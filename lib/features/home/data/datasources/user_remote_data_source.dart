@@ -14,10 +14,7 @@ class UserRemoteDataSourceImpl implements UserRemoteDataSource {
     await Future.delayed(const Duration(seconds: 1));
 
     // Return mock data
-    return [
-      const UserModel(id: '1', name: 'John Doe', email: 'john@example.com'),
-      const UserModel(id: '2', name: 'Jane Smith', email: 'jane@example.com'),
-    ];
+    return [];
   }
 
   @override
@@ -29,6 +26,28 @@ class UserRemoteDataSourceImpl implements UserRemoteDataSource {
       id: '1',
       name: 'John Doe',
       email: 'john@example.com',
+      username: 'johndoe',
+      firstName: 'John',
+      lastName: 'Doe',
+      profilePictureUrl: 'https://example.com/profile.jpg',
+      introVideoUrl: 'https://example.com/intro.mp4',
+      coverPhotoUrl: 'https://example.com/cover.jpg',
+      xp: 1000,
+      level: 5,
+      cardTheme: 'default',
+      isPro: false,
+      sponsors: [],
+      followerCount: 100,
+      stats: const StatsModel(
+        id: 1,
+        userId: 1,
+        averageScore: 200,
+        highGame: 300,
+        highSeries: 800,
+        experience: 5,
+      ), // Replace with appropriate default values if needed
+      favoriteBrands: [],
+      isComplete: true,
     );
   }
 }
