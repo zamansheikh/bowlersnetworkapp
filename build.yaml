@@ -2,6 +2,11 @@ targets:
   $default:
     builders:
       injectable_generator:injectable_builder:
-        enabled: true
-        generate_for:
-          - lib/core/di/injection.dart
+        # Enable injectable for the whole project
+        options:
+          generate_for_dir:
+            - lib
+      injectable_generator:injectable_config_builder:
+        options:
+          generate_for_dir:
+            - lib
