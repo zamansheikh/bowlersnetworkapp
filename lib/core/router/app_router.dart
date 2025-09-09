@@ -3,7 +3,8 @@ import 'dart:async';
 import 'package:go_router/go_router.dart';
 import '../../features/home/presentation/pages/home_page.dart';
 import '../../features/auth/presentation/bloc/auth_cubit.dart';
-import '../../features/auth/presentation/pages/pages.dart';
+import '../../features/auth/presentation/pages/sign_in_page.dart';
+import '../../features/profile/presentation/pages/user_profile_page.dart';
 
 class AppRouter {
   static GoRouter create(AuthCubit authCubit) {
@@ -25,6 +26,11 @@ class AppRouter {
           path: '/login',
           name: 'login',
           builder: (context, state) => const SignInPage(),
+        ),
+        GoRoute(
+          path: '/profile',
+          name: 'profile',
+          builder: (context, state) => const UserProfilePage(),
         ),
       ],
       errorBuilder: (context, state) => const ErrorPage(),

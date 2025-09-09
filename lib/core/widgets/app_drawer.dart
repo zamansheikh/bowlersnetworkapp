@@ -15,21 +15,35 @@ class AppDrawer extends StatelessWidget {
           BlocBuilder<AuthCubit, AuthState>(
             builder: (context, state) {
               if (state is Authenticated) {
-                // TODO: Replace with actual user data when available
+                final user = state.user;
                 return UserAccountsDrawerHeader(
-                  decoration: const BoxDecoration(color: Colors.blue),
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      colors: [Colors.blue, Colors.blue.shade800],
+                      begin: Alignment.topCenter,
+                      end: Alignment.bottomCenter,
+                    ),
+                  ),
                   accountName: Text(
-                    'User Name', // TODO: Replace with state.user.name when available
-                    style: const TextStyle(fontWeight: FontWeight.bold),
+                    user.name,
+                    style: const TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 16,
+                    ),
                   ),
                   accountEmail: Text(
-                    'user@example.com', // TODO: Replace with state.user.email when available
+                    user.email,
+                    style: const TextStyle(fontSize: 14),
                   ),
                   currentAccountPicture: CircleAvatar(
                     backgroundColor: Colors.white,
                     child: Text(
-                      'U', // TODO: Replace with user initials or profile picture
-                      style: TextStyle(fontSize: 24.0, color: Colors.blue[800]),
+                      user.name[0].toUpperCase(),
+                      style: TextStyle(
+                        fontSize: 24.0,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.blue[800],
+                      ),
                     ),
                   ),
                 );
@@ -56,10 +70,7 @@ class AppDrawer extends StatelessWidget {
             title: const Text('Profile'),
             onTap: () {
               Navigator.pop(context);
-              // TODO: Navigate to profile page when implemented
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text('Profile page coming soon!')),
-              );
+              context.go('/profile');
             },
           ),
           ListTile(
