@@ -23,7 +23,7 @@ class UserRemoteDataSourceImpl implements UserRemoteDataSource {
     await Future.delayed(const Duration(seconds: 1));
 
     return const UserModel(
-      id: '1',
+      id: 1,
       name: 'John Doe',
       email: 'john@example.com',
       username: 'johndoe',
@@ -38,7 +38,7 @@ class UserRemoteDataSourceImpl implements UserRemoteDataSource {
       isPro: false,
       sponsors: [],
       followerCount: 100,
-      stats: const StatsModel(
+      stats: StatsModel(
         id: 1,
         userId: 1,
         averageScore: 200,
