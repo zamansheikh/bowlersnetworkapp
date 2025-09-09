@@ -36,7 +36,11 @@ class _SignInPageState extends State<SignInPage> {
           },
           builder: (context, state) {
             return Column(
+              mainAxisAlignment: MainAxisAlignment.center,
               children: [
+                // Logo
+                Image.asset('assets/icon/icon.png', width: 120, height: 120),
+                const SizedBox(height: 32),
                 TextField(
                   controller: _userCtrl,
                   decoration: const InputDecoration(labelText: 'Username'),
