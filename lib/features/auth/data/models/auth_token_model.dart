@@ -6,7 +6,5 @@ class AuthTokenModel extends AuthToken {
   factory AuthTokenModel.fromJson(Map<String, dynamic> json) =>
       AuthTokenModel(accessToken: json['access_token'] as String? ?? '');
 
-  Map<String, dynamic> toJson() => {
-        'access_token': accessToken,
-      };
+  Map<String, dynamic> toJson() => {'access_token': accessToken};
 }

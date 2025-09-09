@@ -9,8 +9,21 @@
 // coverage:ignore-file
 
 // ignore_for_file: no_leading_underscores_for_library_prefixes
+import 'package:bowlersnetworkapp/core/di/prefs_module.dart' as _i47;
 import 'package:bowlersnetworkapp/core/network/network_info.dart' as _i149;
 import 'package:bowlersnetworkapp/core/network/network_module.dart' as _i516;
+import 'package:bowlersnetworkapp/features/auth/data/datasources/auth_remote_data_source.dart'
+    as _i1073;
+import 'package:bowlersnetworkapp/features/auth/data/repositories/auth_repository_impl.dart'
+    as _i359;
+import 'package:bowlersnetworkapp/features/auth/domain/repositories/auth_repository.dart'
+    as _i994;
+import 'package:bowlersnetworkapp/features/auth/domain/usecases/get_profile.dart'
+    as _i298;
+import 'package:bowlersnetworkapp/features/auth/domain/usecases/login.dart'
+    as _i459;
+import 'package:bowlersnetworkapp/features/auth/presentation/bloc/auth_cubit.dart'
+    as _i506;
 import 'package:bowlersnetworkapp/features/home/data/datasources/user_remote_data_source.dart'
     as _i528;
 import 'package:bowlersnetworkapp/features/home/data/repositories/user_repository_impl.dart'
@@ -24,21 +37,30 @@ import 'package:bowlersnetworkapp/features/home/presentation/bloc/home_bloc.dart
 import 'package:dio/dio.dart' as _i361;
 import 'package:get_it/get_it.dart' as _i174;
 import 'package:injectable/injectable.dart' as _i526;
+import 'package:shared_preferences/shared_preferences.dart' as _i460;
 
 extension GetItInjectableX on _i174.GetIt {
   // initializes the registration of main-scope dependencies inside of GetIt
-  _i174.GetIt init({
+  Future<_i174.GetIt> init({
     String? environment,
     _i526.EnvironmentFilter? environmentFilter,
-  }) {
+  }) async {
     final gh = _i526.GetItHelper(this, environment, environmentFilter);
+    final prefsModule = _$PrefsModule();
     final networkModule = _$NetworkModule();
     gh.factory<_i229.HomeBloc>(() => _i229.HomeBloc());
+    await gh.factoryAsync<_i460.SharedPreferences>(
+      () => prefsModule.prefs,
+      preResolve: true,
+    );
     gh.lazySingleton<_i361.Dio>(() => networkModule.dio);
     gh.lazySingleton<_i528.UserRemoteDataSource>(
       () => _i528.UserRemoteDataSourceImpl(),
     );
     gh.lazySingleton<_i149.NetworkInfo>(() => _i149.NetworkInfoImpl());
+    gh.lazySingleton<_i1073.AuthRemoteDataSource>(
+      () => _i1073.AuthRemoteDataSourceImpl(gh<_i361.Dio>()),
+    );
     gh.lazySingleton<_i637.UserRepository>(
       () => _i224.UserRepositoryImpl(
         remoteDataSource: gh<_i528.UserRemoteDataSource>(),
@@ -47,8 +69,23 @@ extension GetItInjectableX on _i174.GetIt {
     gh.factory<_i450.GetUsers>(
       () => _i450.GetUsers(gh<_i637.UserRepository>()),
     );
+    gh.lazySingleton<_i994.AuthRepository>(
+      () => _i359.AuthRepositoryImpl(
+        remote: gh<_i1073.AuthRemoteDataSource>(),
+        prefs: gh<_i460.SharedPreferences>(),
+      ),
+    );
+    gh.factory<_i459.Login>(() => _i459.Login(gh<_i994.AuthRepository>()));
+    gh.factory<_i298.GetProfile>(
+      () => _i298.GetProfile(gh<_i994.AuthRepository>()),
+    );
+    gh.factory<_i506.AuthCubit>(
+      () => _i506.AuthCubit(gh<_i459.Login>(), gh<_i298.GetProfile>()),
+    );
     return this;
   }
 }
+
+class _$PrefsModule extends _i47.PrefsModule {}
 
 class _$NetworkModule extends _i516.NetworkModule {}

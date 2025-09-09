@@ -5,8 +5,12 @@ import 'injection.config.dart';
 final getIt = GetIt.instance;
 
 @InjectableInit()
-void configureDependencies() => getIt.init();
+Future<void> configureDependencies() async {
+  await getIt.init();
+  await getIt.allReady();
+}
 
-void resetDependencies() {
-  getIt.reset();
+Future<void> resetDependencies() async {
+  await getIt.reset();
+  await configureDependencies();
 }
