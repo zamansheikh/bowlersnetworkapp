@@ -1,6 +1,8 @@
 class AppConstants {
   // API
-  static const String baseUrl = 'https://api.example.com';
+  static const String baseUrl = 'https://test.bowlersnetwork.com';
+  static const String loginEndpoint = '/api/amateur-login';
+  static const String userProfileEndpoint = '/api/user/profile';
   static const int connectTimeout = 30000;
   static const int receiveTimeout = 30000;
 
