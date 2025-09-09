@@ -3,14 +3,12 @@ import 'package:dartz/dartz.dart';
 import 'package:injectable/injectable.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../../../../core/constants/constants.dart';
-import '../../../../core/error/exceptions.dart';
 import '../../../../core/error/failures.dart';
 import '../../../home/domain/entities/user.dart';
 import '../../domain/entities/auth_token.dart';
 import '../../domain/repositories/auth_repository.dart';
 import '../datasources/auth_remote_data_source.dart';
 import '../models/auth_token_model.dart';
-import '../../../home/data/models/user_model.dart';
 
 @LazySingleton(as: AuthRepository)
 class AuthRepositoryImpl implements AuthRepository {
@@ -41,10 +39,7 @@ class AuthRepositoryImpl implements AuthRepository {
         return Left(NetworkFailure('Missing token'));
       }
       final user = await remote.getProfile(token);
-      await prefs.setString(
-        AppConstants.userKey,
-        jsonEncode((user as UserModel).toJson()),
-      );
+      await prefs.setString(AppConstants.userKey, jsonEncode((user).toJson()));
       return Right(user);
     } catch (e) {
       return Left(ServerFailure(e.toString()));
