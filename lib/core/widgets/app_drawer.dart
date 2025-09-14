@@ -179,9 +179,13 @@ class AppDrawer extends StatelessWidget {
               child: const Text('Cancel'),
             ),
             TextButton(
-              onPressed: () {
+              onPressed: () async {
                 Navigator.of(context).pop();
-                context.read<AuthCubit>().logout();
+                await context.read<AuthCubit>().logout();
+                if (context.mounted) {
+                  // Immediately redirect to splash, which will handle navigation
+                  context.go('/splash');
+                }
               },
               child: const Text('Logout', style: TextStyle(color: Colors.red)),
             ),
