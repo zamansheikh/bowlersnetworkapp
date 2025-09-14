@@ -31,7 +31,7 @@ class UserModel extends User {
     required this.level,
     required this.cardTheme,
     required this.isPro,
-    required this.sponsors,
+    this.sponsors = const [],
     required this.followerCount,
     required this.stats,
     required this.favoriteBrands,
@@ -52,9 +52,11 @@ class UserModel extends User {
     level: (json['level'] as num).toInt(),
     cardTheme: json['card_theme'] as String,
     isPro: json['is_pro'] as bool,
-    sponsors: (json['sponsors'] as List<dynamic>)
-        .map((e) => BrandModel.fromJson(e as Map<String, dynamic>))
-        .toList(),
+    sponsors: json.containsKey('sponsors')
+        ? (json['sponsors'] as List<dynamic>)
+              .map((e) => BrandModel.fromJson(e as Map<String, dynamic>))
+              .toList()
+        : const [],
     followerCount: (json['follower_count'] as num).toInt(),
     stats: StatsModel.fromJson(json['stats'] as Map<String, dynamic>),
     favoriteBrands: (json['favorite_brands'] as List<dynamic>)
