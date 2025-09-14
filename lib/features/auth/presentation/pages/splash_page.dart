@@ -25,21 +25,19 @@ class _SplashPageState extends State<SplashPage>
       vsync: this,
     );
 
-    _fadeAnimation = Tween<double>(
-      begin: 0.0,
-      end: 1.0,
-    ).animate(CurvedAnimation(
-      parent: _animationController,
-      curve: const Interval(0.0, 0.6, curve: Curves.easeOut),
-    ));
+    _fadeAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
+      CurvedAnimation(
+        parent: _animationController,
+        curve: const Interval(0.0, 0.6, curve: Curves.easeOut),
+      ),
+    );
 
-    _scaleAnimation = Tween<double>(
-      begin: 0.5,
-      end: 1.0,
-    ).animate(CurvedAnimation(
-      parent: _animationController,
-      curve: const Interval(0.0, 0.8, curve: Curves.elasticOut),
-    ));
+    _scaleAnimation = Tween<double>(begin: 0.5, end: 1.0).animate(
+      CurvedAnimation(
+        parent: _animationController,
+        curve: const Interval(0.0, 0.8, curve: Curves.elasticOut),
+      ),
+    );
 
     _animationController.forward();
 
@@ -93,7 +91,9 @@ class _SplashPageState extends State<SplashPage>
                             borderRadius: BorderRadius.circular(30),
                             boxShadow: [
                               BoxShadow(
-                                color: AppColors.primaryLimeGreen.withOpacity(0.4),
+                                color: AppColors.primaryLimeGreen.withOpacity(
+                                  0.4,
+                                ),
                                 blurRadius: 30,
                                 offset: const Offset(0, 15),
                               ),
@@ -120,11 +120,12 @@ class _SplashPageState extends State<SplashPage>
                       opacity: _fadeAnimation,
                       child: Text(
                         'Bowlers Network',
-                        style: Theme.of(context).textTheme.displaySmall?.copyWith(
-                          fontWeight: FontWeight.bold,
-                          color: AppColors.black,
-                          letterSpacing: 1.2,
-                        ),
+                        style: Theme.of(context).textTheme.displaySmall
+                            ?.copyWith(
+                              fontWeight: FontWeight.bold,
+                              color: AppColors.black,
+                              letterSpacing: 1.2,
+                            ),
                       ),
                     );
                   },
@@ -171,9 +172,8 @@ class _SplashPageState extends State<SplashPage>
                           const SizedBox(height: 16),
                           Text(
                             'Loading...',
-                            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                              color: AppColors.gray,
-                            ),
+                            style: Theme.of(context).textTheme.bodyMedium
+                                ?.copyWith(color: AppColors.gray),
                           ),
                         ],
                       );

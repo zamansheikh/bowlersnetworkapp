@@ -20,11 +20,12 @@ class AppRouter {
         final isIncompleteProfile = authState is AuthenticatedIncompleteProfile;
         final isLoading = authState is AuthLoading;
         final isUnauthenticated = authState is Unauthenticated;
-        
+
         final isSplash = state.matchedLocation == '/splash';
         final isSigningIn = state.matchedLocation == '/signin';
         final isSigningUp = state.matchedLocation.startsWith('/signup');
-        final isCompletingProfile = state.matchedLocation == '/complete-profile';
+        final isCompletingProfile =
+            state.matchedLocation == '/complete-profile';
 
         // Stay on splash during loading
         if (isLoading && !isSplash) {
@@ -37,7 +38,8 @@ class AppRouter {
         }
 
         // If user is authenticated (complete profile) and on auth pages, go home
-        if (isAuth && (isSplash || isSigningIn || isSigningUp || isCompletingProfile)) {
+        if (isAuth &&
+            (isSplash || isSigningIn || isSigningUp || isCompletingProfile)) {
           return '/';
         }
 

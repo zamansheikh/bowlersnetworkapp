@@ -21,7 +21,7 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     final authCubit = getIt<AuthCubit>();
     final router = AppRouter.create(authCubit);
-    
+
     return MultiBlocProvider(
       providers: [
         BlocProvider<HomeBloc>(
