@@ -48,6 +48,10 @@ dependencies:
   # Functional Programming
   dartz: ^0.10.1
   
+  # Media & Network
+  video_player: ^2.8.7
+  cached_network_image: ^3.4.1
+  
   # Network
   dio: ^5.9.0
   retrofit: ^4.7.2

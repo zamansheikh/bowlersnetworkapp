@@ -6,6 +6,7 @@ import 'core/theme/app_theme.dart';
 import 'core/constants/strings.dart';
 import 'features/home/presentation/bloc/home_bloc.dart';
 import 'features/auth/presentation/bloc/auth_cubit.dart';
+import 'features/auth/presentation/bloc/signup_cubit.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -20,12 +21,17 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     final authCubit = getIt<AuthCubit>();
     final router = AppRouter.create(authCubit);
+
+    // Check auth status on app start
+    authCubit.checkAuthStatus();
+
     return MultiBlocProvider(
       providers: [
         BlocProvider<HomeBloc>(
           create: (_) => getIt<HomeBloc>()..add(LoadHome()),
         ),
         BlocProvider<AuthCubit>(create: (_) => authCubit),
+        BlocProvider<SignupCubit>(create: (_) => getIt<SignupCubit>()),
       ],
       child: MaterialApp.router(
         title: AppStrings.appName,

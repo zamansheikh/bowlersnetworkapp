@@ -24,8 +24,8 @@ class UserProfilePage extends StatelessWidget {
                 email: state.user.email,
                 username: 'demo_user',
                 firstName: state.user.name.split(' ').first,
-                lastName: state.user.name.split(' ').length > 1 
-                    ? state.user.name.split(' ').last 
+                lastName: state.user.name.split(' ').length > 1
+                    ? state.user.name.split(' ').last
                     : 'User',
                 profilePictureUrl: '',
                 introVideoUrl: '',
@@ -40,8 +40,9 @@ class UserProfilePage extends StatelessWidget {
                     brandType: "Business Sponsors",
                     name: "JMar Entertainment",
                     formalName: "JMar Entertainment LLC",
-                    logoUrl: "https://pub-49dd9bba56ef4264b3519dc44f61a815.r2.dev/business-sponsors/jmar%20entertainment.png"
-                  )
+                    logoUrl:
+                        "https://pub-49dd9bba56ef4264b3519dc44f61a815.r2.dev/business-sponsors/jmar%20entertainment.png",
+                  ),
                 ],
                 followerCount: 3,
                 stats: StatsModel(
@@ -58,14 +59,16 @@ class UserProfilePage extends StatelessWidget {
                     brandType: "Balls",
                     name: "Brunswick",
                     formalName: "Brunswick",
-                    logoUrl: "https://pub-49dd9bba56ef4264b3519dc44f61a815.r2.dev/ball-manufacturers/brunswick%20bowling%20%20ball.png"
+                    logoUrl:
+                        "https://pub-49dd9bba56ef4264b3519dc44f61a815.r2.dev/ball-manufacturers/brunswick%20bowling%20%20ball.png",
                   ),
                   BrandModel(
                     brandId: 5,
-                    brandType: "Business Sponsors", 
+                    brandType: "Business Sponsors",
                     name: "Buffalo Wild Wings",
                     formalName: "Buffalo Wild Wings",
-                    logoUrl: "https://pub-49dd9bba56ef4264b3519dc44f61a815.r2.dev/business-sponsors/buffalo%20wild%20wings.png"
+                    logoUrl:
+                        "https://pub-49dd9bba56ef4264b3519dc44f61a815.r2.dev/business-sponsors/buffalo%20wild%20wings.png",
                   ),
                 ],
                 isComplete: true,
@@ -73,9 +76,7 @@ class UserProfilePage extends StatelessWidget {
               return _buildProfileContent(context, mockUserModel);
             }
           }
-          return const Center(
-            child: Text('User data not available'),
-          );
+          return const Center(child: Text('User data not available'));
         },
       ),
     );
@@ -124,29 +125,22 @@ class UserProfilePage extends StatelessWidget {
                 ? Image.network(
                     user.coverPhotoUrl,
                     fit: BoxFit.cover,
-                    errorBuilder: (context, error, stackTrace) =>
-                        Container(
-                          decoration: BoxDecoration(
-                            gradient: LinearGradient(
-                              begin: Alignment.topCenter,
-                              end: Alignment.bottomCenter,
-                              colors: [
-                                Colors.blue.shade400,
-                                Colors.blue.shade800,
-                              ],
-                            ),
-                          ),
+                    errorBuilder: (context, error, stackTrace) => Container(
+                      decoration: BoxDecoration(
+                        gradient: LinearGradient(
+                          begin: Alignment.topCenter,
+                          end: Alignment.bottomCenter,
+                          colors: [Colors.blue.shade400, Colors.blue.shade800],
                         ),
+                      ),
+                    ),
                   )
                 : Container(
                     decoration: BoxDecoration(
                       gradient: LinearGradient(
                         begin: Alignment.topCenter,
                         end: Alignment.bottomCenter,
-                        colors: [
-                          Colors.blue.shade400,
-                          Colors.blue.shade800,
-                        ],
+                        colors: [Colors.blue.shade400, Colors.blue.shade800],
                       ),
                     ),
                   ),
@@ -278,10 +272,7 @@ class UserProfilePage extends StatelessWidget {
           children: [
             const Text(
               'Profile Information',
-              style: TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
-              ),
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 12),
             _buildInfoRow('Email', user.email, Icons.email),
@@ -301,19 +292,9 @@ class UserProfilePage extends StatelessWidget {
         children: [
           Icon(icon, size: 20, color: Colors.grey[600]),
           const SizedBox(width: 12),
-          Text(
-            '$label: ',
-            style: const TextStyle(
-              fontWeight: FontWeight.w500,
-            ),
-          ),
+          Text('$label: ', style: const TextStyle(fontWeight: FontWeight.w500)),
           Expanded(
-            child: Text(
-              value,
-              style: const TextStyle(
-                color: Colors.grey,
-              ),
-            ),
+            child: Text(value, style: const TextStyle(color: Colors.grey)),
           ),
         ],
       ),
@@ -329,10 +310,7 @@ class UserProfilePage extends StatelessWidget {
           children: [
             const Text(
               'Bowling Statistics',
-              style: TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
-              ),
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 16),
             Row(
@@ -384,7 +362,12 @@ class UserProfilePage extends StatelessWidget {
     );
   }
 
-  Widget _buildStatCard(String title, String value, IconData icon, Color color) {
+  Widget _buildStatCard(
+    String title,
+    String value,
+    IconData icon,
+    Color color,
+  ) {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
@@ -406,10 +389,7 @@ class UserProfilePage extends StatelessWidget {
           ),
           Text(
             title,
-            style: const TextStyle(
-              fontSize: 12,
-              color: Colors.grey,
-            ),
+            style: const TextStyle(fontSize: 12, color: Colors.grey),
             textAlign: TextAlign.center,
           ),
         ],
@@ -430,10 +410,7 @@ class UserProfilePage extends StatelessWidget {
                 SizedBox(width: 8),
                 Text(
                   'Sponsors',
-                  style: TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                  ),
+                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                 ),
               ],
             ),
@@ -447,7 +424,9 @@ class UserProfilePage extends StatelessWidget {
               Wrap(
                 spacing: 12,
                 runSpacing: 12,
-                children: sponsors.map((sponsor) => _buildBrandCard(sponsor)).toList(),
+                children: sponsors
+                    .map((sponsor) => _buildBrandCard(sponsor))
+                    .toList(),
               ),
           ],
         ),
@@ -468,10 +447,7 @@ class UserProfilePage extends StatelessWidget {
                 SizedBox(width: 8),
                 Text(
                   'Favorite Brands',
-                  style: TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                  ),
+                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                 ),
               ],
             ),
@@ -485,7 +461,9 @@ class UserProfilePage extends StatelessWidget {
               Wrap(
                 spacing: 12,
                 runSpacing: 12,
-                children: favoriteBrands.map((brand) => _buildBrandCard(brand)).toList(),
+                children: favoriteBrands
+                    .map((brand) => _buildBrandCard(brand))
+                    .toList(),
               ),
           ],
         ),
@@ -535,10 +513,7 @@ class UserProfilePage extends StatelessWidget {
           const SizedBox(height: 4),
           Text(
             brand.name,
-            style: const TextStyle(
-              fontSize: 10,
-              fontWeight: FontWeight.w500,
-            ),
+            style: const TextStyle(fontSize: 10, fontWeight: FontWeight.w500),
             textAlign: TextAlign.center,
             maxLines: 2,
             overflow: TextOverflow.ellipsis,
@@ -561,10 +536,7 @@ class UserProfilePage extends StatelessWidget {
                 SizedBox(width: 8),
                 Text(
                   'Introduction Video',
-                  style: TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                  ),
+                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                 ),
               ],
             ),
@@ -643,10 +615,7 @@ class UserProfilePage extends StatelessWidget {
                 SizedBox(width: 8),
                 Text(
                   'Activity Feed',
-                  style: TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                  ),
+                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                 ),
               ],
             ),
@@ -661,11 +630,7 @@ class UserProfilePage extends StatelessWidget {
               child: const Center(
                 child: Column(
                   children: [
-                    Icon(
-                      Icons.post_add,
-                      size: 48,
-                      color: Colors.grey,
-                    ),
+                    Icon(Icons.post_add, size: 48, color: Colors.grey),
                     SizedBox(height: 8),
                     Text(
                       'Social Posts Coming Soon!',
@@ -677,10 +642,7 @@ class UserProfilePage extends StatelessWidget {
                     ),
                     Text(
                       'Share your bowling achievements, photos, and connect with other bowlers.',
-                      style: TextStyle(
-                        fontSize: 12,
-                        color: Colors.grey,
-                      ),
+                      style: TextStyle(fontSize: 12, color: Colors.grey),
                       textAlign: TextAlign.center,
                     ),
                   ],

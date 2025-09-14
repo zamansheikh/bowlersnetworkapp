@@ -18,12 +18,22 @@ import 'package:bowlersnetworkapp/features/auth/data/repositories/auth_repositor
     as _i359;
 import 'package:bowlersnetworkapp/features/auth/domain/repositories/auth_repository.dart'
     as _i994;
+import 'package:bowlersnetworkapp/features/auth/domain/usecases/create_user.dart'
+    as _i762;
 import 'package:bowlersnetworkapp/features/auth/domain/usecases/get_profile.dart'
     as _i298;
 import 'package:bowlersnetworkapp/features/auth/domain/usecases/login.dart'
     as _i459;
+import 'package:bowlersnetworkapp/features/auth/domain/usecases/send_verification_code.dart'
+    as _i182;
+import 'package:bowlersnetworkapp/features/auth/domain/usecases/validate_signup_data.dart'
+    as _i920;
+import 'package:bowlersnetworkapp/features/auth/domain/usecases/verify_email.dart'
+    as _i546;
 import 'package:bowlersnetworkapp/features/auth/presentation/bloc/auth_cubit.dart'
     as _i506;
+import 'package:bowlersnetworkapp/features/auth/presentation/bloc/signup_cubit.dart'
+    as _i384;
 import 'package:bowlersnetworkapp/features/home/data/datasources/user_remote_data_source.dart'
     as _i528;
 import 'package:bowlersnetworkapp/features/home/data/repositories/user_repository_impl.dart'
@@ -48,11 +58,11 @@ extension GetItInjectableX on _i174.GetIt {
     final gh = _i526.GetItHelper(this, environment, environmentFilter);
     final prefsModule = _$PrefsModule();
     final networkModule = _$NetworkModule();
-    gh.factory<_i229.HomeBloc>(() => _i229.HomeBloc());
     await gh.factoryAsync<_i460.SharedPreferences>(
       () => prefsModule.prefs,
       preResolve: true,
     );
+    gh.factory<_i229.HomeBloc>(() => _i229.HomeBloc());
     gh.lazySingleton<_i361.Dio>(() => networkModule.dio);
     gh.lazySingleton<_i528.UserRemoteDataSource>(
       () => _i528.UserRemoteDataSourceImpl(),
@@ -75,12 +85,38 @@ extension GetItInjectableX on _i174.GetIt {
         prefs: gh<_i460.SharedPreferences>(),
       ),
     );
-    gh.factory<_i459.Login>(() => _i459.Login(gh<_i994.AuthRepository>()));
+    gh.factory<_i762.CreateUser>(
+      () => _i762.CreateUser(gh<_i994.AuthRepository>()),
+    );
     gh.factory<_i298.GetProfile>(
       () => _i298.GetProfile(gh<_i994.AuthRepository>()),
     );
+    gh.factory<_i459.Login>(() => _i459.Login(gh<_i994.AuthRepository>()));
+    gh.factory<_i182.SendVerificationCode>(
+      () => _i182.SendVerificationCode(gh<_i994.AuthRepository>()),
+    );
+    gh.factory<_i920.ValidateSignupData>(
+      () => _i920.ValidateSignupData(gh<_i994.AuthRepository>()),
+    );
+    gh.factory<_i546.VerifyEmail>(
+      () => _i546.VerifyEmail(gh<_i994.AuthRepository>()),
+    );
     gh.factory<_i506.AuthCubit>(
-      () => _i506.AuthCubit(gh<_i459.Login>(), gh<_i298.GetProfile>()),
+      () => _i506.AuthCubit(
+        gh<_i459.Login>(),
+        gh<_i298.GetProfile>(),
+        gh<_i994.AuthRepository>(),
+      ),
+    );
+    gh.factory<_i384.SignupCubit>(
+      () => _i384.SignupCubit(
+        gh<_i920.ValidateSignupData>(),
+        gh<_i182.SendVerificationCode>(),
+        gh<_i546.VerifyEmail>(),
+        gh<_i762.CreateUser>(),
+        gh<_i459.Login>(),
+        gh<_i298.GetProfile>(),
+      ),
     );
     return this;
   }

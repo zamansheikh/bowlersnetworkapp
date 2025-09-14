@@ -3,6 +3,11 @@ class AppConstants {
   static const String baseUrl = 'https://test.bowlersnetwork.com';
   static const String loginEndpoint = '/api/amateur-login';
   static const String userProfileEndpoint = '/api/user/profile';
+  static const String validateSignupDataEndpoint = '/api/validate-signup-data';
+  static const String sendVerificationCodeEndpoint =
+      '/api/send-verification-code';
+  static const String verifyEmailEndpoint = '/api/verify-email';
+  static const String createUserEndpoint = '/api/create-user';
   static const int connectTimeout = 30000;
   static const int receiveTimeout = 30000;
 

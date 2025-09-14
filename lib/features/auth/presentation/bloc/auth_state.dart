@@ -19,4 +19,13 @@ class Authenticated extends AuthState {
   const Authenticated({required this.token, required this.user});
 }
 
+class AuthenticatedIncompleteProfile extends AuthState {
+  final AuthToken token;
+  final User user;
+  const AuthenticatedIncompleteProfile({
+    required this.token,
+    required this.user,
+  });
+}
+
 class Unauthenticated extends AuthState {}
