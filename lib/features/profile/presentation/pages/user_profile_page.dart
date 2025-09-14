@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:go_router/go_router.dart';
 import '../../../auth/presentation/bloc/auth_cubit.dart';
 import '../../../home/data/models/user_model.dart';
+import '../../../../core/constants/colors.dart';
 
 class UserProfilePage extends StatelessWidget {
   const UserProfilePage({super.key});
@@ -9,251 +11,139 @@ class UserProfilePage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: AppColors.surface,
+      appBar: AppBar(
+        backgroundColor: AppColors.white,
+        elevation: 0,
+        scrolledUnderElevation: 1,
+        surfaceTintColor: AppColors.white,
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back, color: AppColors.black),
+          onPressed: () {
+            if (Navigator.canPop(context)) {
+              Navigator.pop(context);
+            } else {
+              context.go('/');
+            }
+          },
+        ),
+        title: const Text(
+          'Profile',
+          style: TextStyle(
+            color: AppColors.black,
+            fontWeight: FontWeight.w600,
+            fontSize: 20,
+          ),
+        ),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.edit, color: AppColors.primaryLimeGreen),
+            onPressed: () {
+              context.go('/profile/edit');
+            },
+          ),
+        ],
+      ),
       body: BlocBuilder<AuthCubit, AuthState>(
         builder: (context, state) {
           if (state is Authenticated) {
-            // Check if user is UserModel (full data) or basic User entity
+            // Only show profile if user is UserModel (full data)
             if (state.user is UserModel) {
               final userModel = state.user as UserModel;
               return _buildProfileContent(context, userModel);
             } else {
-              // Create a mock UserModel for demonstration with basic user data
-              final mockUserModel = UserModel(
-                id: state.user.id,
-                name: state.user.name,
-                email: state.user.email,
-                username: 'demo_user',
-                firstName: state.user.name.split(' ').first,
-                lastName: state.user.name.split(' ').length > 1
-                    ? state.user.name.split(' ').last
-                    : 'User',
-                profilePictureUrl: '',
-                introVideoUrl: '',
-                coverPhotoUrl: '',
-                xp: 93,
-                level: 4,
-                cardTheme: '#425A70',
-                isPro: true,
-                sponsors: [
-                  BrandModel(
-                    brandId: 7,
-                    brandType: "Business Sponsors",
-                    name: "JMar Entertainment",
-                    formalName: "JMar Entertainment LLC",
-                    logoUrl:
-                        "https://pub-49dd9bba56ef4264b3519dc44f61a815.r2.dev/business-sponsors/jmar%20entertainment.png",
-                  ),
-                ],
-                followerCount: 3,
-                stats: StatsModel(
-                  id: state.user.id,
-                  userId: state.user.id,
-                  averageScore: 185.5,
-                  highGame: 278,
-                  highSeries: 756,
-                  experience: 1500,
-                ),
-                favoriteBrands: [
-                  BrandModel(
-                    brandId: 24,
-                    brandType: "Balls",
-                    name: "Brunswick",
-                    formalName: "Brunswick",
-                    logoUrl:
-                        "https://pub-49dd9bba56ef4264b3519dc44f61a815.r2.dev/ball-manufacturers/brunswick%20bowling%20%20ball.png",
-                  ),
-                  BrandModel(
-                    brandId: 5,
-                    brandType: "Business Sponsors",
-                    name: "Buffalo Wild Wings",
-                    formalName: "Buffalo Wild Wings",
-                    logoUrl:
-                        "https://pub-49dd9bba56ef4264b3519dc44f61a815.r2.dev/business-sponsors/buffalo%20wild%20wings.png",
-                  ),
-                ],
-                isComplete: true,
-              );
-              return _buildProfileContent(context, mockUserModel);
+              // Show message for basic user entity
+              return _buildIncompleteProfileMessage(context);
             }
           }
-          return const Center(child: Text('User data not available'));
+          return const Center(
+            child: Text(
+              'User data not available',
+              style: TextStyle(color: AppColors.gray),
+            ),
+          );
         },
       ),
     );
   }
 
-  Widget _buildProfileContent(BuildContext context, UserModel user) {
-    return CustomScrollView(
-      slivers: [
-        _buildSliverAppBar(context, user),
-        SliverToBoxAdapter(
+  Widget _buildIncompleteProfileMessage(BuildContext context) {
+    return Container(
+      decoration: const BoxDecoration(gradient: AppColors.backgroundGradient),
+      child: Center(
+        child: Card(
+          margin: const EdgeInsets.all(24),
+          elevation: 4,
           child: Padding(
-            padding: const EdgeInsets.all(16.0),
+            padding: const EdgeInsets.all(24),
             child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
               children: [
-                _buildUserInfo(user),
+                const Icon(
+                  Icons.person_outline,
+                  size: 64,
+                  color: AppColors.gray,
+                ),
+                const SizedBox(height: 16),
+                const Text(
+                  'Profile Incomplete',
+                  style: TextStyle(
+                    fontSize: 20,
+                    fontWeight: FontWeight.w600,
+                    color: AppColors.black,
+                  ),
+                ),
+                const SizedBox(height: 8),
+                const Text(
+                  'Complete your profile to access all features',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(color: AppColors.gray, fontSize: 14),
+                ),
                 const SizedBox(height: 24),
-                _buildStatsSection(user.stats),
-                const SizedBox(height: 24),
-                if (user.isPro)
-                  _buildSponsorsSection(user.sponsors)
-                else
-                  _buildFavoriteBrandsSection(user.favoriteBrands),
-                const SizedBox(height: 24),
-                _buildIntroVideoSection(user.introVideoUrl),
-                const SizedBox(height: 24),
-                _buildSocialSection(), // Future: User posts will go here
+                ElevatedButton(
+                  onPressed: () => context.go('/complete-profile'),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppColors.primaryLimeGreen,
+                    foregroundColor: AppColors.black,
+                    elevation: 2,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                  ),
+                  child: const Text('Complete Profile'),
+                ),
               ],
             ),
           ),
         ),
-      ],
+      ),
     );
   }
 
-  Widget _buildSliverAppBar(BuildContext context, UserModel user) {
-    return SliverAppBar(
-      expandedHeight: 300,
-      pinned: true,
-      flexibleSpace: FlexibleSpaceBar(
-        background: Stack(
-          fit: StackFit.expand,
+  Widget _buildProfileContent(BuildContext context, UserModel user) {
+    return Container(
+      decoration: const BoxDecoration(gradient: AppColors.backgroundGradient),
+      child: SingleChildScrollView(
+        child: Column(
           children: [
-            // Cover Photo
-            user.coverPhotoUrl.isNotEmpty
-                ? Image.network(
-                    user.coverPhotoUrl,
-                    fit: BoxFit.cover,
-                    errorBuilder: (context, error, stackTrace) => Container(
-                      decoration: BoxDecoration(
-                        gradient: LinearGradient(
-                          begin: Alignment.topCenter,
-                          end: Alignment.bottomCenter,
-                          colors: [Colors.blue.shade400, Colors.blue.shade800],
-                        ),
-                      ),
-                    ),
-                  )
-                : Container(
-                    decoration: BoxDecoration(
-                      gradient: LinearGradient(
-                        begin: Alignment.topCenter,
-                        end: Alignment.bottomCenter,
-                        colors: [Colors.blue.shade400, Colors.blue.shade800],
-                      ),
-                    ),
-                  ),
-            // Gradient Overlay
-            Container(
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  begin: Alignment.topCenter,
-                  end: Alignment.bottomCenter,
-                  colors: [
-                    Colors.transparent,
-                    Colors.black.withValues(alpha: 0.7),
-                  ],
-                ),
-              ),
-            ),
-            // Profile Picture and Basic Info
-            Positioned(
-              bottom: 20,
-              left: 20,
-              right: 20,
-              child: Row(
+            _buildStaticHeader(context, user),
+            Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Hero(
-                    tag: 'profile_picture',
-                    child: CircleAvatar(
-                      radius: 50,
-                      backgroundColor: Colors.white,
-                      child: user.profilePictureUrl.isNotEmpty
-                          ? ClipOval(
-                              child: Image.network(
-                                user.profilePictureUrl,
-                                width: 96,
-                                height: 96,
-                                fit: BoxFit.cover,
-                                errorBuilder: (context, error, stackTrace) =>
-                                    Text(
-                                      user.name[0].toUpperCase(),
-                                      style: TextStyle(
-                                        fontSize: 36,
-                                        fontWeight: FontWeight.bold,
-                                        color: Colors.blue.shade800,
-                                      ),
-                                    ),
-                              ),
-                            )
-                          : Text(
-                              user.name[0].toUpperCase(),
-                              style: TextStyle(
-                                fontSize: 36,
-                                fontWeight: FontWeight.bold,
-                                color: Colors.blue.shade800,
-                              ),
-                            ),
-                    ),
-                  ),
-                  const SizedBox(width: 16),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          user.name,
-                          style: const TextStyle(
-                            color: Colors.white,
-                            fontSize: 24,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                        Text(
-                          '@${user.username}',
-                          style: const TextStyle(
-                            color: Colors.white70,
-                            fontSize: 16,
-                          ),
-                        ),
-                        const SizedBox(height: 4),
-                        Row(
-                          children: [
-                            if (user.isPro) ...[
-                              Container(
-                                padding: const EdgeInsets.symmetric(
-                                  horizontal: 8,
-                                  vertical: 4,
-                                ),
-                                decoration: BoxDecoration(
-                                  color: Colors.amber,
-                                  borderRadius: BorderRadius.circular(12),
-                                ),
-                                child: const Text(
-                                  'PRO',
-                                  style: TextStyle(
-                                    color: Colors.black,
-                                    fontWeight: FontWeight.bold,
-                                    fontSize: 12,
-                                  ),
-                                ),
-                              ),
-                              const SizedBox(width: 8),
-                            ],
-                            Text(
-                              'Level ${user.level}',
-                              style: const TextStyle(
-                                color: Colors.white,
-                                fontSize: 14,
-                                fontWeight: FontWeight.w500,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ],
-                    ),
-                  ),
+                  _buildUserInfo(user),
+                  const SizedBox(height: 16),
+                  _buildStatsSection(user.stats),
+                  const SizedBox(height: 16),
+                  if (user.isPro)
+                    _buildSponsorsSection(user.sponsors)
+                  else
+                    _buildFavoriteBrandsSection(user.favoriteBrands),
+                  const SizedBox(height: 16),
+                  if (user.isPro && user.introVideoUrl.isNotEmpty)
+                    _buildIntroVideoSection(user.introVideoUrl),
+                  const SizedBox(height: 24),
                 ],
               ),
             ),
@@ -263,18 +153,250 @@ class UserProfilePage extends StatelessWidget {
     );
   }
 
+  Widget _buildStaticHeader(BuildContext context, UserModel user) {
+    return Container(
+      height: 280,
+      width: double.infinity,
+      child: Stack(
+        fit: StackFit.expand,
+        children: [
+          // Cover Photo for non-pro users OR background for pro users
+          if (!user.isPro && user.coverPhotoUrl.isNotEmpty)
+            Image.network(
+              user.coverPhotoUrl,
+              fit: BoxFit.cover,
+              errorBuilder: (context, error, stackTrace) => Container(
+                decoration: const BoxDecoration(
+                  gradient: AppColors.primaryGradient,
+                ),
+              ),
+            )
+          else if (user.isPro && user.introVideoUrl.isNotEmpty)
+            // Show intro video for pro users
+            _buildVideoThumbnail(user.introVideoUrl)
+          else
+            // Fallback gradient background
+            Container(
+              decoration: const BoxDecoration(
+                gradient: AppColors.primaryGradient,
+              ),
+            ),
+          // Gradient Overlay
+          Container(
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                begin: Alignment.topCenter,
+                end: Alignment.bottomCenter,
+                colors: [
+                  Colors.transparent,
+                  Colors.black.withValues(alpha: 0.7),
+                ],
+              ),
+            ),
+          ),
+          // Profile Picture and Basic Info
+          Positioned(
+            bottom: 20,
+            left: 20,
+            right: 20,
+            child: Row(
+              children: [
+                Hero(
+                  tag: 'profile_picture',
+                  child: Container(
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      border: Border.all(color: AppColors.white, width: 3),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withValues(alpha: 0.3),
+                          blurRadius: 8,
+                          offset: const Offset(0, 2),
+                        ),
+                      ],
+                    ),
+                    child: CircleAvatar(
+                      radius: 50,
+                      backgroundColor: AppColors.white,
+                      child: user.profilePictureUrl.isNotEmpty
+                          ? ClipOval(
+                              child: Image.network(
+                                user.profilePictureUrl,
+                                width: 96,
+                                height: 96,
+                                fit: BoxFit.cover,
+                                errorBuilder: (context, error, stackTrace) =>
+                                    Text(
+                                      user.firstName.isNotEmpty
+                                          ? user.firstName[0].toUpperCase()
+                                          : user.name[0].toUpperCase(),
+                                      style: const TextStyle(
+                                        fontSize: 36,
+                                        fontWeight: FontWeight.bold,
+                                        color: AppColors.primaryLimeGreen,
+                                      ),
+                                    ),
+                              ),
+                            )
+                          : Text(
+                              user.firstName.isNotEmpty
+                                  ? user.firstName[0].toUpperCase()
+                                  : user.name[0].toUpperCase(),
+                              style: const TextStyle(
+                                fontSize: 36,
+                                fontWeight: FontWeight.bold,
+                                color: AppColors.primaryLimeGreen,
+                              ),
+                            ),
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 16),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        user.name,
+                        style: const TextStyle(
+                          color: AppColors.white,
+                          fontSize: 24,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      Text(
+                        '@${user.username}',
+                        style: const TextStyle(
+                          color: Colors.white70,
+                          fontSize: 16,
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      Row(
+                        children: [
+                          if (user.isPro) ...[
+                            Container(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 8,
+                                vertical: 4,
+                              ),
+                              decoration: BoxDecoration(
+                                color: AppColors.primaryLimeGreen,
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                              child: const Text(
+                                'PRO',
+                                style: TextStyle(
+                                  color: AppColors.black,
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 12,
+                                ),
+                              ),
+                            ),
+                            const SizedBox(width: 8),
+                          ],
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 8,
+                              vertical: 4,
+                            ),
+                            decoration: BoxDecoration(
+                              color: Colors.white.withValues(alpha: 0.2),
+                              borderRadius: BorderRadius.circular(12),
+                              border: Border.all(
+                                color: Colors.white.withValues(alpha: 0.3),
+                              ),
+                            ),
+                            child: Text(
+                              'Level ${user.level}',
+                              style: const TextStyle(
+                                color: AppColors.white,
+                                fontSize: 12,
+                                fontWeight: FontWeight.w500,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildVideoThumbnail(String videoUrl) {
+    return Container(
+      decoration: const BoxDecoration(gradient: AppColors.primaryGradient),
+      child: Stack(
+        alignment: Alignment.center,
+        children: [
+          Container(
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                begin: Alignment.topCenter,
+                end: Alignment.bottomCenter,
+                colors: [
+                  AppColors.primaryLimeGreen.withValues(alpha: 0.8),
+                  AppColors.darkLimeGreen.withValues(alpha: 0.9),
+                ],
+              ),
+            ),
+          ),
+          Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Container(
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  color: Colors.white.withValues(alpha: 0.2),
+                  shape: BoxShape.circle,
+                ),
+                child: const Icon(
+                  Icons.play_arrow,
+                  size: 32,
+                  color: AppColors.white,
+                ),
+              ),
+              const SizedBox(height: 8),
+              const Text(
+                'Introduction Video',
+                style: TextStyle(
+                  color: AppColors.white,
+                  fontSize: 14,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
   Widget _buildUserInfo(UserModel user) {
     return Card(
+      elevation: 2,
+      shadowColor: AppColors.cardShadow,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       child: Padding(
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.all(20),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             const Text(
               'Profile Information',
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+              style: TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.w600,
+                color: AppColors.black,
+              ),
             ),
-            const SizedBox(height: 12),
+            const SizedBox(height: 16),
             _buildInfoRow('Email', user.email, Icons.email),
             _buildInfoRow('Experience Points', '${user.xp} XP', Icons.star),
             _buildInfoRow('Followers', '${user.followerCount}', Icons.people),
@@ -287,14 +409,27 @@ class UserProfilePage extends StatelessWidget {
 
   Widget _buildInfoRow(String label, String value, IconData icon) {
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 4),
+      padding: const EdgeInsets.symmetric(vertical: 6),
       child: Row(
         children: [
-          Icon(icon, size: 20, color: Colors.grey[600]),
+          Container(
+            padding: const EdgeInsets.all(8),
+            decoration: BoxDecoration(
+              color: AppColors.primaryLimeGreen.withValues(alpha: 0.1),
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: Icon(icon, size: 20, color: AppColors.primaryLimeGreen),
+          ),
           const SizedBox(width: 12),
-          Text('$label: ', style: const TextStyle(fontWeight: FontWeight.w500)),
+          Text(
+            '$label: ',
+            style: const TextStyle(
+              fontWeight: FontWeight.w500,
+              color: AppColors.black,
+            ),
+          ),
           Expanded(
-            child: Text(value, style: const TextStyle(color: Colors.grey)),
+            child: Text(value, style: const TextStyle(color: AppColors.gray)),
           ),
         ],
       ),
@@ -303,14 +438,21 @@ class UserProfilePage extends StatelessWidget {
 
   Widget _buildStatsSection(StatsModel stats) {
     return Card(
+      elevation: 2,
+      shadowColor: AppColors.cardShadow,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       child: Padding(
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.all(20),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             const Text(
               'Bowling Statistics',
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+              style: TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.w600,
+                color: AppColors.black,
+              ),
             ),
             const SizedBox(height: 16),
             Row(
@@ -320,7 +462,7 @@ class UserProfilePage extends StatelessWidget {
                     'Average Score',
                     stats.averageScore.toStringAsFixed(1),
                     Icons.analytics,
-                    Colors.blue,
+                    AppColors.info,
                   ),
                 ),
                 const SizedBox(width: 12),
@@ -329,7 +471,7 @@ class UserProfilePage extends StatelessWidget {
                     'High Game',
                     '${stats.highGame}',
                     Icons.emoji_events,
-                    Colors.orange,
+                    AppColors.warning,
                   ),
                 ),
               ],
@@ -342,7 +484,7 @@ class UserProfilePage extends StatelessWidget {
                     'High Series',
                     '${stats.highSeries}',
                     Icons.timeline,
-                    Colors.green,
+                    AppColors.success,
                   ),
                 ),
                 const SizedBox(width: 12),
@@ -351,7 +493,7 @@ class UserProfilePage extends StatelessWidget {
                     'Experience',
                     '${stats.experience}',
                     Icons.psychology,
-                    Colors.purple,
+                    AppColors.primaryLimeGreen,
                   ),
                 ),
               ],
@@ -389,7 +531,7 @@ class UserProfilePage extends StatelessWidget {
           ),
           Text(
             title,
-            style: const TextStyle(fontSize: 12, color: Colors.grey),
+            style: const TextStyle(fontSize: 12, color: AppColors.gray),
             textAlign: TextAlign.center,
           ),
         ],
@@ -399,18 +541,25 @@ class UserProfilePage extends StatelessWidget {
 
   Widget _buildSponsorsSection(List<BrandModel> sponsors) {
     return Card(
+      elevation: 2,
+      shadowColor: AppColors.cardShadow,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       child: Padding(
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.all(20),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             const Row(
               children: [
-                Icon(Icons.business, color: Colors.amber),
+                Icon(Icons.business, color: AppColors.warning),
                 SizedBox(width: 8),
                 Text(
                   'Sponsors',
-                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                  style: TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.w600,
+                    color: AppColors.black,
+                  ),
                 ),
               ],
             ),
@@ -418,7 +567,7 @@ class UserProfilePage extends StatelessWidget {
             if (sponsors.isEmpty)
               const Text(
                 'No sponsors yet',
-                style: TextStyle(color: Colors.grey),
+                style: TextStyle(color: AppColors.gray),
               )
             else
               Wrap(
@@ -436,18 +585,25 @@ class UserProfilePage extends StatelessWidget {
 
   Widget _buildFavoriteBrandsSection(List<BrandModel> favoriteBrands) {
     return Card(
+      elevation: 2,
+      shadowColor: AppColors.cardShadow,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       child: Padding(
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.all(20),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             const Row(
               children: [
-                Icon(Icons.favorite, color: Colors.red),
+                Icon(Icons.favorite, color: AppColors.error),
                 SizedBox(width: 8),
                 Text(
                   'Favorite Brands',
-                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                  style: TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.w600,
+                    color: AppColors.black,
+                  ),
                 ),
               ],
             ),
@@ -455,7 +611,7 @@ class UserProfilePage extends StatelessWidget {
             if (favoriteBrands.isEmpty)
               const Text(
                 'No favorite brands selected',
-                style: TextStyle(color: Colors.grey),
+                style: TextStyle(color: AppColors.gray),
               )
             else
               Wrap(
@@ -476,9 +632,16 @@ class UserProfilePage extends StatelessWidget {
       width: 80,
       padding: const EdgeInsets.all(8),
       decoration: BoxDecoration(
-        color: Colors.grey[50],
-        borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: Colors.grey[200]!),
+        color: AppColors.white,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: AppColors.outline),
+        boxShadow: [
+          BoxShadow(
+            color: AppColors.shadow,
+            blurRadius: 4,
+            offset: const Offset(0, 2),
+          ),
+        ],
       ),
       child: Column(
         mainAxisSize: MainAxisSize.min,
@@ -487,15 +650,8 @@ class UserProfilePage extends StatelessWidget {
             width: 50,
             height: 50,
             decoration: BoxDecoration(
-              color: Colors.white,
+              color: AppColors.surface,
               borderRadius: BorderRadius.circular(8),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withValues(alpha: 0.1),
-                  blurRadius: 4,
-                  offset: const Offset(0, 2),
-                ),
-              ],
             ),
             child: ClipRRect(
               borderRadius: BorderRadius.circular(8),
@@ -504,7 +660,7 @@ class UserProfilePage extends StatelessWidget {
                 fit: BoxFit.contain,
                 errorBuilder: (context, error, stackTrace) => Icon(
                   Icons.image_not_supported,
-                  color: Colors.grey[400],
+                  color: AppColors.gray,
                   size: 24,
                 ),
               ),
@@ -513,7 +669,11 @@ class UserProfilePage extends StatelessWidget {
           const SizedBox(height: 4),
           Text(
             brand.name,
-            style: const TextStyle(fontSize: 10, fontWeight: FontWeight.w500),
+            style: const TextStyle(
+              fontSize: 10,
+              fontWeight: FontWeight.w500,
+              color: AppColors.black,
+            ),
             textAlign: TextAlign.center,
             maxLines: 2,
             overflow: TextOverflow.ellipsis,
@@ -525,128 +685,70 @@ class UserProfilePage extends StatelessWidget {
 
   Widget _buildIntroVideoSection(String introVideoUrl) {
     return Card(
+      elevation: 2,
+      shadowColor: AppColors.cardShadow,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       child: Padding(
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.all(20),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             const Row(
               children: [
-                Icon(Icons.video_library, color: Colors.red),
+                Icon(Icons.video_library, color: AppColors.error),
                 SizedBox(width: 8),
                 Text(
                   'Introduction Video',
-                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                ),
-              ],
-            ),
-            const SizedBox(height: 16),
-            if (introVideoUrl.isEmpty)
-              const Text(
-                'No introduction video available',
-                style: TextStyle(color: Colors.grey),
-              )
-            else
-              Container(
-                height: 200,
-                width: double.infinity,
-                decoration: BoxDecoration(
-                  color: Colors.black,
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: Stack(
-                  alignment: Alignment.center,
-                  children: [
-                    Container(
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(12),
-                        gradient: LinearGradient(
-                          colors: [Colors.blue.shade800, Colors.blue.shade400],
-                        ),
-                      ),
-                      child: const Center(
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Icon(
-                              Icons.play_circle_fill,
-                              size: 64,
-                              color: Colors.white,
-                            ),
-                            SizedBox(height: 8),
-                            Text(
-                              'Introduction Video',
-                              style: TextStyle(
-                                color: Colors.white,
-                                fontSize: 16,
-                                fontWeight: FontWeight.w500,
-                              ),
-                            ),
-                            Text(
-                              'Tap to play',
-                              style: TextStyle(
-                                color: Colors.white70,
-                                fontSize: 12,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildSocialSection() {
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const Row(
-              children: [
-                Icon(Icons.feed, color: Colors.blue),
-                SizedBox(width: 8),
-                Text(
-                  'Activity Feed',
-                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                  style: TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.w600,
+                    color: AppColors.black,
+                  ),
                 ),
               ],
             ),
             const SizedBox(height: 16),
             Container(
-              padding: const EdgeInsets.all(24),
+              height: 200,
+              width: double.infinity,
               decoration: BoxDecoration(
-                color: Colors.grey[50],
                 borderRadius: BorderRadius.circular(12),
-                border: Border.all(color: Colors.grey[200]!),
+                gradient: AppColors.primaryGradient,
               ),
-              child: const Center(
-                child: Column(
-                  children: [
-                    Icon(Icons.post_add, size: 48, color: Colors.grey),
-                    SizedBox(height: 8),
-                    Text(
-                      'Social Posts Coming Soon!',
-                      style: TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.w500,
-                        color: Colors.grey,
+              child: Stack(
+                alignment: Alignment.center,
+                children: [
+                  Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.all(16),
+                        decoration: BoxDecoration(
+                          color: Colors.white.withValues(alpha: 0.2),
+                          shape: BoxShape.circle,
+                        ),
+                        child: const Icon(
+                          Icons.play_circle_fill,
+                          size: 48,
+                          color: AppColors.white,
+                        ),
                       ),
-                    ),
-                    Text(
-                      'Share your bowling achievements, photos, and connect with other bowlers.',
-                      style: TextStyle(fontSize: 12, color: Colors.grey),
-                      textAlign: TextAlign.center,
-                    ),
-                  ],
-                ),
+                      const SizedBox(height: 12),
+                      const Text(
+                        'Introduction Video',
+                        style: TextStyle(
+                          color: AppColors.white,
+                          fontSize: 16,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                      const Text(
+                        'Tap to play',
+                        style: TextStyle(color: Colors.white70, fontSize: 12),
+                      ),
+                    ],
+                  ),
+                ],
               ),
             ),
           ],

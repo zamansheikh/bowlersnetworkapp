@@ -9,6 +9,7 @@ import '../../features/auth/presentation/pages/signup_page.dart';
 import '../../features/auth/presentation/pages/email_verification_page.dart';
 import '../../features/auth/presentation/pages/profile_completion_page.dart';
 import '../../features/profile/presentation/pages/user_profile_page.dart';
+import '../../features/profile/presentation/pages/profile_edit_page.dart';
 
 class AppRouter {
   static GoRouter create(AuthCubit authCubit) {
@@ -106,6 +107,11 @@ class AppRouter {
           path: '/profile',
           name: 'profile',
           builder: (context, state) => const UserProfilePage(),
+        ),
+        GoRoute(
+          path: '/profile/edit',
+          name: 'profile-edit',
+          builder: (context, state) => const ProfileEditPage(),
         ),
       ],
       errorBuilder: (context, state) => const ErrorPage(),
