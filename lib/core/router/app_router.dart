@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:go_router/go_router.dart';
 import '../../features/home/presentation/pages/home_page.dart';
 import '../../features/auth/presentation/bloc/auth_cubit.dart';
+import '../../features/auth/presentation/pages/splash_page.dart';
 import '../../features/auth/presentation/pages/sign_in_page.dart';
 import '../../features/auth/presentation/pages/signup_page.dart';
 import '../../features/auth/presentation/pages/email_verification_page.dart';
@@ -12,37 +13,58 @@ import '../../features/profile/presentation/pages/user_profile_page.dart';
 class AppRouter {
   static GoRouter create(AuthCubit authCubit) {
     return GoRouter(
+      initialLocation: '/splash',
       redirect: (context, state) {
         final authState = authCubit.state;
         final isAuth = authState is Authenticated;
         final isIncompleteProfile = authState is AuthenticatedIncompleteProfile;
-        final loggingIn = state.matchedLocation == '/login';
-        final signingUp = state.matchedLocation.startsWith('/signup');
-        final completingProfile = state.matchedLocation == '/complete-profile';
+        final isLoading = authState is AuthLoading;
+        final isUnauthenticated = authState is Unauthenticated;
+        
+        final isSplash = state.matchedLocation == '/splash';
+        final isSigningIn = state.matchedLocation == '/signin';
+        final isSigningUp = state.matchedLocation.startsWith('/signup');
+        final isCompletingProfile = state.matchedLocation == '/complete-profile';
+
+        // Stay on splash during loading
+        if (isLoading && !isSplash) {
+          return '/splash';
+        }
 
         // If user has incomplete profile and not on completion page, redirect there
-        if (isIncompleteProfile && !completingProfile) {
+        if (isIncompleteProfile && !isCompletingProfile) {
           return '/complete-profile';
         }
 
         // If user is authenticated (complete profile) and on auth pages, go home
-        if (isAuth && (loggingIn || signingUp || completingProfile)) {
+        if (isAuth && (isSplash || isSigningIn || isSigningUp || isCompletingProfile)) {
           return '/';
         }
 
-        // If user is not authenticated and not on auth pages, go to login
-        if (!isAuth && !isIncompleteProfile && !loggingIn && !signingUp) {
-          return '/login';
+        // If user is not authenticated and not on auth pages, go to signin
+        if (isUnauthenticated && !isSigningIn && !isSigningUp) {
+          return '/signin';
         }
 
         return null;
       },
       routes: [
         GoRoute(
+          path: '/splash',
+          name: 'splash',
+          builder: (context, state) => const SplashPage(),
+        ),
+        GoRoute(
           path: '/',
           name: 'home',
           builder: (context, state) => const HomePage(),
         ),
+        GoRoute(
+          path: '/signin',
+          name: 'signin',
+          builder: (context, state) => const SignInPage(),
+        ),
+        // Keep old /login route for backward compatibility
         GoRoute(
           path: '/login',
           name: 'login',
@@ -68,6 +90,7 @@ class AppRouter {
                 'lastName': extra['lastName']!,
                 'username': extra['username']!,
                 'password': extra['password']!,
+                'birthDate': extra['birthDate'] ?? '',
               },
             );
           },
