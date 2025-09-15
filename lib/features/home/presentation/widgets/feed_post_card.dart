@@ -5,7 +5,7 @@ import '../../../../core/constants/colors.dart';
 import '../../data/models/feed_post.dart';
 import '../cubit/feed_cubit.dart';
 import 'comments_bottom_sheet.dart';
-import 'media_item.dart';
+import 'media_gallery.dart';
 
 class FeedPostCard extends StatefulWidget {
   final FeedPost post;
@@ -169,41 +169,10 @@ class _FeedPostCardState extends State<FeedPostCard> {
 
     return Container(
       margin: const EdgeInsets.symmetric(vertical: 12),
-      constraints: const BoxConstraints(maxHeight: 400),
-      child: widget.post.media.length == 1
-          ? _buildSingleMedia(widget.post.media.first)
-          : _buildMultipleMedia(),
-    );
-  }
-
-  Widget _buildSingleMedia(String mediaUrl) {
-    return MediaItem(
-      mediaUrl: mediaUrl,
-      fit: BoxFit.cover,
-      width: double.infinity,
-    );
-  }
-
-  Widget _buildMultipleMedia() {
-    return SizedBox(
-      height: 200,
-      child: ListView.builder(
-        scrollDirection: Axis.horizontal,
-        itemCount: widget.post.media.length,
-        itemBuilder: (context, index) {
-          return Container(
-            width: 160,
-            margin: EdgeInsets.only(
-              right: index < widget.post.media.length - 1 ? 8 : 0,
-            ),
-            child: MediaItem(
-              mediaUrl: widget.post.media[index],
-              fit: BoxFit.cover,
-              width: 160,
-              height: 200,
-            ),
-          );
-        },
+      child: MediaGallery(
+        mediaUrls: widget.post.media,
+        height: 300,
+        borderRadius: BorderRadius.circular(12),
       ),
     );
   }

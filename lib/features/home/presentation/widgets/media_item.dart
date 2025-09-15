@@ -74,7 +74,7 @@ class _MediaItemState extends State<MediaItem> {
         }
       });
     } catch (e) {
-      print('Error initializing video: $e');
+      debugPrint('Error initializing video: $e');
       if (mounted) {
         setState(() {
           _isVideoInitialized = false;
