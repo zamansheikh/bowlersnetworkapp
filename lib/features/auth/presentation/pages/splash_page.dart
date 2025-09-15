@@ -91,8 +91,8 @@ class _SplashPageState extends State<SplashPage>
                             borderRadius: BorderRadius.circular(30),
                             boxShadow: [
                               BoxShadow(
-                                color: AppColors.primaryLimeGreen.withOpacity(
-                                  0.4,
+                                color: AppColors.primaryLimeGreen.withValues(
+                                  alpha: 0.4,
                                 ),
                                 blurRadius: 30,
                                 offset: const Offset(0, 15),
@@ -186,10 +186,10 @@ class _SplashPageState extends State<SplashPage>
                               vertical: 12,
                             ),
                             decoration: BoxDecoration(
-                              color: AppColors.error.withOpacity(0.1),
+                              color: AppColors.error.withValues(alpha: 0.1),
                               borderRadius: BorderRadius.circular(12),
                               border: Border.all(
-                                color: AppColors.error.withOpacity(0.3),
+                                color: AppColors.error.withValues(alpha: 0.3),
                               ),
                             ),
                             child: Row(

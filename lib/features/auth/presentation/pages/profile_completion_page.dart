@@ -105,8 +105,8 @@ class _ProfileCompletionPageState extends State<ProfileCompletionPage> {
                             borderRadius: BorderRadius.circular(20),
                             boxShadow: [
                               BoxShadow(
-                                color: AppColors.primaryLimeGreen.withOpacity(
-                                  0.3,
+                                color: AppColors.primaryLimeGreen.withValues(
+                                  alpha: 0.3,
                                 ),
                                 blurRadius: 15,
                                 offset: const Offset(0, 8),
@@ -177,7 +177,7 @@ class _ProfileCompletionPageState extends State<ProfileCompletionPage> {
                                     ? [
                                         BoxShadow(
                                           color: AppColors.primaryLimeGreen
-                                              .withOpacity(0.3),
+                                              .withValues(alpha: 0.3),
                                           blurRadius: 10,
                                           offset: const Offset(0, 4),
                                         ),
@@ -323,7 +323,9 @@ class _ProfileCompletionPageState extends State<ProfileCompletionPage> {
                         gradient: AppColors.primaryGradient,
                         boxShadow: [
                           BoxShadow(
-                            color: AppColors.primaryLimeGreen.withOpacity(0.4),
+                            color: AppColors.primaryLimeGreen.withValues(
+                              alpha: 0.4,
+                            ),
                             blurRadius: 15,
                             offset: const Offset(0, 8),
                           ),

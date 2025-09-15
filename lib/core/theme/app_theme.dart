@@ -125,7 +125,7 @@ class AppTheme {
       // InputDecoration Theme
       inputDecorationTheme: InputDecorationTheme(
         filled: true,
-        fillColor: AppColors.lightGray.withOpacity(0.3),
+        fillColor: AppColors.lightGray.withValues(alpha: 0.3),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(16),
           borderSide: BorderSide.none,
@@ -167,7 +167,7 @@ class AppTheme {
         elevation: 0,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
         color: AppColors.white,
-        shadowColor: AppColors.black.withOpacity(0.1),
+        shadowColor: AppColors.black.withValues(alpha: 0.1),
       ),
 
       // BottomNavigationBar Theme

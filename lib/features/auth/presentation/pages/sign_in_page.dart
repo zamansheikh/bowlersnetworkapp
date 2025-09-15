@@ -60,7 +60,7 @@ class _SignInPageState extends State<SignInPage> {
                                 boxShadow: [
                                   BoxShadow(
                                     color: AppColors.primaryLimeGreen
-                                        .withOpacity(0.3),
+                                        .withValues(alpha: 0.3),
                                     blurRadius: 20,
                                     offset: const Offset(0, 10),
                                   ),
@@ -186,8 +186,8 @@ class _SignInPageState extends State<SignInPage> {
                               gradient: AppColors.primaryGradient,
                               boxShadow: [
                                 BoxShadow(
-                                  color: AppColors.primaryLimeGreen.withOpacity(
-                                    0.4,
+                                  color: AppColors.primaryLimeGreen.withValues(
+                                    alpha: 0.4,
                                   ),
                                   blurRadius: 15,
                                   offset: const Offset(0, 8),
@@ -228,10 +228,10 @@ class _SignInPageState extends State<SignInPage> {
                           Container(
                             padding: const EdgeInsets.all(16),
                             decoration: BoxDecoration(
-                              color: AppColors.error.withOpacity(0.1),
+                              color: AppColors.error.withValues(alpha: 0.1),
                               borderRadius: BorderRadius.circular(12),
                               border: Border.all(
-                                color: AppColors.error.withOpacity(0.3),
+                                color: AppColors.error.withValues(alpha: 0.3),
                               ),
                             ),
                             child: Row(

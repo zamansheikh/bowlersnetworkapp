@@ -308,7 +308,7 @@ class _FeedPostCardState extends State<FeedPostCard> {
           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
           decoration: BoxDecoration(
             color: isSelected
-                ? AppColors.primaryLimeGreen.withOpacity(0.1)
+                ? AppColors.primaryLimeGreen.withValues(alpha: 0.1)
                 : AppColors.white,
             borderRadius: BorderRadius.circular(8),
             border: Border.all(
