@@ -79,6 +79,17 @@ class MediaGallery extends StatelessWidget {
 
     if (mediaCount == 0) return const SizedBox.shrink();
 
+    // For single media, use intrinsic sizing instead of fixed height
+    if (mediaCount == 1) {
+      return Container(
+        padding: padding,
+        child: ClipRRect(
+          borderRadius: borderRadius ?? BorderRadius.circular(12),
+          child: _buildLayoutByCount(context, mediaCount, height),
+        ),
+      );
+    }
+
     return Container(
       height: height,
       padding: padding,
@@ -107,9 +118,20 @@ class MediaGallery extends StatelessWidget {
   Widget _buildSingleMedia(BuildContext context, int index) {
     return GestureDetector(
       onTap: () => _openFullScreen(context, index),
-      child: MediaThumbnail(
-        mediaInfo: _mediaInfoList[index],
-        fit: BoxFit.cover,
+      child: Container(
+        constraints: const BoxConstraints(
+          maxHeight: 400, // Maximum height to prevent overly tall media
+          maxWidth: double.infinity,
+        ),
+        child: AspectRatio(
+          aspectRatio: _mediaInfoList[index].type == MediaType.video 
+            ? 16 / 9  // Standard video aspect ratio
+            : 4 / 3,  // Standard image aspect ratio
+          child: MediaThumbnail(
+            mediaInfo: _mediaInfoList[index],
+            fit: BoxFit.cover,
+          ),
+        ),
       ),
     );
   }
@@ -402,7 +424,10 @@ class _MediaThumbnailState extends State<MediaThumbnail> {
       return Container(
         width: widget.width,
         height: widget.height,
-        color: AppColors.lightGray,
+        decoration: BoxDecoration(
+          color: AppColors.lightGray,
+          borderRadius: BorderRadius.circular(12),
+        ),
         child: const Center(
           child: Icon(Icons.error, color: AppColors.gray, size: 32),
         ),
@@ -413,7 +438,10 @@ class _MediaThumbnailState extends State<MediaThumbnail> {
       return Container(
         width: widget.width,
         height: widget.height,
-        color: AppColors.lightGray,
+        decoration: BoxDecoration(
+          color: AppColors.lightGray,
+          borderRadius: BorderRadius.circular(12),
+        ),
         child: const Center(
           child: CircularProgressIndicator(
             strokeWidth: 2,
@@ -425,27 +453,21 @@ class _MediaThumbnailState extends State<MediaThumbnail> {
       );
     }
 
-    return Stack(
-      children: [
-        SizedBox(
-          width: widget.width,
-          height: widget.height,
-          child: ClipRRect(
-            borderRadius: BorderRadius.circular(12),
-            child: FittedBox(
-              fit: widget.fit,
-              child: SizedBox(
-                width: _controller!.value.size.width,
-                height: _controller!.value.size.height,
-                child: VideoPlayer(_controller!),
-              ),
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(12),
+      child: Stack(
+        fit: StackFit.expand,
+        children: [
+          FittedBox(
+            fit: widget.fit,
+            child: SizedBox(
+              width: _controller!.value.size.width,
+              height: _controller!.value.size.height,
+              child: VideoPlayer(_controller!),
             ),
           ),
-        ),
-        Positioned.fill(
-          child: Container(
+          Container(
             decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(12),
               gradient: LinearGradient(
                 begin: Alignment.topCenter,
                 end: Alignment.bottomCenter,
@@ -456,10 +478,8 @@ class _MediaThumbnailState extends State<MediaThumbnail> {
               ),
             ),
           ),
-        ),
-        // Centered play button
-        Positioned.fill(
-          child: Center(
+          // Centered play button
+          Center(
             child: Container(
               padding: const EdgeInsets.all(12),
               decoration: const BoxDecoration(
@@ -473,28 +493,28 @@ class _MediaThumbnailState extends State<MediaThumbnail> {
               ),
             ),
           ),
-        ),
-        if (_controller!.value.duration.inSeconds > 0)
-          Positioned(
-            bottom: 8,
-            right: 8,
-            child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-              decoration: BoxDecoration(
-                color: Colors.black54,
-                borderRadius: BorderRadius.circular(4),
-              ),
-              child: Text(
-                _formatDuration(_controller!.value.duration),
-                style: const TextStyle(
-                  color: Colors.white,
-                  fontSize: 10,
-                  fontWeight: FontWeight.w500,
+          if (_controller!.value.duration.inSeconds > 0)
+            Positioned(
+              bottom: 8,
+              right: 8,
+              child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                decoration: BoxDecoration(
+                  color: Colors.black54,
+                  borderRadius: BorderRadius.circular(4),
+                ),
+                child: Text(
+                  _formatDuration(_controller!.value.duration),
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 10,
+                    fontWeight: FontWeight.w500,
+                  ),
                 ),
               ),
             ),
-          ),
-      ],
+        ],
+      ),
     );
   }
 
