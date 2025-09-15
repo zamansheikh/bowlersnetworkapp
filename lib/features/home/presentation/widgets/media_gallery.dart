@@ -247,7 +247,7 @@ class MediaGallery extends StatelessWidget {
 
   Widget _buildFiveOrMoreMedia(BuildContext context, double height, int count) {
     final remainingCount = count - 4;
-    
+
     return Column(
       children: [
         Expanded(
@@ -324,7 +324,9 @@ class MediaGallery extends StatelessWidget {
         ),
       ],
     );
-  }  @override
+  }
+
+  @override
   Widget build(BuildContext context) {
     if (mediaUrls.isEmpty) return const SizedBox.shrink();
     return _buildGridLayout(context);
