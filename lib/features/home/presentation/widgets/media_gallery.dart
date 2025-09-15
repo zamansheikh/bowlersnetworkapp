@@ -124,9 +124,10 @@ class MediaGallery extends StatelessWidget {
           maxWidth: double.infinity,
         ),
         child: AspectRatio(
-          aspectRatio: _mediaInfoList[index].type == MediaType.video 
-            ? 16 / 9  // Standard video aspect ratio
-            : 4 / 3,  // Standard image aspect ratio
+          aspectRatio: _mediaInfoList[index].type == MediaType.video
+              ? 16 /
+                    9 // Standard video aspect ratio
+              : 4 / 3, // Standard image aspect ratio
           child: MediaThumbnail(
             mediaInfo: _mediaInfoList[index],
             fit: BoxFit.cover,
