@@ -5,6 +5,7 @@ import '../../../../core/constants/colors.dart';
 import '../../data/models/feed_post.dart';
 import '../cubit/feed_cubit.dart';
 import 'comments_bottom_sheet.dart';
+import 'media_item.dart';
 
 class FeedPostCard extends StatefulWidget {
   final FeedPost post;
@@ -170,32 +171,20 @@ class _FeedPostCardState extends State<FeedPostCard> {
       margin: const EdgeInsets.symmetric(vertical: 12),
       constraints: const BoxConstraints(maxHeight: 400),
       child: widget.post.media.length == 1
-          ? _buildSingleImage(widget.post.media.first)
-          : _buildMultipleImages(),
+          ? _buildSingleMedia(widget.post.media.first)
+          : _buildMultipleMedia(),
     );
   }
 
-  Widget _buildSingleImage(String imageUrl) {
-    return ClipRRect(
-      borderRadius: BorderRadius.circular(12),
-      child: Image.network(
-        imageUrl,
-        fit: BoxFit.cover,
-        width: double.infinity,
-        errorBuilder: (context, error, stackTrace) {
-          return Container(
-            height: 200,
-            color: AppColors.lightGray,
-            child: const Center(
-              child: Icon(Icons.broken_image, color: AppColors.gray, size: 48),
-            ),
-          );
-        },
-      ),
+  Widget _buildSingleMedia(String mediaUrl) {
+    return MediaItem(
+      mediaUrl: mediaUrl,
+      fit: BoxFit.cover,
+      width: double.infinity,
     );
   }
 
-  Widget _buildMultipleImages() {
+  Widget _buildMultipleMedia() {
     return SizedBox(
       height: 200,
       child: ListView.builder(
@@ -207,24 +196,11 @@ class _FeedPostCardState extends State<FeedPostCard> {
             margin: EdgeInsets.only(
               right: index < widget.post.media.length - 1 ? 8 : 0,
             ),
-            child: ClipRRect(
-              borderRadius: BorderRadius.circular(12),
-              child: Image.network(
-                widget.post.media[index],
-                fit: BoxFit.cover,
-                errorBuilder: (context, error, stackTrace) {
-                  return Container(
-                    color: AppColors.lightGray,
-                    child: const Center(
-                      child: Icon(
-                        Icons.broken_image,
-                        color: AppColors.gray,
-                        size: 32,
-                      ),
-                    ),
-                  );
-                },
-              ),
+            child: MediaItem(
+              mediaUrl: widget.post.media[index],
+              fit: BoxFit.cover,
+              width: 160,
+              height: 200,
             ),
           );
         },
