@@ -204,4 +204,44 @@ class FeedRepository {
       throw Exception('Unexpected error: $e');
     }
   }
+
+  /// Add comment to a post
+  Future<PostComment> addComment(int postId, String text) async {
+    try {
+      final response = await _dio.post(
+        '/api/user/post/add-comment/$postId',
+        data: {'text': text},
+      );
+
+      if (response.statusCode != 200 && response.statusCode != 201) {
+        throw Exception('Failed to add comment');
+      }
+
+      return PostComment.fromJson(response.data['comment']);
+    } on DioException catch (e) {
+      throw Exception('Network error: ${e.message}');
+    } catch (e) {
+      throw Exception('Unexpected error: $e');
+    }
+  }
+
+  /// Add reply to a comment
+  Future<Map<String, dynamic>> addReply(int commentId, String text) async {
+    try {
+      final response = await _dio.post(
+        '/api/user/post/add-reply/$commentId',
+        data: {'text': text},
+      );
+
+      if (response.statusCode != 200 && response.statusCode != 201) {
+        throw Exception('Failed to add reply');
+      }
+
+      return response.data;
+    } on DioException catch (e) {
+      throw Exception('Network error: ${e.message}');
+    } catch (e) {
+      throw Exception('Unexpected error: $e');
+    }
+  }
 }

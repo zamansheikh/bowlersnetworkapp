@@ -4,6 +4,7 @@ import 'package:intl/intl.dart';
 import '../../../../core/constants/colors.dart';
 import '../../data/models/feed_post.dart';
 import '../cubit/feed_cubit.dart';
+import 'comments_bottom_sheet.dart';
 
 class FeedPostCard extends StatefulWidget {
   final FeedPost post;
@@ -22,79 +23,45 @@ class FeedPostCard extends StatefulWidget {
 }
 
 class _FeedPostCardState extends State<FeedPostCard> {
-  late FeedPost _localPost;
   bool _isLiking = false;
   bool _isVoting = false;
   int? _selectedPollOption;
-
-  @override
-  void initState() {
-    super.initState();
-    _localPost = widget.post;
-  }
-
-  @override
-  void didUpdateWidget(FeedPostCard oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    if (oldWidget.post != widget.post) {
-      _localPost = widget.post;
-    }
-  }
 
   void _handleLike() async {
     if (_isLiking) return;
 
     setState(() {
       _isLiking = true;
-      // Optimistic update
-      final newLikedState = !_localPost.isLikedByMe;
-      _localPost = _localPost.copyWith(
-        isLikedByMe: newLikedState,
-        metadata: _localPost.metadata.copyWith(
-          totalLikes: newLikedState
-              ? _localPost.metadata.totalLikes + 1
-              : _localPost.metadata.totalLikes - 1,
-        ),
-      );
     });
 
     try {
       await context.read<FeedCubit>().toggleLike(
-        _localPost.metadata.id,
+        widget.post.metadata.id,
         widget.postIndex,
       );
-      widget.onPostUpdate?.call();
     } catch (error) {
-      // Revert optimistic update on error
-      setState(() {
-        _localPost = widget.post;
-      });
       if (mounted) {
         ScaffoldMessenger.of(
           context,
         ).showSnackBar(const SnackBar(content: Text('Failed to like post')));
       }
     } finally {
-      setState(() {
-        _isLiking = false;
-      });
+      if (mounted) {
+        setState(() {
+          _isLiking = false;
+        });
+      }
     }
   }
 
   void _handleFollow() async {
-    if (_localPost.author.viewerIsAuthor) return;
+    if (widget.post.author.viewerIsAuthor) return;
 
     try {
       await context.read<FeedCubit>().followUser(
-        _localPost.author.userId,
+        widget.post.author.userId,
         widget.postIndex,
       );
-      setState(() {
-        _localPost = _localPost.copyWith(
-          author: _localPost.author.copyWith(isFollowing: true),
-        );
-      });
-      widget.onPostUpdate?.call();
     } catch (error) {
       if (mounted) {
         ScaffoldMessenger.of(
@@ -105,7 +72,7 @@ class _FeedPostCardState extends State<FeedPostCard> {
   }
 
   void _handlePollVote(int optionId) async {
-    if (_isVoting || _localPost.poll == null) return;
+    if (_isVoting || widget.post.poll == null) return;
 
     setState(() {
       _isVoting = true;
@@ -114,7 +81,6 @@ class _FeedPostCardState extends State<FeedPostCard> {
 
     try {
       await context.read<FeedCubit>().voteOnPoll(optionId, widget.postIndex);
-      widget.onPostUpdate?.call();
     } catch (error) {
       setState(() {
         _selectedPollOption = null;
@@ -198,13 +164,13 @@ class _FeedPostCardState extends State<FeedPostCard> {
   }
 
   Widget _buildMediaGallery() {
-    if (_localPost.media.isEmpty) return const SizedBox.shrink();
+    if (widget.post.media.isEmpty) return const SizedBox.shrink();
 
     return Container(
       margin: const EdgeInsets.symmetric(vertical: 12),
       constraints: const BoxConstraints(maxHeight: 400),
-      child: _localPost.media.length == 1
-          ? _buildSingleImage(_localPost.media.first)
+      child: widget.post.media.length == 1
+          ? _buildSingleImage(widget.post.media.first)
           : _buildMultipleImages(),
     );
   }
@@ -234,17 +200,17 @@ class _FeedPostCardState extends State<FeedPostCard> {
       height: 200,
       child: ListView.builder(
         scrollDirection: Axis.horizontal,
-        itemCount: _localPost.media.length,
+        itemCount: widget.post.media.length,
         itemBuilder: (context, index) {
           return Container(
             width: 160,
             margin: EdgeInsets.only(
-              right: index < _localPost.media.length - 1 ? 8 : 0,
+              right: index < widget.post.media.length - 1 ? 8 : 0,
             ),
             child: ClipRRect(
               borderRadius: BorderRadius.circular(12),
               child: Image.network(
-                _localPost.media[index],
+                widget.post.media[index],
                 fit: BoxFit.cover,
                 errorBuilder: (context, error, stackTrace) {
                   return Container(
@@ -267,7 +233,7 @@ class _FeedPostCardState extends State<FeedPostCard> {
   }
 
   Widget _buildPoll() {
-    final poll = _localPost.poll;
+    final poll = widget.post.poll;
     if (poll == null) return const SizedBox.shrink();
 
     return Container(
@@ -372,15 +338,17 @@ class _FeedPostCardState extends State<FeedPostCard> {
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   Icon(
-                    _localPost.isLikedByMe
+                    widget.post.isLikedByMe
                         ? Icons.favorite
                         : Icons.favorite_border,
-                    color: _localPost.isLikedByMe ? Colors.red : AppColors.gray,
+                    color: widget.post.isLikedByMe
+                        ? Colors.red
+                        : AppColors.gray,
                     size: 20,
                   ),
                   const SizedBox(width: 4),
                   Text(
-                    '${_localPost.metadata.totalLikes}',
+                    '${widget.post.metadata.totalLikes}',
                     style: const TextStyle(
                       color: AppColors.darkGray,
                       fontSize: 14,
@@ -394,7 +362,20 @@ class _FeedPostCardState extends State<FeedPostCard> {
           // Comment button
           InkWell(
             onTap: () {
-              // TODO: Implement comment functionality
+              showModalBottomSheet(
+                context: context,
+                isScrollControlled: true,
+                backgroundColor: Colors.transparent,
+                builder: (context) => DraggableScrollableSheet(
+                  initialChildSize: 0.7,
+                  minChildSize: 0.5,
+                  maxChildSize: 0.9,
+                  builder: (context, scrollController) => CommentsBottomSheet(
+                    post: widget.post,
+                    postIndex: widget.postIndex,
+                  ),
+                ),
+              );
             },
             borderRadius: BorderRadius.circular(20),
             child: Container(
@@ -409,7 +390,7 @@ class _FeedPostCardState extends State<FeedPostCard> {
                   ),
                   const SizedBox(width: 4),
                   Text(
-                    '${_localPost.metadata.totalComments}',
+                    '${widget.post.metadata.totalComments}',
                     style: const TextStyle(
                       color: AppColors.darkGray,
                       fontSize: 14,
@@ -464,13 +445,13 @@ class _FeedPostCardState extends State<FeedPostCard> {
                     radius: 24,
                     backgroundColor: AppColors.lightGray,
                     backgroundImage:
-                        _localPost.author.profilePictureUrl.isNotEmpty
-                        ? NetworkImage(_localPost.author.profilePictureUrl)
+                        widget.post.author.profilePictureUrl.isNotEmpty
+                        ? NetworkImage(widget.post.author.profilePictureUrl)
                         : null,
-                    child: _localPost.author.profilePictureUrl.isEmpty
+                    child: widget.post.author.profilePictureUrl.isEmpty
                         ? Text(
-                            _localPost.author.name.isNotEmpty
-                                ? _localPost.author.name[0].toUpperCase()
+                            widget.post.author.name.isNotEmpty
+                                ? widget.post.author.name[0].toUpperCase()
                                 : 'U',
                             style: const TextStyle(
                               color: AppColors.darkGray,
@@ -492,7 +473,7 @@ class _FeedPostCardState extends State<FeedPostCard> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          _localPost.author.name,
+                          widget.post.author.name,
                           style: const TextStyle(
                             fontWeight: FontWeight.w600,
                             fontSize: 16,
@@ -500,7 +481,7 @@ class _FeedPostCardState extends State<FeedPostCard> {
                           ),
                         ),
                         Text(
-                          _formatTimeAgo(_localPost.metadata.createdAt),
+                          _formatTimeAgo(widget.post.metadata.createdAt),
                           style: const TextStyle(
                             color: AppColors.gray,
                             fontSize: 14,
@@ -511,8 +492,8 @@ class _FeedPostCardState extends State<FeedPostCard> {
                   ),
                 ),
                 // Follow button
-                if (!_localPost.author.viewerIsAuthor &&
-                    !_localPost.author.isFollowing)
+                if (!widget.post.author.viewerIsAuthor &&
+                    !widget.post.author.isFollowing)
                   GestureDetector(
                     onTap: _handleFollow,
                     child: Container(
@@ -540,8 +521,8 @@ class _FeedPostCardState extends State<FeedPostCard> {
             const SizedBox(height: 12),
 
             // Post content
-            if (_localPost.caption.isNotEmpty)
-              _buildTextWithTags(_localPost.caption, _localPost.tags),
+            if (widget.post.caption.isNotEmpty)
+              _buildTextWithTags(widget.post.caption, widget.post.tags),
 
             // Media gallery
             _buildMediaGallery(),

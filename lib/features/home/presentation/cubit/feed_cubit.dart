@@ -77,6 +77,21 @@ class UserFollowed extends FeedEvent {
   List<Object?> get props => [userId, postIndex];
 }
 
+class CommentAdded extends FeedEvent {
+  final int postId;
+  final int postIndex;
+  final String text;
+
+  const CommentAdded({
+    required this.postId,
+    required this.postIndex,
+    required this.text,
+  });
+
+  @override
+  List<Object?> get props => [postId, postIndex, text];
+}
+
 // States
 abstract class FeedState extends Equatable {
   const FeedState();
@@ -337,6 +352,41 @@ class FeedCubit extends Cubit<FeedState> {
       // Revert optimistic update
       posts[postIndex] = post;
       emit(FeedLoaded(posts: posts));
+    }
+  }
+
+  Future<void> addComment(int postId, int postIndex, String text) async {
+    final currentState = state;
+    if (currentState is! FeedLoaded) return;
+
+    final posts = List<FeedPost>.from(currentState.posts);
+    if (postIndex >= posts.length) return;
+
+    try {
+      final newComment = await _repository.addComment(postId, text);
+
+      final post = posts[postIndex];
+
+      // Optimistic update - add the new comment
+      final updatedComments = PostComments(
+        total: post.comments.total + 1,
+        commentList: [newComment, ...post.comments.commentList],
+      );
+
+      final updatedMetadata = post.metadata.copyWith(
+        totalComments: post.metadata.totalComments + 1,
+      );
+
+      final updatedPost = post.copyWith(
+        comments: updatedComments,
+        metadata: updatedMetadata,
+      );
+
+      posts[postIndex] = updatedPost;
+      emit(FeedLoaded(posts: posts));
+    } catch (e) {
+      // Handle error but don't revert since we don't have optimistic state here
+      throw Exception('Failed to add comment: $e');
     }
   }
 }
