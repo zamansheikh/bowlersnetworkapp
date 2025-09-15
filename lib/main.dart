@@ -7,6 +7,7 @@ import 'core/constants/strings.dart';
 import 'features/home/presentation/bloc/home_bloc.dart';
 import 'features/auth/presentation/bloc/auth_cubit.dart';
 import 'features/auth/presentation/bloc/signup_cubit.dart';
+import 'features/home/presentation/cubit/feed_cubit.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -29,6 +30,7 @@ class MyApp extends StatelessWidget {
         ),
         BlocProvider<AuthCubit>(create: (_) => authCubit),
         BlocProvider<SignupCubit>(create: (_) => getIt<SignupCubit>()),
+        BlocProvider<FeedCubit>(create: (_) => getIt<FeedCubit>()),
       ],
       child: MaterialApp.router(
         title: AppStrings.appName,

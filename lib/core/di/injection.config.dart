@@ -36,6 +36,8 @@ import 'package:bowlersnetworkapp/features/auth/presentation/bloc/signup_cubit.d
     as _i384;
 import 'package:bowlersnetworkapp/features/home/data/datasources/user_remote_data_source.dart'
     as _i528;
+import 'package:bowlersnetworkapp/features/home/data/repositories/feed_repository.dart'
+    as _i535;
 import 'package:bowlersnetworkapp/features/home/data/repositories/user_repository_impl.dart'
     as _i224;
 import 'package:bowlersnetworkapp/features/home/domain/repositories/user_repository.dart'
@@ -44,6 +46,8 @@ import 'package:bowlersnetworkapp/features/home/domain/usecases/get_users.dart'
     as _i450;
 import 'package:bowlersnetworkapp/features/home/presentation/bloc/home_bloc.dart'
     as _i229;
+import 'package:bowlersnetworkapp/features/home/presentation/cubit/feed_cubit.dart'
+    as _i813;
 import 'package:dio/dio.dart' as _i361;
 import 'package:get_it/get_it.dart' as _i174;
 import 'package:injectable/injectable.dart' as _i526;
@@ -68,6 +72,12 @@ extension GetItInjectableX on _i174.GetIt {
       () => _i528.UserRemoteDataSourceImpl(),
     );
     gh.lazySingleton<_i149.NetworkInfo>(() => _i149.NetworkInfoImpl());
+    gh.factory<_i535.FeedRepository>(
+      () => _i535.FeedRepository(gh<_i460.SharedPreferences>()),
+    );
+    gh.factory<_i813.FeedCubit>(
+      () => _i813.FeedCubit(repository: gh<_i535.FeedRepository>()),
+    );
     gh.lazySingleton<_i1073.AuthRemoteDataSource>(
       () => _i1073.AuthRemoteDataSourceImpl(gh<_i361.Dio>()),
     );

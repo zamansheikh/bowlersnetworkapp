@@ -1,117 +1,315 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import '../bloc/home_bloc.dart';
 import '../../../../core/constants/colors.dart';
-import '../../../../core/constants/strings.dart';
 import '../../../../core/widgets/app_drawer.dart';
+import '../../../../core/di/injection.dart';
+import '../cubit/feed_cubit.dart';
+import '../widgets/create_post_section.dart';
+import '../widgets/feed_post_card.dart';
+import '../../data/models/feed_post.dart';
 
 class HomePage extends StatelessWidget {
   const HomePage({super.key});
 
   @override
   Widget build(BuildContext context) {
+    return BlocProvider(
+      create: (context) => getIt<FeedCubit>()..loadFeed(),
+      child: const HomePageView(),
+    );
+  }
+}
+
+class HomePageView extends StatelessWidget {
+  const HomePageView({super.key});
+
+  @override
+  Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text(AppStrings.appName)),
+      backgroundColor: AppColors.surface,
       drawer: const AppDrawer(),
-      body: BlocBuilder<HomeBloc, HomeState>(
-        builder: (context, state) {
-          if (state is HomeLoading) {
-            return const Center(
-              child: CircularProgressIndicator(
-                color: AppColors.primaryLimeGreen,
-              ),
-            );
-          } else if (state is HomeLoaded) {
-            return const Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Icon(
-                    Icons.sports,
-                    size: 100,
-                    color: AppColors.primaryLimeGreen,
-                  ),
-                  SizedBox(height: 20),
-                  Text(
-                    'Welcome to Bowlers Network!',
-                    style: TextStyle(
-                      fontSize: 24,
-                      fontWeight: FontWeight.bold,
-                      color: AppColors.primaryLimeGreen,
+      body: Container(
+        decoration: const BoxDecoration(gradient: AppColors.backgroundGradient),
+        child: SafeArea(
+          child: RefreshIndicator(
+            onRefresh: () async {
+              context.read<FeedCubit>().refreshFeed();
+            },
+            color: AppColors.primaryLimeGreen,
+            child: CustomScrollView(
+              slivers: [
+                // App Bar
+                SliverAppBar(
+                  backgroundColor: AppColors.white,
+                  elevation: 0,
+                  scrolledUnderElevation: 1,
+                  surfaceTintColor: AppColors.white,
+                  floating: true,
+                  snap: true,
+                  leading: Builder(
+                    builder: (context) => IconButton(
+                      icon: const Icon(
+                        Icons.menu,
+                        color: AppColors.black,
+                      ),
+                      onPressed: () => Scaffold.of(context).openDrawer(),
                     ),
                   ),
-                  SizedBox(height: 10),
-                  Text(
-                    'Your bowling community awaits',
-                    style: TextStyle(fontSize: 16, color: AppColors.darkGray),
+                  title: const Row(
+                    children: [
+                      Icon(
+                        Icons.sports,
+                        color: AppColors.primaryLimeGreen,
+                        size: 28,
+                      ),
+                      SizedBox(width: 12),
+                      Text(
+                        'Bowlers Network',
+                        style: TextStyle(
+                          color: AppColors.black,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 20,
+                        ),
+                      ),
+                    ],
                   ),
-                ],
-              ),
-            );
-          } else if (state is HomeError) {
-            return Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  const Icon(
-                    Icons.error_outline,
-                    size: 64,
-                    color: AppColors.error,
-                  ),
-                  const SizedBox(height: 16),
-                  Text(
-                    state.message,
-                    style: const TextStyle(color: AppColors.error),
-                    textAlign: TextAlign.center,
-                  ),
-                  const SizedBox(height: 16),
-                  ElevatedButton(
-                    onPressed: () {
-                      context.read<HomeBloc>().add(LoadHome());
-                    },
-                    child: const Text(AppStrings.retry),
-                  ),
-                ],
-              ),
-            );
-          }
+                ),
 
-          // Initial state
-          return const Center(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Icon(
-                  Icons.sports,
-                  size: 100,
-                  color: AppColors.primaryLimeGreen,
-                ),
-                SizedBox(height: 20),
-                Text(
-                  'Welcome to Bowlers Network!',
-                  style: TextStyle(
-                    fontSize: 24,
-                    fontWeight: FontWeight.bold,
-                    color: AppColors.primaryLimeGreen,
+                // Content
+                SliverToBoxAdapter(
+                  child: Column(
+                    children: [
+                      const SizedBox(height: 16),
+
+                      // Create Post Section
+                      const CreatePostSection(),
+
+                      const SizedBox(height: 16),
+
+                      // Feed Content
+                      BlocConsumer<FeedCubit, FeedState>(
+                        listener: (context, state) {
+                          if (state is PostCreateSuccess) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(
+                                content: Text('Post created successfully!'),
+                                backgroundColor: AppColors.success,
+                              ),
+                            );
+                          } else if (state is PostCreateError) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(
+                                content: Text(
+                                  'Failed to create post: ${state.message}',
+                                ),
+                                backgroundColor: AppColors.error,
+                              ),
+                            );
+                          }
+                        },
+                        builder: (context, state) {
+                          if (state is FeedLoading) {
+                            return _buildLoadingWidget();
+                          } else if (state is FeedError) {
+                            return _buildErrorWidget(state.message, context);
+                          } else if (state is FeedLoaded ||
+                              state is FeedRefreshing ||
+                              state is PostCreating ||
+                              state is PostCreateSuccess ||
+                              state is PostCreateError) {
+                            List<FeedPost> posts = [];
+                            bool isCreating = false;
+
+                            if (state is FeedLoaded) {
+                              posts = state.posts;
+                            } else if (state is FeedRefreshing) {
+                              posts = state.posts;
+                            } else if (state is PostCreating) {
+                              posts = state.posts;
+                              isCreating = true;
+                            } else if (state is PostCreateSuccess) {
+                              posts = state.posts;
+                            } else if (state is PostCreateError) {
+                              posts = state.posts;
+                            }
+
+                            return _buildFeedContent(posts, isCreating);
+                          }
+
+                          return _buildEmptyWidget();
+                        },
+                      ),
+                    ],
                   ),
-                ),
-                SizedBox(height: 10),
-                Text(
-                  'Your bowling community awaits',
-                  style: TextStyle(fontSize: 16, color: AppColors.darkGray),
                 ),
               ],
             ),
-          );
-        },
+          ),
+        ),
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          context.read<HomeBloc>().add(LoadHome());
-        },
-        backgroundColor: AppColors.primaryLimeGreen,
-        child: const Icon(Icons.refresh, color: AppColors.white),
+    );
+  }
+
+  Widget _buildLoadingWidget() {
+    return Container(
+      padding: const EdgeInsets.symmetric(vertical: 60),
+      child: const Center(
+        child: Column(
+          children: [
+            CircularProgressIndicator(
+              valueColor: AlwaysStoppedAnimation<Color>(
+                AppColors.primaryLimeGreen,
+              ),
+            ),
+            SizedBox(height: 16),
+            Text(
+              'Loading feed...',
+              style: TextStyle(color: AppColors.gray, fontSize: 16),
+            ),
+          ],
+        ),
       ),
+    );
+  }
+
+  Widget _buildErrorWidget(String message, BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.all(24),
+      child: Center(
+        child: Column(
+          children: [
+            const Icon(Icons.error_outline, size: 64, color: AppColors.error),
+            const SizedBox(height: 16),
+            const Text(
+              'Oops! Something went wrong',
+              style: TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.w600,
+                color: AppColors.black,
+              ),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              message,
+              style: const TextStyle(color: AppColors.gray, fontSize: 14),
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 24),
+            ElevatedButton(
+              onPressed: () {
+                context.read<FeedCubit>().loadFeed();
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: AppColors.primaryLimeGreen,
+                foregroundColor: AppColors.black,
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 32,
+                  vertical: 12,
+                ),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+              ),
+              child: const Text(
+                'Try Again',
+                style: TextStyle(fontWeight: FontWeight.w600),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildEmptyWidget() {
+    return Container(
+      padding: const EdgeInsets.all(24),
+      child: const Center(
+        child: Column(
+          children: [
+            Icon(Icons.article_outlined, size: 64, color: AppColors.gray),
+            SizedBox(height: 16),
+            Text(
+              'No posts yet',
+              style: TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.w600,
+                color: AppColors.black,
+              ),
+            ),
+            SizedBox(height: 8),
+            Text(
+              'Be the first to share something!',
+              style: TextStyle(color: AppColors.gray, fontSize: 14),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildFeedContent(List<FeedPost> posts, bool isCreating) {
+    if (posts.isEmpty) {
+      return _buildEmptyWidget();
+    }
+
+    return Column(
+      children: [
+        // Show creating indicator
+        if (isCreating)
+          Container(
+            margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: AppColors.info.withValues(alpha: 0.1),
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(color: AppColors.info.withValues(alpha: 0.3)),
+            ),
+            child: const Row(
+              children: [
+                SizedBox(
+                  width: 16,
+                  height: 16,
+                  child: CircularProgressIndicator(
+                    strokeWidth: 2,
+                    valueColor: AlwaysStoppedAnimation<Color>(AppColors.info),
+                  ),
+                ),
+                SizedBox(width: 12),
+                Text(
+                  'Creating your post...',
+                  style: TextStyle(
+                    color: AppColors.info,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+              ],
+            ),
+          ),
+
+        // Posts list
+        ListView.builder(
+          shrinkWrap: true,
+          physics: const NeverScrollableScrollPhysics(),
+          padding: const EdgeInsets.symmetric(horizontal: 16),
+          itemCount: posts.length,
+          itemBuilder: (context, index) {
+            return Padding(
+              padding: const EdgeInsets.only(bottom: 16),
+              child: FeedPostCard(
+                post: posts[index],
+                postIndex: index,
+                onPostUpdate: () {
+                  context.read<FeedCubit>().loadFeed();
+                },
+              ),
+            );
+          },
+        ),
+
+        // Bottom spacing
+        const SizedBox(height: 24),
+      ],
     );
   }
 }
