@@ -58,7 +58,7 @@ class _MediaItemState extends State<MediaItem> {
       );
 
       await _videoController!.initialize();
-      
+
       if (mounted) {
         setState(() {
           _isVideoInitialized = true;
@@ -107,13 +107,11 @@ class _MediaItemState extends State<MediaItem> {
         color: AppColors.lightGray,
         child: Center(
           child: _videoController == null
-              ? const Icon(
-                  Icons.videocam_off,
-                  color: AppColors.gray,
-                  size: 48,
-                )
+              ? const Icon(Icons.videocam_off, color: AppColors.gray, size: 48)
               : const CircularProgressIndicator(
-                  valueColor: AlwaysStoppedAnimation<Color>(AppColors.primaryLimeGreen),
+                  valueColor: AlwaysStoppedAnimation<Color>(
+                    AppColors.primaryLimeGreen,
+                  ),
                 ),
         ),
       );
@@ -162,7 +160,8 @@ class _MediaItemState extends State<MediaItem> {
           ),
         ),
         // Video progress indicator (optional)
-        if (_isVideoInitialized && _videoController!.value.duration.inSeconds > 0)
+        if (_isVideoInitialized &&
+            _videoController!.value.duration.inSeconds > 0)
           Positioned(
             bottom: 8,
             left: 8,
@@ -171,10 +170,13 @@ class _MediaItemState extends State<MediaItem> {
               opacity: _isPlaying ? 0.0 : 1.0,
               duration: const Duration(milliseconds: 300),
               child: LinearProgressIndicator(
-                value: _videoController!.value.position.inSeconds /
+                value:
+                    _videoController!.value.position.inSeconds /
                     _videoController!.value.duration.inSeconds,
                 backgroundColor: Colors.white24,
-                valueColor: const AlwaysStoppedAnimation<Color>(AppColors.primaryLimeGreen),
+                valueColor: const AlwaysStoppedAnimation<Color>(
+                  AppColors.primaryLimeGreen,
+                ),
               ),
             ),
           ),
@@ -194,7 +196,9 @@ class _MediaItemState extends State<MediaItem> {
         color: AppColors.lightGray,
         child: const Center(
           child: CircularProgressIndicator(
-            valueColor: AlwaysStoppedAnimation<Color>(AppColors.primaryLimeGreen),
+            valueColor: AlwaysStoppedAnimation<Color>(
+              AppColors.primaryLimeGreen,
+            ),
           ),
         ),
       ),
@@ -203,11 +207,7 @@ class _MediaItemState extends State<MediaItem> {
         height: widget.height ?? 200,
         color: AppColors.lightGray,
         child: const Center(
-          child: Icon(
-            Icons.broken_image,
-            color: AppColors.gray,
-            size: 48,
-          ),
+          child: Icon(Icons.broken_image, color: AppColors.gray, size: 48),
         ),
       ),
     );
