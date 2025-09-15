@@ -107,11 +107,11 @@ class PostMetadata {
 
   factory PostMetadata.fromJson(Map<String, dynamic> json) {
     return PostMetadata(
-      id: json['id'],
+      id: (json['id'] as num).toInt(),
       uid: json['uid'],
       postPrivacy: json['post_privacy'],
-      totalLikes: json['total_likes'],
-      totalComments: json['total_comments'],
+      totalLikes: (json['total_likes'] as num).toInt(),
+      totalComments: (json['total_comments'] as num).toInt(),
       createdAt: json['created_at'],
       updatedAt: json['updated_at'],
       created: json['created'],
@@ -193,7 +193,7 @@ class PostAuthor {
 
   factory PostAuthor.fromJson(Map<String, dynamic> json) {
     return PostAuthor(
-      userId: json['user_id'],
+      userId: (json['user_id'] as num).toInt(),
       name: json['name'],
       username: json['username'],
       profilePictureUrl: json['profile_picture_url'] ?? '',
@@ -240,7 +240,7 @@ class PostLikes {
 
   factory PostLikes.fromJson(Map<String, dynamic> json) {
     return PostLikes(
-      total: json['total'],
+      total: (json['total'] as num).toInt(),
       likers:
           (json['likers'] as List<dynamic>?)
               ?.map((liker) => PostLiker.fromJson(liker))
@@ -270,7 +270,7 @@ class PostLiker {
 
   factory PostLiker.fromJson(Map<String, dynamic> json) {
     return PostLiker(
-      userId: json['user_id'],
+      userId: (json['user_id'] as num).toInt(),
       name: json['name'],
       profilePicUrl: json['profile_pic_url'] ?? '',
     );
@@ -289,7 +289,7 @@ class PostComments {
 
   factory PostComments.fromJson(Map<String, dynamic> json) {
     return PostComments(
-      total: json['total'],
+      total: (json['total'] as num).toInt(),
       commentList:
           (json['comment_list'] as List<dynamic>?)
               ?.map((comment) => PostComment.fromJson(comment))
@@ -323,7 +323,7 @@ class PostComment {
 
   factory PostComment.fromJson(Map<String, dynamic> json) {
     return PostComment(
-      commentId: json['comment_id'],
+      commentId: (json['comment_id'] as num).toInt(),
       user: CommentUser.fromJson(json['user']),
       text: json['text'],
       pics: json['pics'] ?? [],
@@ -355,7 +355,7 @@ class CommentUser {
 
   factory CommentUser.fromJson(Map<String, dynamic> json) {
     return CommentUser(
-      userId: json['user_id'],
+      userId: (json['user_id'] as num).toInt(),
       name: json['name'],
       profilePictureUrl: json['profile_picture_url'] ?? '',
     );
@@ -387,7 +387,7 @@ class PostPoll {
 
   factory PostPoll.fromJson(Map<String, dynamic> json) {
     return PostPoll(
-      id: json['id'],
+      id: (json['id'] as num).toInt(),
       uid: json['uid'],
       title: json['title'],
       pollType: json['poll_type'],
@@ -441,10 +441,10 @@ class PollOption {
 
   factory PollOption.fromJson(Map<String, dynamic> json) {
     return PollOption(
-      optionId: json['option_id'],
+      optionId: (json['option_id'] as num).toInt(),
       content: json['content'],
-      vote: json['vote'],
-      perc: json['perc'],
+      vote: (json['vote'] as num).toInt(),
+      perc: (json['perc'] as num).round(), // Convert double to int safely
     );
   }
 
