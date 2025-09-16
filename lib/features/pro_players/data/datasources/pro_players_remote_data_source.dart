@@ -107,7 +107,7 @@ class ProPlayersRemoteDataSourceImpl implements ProPlayersRemoteDataSource {
   Future<List<FeedPost>> getUserPosts(String userId) async {
     try {
       final response = await _dio.get('/api/user/$userId/posts');
-      
+
       if (response.data is List) {
         return (response.data as List<dynamic>)
             .map((e) => FeedPost.fromJson(e as Map<String, dynamic>))

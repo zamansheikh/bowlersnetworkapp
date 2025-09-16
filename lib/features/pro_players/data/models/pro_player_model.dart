@@ -93,7 +93,7 @@ class ProPlayerModel extends ProPlayer {
   }
 
   ProPlayerModel copyWith({
-    bool? isFollowed, 
+    bool? isFollowed,
     int? followerCount,
     List<FeedPost>? posts,
   }) {

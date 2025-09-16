@@ -511,21 +511,19 @@ class _PlayerDetailPageState extends State<PlayerDetailPage> {
                     ),
                   )
                 : SliverGrid(
-                    gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                      crossAxisCount: 2,
-                      crossAxisSpacing: 16,
-                      mainAxisSpacing: 16,
-                      childAspectRatio: 0.75,
-                    ),
-                    delegate: SliverChildBuilderDelegate(
-                      (context, index) {
-                        return FeedPostCard(
-                          post: player.posts[index],
-                          postIndex: index,
-                        );
-                      },
-                      childCount: player.posts.length,
-                    ),
+                    gridDelegate:
+                        const SliverGridDelegateWithFixedCrossAxisCount(
+                          crossAxisCount: 2,
+                          crossAxisSpacing: 16,
+                          mainAxisSpacing: 16,
+                          childAspectRatio: 0.75,
+                        ),
+                    delegate: SliverChildBuilderDelegate((context, index) {
+                      return FeedPostCard(
+                        post: player.posts[index],
+                        postIndex: index,
+                      );
+                    }, childCount: player.posts.length),
                   ),
           ),
         ],
@@ -566,8 +564,7 @@ class _PlayerDetailPageState extends State<PlayerDetailPage> {
 
   Widget _buildVideoPlayer(String videoUrl) {
     // Initialize video controller if not already done
-    if (_videoController == null || 
-        _videoController!.dataSource != videoUrl) {
+    if (_videoController == null || _videoController!.dataSource != videoUrl) {
       _initializeVideoPlayer(videoUrl);
     }
 
@@ -616,8 +613,8 @@ class _PlayerDetailPageState extends State<PlayerDetailPage> {
                         shape: BoxShape.circle,
                       ),
                       child: Icon(
-                        _videoController!.value.isPlaying 
-                            ? Icons.pause 
+                        _videoController!.value.isPlaying
+                            ? Icons.pause
                             : Icons.play_arrow,
                         color: Colors.white,
                         size: 24,
@@ -637,10 +634,7 @@ class _PlayerDetailPageState extends State<PlayerDetailPage> {
                     SizedBox(height: 16),
                     Text(
                       'Loading Video...',
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 16,
-                      ),
+                      style: TextStyle(color: Colors.white, fontSize: 16),
                     ),
                   ],
                 ),
