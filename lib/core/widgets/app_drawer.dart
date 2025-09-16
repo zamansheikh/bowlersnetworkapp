@@ -115,73 +115,7 @@ class AppDrawer extends StatelessWidget {
               context.push('/pro-players');
             },
           ),
-          ListTile(
-            leading: const Icon(Icons.sports),
-            title: const Text('Bowling Stats'),
-            onTap: () {
-              Navigator.pop(context);
-              // TODO: Navigate to bowling stats page when implemented
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text('Bowling stats coming soon!')),
-              );
-            },
-          ),
-          ListTile(
-            leading: const Icon(Icons.group),
-            title: const Text('Friends'),
-            onTap: () {
-              Navigator.pop(context);
-              // TODO: Navigate to friends page when implemented
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text('Friends page coming soon!')),
-              );
-            },
-          ),
-          ListTile(
-            leading: const Icon(Icons.business),
-            title: const Text('Sponsors'),
-            onTap: () {
-              Navigator.pop(context);
-              // TODO: Navigate to sponsors page when implemented
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text('Sponsors page coming soon!')),
-              );
-            },
-          ),
-          ListTile(
-            leading: const Icon(Icons.settings),
-            title: const Text('Settings'),
-            onTap: () {
-              Navigator.pop(context);
-              // TODO: Navigate to settings page when implemented
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text('Settings page coming soon!')),
-              );
-            },
-          ),
-          const Divider(),
-          ListTile(
-            leading: const Icon(Icons.help),
-            title: const Text('Help & Support'),
-            onTap: () {
-              Navigator.pop(context);
-              // TODO: Navigate to help page when implemented
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text('Help & Support coming soon!')),
-              );
-            },
-          ),
-          ListTile(
-            leading: const Icon(Icons.info),
-            title: const Text('About'),
-            onTap: () {
-              Navigator.pop(context);
-              // TODO: Navigate to about page when implemented
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text('About page coming soon!')),
-              );
-            },
-          ),
+
           const Divider(),
           BlocBuilder<AuthCubit, AuthState>(
             builder: (context, state) {
