@@ -492,4 +492,22 @@ class FeedCubit extends Cubit<FeedState> {
       // Silently fail - don't affect the current feed state
     }
   }
+
+  /// Return to feed from post detail - ensures proper feed state
+  Future<void> returnToFeed() async {
+    final currentState = state;
+    
+    // If we're in PostDetailLoaded, we need to get back to feed
+    if (currentState is PostDetailLoaded) {
+      await loadFeed();
+    }
+    // If we're in any other non-feed state, also load feed
+    else if (currentState is! FeedLoaded && 
+             currentState is! FeedRefreshing &&
+             currentState is! PostCreating &&
+             currentState is! PostCreateSuccess &&
+             currentState is! PostCreateError) {
+      await loadFeed();
+    }
+  }
 }

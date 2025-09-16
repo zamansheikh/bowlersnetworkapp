@@ -18,11 +18,9 @@ class _HomePageState extends State<HomePage> {
   @override
   void initState() {
     super.initState();
-    // Only load feed if not already loaded
+    // Ensure we're in proper feed state when returning to home
     final feedCubit = context.read<FeedCubit>();
-    if (feedCubit.state is! FeedLoaded && feedCubit.state is! FeedLoading) {
-      feedCubit.loadFeed();
-    }
+    feedCubit.returnToFeed();
   }
 
   @override

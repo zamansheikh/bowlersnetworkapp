@@ -139,13 +139,8 @@ class _PostDetailViewState extends State<PostDetailView> {
         leading: IconButton(
           icon: const Icon(Icons.arrow_back, color: AppColors.black),
           onPressed: () {
-            // Refresh the post in the feed when going back
-            try {
-              final feedCubit = context.read<FeedCubit>();
-              feedCubit.refreshPostInFeed(int.parse(widget.postId));
-            } catch (e) {
-              // Ignore errors when refreshing
-            }
+            // Return to feed state when going back
+            context.read<FeedCubit>().returnToFeed();
             context.pop();
           },
         ),
