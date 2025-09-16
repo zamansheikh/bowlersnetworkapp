@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import '../../features/auth/presentation/bloc/auth_cubit.dart';
+import '../../features/home/data/models/user_model.dart';
 
 class AppDrawer extends StatelessWidget {
   const AppDrawer({super.key});
@@ -16,6 +17,40 @@ class AppDrawer extends StatelessWidget {
             builder: (context, state) {
               if (state is Authenticated) {
                 final user = state.user;
+                // Check if user is UserModel to access profilePictureUrl
+                Widget profileImage = CircleAvatar(
+                  backgroundColor: Colors.white,
+                  child: Text(
+                    user.name[0].toUpperCase(),
+                    style: TextStyle(
+                      fontSize: 24.0,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.blue[800],
+                    ),
+                  ),
+                );
+
+                // If user is UserModel and has profile picture, use it
+                if (user is UserModel && user.profilePictureUrl.isNotEmpty) {
+                  profileImage = CircleAvatar(
+                    backgroundColor: Colors.white,
+                    backgroundImage: NetworkImage(user.profilePictureUrl),
+                    onBackgroundImageError: (_, __) {
+                      // Fallback handled by providing a child
+                    },
+                    child: user.profilePictureUrl.isEmpty
+                        ? Text(
+                            user.name[0].toUpperCase(),
+                            style: TextStyle(
+                              fontSize: 24.0,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.blue[800],
+                            ),
+                          )
+                        : null,
+                  );
+                }
+
                 return UserAccountsDrawerHeader(
                   decoration: BoxDecoration(
                     gradient: LinearGradient(
@@ -35,17 +70,7 @@ class AppDrawer extends StatelessWidget {
                     user.email,
                     style: const TextStyle(fontSize: 14),
                   ),
-                  currentAccountPicture: CircleAvatar(
-                    backgroundColor: Colors.white,
-                    child: Text(
-                      user.name[0].toUpperCase(),
-                      style: TextStyle(
-                        fontSize: 24.0,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.blue[800],
-                      ),
-                    ),
-                  ),
+                  currentAccountPicture: profileImage,
                 );
               }
               return const DrawerHeader(
@@ -80,6 +105,14 @@ class AppDrawer extends StatelessWidget {
             onTap: () {
               Navigator.pop(context);
               context.push('/profile');
+            },
+          ),
+          ListTile(
+            leading: const Icon(Icons.star),
+            title: const Text('Pro Players'),
+            onTap: () {
+              Navigator.pop(context);
+              context.push('/pro-players');
             },
           ),
           ListTile(

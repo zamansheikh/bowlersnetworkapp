@@ -11,6 +11,8 @@ import '../../features/auth/presentation/pages/email_verification_page.dart';
 import '../../features/auth/presentation/pages/profile_completion_page.dart';
 import '../../features/profile/presentation/pages/user_profile_page.dart';
 import '../../features/profile/presentation/pages/profile_edit_page.dart';
+import '../../features/pro_players/presentation/pages/pro_players_page.dart';
+import '../../features/pro_players/presentation/pages/player_detail_page.dart';
 
 class AppRouter {
   static GoRouter create(AuthCubit authCubit) {
@@ -122,6 +124,19 @@ class AppRouter {
           builder: (context, state) {
             final postId = state.pathParameters['id']!;
             return PostDetailPage(postId: postId);
+          },
+        ),
+        GoRoute(
+          path: '/pro-players',
+          name: 'pro-players',
+          builder: (context, state) => const ProPlayersPage(),
+        ),
+        GoRoute(
+          path: '/player/:username',
+          name: 'player-detail',
+          builder: (context, state) {
+            final username = state.pathParameters['username']!;
+            return PlayerDetailPage(username: username);
           },
         ),
       ],

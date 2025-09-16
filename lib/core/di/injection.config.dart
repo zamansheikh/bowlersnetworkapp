@@ -48,6 +48,16 @@ import 'package:bowlersnetworkapp/features/home/presentation/bloc/home_bloc.dart
     as _i229;
 import 'package:bowlersnetworkapp/features/home/presentation/cubit/feed_cubit.dart'
     as _i813;
+import 'package:bowlersnetworkapp/features/pro_players/data/datasources/pro_players_remote_data_source.dart'
+    as _i607;
+import 'package:bowlersnetworkapp/features/pro_players/data/repositories/pro_players_repository_impl.dart'
+    as _i290;
+import 'package:bowlersnetworkapp/features/pro_players/domain/repositories/pro_players_repository.dart'
+    as _i1062;
+import 'package:bowlersnetworkapp/features/pro_players/domain/usecases/pro_players_usecases.dart'
+    as _i74;
+import 'package:bowlersnetworkapp/features/pro_players/presentation/cubit/pro_players_cubit.dart'
+    as _i565;
 import 'package:dio/dio.dart' as _i361;
 import 'package:get_it/get_it.dart' as _i174;
 import 'package:injectable/injectable.dart' as _i526;
@@ -71,6 +81,9 @@ extension GetItInjectableX on _i174.GetIt {
     gh.lazySingleton<_i528.UserRemoteDataSource>(
       () => _i528.UserRemoteDataSourceImpl(),
     );
+    gh.lazySingleton<_i607.ProPlayersRemoteDataSource>(
+      () => _i607.ProPlayersRemoteDataSourceImpl(gh<_i460.SharedPreferences>()),
+    );
     gh.lazySingleton<_i149.NetworkInfo>(() => _i149.NetworkInfoImpl());
     gh.factory<_i535.FeedRepository>(
       () => _i535.FeedRepository(gh<_i460.SharedPreferences>()),
@@ -84,6 +97,11 @@ extension GetItInjectableX on _i174.GetIt {
     gh.lazySingleton<_i637.UserRepository>(
       () => _i224.UserRepositoryImpl(
         remoteDataSource: gh<_i528.UserRemoteDataSource>(),
+      ),
+    );
+    gh.lazySingleton<_i1062.ProPlayersRepository>(
+      () => _i290.ProPlayersRepositoryImpl(
+        gh<_i607.ProPlayersRemoteDataSource>(),
       ),
     );
     gh.factory<_i450.GetUsers>(
@@ -118,6 +136,18 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i994.AuthRepository>(),
       ),
     );
+    gh.factory<_i74.GetProPlayers>(
+      () => _i74.GetProPlayers(gh<_i1062.ProPlayersRepository>()),
+    );
+    gh.factory<_i74.GetProPlayerByUsername>(
+      () => _i74.GetProPlayerByUsername(gh<_i1062.ProPlayersRepository>()),
+    );
+    gh.factory<_i74.FollowPlayer>(
+      () => _i74.FollowPlayer(gh<_i1062.ProPlayersRepository>()),
+    );
+    gh.factory<_i74.UnfollowPlayer>(
+      () => _i74.UnfollowPlayer(gh<_i1062.ProPlayersRepository>()),
+    );
     gh.factory<_i384.SignupCubit>(
       () => _i384.SignupCubit(
         gh<_i920.ValidateSignupData>(),
@@ -126,6 +156,14 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i762.CreateUser>(),
         gh<_i459.Login>(),
         gh<_i298.GetProfile>(),
+      ),
+    );
+    gh.factory<_i565.ProPlayersCubit>(
+      () => _i565.ProPlayersCubit(
+        gh<_i74.GetProPlayers>(),
+        gh<_i74.GetProPlayerByUsername>(),
+        gh<_i74.FollowPlayer>(),
+        gh<_i74.UnfollowPlayer>(),
       ),
     );
     return this;
