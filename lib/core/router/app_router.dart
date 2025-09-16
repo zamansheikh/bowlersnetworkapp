@@ -132,11 +132,11 @@ class AppRouter {
           builder: (context, state) => const ProPlayersPage(),
         ),
         GoRoute(
-          path: '/player/:username',
+          path: '/player/:userId',
           name: 'player-detail',
           builder: (context, state) {
-            final username = state.pathParameters['username']!;
-            return PlayerDetailPage(username: username);
+            final userId = state.pathParameters['userId']!;
+            return PlayerDetailPage(userId: userId);
           },
         ),
       ],

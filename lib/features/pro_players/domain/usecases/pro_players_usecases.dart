@@ -18,14 +18,14 @@ class GetProPlayers implements UseCase<List<ProPlayer>, NoParams> {
 }
 
 @injectable
-class GetProPlayerByUsername implements UseCase<ProPlayer, String> {
+class GetProPlayerById implements UseCase<ProPlayer, String> {
   final ProPlayersRepository repository;
 
-  GetProPlayerByUsername(this.repository);
+  GetProPlayerById(this.repository);
 
   @override
-  Future<Either<Failure, ProPlayer>> call(String username) async {
-    return await repository.getProPlayerByUsername(username);
+  Future<Either<Failure, ProPlayer>> call(String userId) async {
+    return await repository.getProPlayerById(userId);
   }
 }
 

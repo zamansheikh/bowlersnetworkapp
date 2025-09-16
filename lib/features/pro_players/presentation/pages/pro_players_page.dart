@@ -179,8 +179,9 @@ class _ProPlayersPageState extends State<ProPlayersPage> {
             ),
             child: Column(
               children: [
-                Row(
+                Column(
                   mainAxisAlignment: MainAxisAlignment.center,
+                  mainAxisSize: MainAxisSize.min,
                   children: [
                     Container(
                       padding: const EdgeInsets.all(12),

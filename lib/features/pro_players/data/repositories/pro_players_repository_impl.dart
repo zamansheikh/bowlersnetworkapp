@@ -22,11 +22,9 @@ class ProPlayersRepositoryImpl implements ProPlayersRepository {
   }
 
   @override
-  Future<Either<Failure, ProPlayer>> getProPlayerByUsername(
-    String username,
-  ) async {
+  Future<Either<Failure, ProPlayer>> getProPlayerById(String userId) async {
     try {
-      final proPlayer = await remoteDataSource.getProPlayerByUsername(username);
+      final proPlayer = await remoteDataSource.getProPlayerById(userId);
       return Right(proPlayer);
     } catch (e) {
       return Left(ServerFailure(e.toString()));

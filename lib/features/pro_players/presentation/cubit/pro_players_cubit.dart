@@ -10,13 +10,13 @@ part 'pro_players_state.dart';
 @injectable
 class ProPlayersCubit extends Cubit<ProPlayersState> {
   final GetProPlayers getProPlayers;
-  final GetProPlayerByUsername getProPlayerByUsername;
+  final GetProPlayerById getProPlayerById;
   final FollowPlayer followPlayer;
   final UnfollowPlayer unfollowPlayer;
 
   ProPlayersCubit(
     this.getProPlayers,
-    this.getProPlayerByUsername,
+    this.getProPlayerById,
     this.followPlayer,
     this.unfollowPlayer,
   ) : super(ProPlayersInitial());
@@ -31,10 +31,10 @@ class ProPlayersCubit extends Cubit<ProPlayersState> {
     );
   }
 
-  Future<void> loadProPlayerByUsername(String username) async {
+  Future<void> loadProPlayerById(String userId) async {
     emit(ProPlayerDetailLoading());
 
-    final result = await getProPlayerByUsername(username);
+    final result = await getProPlayerById(userId);
     result.fold(
       (failure) => emit(ProPlayerDetailError(failure.toString())),
       (player) => emit(ProPlayerDetailLoaded(player)),

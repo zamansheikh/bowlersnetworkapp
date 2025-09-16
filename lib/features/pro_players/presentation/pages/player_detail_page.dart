@@ -5,9 +5,9 @@ import '../../domain/entities/pro_player.dart';
 import '../cubit/pro_players_cubit.dart';
 
 class PlayerDetailPage extends StatefulWidget {
-  final String username;
+  final String userId;
 
-  const PlayerDetailPage({super.key, required this.username});
+  const PlayerDetailPage({super.key, required this.userId});
 
   @override
   State<PlayerDetailPage> createState() => _PlayerDetailPageState();
@@ -20,7 +20,7 @@ class _PlayerDetailPageState extends State<PlayerDetailPage> {
   void initState() {
     super.initState();
     _cubit = getIt<ProPlayersCubit>();
-    _cubit.loadProPlayerByUsername(widget.username);
+    _cubit.loadProPlayerById(widget.userId);
   }
 
   @override
@@ -103,8 +103,7 @@ class _PlayerDetailPageState extends State<PlayerDetailPage> {
               ),
               const SizedBox(height: 24),
               ElevatedButton(
-                onPressed: () =>
-                    _cubit.loadProPlayerByUsername(widget.username),
+                onPressed: () => _cubit.loadProPlayerById(widget.userId),
                 style: ElevatedButton.styleFrom(
                   backgroundColor: const Color(0xFF8BC342),
                   foregroundColor: Colors.white,

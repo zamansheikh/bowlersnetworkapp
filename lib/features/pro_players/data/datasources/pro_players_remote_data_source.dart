@@ -6,7 +6,7 @@ import '../models/pro_player_model.dart';
 
 abstract class ProPlayersRemoteDataSource {
   Future<List<ProPlayerModel>> getProPlayers();
-  Future<ProPlayerModel> getProPlayerByUsername(String username);
+  Future<ProPlayerModel> getProPlayerById(String userId);
   Future<bool> followPlayer(int userId);
   Future<bool> unfollowPlayer(int userId);
 }
@@ -92,14 +92,12 @@ class ProPlayersRemoteDataSourceImpl implements ProPlayersRemoteDataSource {
   }
 
   @override
-  Future<ProPlayerModel> getProPlayerByUsername(String username) async {
+  Future<ProPlayerModel> getProPlayerById(String userId) async {
     try {
-      final response = await _dio.get(
-        '/api/user/pro-player-public-profile/$username',
-      );
+      final response = await _dio.get('/api/user/profile/$userId');
       return ProPlayerModel.fromJson(response.data as Map<String, dynamic>);
     } catch (e) {
-      throw Exception('Failed to fetch pro player $username: $e');
+      throw Exception('Failed to fetch pro player $userId: $e');
     }
   }
 
