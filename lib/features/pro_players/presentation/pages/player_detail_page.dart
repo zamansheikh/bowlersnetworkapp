@@ -166,7 +166,7 @@ class _PlayerDetailPageState extends State<PlayerDetailPage> {
         slivers: [
           // Header with back button and video/cover
           SliverAppBar(
-            expandedHeight: 280,
+            expandedHeight: 180,
             pinned: false,
             backgroundColor: Colors.transparent,
             elevation: 0,
@@ -222,7 +222,7 @@ class _PlayerDetailPageState extends State<PlayerDetailPage> {
           // Profile Info Section
           SliverToBoxAdapter(
             child: Transform.translate(
-              offset: const Offset(0, -40),
+              offset: const Offset(0, 10),
               child: Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 24),
                 child: Column(
@@ -640,10 +640,7 @@ class _PlayerDetailPageState extends State<PlayerDetailPage> {
 
     return SliverGrid(
       gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-        crossAxisCount: 2,
-        crossAxisSpacing: 16,
-        mainAxisSpacing: 16,
-        childAspectRatio: 0.75,
+        crossAxisCount: 1,
       ),
       delegate: SliverChildBuilderDelegate((context, index) {
         return FeedPostCard(post: posts[index], postIndex: index);
