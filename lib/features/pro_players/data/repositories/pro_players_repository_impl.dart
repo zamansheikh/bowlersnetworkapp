@@ -25,7 +25,15 @@ class ProPlayersRepositoryImpl implements ProPlayersRepository {
   Future<Either<Failure, ProPlayer>> getProPlayerById(String userId) async {
     try {
       final proPlayer = await remoteDataSource.getProPlayerById(userId);
-      return Right(proPlayer);
+      // Fetch user posts separately
+      try {
+        final posts = await remoteDataSource.getUserPosts(userId);
+        final playerWithPosts = proPlayer.copyWith(posts: posts);
+        return Right(playerWithPosts);
+      } catch (postsError) {
+        // If posts fail to load, still return player without posts
+        return Right(proPlayer);
+      }
     } catch (e) {
       return Left(ServerFailure(e.toString()));
     }

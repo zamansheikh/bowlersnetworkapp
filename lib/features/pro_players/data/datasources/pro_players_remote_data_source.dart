@@ -3,10 +3,12 @@ import 'package:injectable/injectable.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../../../../core/constants/constants.dart';
 import '../models/pro_player_model.dart';
+import '../../../home/data/models/feed_post.dart';
 
 abstract class ProPlayersRemoteDataSource {
   Future<List<ProPlayerModel>> getProPlayers();
   Future<ProPlayerModel> getProPlayerById(String userId);
+  Future<List<FeedPost>> getUserPosts(String userId);
   Future<bool> followPlayer(int userId);
   Future<bool> unfollowPlayer(int userId);
 }
@@ -98,6 +100,23 @@ class ProPlayersRemoteDataSourceImpl implements ProPlayersRemoteDataSource {
       return ProPlayerModel.fromJson(response.data as Map<String, dynamic>);
     } catch (e) {
       throw Exception('Failed to fetch pro player $userId: $e');
+    }
+  }
+
+  @override
+  Future<List<FeedPost>> getUserPosts(String userId) async {
+    try {
+      final response = await _dio.get('/api/user/$userId/posts');
+      
+      if (response.data is List) {
+        return (response.data as List<dynamic>)
+            .map((e) => FeedPost.fromJson(e as Map<String, dynamic>))
+            .toList();
+      } else {
+        throw Exception('Invalid response format: expected List');
+      }
+    } catch (e) {
+      throw Exception('Failed to fetch user posts: $e');
     }
   }
 

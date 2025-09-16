@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:video_player/video_player.dart';
 import '../../../../core/di/injection.dart';
 import '../../domain/entities/pro_player.dart';
 import '../cubit/pro_players_cubit.dart';
+import '../../../home/presentation/widgets/feed_post_card.dart';
 
 class PlayerDetailPage extends StatefulWidget {
   final String userId;
@@ -15,6 +17,7 @@ class PlayerDetailPage extends StatefulWidget {
 
 class _PlayerDetailPageState extends State<PlayerDetailPage> {
   late ProPlayersCubit _cubit;
+  VideoPlayerController? _videoController;
 
   @override
   void initState() {
@@ -26,7 +29,22 @@ class _PlayerDetailPageState extends State<PlayerDetailPage> {
   @override
   void dispose() {
     _cubit.close();
+    _videoController?.dispose();
     super.dispose();
+  }
+
+  void _initializeVideoPlayer(String videoUrl) {
+    if (videoUrl.isNotEmpty) {
+      _videoController = VideoPlayerController.networkUrl(Uri.parse(videoUrl))
+        ..initialize().then((_) {
+          if (mounted) {
+            setState(() {});
+            _videoController?.setLooping(true);
+            _videoController?.setVolume(0.0); // Muted
+            _videoController?.play();
+          }
+        });
+    }
   }
 
   @override
@@ -146,30 +164,7 @@ class _PlayerDetailPageState extends State<PlayerDetailPage> {
                 children: [
                   // Intro Video or Cover Photo
                   if (player.introVideoUrl.isNotEmpty && player.isPro)
-                    Container(
-                      color: Colors.black,
-                      child: Center(
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            const Icon(
-                              Icons.play_circle_filled,
-                              color: Colors.white,
-                              size: 64,
-                            ),
-                            const SizedBox(height: 16),
-                            Text(
-                              'Intro Video',
-                              style: const TextStyle(
-                                color: Colors.white,
-                                fontSize: 18,
-                                fontWeight: FontWeight.w600,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    )
+                    _buildVideoPlayer(player.introVideoUrl)
                   else
                     Container(
                       decoration: const BoxDecoration(
@@ -194,26 +189,6 @@ class _PlayerDetailPageState extends State<PlayerDetailPage> {
                       ),
                     ),
                   ),
-
-                  // Play button for video
-                  if (player.introVideoUrl.isNotEmpty && player.isPro)
-                    Positioned(
-                      bottom: 16,
-                      right: 16,
-                      child: Container(
-                        width: 48,
-                        height: 48,
-                        decoration: BoxDecoration(
-                          color: Colors.white.withOpacity(0.2),
-                          shape: BoxShape.circle,
-                        ),
-                        child: const Icon(
-                          Icons.play_arrow,
-                          color: Colors.white,
-                          size: 24,
-                        ),
-                      ),
-                    ),
                 ],
               ),
             ),
@@ -501,20 +476,57 @@ class _PlayerDetailPageState extends State<PlayerDetailPage> {
           // Posts Grid (like web version)
           SliverPadding(
             padding: const EdgeInsets.all(24),
-            sliver: SliverGrid(
-              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount: 2,
-                crossAxisSpacing: 16,
-                mainAxisSpacing: 16,
-                childAspectRatio: 0.75,
-              ),
-              delegate: SliverChildBuilderDelegate(
-                (context, index) {
-                  return _buildPostCard(index);
-                },
-                childCount: 6, // Placeholder posts
-              ),
-            ),
+            sliver: player.posts.isEmpty
+                ? SliverToBoxAdapter(
+                    child: Center(
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 64),
+                        child: Column(
+                          children: [
+                            Icon(
+                              Icons.photo_library_outlined,
+                              size: 64,
+                              color: Colors.grey[400],
+                            ),
+                            const SizedBox(height: 16),
+                            Text(
+                              'No posts yet',
+                              style: TextStyle(
+                                fontSize: 18,
+                                color: Colors.grey[600],
+                                fontWeight: FontWeight.w500,
+                              ),
+                            ),
+                            const SizedBox(height: 8),
+                            Text(
+                              'Share your first bowling experience!',
+                              style: TextStyle(
+                                fontSize: 14,
+                                color: Colors.grey[500],
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  )
+                : SliverGrid(
+                    gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                      crossAxisCount: 2,
+                      crossAxisSpacing: 16,
+                      mainAxisSpacing: 16,
+                      childAspectRatio: 0.75,
+                    ),
+                    delegate: SliverChildBuilderDelegate(
+                      (context, index) {
+                        return FeedPostCard(
+                          post: player.posts[index],
+                          postIndex: index,
+                        );
+                      },
+                      childCount: player.posts.length,
+                    ),
+                  ),
           ),
         ],
       ),
@@ -552,88 +564,88 @@ class _PlayerDetailPageState extends State<PlayerDetailPage> {
     );
   }
 
-  Widget _buildPostCard(int index) {
+  Widget _buildVideoPlayer(String videoUrl) {
+    // Initialize video controller if not already done
+    if (_videoController == null || 
+        _videoController!.dataSource != videoUrl) {
+      _initializeVideoPlayer(videoUrl);
+    }
+
     return Container(
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(12),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.1),
-            blurRadius: 8,
-            offset: const Offset(0, 2),
-          ),
-        ],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // Post Image
-          Expanded(
-            flex: 3,
-            child: Container(
-              width: double.infinity,
-              decoration: BoxDecoration(
-                color: Colors.grey[200],
-                borderRadius: const BorderRadius.only(
-                  topLeft: Radius.circular(12),
-                  topRight: Radius.circular(12),
+      color: Colors.black,
+      child: _videoController != null && _videoController!.value.isInitialized
+          ? Stack(
+              fit: StackFit.expand,
+              children: [
+                AspectRatio(
+                  aspectRatio: _videoController!.value.aspectRatio,
+                  child: VideoPlayer(_videoController!),
+                ),
+                // Dark overlay
+                Container(
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      begin: Alignment.topCenter,
+                      end: Alignment.bottomCenter,
+                      colors: [
+                        Colors.transparent,
+                        Colors.black.withOpacity(0.2),
+                      ],
+                    ),
+                  ),
+                ),
+                // Play/Pause button
+                Positioned(
+                  bottom: 16,
+                  right: 16,
+                  child: GestureDetector(
+                    onTap: () {
+                      setState(() {
+                        if (_videoController!.value.isPlaying) {
+                          _videoController!.pause();
+                        } else {
+                          _videoController!.play();
+                        }
+                      });
+                    },
+                    child: Container(
+                      width: 48,
+                      height: 48,
+                      decoration: BoxDecoration(
+                        color: Colors.white.withOpacity(0.2),
+                        shape: BoxShape.circle,
+                      ),
+                      child: Icon(
+                        _videoController!.value.isPlaying 
+                            ? Icons.pause 
+                            : Icons.play_arrow,
+                        color: Colors.white,
+                        size: 24,
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            )
+          : Container(
+              color: Colors.black,
+              child: const Center(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    CircularProgressIndicator(color: Colors.white),
+                    SizedBox(height: 16),
+                    Text(
+                      'Loading Video...',
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 16,
+                      ),
+                    ),
+                  ],
                 ),
               ),
-              child: const Icon(Icons.image, size: 40, color: Colors.grey),
             ),
-          ),
-
-          // Post Content
-          Expanded(
-            flex: 2,
-            child: Padding(
-              padding: const EdgeInsets.all(12),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    'Sample Post ${index + 1}',
-                    style: const TextStyle(
-                      fontSize: 14,
-                      fontWeight: FontWeight.w600,
-                    ),
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                  const SizedBox(height: 4),
-                  Text(
-                    '2 weeks ago',
-                    style: TextStyle(fontSize: 12, color: Colors.grey[600]),
-                  ),
-                  const Spacer(),
-                  Row(
-                    children: [
-                      Icon(
-                        Icons.favorite_border,
-                        size: 16,
-                        color: Colors.grey[600],
-                      ),
-                      const SizedBox(width: 4),
-                      Text(
-                        '${10 + index}',
-                        style: TextStyle(fontSize: 12, color: Colors.grey[600]),
-                      ),
-                      const SizedBox(width: 12),
-                      Icon(Icons.comment, size: 16, color: Colors.grey[600]),
-                      const SizedBox(width: 4),
-                      Text(
-                        '${3 + index}',
-                        style: TextStyle(fontSize: 12, color: Colors.grey[600]),
-                      ),
-                    ],
-                  ),
-                ],
-              ),
-            ),
-          ),
-        ],
-      ),
     );
   }
 }
