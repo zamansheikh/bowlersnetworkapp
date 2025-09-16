@@ -73,7 +73,7 @@ class _SplashPageState extends State<SplashPage>
                         width: 120,
                         height: 120,
                         decoration: BoxDecoration(
-                          gradient: AppColors.primaryGradient,
+                          // gradient: AppColors.primaryGradient,
                           borderRadius: BorderRadius.circular(30),
                           boxShadow: [
                             BoxShadow(
