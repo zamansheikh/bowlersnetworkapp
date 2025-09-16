@@ -1,5 +1,4 @@
 import 'package:equatable/equatable.dart';
-import '../../../home/data/models/feed_post.dart';
 
 class ProPlayer extends Equatable {
   final int userId;
@@ -20,7 +19,6 @@ class ProPlayer extends Equatable {
   final Engagement engagement;
   final bool isFollowed;
   final List<Brand> favoriteBrands;
-  final List<FeedPost> posts;
 
   const ProPlayer({
     required this.userId,
@@ -41,7 +39,6 @@ class ProPlayer extends Equatable {
     required this.engagement,
     required this.isFollowed,
     required this.favoriteBrands,
-    required this.posts,
   });
 
   @override
@@ -64,7 +61,6 @@ class ProPlayer extends Equatable {
     engagement,
     isFollowed,
     favoriteBrands,
-    posts,
   ];
 }
 

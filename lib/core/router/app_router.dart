@@ -136,7 +136,11 @@ class AppRouter {
           name: 'player-detail',
           builder: (context, state) {
             final userId = state.pathParameters['userId']!;
-            return PlayerDetailPage(userId: userId);
+            final extra = state.extra as Map<String, String>?;
+            final userIdParam = extra != null && extra.containsKey('userId')
+                ? extra['userId']!
+                : userId;
+            return PlayerDetailPage(userName: userId, userId: userIdParam);
           },
         ),
       ],

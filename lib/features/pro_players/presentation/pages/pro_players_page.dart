@@ -408,7 +408,9 @@ class _ProPlayersPageState extends State<ProPlayersPage> {
   }
 
   void _navigateToPlayerDetail(ProPlayer player) {
-    context.push('/player/${player.username}');
+    context.push('/player/${player.username}',
+      extra: {'userId': player.userId.toString()},
+    );
   }
 
   void _toggleFollow(ProPlayer player) {

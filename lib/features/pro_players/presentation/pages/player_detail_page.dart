@@ -5,11 +5,13 @@ import '../../../../core/di/injection.dart';
 import '../../domain/entities/pro_player.dart';
 import '../cubit/pro_players_cubit.dart';
 import '../../../home/presentation/widgets/feed_post_card.dart';
+import '../../../home/data/models/feed_post.dart';
 
 class PlayerDetailPage extends StatefulWidget {
+  final String userName;
   final String userId;
 
-  const PlayerDetailPage({super.key, required this.userId});
+  const PlayerDetailPage({super.key, required this.userName, required this.userId});
 
   @override
   State<PlayerDetailPage> createState() => _PlayerDetailPageState();
@@ -23,7 +25,8 @@ class _PlayerDetailPageState extends State<PlayerDetailPage> {
   void initState() {
     super.initState();
     _cubit = getIt<ProPlayersCubit>();
-    _cubit.loadProPlayerById(widget.userId);
+    _cubit.loadProPlayerById(widget.userName);
+    _cubit.loadUserPosts(widget.userId);
   }
 
   @override
@@ -70,7 +73,21 @@ class _PlayerDetailPageState extends State<PlayerDetailPage> {
             }
 
             if (state is ProPlayerDetailLoaded) {
-              return _buildPlayerDetailView(state.player);
+              // Load posts when player is loaded but posts haven't been loaded yet
+              if (state.posts == null &&
+                  !state.isLoadingPosts &&
+                  state.postsError == null) {
+                // Trigger posts loading
+                WidgetsBinding.instance.addPostFrameCallback((_) {
+                  _cubit.loadUserPosts(widget.userName);
+                });
+              }
+              return _buildPlayerDetailView(
+                state.player,
+                state.posts,
+                state.isLoadingPosts,
+                state.postsError,
+              );
             }
 
             if (state is ProPlayerDetailError) {
@@ -121,7 +138,7 @@ class _PlayerDetailPageState extends State<PlayerDetailPage> {
               ),
               const SizedBox(height: 24),
               ElevatedButton(
-                onPressed: () => _cubit.loadProPlayerById(widget.userId),
+                onPressed: () => _cubit.loadProPlayerById(widget.userName),
                 style: ElevatedButton.styleFrom(
                   backgroundColor: const Color(0xFF8BC342),
                   foregroundColor: Colors.white,
@@ -135,7 +152,12 @@ class _PlayerDetailPageState extends State<PlayerDetailPage> {
     );
   }
 
-  Widget _buildPlayerDetailView(ProPlayer player) {
+  Widget _buildPlayerDetailView(
+    ProPlayer player,
+    List<FeedPost>? posts,
+    bool isLoadingPosts,
+    String? postsError,
+  ) {
     return Scaffold(
       body: CustomScrollView(
         slivers: [
@@ -476,55 +498,7 @@ class _PlayerDetailPageState extends State<PlayerDetailPage> {
           // Posts Grid (like web version)
           SliverPadding(
             padding: const EdgeInsets.all(24),
-            sliver: player.posts.isEmpty
-                ? SliverToBoxAdapter(
-                    child: Center(
-                      child: Padding(
-                        padding: const EdgeInsets.symmetric(vertical: 64),
-                        child: Column(
-                          children: [
-                            Icon(
-                              Icons.photo_library_outlined,
-                              size: 64,
-                              color: Colors.grey[400],
-                            ),
-                            const SizedBox(height: 16),
-                            Text(
-                              'No posts yet',
-                              style: TextStyle(
-                                fontSize: 18,
-                                color: Colors.grey[600],
-                                fontWeight: FontWeight.w500,
-                              ),
-                            ),
-                            const SizedBox(height: 8),
-                            Text(
-                              'Share your first bowling experience!',
-                              style: TextStyle(
-                                fontSize: 14,
-                                color: Colors.grey[500],
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                  )
-                : SliverGrid(
-                    gridDelegate:
-                        const SliverGridDelegateWithFixedCrossAxisCount(
-                          crossAxisCount: 2,
-                          crossAxisSpacing: 16,
-                          mainAxisSpacing: 16,
-                          childAspectRatio: 0.75,
-                        ),
-                    delegate: SliverChildBuilderDelegate((context, index) {
-                      return FeedPostCard(
-                        post: player.posts[index],
-                        postIndex: index,
-                      );
-                    }, childCount: player.posts.length),
-                  ),
+            sliver: _buildPostsSection(posts, isLoadingPosts, postsError),
           ),
         ],
       ),
@@ -559,6 +533,118 @@ class _PlayerDetailPageState extends State<PlayerDetailPage> {
           ),
         ),
       ],
+    );
+  }
+
+  Widget _buildPostsSection(
+    List<FeedPost>? posts,
+    bool isLoadingPosts,
+    String? postsError,
+  ) {
+    if (isLoadingPosts) {
+      return SliverToBoxAdapter(
+        child: Center(
+          child: Padding(
+            padding: const EdgeInsets.symmetric(vertical: 64),
+            child: Column(
+              children: [
+                const CircularProgressIndicator(
+                  valueColor: AlwaysStoppedAnimation<Color>(Color(0xFF8BC342)),
+                ),
+                const SizedBox(height: 16),
+                Text(
+                  'Loading posts...',
+                  style: TextStyle(fontSize: 16, color: Colors.grey[600]),
+                ),
+              ],
+            ),
+          ),
+        ),
+      );
+    }
+
+    if (postsError != null) {
+      return SliverToBoxAdapter(
+        child: Center(
+          child: Padding(
+            padding: const EdgeInsets.symmetric(vertical: 64),
+            child: Column(
+              children: [
+                Icon(Icons.error_outline, size: 64, color: Colors.red[400]),
+                const SizedBox(height: 16),
+                Text(
+                  'Failed to load posts',
+                  style: TextStyle(
+                    fontSize: 18,
+                    color: Colors.grey[600],
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  postsError,
+                  style: TextStyle(fontSize: 14, color: Colors.grey[500]),
+                  textAlign: TextAlign.center,
+                ),
+                const SizedBox(height: 16),
+                ElevatedButton(
+                  onPressed: () => _cubit.loadUserPosts(widget.userName),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color(0xFF8BC342),
+                    foregroundColor: Colors.white,
+                  ),
+                  child: const Text('Retry'),
+                ),
+              ],
+            ),
+          ),
+        ),
+      );
+    }
+
+    if (posts == null || posts.isEmpty) {
+      return SliverToBoxAdapter(
+        child: Center(
+          child: Padding(
+            padding: const EdgeInsets.symmetric(vertical: 64),
+            child: Column(
+              children: [
+                Icon(
+                  Icons.photo_library_outlined,
+                  size: 64,
+                  color: Colors.grey[400],
+                ),
+                const SizedBox(height: 16),
+                Text(
+                  'No posts yet',
+                  style: TextStyle(
+                    fontSize: 18,
+                    color: Colors.grey[600],
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  'Share your first bowling experience!',
+                  style: TextStyle(fontSize: 14, color: Colors.grey[500]),
+                ),
+              ],
+            ),
+          ),
+        ),
+      );
+    }
+
+    return SliverGrid(
+      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+        crossAxisCount: 2,
+        crossAxisSpacing: 16,
+        mainAxisSpacing: 16,
+        childAspectRatio: 0.75,
+      ),
+      delegate: SliverChildBuilderDelegate((context, index) {
+        return FeedPostCard(post: posts[index], postIndex: index);
+      }, childCount: posts.length),
     );
   }
 

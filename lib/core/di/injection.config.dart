@@ -148,14 +148,6 @@ extension GetItInjectableX on _i174.GetIt {
     gh.factory<_i74.UnfollowPlayer>(
       () => _i74.UnfollowPlayer(gh<_i1062.ProPlayersRepository>()),
     );
-    gh.factory<_i565.ProPlayersCubit>(
-      () => _i565.ProPlayersCubit(
-        gh<_i74.GetProPlayers>(),
-        gh<_i74.GetProPlayerById>(),
-        gh<_i74.FollowPlayer>(),
-        gh<_i74.UnfollowPlayer>(),
-      ),
-    );
     gh.factory<_i384.SignupCubit>(
       () => _i384.SignupCubit(
         gh<_i920.ValidateSignupData>(),
@@ -164,6 +156,15 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i762.CreateUser>(),
         gh<_i459.Login>(),
         gh<_i298.GetProfile>(),
+      ),
+    );
+    gh.factory<_i565.ProPlayersCubit>(
+      () => _i565.ProPlayersCubit(
+        gh<_i74.GetProPlayers>(),
+        gh<_i74.GetProPlayerById>(),
+        gh<_i74.FollowPlayer>(),
+        gh<_i74.UnfollowPlayer>(),
+        gh<_i607.ProPlayersRemoteDataSource>(),
       ),
     );
     return this;

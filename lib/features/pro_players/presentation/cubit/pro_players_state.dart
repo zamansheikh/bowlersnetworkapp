@@ -22,8 +22,16 @@ class ProPlayerDetailLoading extends ProPlayersState {}
 
 class ProPlayerDetailLoaded extends ProPlayersState {
   final ProPlayer player;
+  final List<FeedPost>? posts;
+  final bool isLoadingPosts;
+  final String? postsError;
 
-  ProPlayerDetailLoaded(this.player);
+  ProPlayerDetailLoaded(
+    this.player, {
+    this.posts,
+    this.isLoadingPosts = false,
+    this.postsError,
+  });
 }
 
 class ProPlayerDetailError extends ProPlayersState {

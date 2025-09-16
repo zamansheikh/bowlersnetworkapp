@@ -4,6 +4,8 @@ import '../../../../core/utils/usecase.dart';
 import '../../domain/entities/pro_player.dart';
 import '../../domain/usecases/pro_players_usecases.dart';
 import '../../data/models/pro_player_model.dart';
+import '../../data/datasources/pro_players_remote_data_source.dart';
+import '../../../home/data/models/feed_post.dart';
 
 part 'pro_players_state.dart';
 
@@ -13,12 +15,14 @@ class ProPlayersCubit extends Cubit<ProPlayersState> {
   final GetProPlayerById getProPlayerById;
   final FollowPlayer followPlayer;
   final UnfollowPlayer unfollowPlayer;
+  final ProPlayersRemoteDataSource remoteDataSource;
 
   ProPlayersCubit(
     this.getProPlayers,
     this.getProPlayerById,
     this.followPlayer,
     this.unfollowPlayer,
+    this.remoteDataSource,
   ) : super(ProPlayersInitial());
 
   Future<void> loadProPlayers() async {
@@ -39,6 +43,39 @@ class ProPlayersCubit extends Cubit<ProPlayersState> {
       (failure) => emit(ProPlayerDetailError(failure.toString())),
       (player) => emit(ProPlayerDetailLoaded(player)),
     );
+  }
+
+  Future<void> loadUserPosts(String userId) async {
+    final currentState = state;
+    if (currentState is ProPlayerDetailLoaded) {
+      emit(
+        ProPlayerDetailLoaded(
+          currentState.player,
+          posts: currentState.posts,
+          isLoadingPosts: true,
+        ),
+      );
+
+      try {
+        final posts = await remoteDataSource.getUserPosts(userId);
+        emit(
+          ProPlayerDetailLoaded(
+            currentState.player,
+            posts: posts,
+            isLoadingPosts: false,
+          ),
+        );
+      } catch (e) {
+        emit(
+          ProPlayerDetailLoaded(
+            currentState.player,
+            posts: currentState.posts,
+            isLoadingPosts: false,
+            postsError: e.toString(),
+          ),
+        );
+      }
+    }
   }
 
   Future<void> toggleFollowPlayer(int userId) async {

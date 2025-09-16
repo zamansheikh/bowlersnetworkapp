@@ -1,5 +1,4 @@
 import '../../domain/entities/pro_player.dart';
-import '../../../home/data/models/feed_post.dart';
 
 class ProPlayerModel extends ProPlayer {
   const ProPlayerModel({
@@ -21,7 +20,6 @@ class ProPlayerModel extends ProPlayer {
     required super.engagement,
     required super.isFollowed,
     required super.favoriteBrands,
-    required super.posts,
   });
 
   factory ProPlayerModel.fromJson(Map<String, dynamic> json) {
@@ -63,7 +61,6 @@ class ProPlayerModel extends ProPlayer {
                 .map((e) => BrandModel.fromJson(e as Map<String, dynamic>))
                 .toList()
           : [],
-      posts: [], // Posts will be loaded separately
     );
   }
 
@@ -92,11 +89,7 @@ class ProPlayerModel extends ProPlayer {
     };
   }
 
-  ProPlayerModel copyWith({
-    bool? isFollowed,
-    int? followerCount,
-    List<FeedPost>? posts,
-  }) {
+  ProPlayerModel copyWith({bool? isFollowed, int? followerCount}) {
     return ProPlayerModel(
       userId: userId,
       username: username,
@@ -116,7 +109,6 @@ class ProPlayerModel extends ProPlayer {
       engagement: engagement,
       isFollowed: isFollowed ?? this.isFollowed,
       favoriteBrands: favoriteBrands,
-      posts: posts ?? this.posts,
     );
   }
 }
