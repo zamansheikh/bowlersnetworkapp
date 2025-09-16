@@ -99,10 +99,14 @@ class _SplashPageState extends State<SplashPage>
                               ),
                             ],
                           ),
-                          child: const Icon(
-                            Icons.sports,
-                            size: 60,
-                            color: AppColors.white,
+                          child: ClipRRect(
+                            borderRadius: BorderRadius.circular(30),
+                            child: Image.asset(
+                              'assets/icon/icon.png',
+                              width: 120,
+                              height: 120,
+                              fit: BoxFit.cover,
+                            ),
                           ),
                         ),
                       ),

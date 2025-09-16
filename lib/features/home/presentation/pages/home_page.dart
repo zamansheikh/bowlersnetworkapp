@@ -48,22 +48,23 @@ class HomePageView extends StatelessWidget {
                   snap: true,
                   leading: Builder(
                     builder: (context) => IconButton(
-                      icon: const Icon(
-                        Icons.menu,
-                        color: AppColors.black,
-                      ),
+                      icon: const Icon(Icons.menu, color: AppColors.black),
                       onPressed: () => Scaffold.of(context).openDrawer(),
                     ),
                   ),
-                  title: const Row(
+                  title: Row(
                     children: [
-                      Icon(
-                        Icons.sports,
-                        color: AppColors.primaryLimeGreen,
-                        size: 28,
+                      ClipRRect(
+                        borderRadius: BorderRadius.circular(4),
+                        child: Image.asset(
+                          'assets/icon/icon.png',
+                          width: 28,
+                          height: 28,
+                          fit: BoxFit.cover,
+                        ),
                       ),
-                      SizedBox(width: 12),
-                      Text(
+                      const SizedBox(width: 12),
+                      const Text(
                         'Bowlers Network',
                         style: TextStyle(
                           color: AppColors.black,

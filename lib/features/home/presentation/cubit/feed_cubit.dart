@@ -159,6 +159,51 @@ class PostCreateError extends FeedState {
   List<Object?> get props => [posts, message];
 }
 
+class PostDetailLoaded extends FeedState {
+  final FeedPost post;
+
+  const PostDetailLoaded({required this.post});
+
+  @override
+  List<Object?> get props => [post];
+}
+
+class CommentAddSuccess extends FeedState {
+  final FeedPost post;
+
+  const CommentAddSuccess({required this.post});
+
+  @override
+  List<Object?> get props => [post];
+}
+
+class CommentAddError extends FeedState {
+  final String message;
+
+  const CommentAddError({required this.message});
+
+  @override
+  List<Object?> get props => [message];
+}
+
+class ReplyAddSuccess extends FeedState {
+  final FeedPost post;
+
+  const ReplyAddSuccess({required this.post});
+
+  @override
+  List<Object?> get props => [post];
+}
+
+class ReplyAddError extends FeedState {
+  final String message;
+
+  const ReplyAddError({required this.message});
+
+  @override
+  List<Object?> get props => [message];
+}
+
 // Cubit
 @injectable
 class FeedCubit extends Cubit<FeedState> {
@@ -387,6 +432,66 @@ class FeedCubit extends Cubit<FeedState> {
     } catch (e) {
       // Handle error but don't revert since we don't have optimistic state here
       throw Exception('Failed to add comment: $e');
+    }
+  }
+
+  Future<void> loadPostDetails(String postId) async {
+    emit(FeedLoading());
+    try {
+      final post = await _repository.getPostDetails(int.parse(postId));
+      emit(PostDetailLoaded(post: post));
+    } catch (e) {
+      emit(FeedError(message: e.toString()));
+    }
+  }
+
+  Future<void> addCommentToPost(String postId, String text) async {
+    try {
+      await _repository.addComment(int.parse(postId), text);
+
+      // Reload post details to get updated comment count and comments
+      final updatedPost = await _repository.getPostDetails(int.parse(postId));
+      emit(PostDetailLoaded(post: updatedPost));
+      emit(CommentAddSuccess(post: updatedPost));
+    } catch (e) {
+      emit(CommentAddError(message: 'Failed to add comment: $e'));
+    }
+  }
+
+  Future<void> addReply(String commentId, String text) async {
+    try {
+      await _repository.addReply(int.parse(commentId), text);
+
+      // For now, we'll need to reload the current post
+      if (state is PostDetailLoaded) {
+        final currentPost = (state as PostDetailLoaded).post;
+        final updatedPost = await _repository.getPostDetails(
+          currentPost.metadata.id,
+        );
+        emit(PostDetailLoaded(post: updatedPost));
+        emit(ReplyAddSuccess(post: updatedPost));
+      }
+    } catch (e) {
+      emit(ReplyAddError(message: 'Failed to add reply: $e'));
+    }
+  }
+
+  Future<void> refreshPostInFeed(int postId) async {
+    final currentState = state;
+    if (currentState is! FeedLoaded) return;
+
+    try {
+      final updatedPost = await _repository.getPostDetails(postId);
+      final posts = List<FeedPost>.from(currentState.posts);
+
+      // Find and update the post
+      final postIndex = posts.indexWhere((post) => post.metadata.id == postId);
+      if (postIndex != -1) {
+        posts[postIndex] = updatedPost;
+        emit(FeedLoaded(posts: posts));
+      }
+    } catch (e) {
+      // Silently fail - don't affect the current feed state
     }
   }
 }

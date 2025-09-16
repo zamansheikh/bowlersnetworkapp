@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'dart:async';
 import 'package:go_router/go_router.dart';
 import '../../features/home/presentation/pages/home_page.dart';
+import '../../features/home/presentation/pages/post_detail_page.dart';
 import '../../features/auth/presentation/bloc/auth_cubit.dart';
 import '../../features/auth/presentation/pages/splash_page.dart';
 import '../../features/auth/presentation/pages/sign_in_page.dart';
@@ -28,8 +29,9 @@ class AppRouter {
         final isCompletingProfile =
             state.matchedLocation == '/complete-profile';
 
-        // Stay on splash during loading
-        if (isLoading && !isSplash) {
+        // During loading, only redirect to splash if we're on an auth page or have no location
+        if (isLoading &&
+            (isSigningIn || isSigningUp || state.matchedLocation == '/')) {
           return '/splash';
         }
 
@@ -112,6 +114,14 @@ class AppRouter {
           path: '/profile/edit',
           name: 'profile-edit',
           builder: (context, state) => const ProfileEditPage(),
+        ),
+        GoRoute(
+          path: '/post/:id',
+          name: 'post-detail',
+          builder: (context, state) {
+            final postId = state.pathParameters['id']!;
+            return PostDetailPage(postId: postId);
+          },
         ),
       ],
       errorBuilder: (context, state) => const ErrorPage(),

@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import '../../../../core/constants/colors.dart';
 import '../../data/models/feed_post.dart';
 import '../cubit/feed_cubit.dart';
-import 'comments_bottom_sheet.dart';
 import 'media_gallery.dart';
 
 class FeedPostCard extends StatefulWidget {
@@ -307,20 +307,7 @@ class _FeedPostCardState extends State<FeedPostCard> {
           // Comment button
           InkWell(
             onTap: () {
-              showModalBottomSheet(
-                context: context,
-                isScrollControlled: true,
-                backgroundColor: Colors.transparent,
-                builder: (context) => DraggableScrollableSheet(
-                  initialChildSize: 0.7,
-                  minChildSize: 0.5,
-                  maxChildSize: 0.9,
-                  builder: (context, scrollController) => CommentsBottomSheet(
-                    post: widget.post,
-                    postIndex: widget.postIndex,
-                  ),
-                ),
-              );
+              context.go('/post/${widget.post.metadata.id}');
             },
             borderRadius: BorderRadius.circular(20),
             child: Container(
@@ -465,15 +452,26 @@ class _FeedPostCardState extends State<FeedPostCard> {
 
             const SizedBox(height: 12),
 
-            // Post content
-            if (widget.post.caption.isNotEmpty)
-              _buildTextWithTags(widget.post.caption, widget.post.tags),
+            // Post content - clickable
+            GestureDetector(
+              onTap: () {
+                context.go('/post/${widget.post.metadata.id}');
+              },
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // Post content
+                  if (widget.post.caption.isNotEmpty)
+                    _buildTextWithTags(widget.post.caption, widget.post.tags),
 
-            // Media gallery
-            _buildMediaGallery(),
+                  // Media gallery
+                  _buildMediaGallery(),
 
-            // Poll
-            _buildPoll(),
+                  // Poll
+                  _buildPoll(),
+                ],
+              ),
+            ),
 
             const SizedBox(height: 8),
 

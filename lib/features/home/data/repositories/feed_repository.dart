@@ -225,6 +225,23 @@ class FeedRepository {
     }
   }
 
+  /// Get post details with comments
+  Future<FeedPost> getPostDetails(int postId) async {
+    try {
+      final response = await _dio.get('/api/post/$postId');
+
+      if (response.statusCode == 200) {
+        return FeedPost.fromJson(response.data);
+      } else {
+        throw Exception('Failed to load post details');
+      }
+    } on DioException catch (e) {
+      throw Exception('Network error: ${e.message}');
+    } catch (e) {
+      throw Exception('Unexpected error: $e');
+    }
+  }
+
   /// Add reply to a comment
   Future<Map<String, dynamic>> addReply(int commentId, String text) async {
     try {
