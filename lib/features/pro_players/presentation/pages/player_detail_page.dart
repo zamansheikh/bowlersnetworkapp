@@ -638,13 +638,11 @@ class _PlayerDetailPageState extends State<PlayerDetailPage> {
       );
     }
 
-    return SliverGrid(
-      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-        crossAxisCount: 1,
-      ),
-      delegate: SliverChildBuilderDelegate((context, index) {
+    return SliverList.builder(
+      itemCount: posts.length,
+      itemBuilder: (context, index) {
         return FeedPostCard(post: posts[index], postIndex: index);
-      }, childCount: posts.length),
+      },
     );
   }
 
