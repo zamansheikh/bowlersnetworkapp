@@ -57,6 +57,15 @@ class _PostDetailViewState extends State<PostDetailView> {
         _commentController.text.trim(),
       );
       _commentController.clear();
+
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Comment added successfully!'),
+            backgroundColor: AppColors.success,
+          ),
+        );
+      }
     } catch (error) {
       if (mounted) {
         ScaffoldMessenger.of(
@@ -88,6 +97,15 @@ class _PostDetailViewState extends State<PostDetailView> {
       setState(() {
         _replyToCommentId = null;
       });
+
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Reply added successfully!'),
+            backgroundColor: AppColors.success,
+          ),
+        );
+      }
     } catch (error) {
       if (mounted) {
         ScaffoldMessenger.of(
@@ -105,224 +123,202 @@ class _PostDetailViewState extends State<PostDetailView> {
 
   @override
   Widget build(BuildContext context) {
-    return PopScope(
-      onPopInvokedWithResult: (didPop, result) {
-        if (didPop) {
-          // Refresh the post in the feed when going back
-          try {
-            final feedCubit = context.read<FeedCubit>();
-            feedCubit.refreshPostInFeed(int.parse(widget.postId));
-          } catch (e) {
-            // Ignore errors when refreshing
-          }
-        }
-      },
-      child: Scaffold(
-        backgroundColor: AppColors.surface,
-        appBar: AppBar(
-          backgroundColor: AppColors.white,
-          elevation: 0,
-          leading: IconButton(
-            icon: const Icon(Icons.arrow_back, color: AppColors.black),
-            onPressed: () => context.pop(),
-          ),
-          title: const Text(
-            'Post',
-            style: TextStyle(
-              color: AppColors.black,
-              fontWeight: FontWeight.w600,
-            ),
-          ),
-        ),
-        body: BlocConsumer<FeedCubit, FeedState>(
-          listener: (context, state) {
-            if (state is CommentAddSuccess) {
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(
-                  content: Text('Comment added successfully!'),
-                  backgroundColor: AppColors.success,
-                ),
-              );
-            } else if (state is CommentAddError) {
-              ScaffoldMessenger.of(
-                context,
-              ).showSnackBar(SnackBar(content: Text(state.message)));
-            } else if (state is ReplyAddSuccess) {
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(
-                  content: Text('Reply added successfully!'),
-                  backgroundColor: AppColors.success,
-                ),
-              );
-            } else if (state is ReplyAddError) {
-              ScaffoldMessenger.of(
-                context,
-              ).showSnackBar(SnackBar(content: Text(state.message)));
+    return Scaffold(
+      backgroundColor: AppColors.surface,
+      appBar: AppBar(
+        backgroundColor: AppColors.white,
+        elevation: 0,
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back, color: AppColors.black),
+          onPressed: () {
+            // Refresh the post in the feed when going back
+            try {
+              final feedCubit = context.read<FeedCubit>();
+              feedCubit.refreshPostInFeed(int.parse(widget.postId));
+            } catch (e) {
+              // Ignore errors when refreshing
             }
+            context.pop();
           },
-          builder: (context, state) {
-            if (state is FeedLoading) {
-              return const Center(
-                child: CircularProgressIndicator(
-                  color: AppColors.primaryLimeGreen,
-                ),
-              );
-            }
+        ),
+        title: const Text(
+          'Post',
+          style: TextStyle(color: AppColors.black, fontWeight: FontWeight.w600),
+        ),
+      ),
+      body: BlocConsumer<FeedCubit, FeedState>(
+        listener: (context, state) {
+          if (state is CommentAddError) {
+            ScaffoldMessenger.of(
+              context,
+            ).showSnackBar(SnackBar(content: Text(state.message)));
+          } else if (state is ReplyAddError) {
+            ScaffoldMessenger.of(
+              context,
+            ).showSnackBar(SnackBar(content: Text(state.message)));
+          }
+        },
+        builder: (context, state) {
+          if (state is FeedLoading) {
+            return const Center(
+              child: CircularProgressIndicator(
+                color: AppColors.primaryLimeGreen,
+              ),
+            );
+          }
 
-            if (state is FeedError) {
-              return Center(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    const Icon(
-                      Icons.error_outline,
-                      size: 64,
-                      color: AppColors.error,
-                    ),
-                    const SizedBox(height: 16),
-                    Text(
-                      'Failed to load post',
-                      style: Theme.of(
-                        context,
-                      ).textTheme.titleLarge?.copyWith(color: AppColors.error),
-                    ),
-                    const SizedBox(height: 8),
-                    Text(
-                      state.message,
-                      style: Theme.of(
-                        context,
-                      ).textTheme.bodyMedium?.copyWith(color: AppColors.gray),
-                      textAlign: TextAlign.center,
-                    ),
-                    const SizedBox(height: 24),
-                    ElevatedButton(
-                      onPressed: () => context
-                          .read<FeedCubit>()
-                          .loadPostDetails(widget.postId),
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: AppColors.primaryLimeGreen,
-                        foregroundColor: AppColors.white,
-                      ),
-                      child: const Text('Retry'),
-                    ),
-                  ],
-                ),
-              );
-            }
-
-            if (state is PostDetailLoaded) {
-              final post = state.post;
-              return Column(
+          if (state is FeedError) {
+            return Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  // Post content
-                  Expanded(
-                    child: SingleChildScrollView(
-                      padding: const EdgeInsets.all(16),
-                      child: Column(
-                        children: [
-                          // Post card
-                          FeedPostCard(
-                            post: post,
-                            postIndex: 0,
-                            onPostUpdate: () => context
-                                .read<FeedCubit>()
-                                .loadPostDetails(widget.postId),
-                          ),
-                          const SizedBox(height: 24),
-
-                          // Comments section
-                          CommentsSection(
-                            post: post,
-                            onReplyTap: (commentId) {
-                              setState(() {
-                                _replyToCommentId =
-                                    _replyToCommentId == commentId
-                                    ? null
-                                    : commentId;
-                              });
-                            },
-                            replyToCommentId: _replyToCommentId,
-                            replyController: _replyController,
-                            isAddingReply: _isAddingReply,
-                            onAddReply: _handleAddReply,
-                          ),
-                        ],
-                      ),
-                    ),
+                  const Icon(
+                    Icons.error_outline,
+                    size: 64,
+                    color: AppColors.error,
                   ),
-
-                  // Comment input
-                  Container(
-                    padding: const EdgeInsets.all(16),
-                    decoration: const BoxDecoration(
-                      color: AppColors.white,
-                      border: Border(
-                        top: BorderSide(color: AppColors.lightGray, width: 1),
-                      ),
+                  const SizedBox(height: 16),
+                  Text(
+                    'Failed to load post',
+                    style: Theme.of(
+                      context,
+                    ).textTheme.titleLarge?.copyWith(color: AppColors.error),
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    state.message,
+                    style: Theme.of(
+                      context,
+                    ).textTheme.bodyMedium?.copyWith(color: AppColors.gray),
+                    textAlign: TextAlign.center,
+                  ),
+                  const SizedBox(height: 24),
+                  ElevatedButton(
+                    onPressed: () => context.read<FeedCubit>().loadPostDetails(
+                      widget.postId,
                     ),
-                    child: Row(
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: AppColors.primaryLimeGreen,
+                      foregroundColor: AppColors.white,
+                    ),
+                    child: const Text('Retry'),
+                  ),
+                ],
+              ),
+            );
+          }
+
+          if (state is PostDetailLoaded) {
+            final post = state.post;
+            return Column(
+              children: [
+                // Post content
+                Expanded(
+                  child: SingleChildScrollView(
+                    padding: const EdgeInsets.all(16),
+                    child: Column(
                       children: [
-                        Expanded(
-                          child: TextField(
-                            controller: _commentController,
-                            decoration: InputDecoration(
-                              hintText: 'Write a comment...',
-                              hintStyle: const TextStyle(color: AppColors.gray),
-                              filled: true,
-                              fillColor: AppColors.lightGray,
-                              border: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(24),
-                                borderSide: BorderSide.none,
-                              ),
-                              contentPadding: const EdgeInsets.symmetric(
-                                horizontal: 16,
-                                vertical: 12,
-                              ),
-                            ),
-                            maxLines: null,
-                            textCapitalization: TextCapitalization.sentences,
-                          ),
+                        // Post card
+                        FeedPostCard(
+                          post: post,
+                          postIndex: 0,
+                          onPostUpdate: () => context
+                              .read<FeedCubit>()
+                              .loadPostDetails(widget.postId),
                         ),
-                        const SizedBox(width: 12),
-                        GestureDetector(
-                          onTap: _isAddingComment ? null : _handleAddComment,
-                          child: Container(
-                            width: 44,
-                            height: 44,
-                            decoration: BoxDecoration(
-                              color:
-                                  _commentController.text.trim().isNotEmpty &&
-                                      !_isAddingComment
-                                  ? AppColors.primaryLimeGreen
-                                  : AppColors.gray,
-                              borderRadius: BorderRadius.circular(22),
-                            ),
-                            child: _isAddingComment
-                                ? const SizedBox(
-                                    width: 20,
-                                    height: 20,
-                                    child: CircularProgressIndicator(
-                                      strokeWidth: 2,
-                                      color: AppColors.white,
-                                    ),
-                                  )
-                                : const Icon(
-                                    Icons.send,
-                                    color: AppColors.white,
-                                    size: 20,
-                                  ),
-                          ),
+                        const SizedBox(height: 24),
+
+                        // Comments section
+                        CommentsSection(
+                          post: post,
+                          onReplyTap: (commentId) {
+                            setState(() {
+                              _replyToCommentId = _replyToCommentId == commentId
+                                  ? null
+                                  : commentId;
+                            });
+                          },
+                          replyToCommentId: _replyToCommentId,
+                          replyController: _replyController,
+                          isAddingReply: _isAddingReply,
+                          onAddReply: _handleAddReply,
                         ),
                       ],
                     ),
                   ),
-                ],
-              );
-            }
+                ),
 
-            return const Center(child: Text('No post found'));
-          },
-        ),
+                // Comment input
+                Container(
+                  padding: const EdgeInsets.all(16),
+                  decoration: const BoxDecoration(
+                    color: AppColors.white,
+                    border: Border(
+                      top: BorderSide(color: AppColors.lightGray, width: 1),
+                    ),
+                  ),
+                  child: Row(
+                    children: [
+                      Expanded(
+                        child: TextField(
+                          controller: _commentController,
+                          decoration: InputDecoration(
+                            hintText: 'Write a comment...',
+                            hintStyle: const TextStyle(color: AppColors.gray),
+                            filled: true,
+                            fillColor: AppColors.lightGray,
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(24),
+                              borderSide: BorderSide.none,
+                            ),
+                            contentPadding: const EdgeInsets.symmetric(
+                              horizontal: 16,
+                              vertical: 12,
+                            ),
+                          ),
+                          maxLines: null,
+                          textCapitalization: TextCapitalization.sentences,
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+                      GestureDetector(
+                        onTap: _isAddingComment ? null : _handleAddComment,
+                        child: Container(
+                          width: 44,
+                          height: 44,
+                          decoration: BoxDecoration(
+                            color:
+                                _commentController.text.trim().isNotEmpty &&
+                                    !_isAddingComment
+                                ? AppColors.primaryLimeGreen
+                                : AppColors.gray,
+                            borderRadius: BorderRadius.circular(22),
+                          ),
+                          child: _isAddingComment
+                              ? const SizedBox(
+                                  width: 20,
+                                  height: 20,
+                                  child: CircularProgressIndicator(
+                                    strokeWidth: 2,
+                                    color: AppColors.white,
+                                  ),
+                                )
+                              : const Icon(
+                                  Icons.send,
+                                  color: AppColors.white,
+                                  size: 20,
+                                ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            );
+          }
+
+          return const Center(child: Text('No post found'));
+        },
       ),
     );
   }

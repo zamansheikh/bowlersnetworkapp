@@ -452,7 +452,6 @@ class FeedCubit extends Cubit<FeedState> {
       // Reload post details to get updated comment count and comments
       final updatedPost = await _repository.getPostDetails(int.parse(postId));
       emit(PostDetailLoaded(post: updatedPost));
-      emit(CommentAddSuccess(post: updatedPost));
     } catch (e) {
       emit(CommentAddError(message: 'Failed to add comment: $e'));
     }
@@ -469,7 +468,6 @@ class FeedCubit extends Cubit<FeedState> {
           currentPost.metadata.id,
         );
         emit(PostDetailLoaded(post: updatedPost));
-        emit(ReplyAddSuccess(post: updatedPost));
       }
     } catch (e) {
       emit(ReplyAddError(message: 'Failed to add reply: $e'));
