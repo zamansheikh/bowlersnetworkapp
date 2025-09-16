@@ -11,7 +11,11 @@ class PlayerDetailPage extends StatefulWidget {
   final String userName;
   final String userId;
 
-  const PlayerDetailPage({super.key, required this.userName, required this.userId});
+  const PlayerDetailPage({
+    super.key,
+    required this.userName,
+    required this.userId,
+  });
 
   @override
   State<PlayerDetailPage> createState() => _PlayerDetailPageState();
@@ -26,7 +30,6 @@ class _PlayerDetailPageState extends State<PlayerDetailPage> {
     super.initState();
     _cubit = getIt<ProPlayersCubit>();
     _cubit.loadProPlayerById(widget.userName);
-    _cubit.loadUserPosts(widget.userId);
   }
 
   @override
@@ -79,7 +82,7 @@ class _PlayerDetailPageState extends State<PlayerDetailPage> {
                   state.postsError == null) {
                 // Trigger posts loading
                 WidgetsBinding.instance.addPostFrameCallback((_) {
-                  _cubit.loadUserPosts(widget.userName);
+                  _cubit.loadUserPosts(widget.userId);
                 });
               }
               return _buildPlayerDetailView(
