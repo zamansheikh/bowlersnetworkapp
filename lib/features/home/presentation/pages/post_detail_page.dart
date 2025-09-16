@@ -2,22 +2,30 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import '../../../../core/constants/colors.dart';
-import '../../../../core/di/injection.dart';
 import '../cubit/feed_cubit.dart';
 import '../widgets/feed_post_card.dart';
 import '../widgets/comments_section.dart';
 
-class PostDetailPage extends StatelessWidget {
+class PostDetailPage extends StatefulWidget {
   final String postId;
 
   const PostDetailPage({super.key, required this.postId});
 
   @override
+  State<PostDetailPage> createState() => _PostDetailPageState();
+}
+
+class _PostDetailPageState extends State<PostDetailPage> {
+  @override
+  void initState() {
+    super.initState();
+    // Use existing FeedCubit and load post details
+    context.read<FeedCubit>().loadPostDetails(widget.postId);
+  }
+
+  @override
   Widget build(BuildContext context) {
-    return BlocProvider(
-      create: (context) => getIt<FeedCubit>()..loadPostDetails(postId),
-      child: PostDetailView(postId: postId),
-    );
+    return PostDetailView(postId: widget.postId);
   }
 }
 

@@ -62,7 +62,16 @@ class AppDrawer extends StatelessWidget {
             title: const Text('Home'),
             onTap: () {
               Navigator.pop(context);
-              context.go('/');
+              // Use pushReplacement to replace the current route if not already on home
+              if (GoRouter.of(context)
+                      .routerDelegate
+                      .currentConfiguration
+                      .matches
+                      .last
+                      .matchedLocation !=
+                  '/') {
+                context.pushReplacement('/');
+              }
             },
           ),
           ListTile(
@@ -70,7 +79,7 @@ class AppDrawer extends StatelessWidget {
             title: const Text('Profile'),
             onTap: () {
               Navigator.pop(context);
-              context.go('/profile');
+              context.push('/profile');
             },
           ),
           ListTile(

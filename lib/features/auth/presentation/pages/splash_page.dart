@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:go_router/go_router.dart';
 import '../../../../core/constants/colors.dart';
 import '../bloc/auth_cubit.dart';
 
@@ -56,25 +55,14 @@ class _SplashPageState extends State<SplashPage>
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: BlocListener<AuthCubit, AuthState>(
-        listener: (context, state) {
-          if (state is Authenticated) {
-            context.go('/');
-          } else if (state is AuthenticatedIncompleteProfile) {
-            context.go('/complete-profile');
-          } else if (state is Unauthenticated) {
-            context.go('/signin');
-          }
-          // AuthLoading and AuthError are handled in the UI
-        },
-        child: Container(
-          decoration: const BoxDecoration(
-            gradient: AppColors.backgroundGradient,
-          ),
-          child: Center(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
+      body: Container(
+        decoration: const BoxDecoration(
+          gradient: AppColors.backgroundGradient,
+        ),
+        child: Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
                 // Animated Logo
                 AnimatedBuilder(
                   animation: _animationController,
@@ -240,7 +228,6 @@ class _SplashPageState extends State<SplashPage>
             ),
           ),
         ),
-      ),
     );
   }
 }

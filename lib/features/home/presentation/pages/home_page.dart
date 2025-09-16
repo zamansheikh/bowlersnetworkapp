@@ -2,21 +2,32 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../../core/constants/colors.dart';
 import '../../../../core/widgets/app_drawer.dart';
-import '../../../../core/di/injection.dart';
 import '../cubit/feed_cubit.dart';
 import '../widgets/create_post_section.dart';
 import '../widgets/feed_post_card.dart';
 import '../../data/models/feed_post.dart';
 
-class HomePage extends StatelessWidget {
+class HomePage extends StatefulWidget {
   const HomePage({super.key});
 
   @override
+  State<HomePage> createState() => _HomePageState();
+}
+
+class _HomePageState extends State<HomePage> {
+  @override
+  void initState() {
+    super.initState();
+    // Only load feed if not already loaded
+    final feedCubit = context.read<FeedCubit>();
+    if (feedCubit.state is! FeedLoaded && feedCubit.state is! FeedLoading) {
+      feedCubit.loadFeed();
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
-    return BlocProvider(
-      create: (context) => getIt<FeedCubit>()..loadFeed(),
-      child: const HomePageView(),
-    );
+    return const HomePageView();
   }
 }
 

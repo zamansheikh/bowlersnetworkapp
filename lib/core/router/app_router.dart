@@ -16,11 +16,13 @@ class AppRouter {
   static GoRouter create(AuthCubit authCubit) {
     return GoRouter(
       initialLocation: '/splash',
+      refreshListenable: GoRouterRefreshStream(authCubit.stream),
       redirect: (context, state) {
         final authState = authCubit.state;
         final isAuth = authState is Authenticated;
         final isIncompleteProfile = authState is AuthenticatedIncompleteProfile;
         final isLoading = authState is AuthLoading;
+        final isInitial = authState is AuthInitial;
         final isUnauthenticated = authState is Unauthenticated;
 
         final isSplash = state.matchedLocation == '/splash';
@@ -29,9 +31,8 @@ class AppRouter {
         final isCompletingProfile =
             state.matchedLocation == '/complete-profile';
 
-        // During loading, only redirect to splash if we're on an auth page or have no location
-        if (isLoading &&
-            (isSigningIn || isSigningUp || state.matchedLocation == '/')) {
+        // Show splash during initial auth loading or initial state
+        if (isLoading || isInitial) {
           return '/splash';
         }
 
@@ -40,14 +41,14 @@ class AppRouter {
           return '/complete-profile';
         }
 
-        // If user is authenticated (complete profile) and on auth pages, go home
+        // If user is authenticated and on auth pages, go home
         if (isAuth &&
             (isSplash || isSigningIn || isSigningUp || isCompletingProfile)) {
           return '/';
         }
 
-        // If user is not authenticated and not on auth pages, go to signin
-        if (isUnauthenticated && !isSigningIn && !isSigningUp) {
+        // If user is not authenticated and not on auth/splash pages, go to signin
+        if (isUnauthenticated && !isSigningIn && !isSigningUp && !isSplash) {
           return '/signin';
         }
 

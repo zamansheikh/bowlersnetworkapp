@@ -307,7 +307,7 @@ class _FeedPostCardState extends State<FeedPostCard> {
           // Comment button
           InkWell(
             onTap: () {
-              context.go('/post/${widget.post.metadata.id}');
+              context.push('/post/${widget.post.metadata.id}');
             },
             borderRadius: BorderRadius.circular(20),
             child: Container(
@@ -455,7 +455,7 @@ class _FeedPostCardState extends State<FeedPostCard> {
             // Post content - clickable
             GestureDetector(
               onTap: () {
-                context.go('/post/${widget.post.metadata.id}');
+                context.push('/post/${widget.post.metadata.id}');
               },
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
