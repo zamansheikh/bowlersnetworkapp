@@ -24,14 +24,21 @@ class _MessagesPageState extends State<MessagesPage> {
   String _selectedFilter = 'all';
   List<AvailableMemberModel> _availableMembers = [];
   bool _loadingMembers = false;
+  bool _showConversationsList = true; // For mobile navigation
 
   @override
   void initState() {
     super.initState();
-    // Load conversations when page opens
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      context.read<MessagesCubit>().loadConversations();
-    });
+    
+    // Load conversations
+    context.read<MessagesCubit>().loadConversations();
+    
+    // If there's a target room ID, we'll handle it when conversations are loaded
+    if (widget.targetRoomId != null) {
+      setState(() {
+        _showConversationsList = false; // Jump directly to chat view on mobile
+      });
+    }
   }
 
   @override
@@ -41,29 +48,30 @@ class _MessagesPageState extends State<MessagesPage> {
     super.dispose();
   }
 
-  void _scrollToBottom() {
-    if (_messagesScrollController.hasClients) {
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        _messagesScrollController.animateTo(
-          _messagesScrollController.position.maxScrollExtent,
-          duration: const Duration(milliseconds: 300),
-          curve: Curves.easeOut,
-        );
+  void _showNewMessageModalDialog() async {
+    if (_availableMembers.isEmpty && !_loadingMembers) {
+      setState(() {
+        _loadingMembers = true;
       });
+      
+      try {
+        final members = await context.read<MessagesCubit>().loadAvailableMembers();
+        setState(() {
+          _availableMembers = members;
+          _loadingMembers = false;
+        });
+      } catch (e) {
+        setState(() {
+          _loadingMembers = false;
+        });
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('Failed to load members: $e')),
+          );
+        }
+        return;
+      }
     }
-  }
-
-  Future<void> _showNewMessageModalDialog() async {
-    setState(() {
-      _loadingMembers = true;
-    });
-
-    final members = await context.read<MessagesCubit>().loadAvailableMembers();
-
-    setState(() {
-      _availableMembers = members;
-      _loadingMembers = false;
-    });
 
     if (mounted) {
       showDialog(
@@ -72,8 +80,8 @@ class _MessagesPageState extends State<MessagesPage> {
           availableMembers: _availableMembers,
           isLoading: _loadingMembers,
           onMemberSelected: (member) {
-            Navigator.of(context).pop();
             context.read<MessagesCubit>().createConversation(member.username);
+            Navigator.of(context).pop();
           },
           onClose: () {
             Navigator.of(context).pop();
@@ -86,13 +94,10 @@ class _MessagesPageState extends State<MessagesPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
-      body: SafeArea(
+      body: Padding(
+        padding: const EdgeInsets.all(16.0),
         child: BlocConsumer<MessagesCubit, MessagesState>(
           listener: (context, state) {
-            if (state is MessagesLoaded && state.messages.isNotEmpty) {
-              _scrollToBottom();
-            }
             if (state is MessagesError) {
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(
@@ -104,7 +109,18 @@ class _MessagesPageState extends State<MessagesPage> {
           },
           builder: (context, state) {
             if (state is MessagesLoading) {
-              return const Center(child: CircularProgressIndicator());
+              return const Center(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    CircularProgressIndicator(
+                      color: AppColors.primaryLimeGreen,
+                    ),
+                    SizedBox(height: 16),
+                    Text('Loading messages...'),
+                  ],
+                ),
+              );
             }
 
             if (state is MessagesError) {
@@ -112,28 +128,23 @@ class _MessagesPageState extends State<MessagesPage> {
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Icon(Icons.error, size: 64, color: Colors.grey[400]),
+                    const Icon(
+                      Icons.error_outline,
+                      size: 64,
+                      color: Colors.red,
+                    ),
                     const SizedBox(height: 16),
                     Text(
-                      'Something went wrong',
-                      style: TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.w500,
-                        color: Colors.grey[600],
-                      ),
-                    ),
-                    const SizedBox(height: 8),
-                    Text(
-                      state.message,
-                      style: TextStyle(color: Colors.grey[500]),
+                      'Error: ${state.message}',
                       textAlign: TextAlign.center,
+                      style: const TextStyle(color: Colors.red),
                     ),
                     const SizedBox(height: 16),
                     ElevatedButton(
                       onPressed: () {
                         context.read<MessagesCubit>().loadConversations();
                       },
-                      child: const Text('Try Again'),
+                      child: const Text('Retry'),
                     ),
                   ],
                 ),
@@ -141,341 +152,62 @@ class _MessagesPageState extends State<MessagesPage> {
             }
 
             if (state is MessagesLoaded) {
-              return Row(
-                children: [
-                  // Conversations sidebar
-                  Container(
-                    width: MediaQuery.of(context).size.width * 0.35,
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      border: Border(
-                        right: BorderSide(color: Colors.grey[300]!),
-                      ),
-                    ),
-                    child: Column(
+              return LayoutBuilder(
+                builder: (context, constraints) {
+                  // Check if we're on a small screen (mobile)
+                  final isSmallScreen = constraints.maxWidth < 800;
+                  
+                  if (isSmallScreen) {
+                    // Mobile layout: show either conversations list OR chat view
+                    if (_showConversationsList || state.selectedConversation == null) {
+                      return _buildConversationsList(state);
+                    } else {
+                      return _buildChatView(state);
+                    }
+                  } else {
+                    // Desktop layout: show both side by side
+                    return Row(
                       children: [
-                        // Header with search and filters
+                        // Conversations List - wider on desktop
                         Container(
-                          padding: const EdgeInsets.all(16),
+                          width: constraints.maxWidth * 0.4,
                           decoration: BoxDecoration(
-                            color: Colors.grey[50],
                             border: Border(
-                              bottom: BorderSide(color: Colors.grey[300]!),
+                              right: BorderSide(color: Colors.grey[300]!),
                             ),
                           ),
-                          child: Column(
-                            children: [
-                              // Title and new message button
-                              Row(
-                                mainAxisAlignment:
-                                    MainAxisAlignment.spaceBetween,
-                                children: [
-                                  const Row(
-                                    children: [
-                                      Icon(
-                                        Icons.message,
-                                        color: AppColors.primaryLimeGreen,
-                                        size: 20,
-                                      ),
-                                      SizedBox(width: 8),
-                                      Text(
-                                        'Messages',
-                                        style: TextStyle(
-                                          fontSize: 18,
-                                          fontWeight: FontWeight.bold,
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                  IconButton(
-                                    onPressed: _showNewMessageModalDialog,
-                                    icon: const Icon(Icons.add),
-                                    style: IconButton.styleFrom(
-                                      backgroundColor:
-                                          AppColors.primaryLimeGreen,
-                                      foregroundColor: Colors.white,
-                                      fixedSize: const Size(32, 32),
-                                    ),
-                                  ),
-                                ],
-                              ),
-
-                              const SizedBox(height: 12),
-
-                              // Search bar
-                              TextField(
-                                controller: _searchController,
-                                decoration: InputDecoration(
-                                  hintText: 'Search messages...',
-                                  prefixIcon: const Icon(
-                                    Icons.search,
-                                    size: 20,
-                                  ),
-                                  border: OutlineInputBorder(
-                                    borderRadius: BorderRadius.circular(20),
-                                    borderSide: BorderSide(
-                                      color: Colors.grey[300]!,
-                                    ),
-                                  ),
-                                  focusedBorder: OutlineInputBorder(
-                                    borderRadius: BorderRadius.circular(20),
-                                    borderSide: const BorderSide(
-                                      color: AppColors.primaryLimeGreen,
-                                    ),
-                                  ),
-                                  contentPadding: const EdgeInsets.symmetric(
-                                    horizontal: 16,
-                                    vertical: 8,
-                                  ),
-                                ),
-                                onChanged: (value) {
-                                  context
-                                      .read<MessagesCubit>()
-                                      .updateSearchQuery(value);
-                                },
-                              ),
-
-                              const SizedBox(height: 12),
-
-                              // Filter chips
-                              Row(
-                                children: ['all', 'private', 'group'].map((
-                                  filter,
-                                ) {
-                                  final isSelected = _selectedFilter == filter;
-                                  return Padding(
-                                    padding: const EdgeInsets.only(right: 8),
-                                    child: ChoiceChip(
-                                      label: Text(
-                                        filter.capitalize(),
-                                        style: TextStyle(
-                                          fontSize: 12,
-                                          color: isSelected
-                                              ? Colors.white
-                                              : Colors.grey[600],
-                                        ),
-                                      ),
-                                      selected: isSelected,
-                                      onSelected: (selected) {
-                                        setState(() {
-                                          _selectedFilter = filter;
-                                        });
-                                        context
-                                            .read<MessagesCubit>()
-                                            .updateFilterType(filter);
-                                      },
-                                      selectedColor: AppColors.primaryLimeGreen,
-                                      backgroundColor: Colors.grey[100],
-                                      padding: const EdgeInsets.symmetric(
-                                        horizontal: 8,
-                                      ),
-                                    ),
-                                  );
-                                }).toList(),
-                              ),
-                            ],
-                          ),
+                          child: _buildConversationsList(state),
                         ),
-
-                        // Conversations list
+                        
+                        // Chat Area
                         Expanded(
-                          child: state.filteredConversations.isEmpty
-                              ? const Center(
+                          child: state.selectedConversation == null
+                              ? Center(
                                   child: Column(
                                     mainAxisAlignment: MainAxisAlignment.center,
                                     children: [
-                                      Icon(
-                                        Icons.message_outlined,
-                                        size: 48,
+                                      const Icon(
+                                        Icons.forum_outlined,
+                                        size: 80,
                                         color: Colors.grey,
                                       ),
-                                      SizedBox(height: 16),
+                                      const SizedBox(height: 16),
                                       Text(
-                                        'No conversations found',
+                                        'Select a conversation to start messaging',
                                         style: TextStyle(
-                                          color: Colors.grey,
-                                          fontSize: 16,
+                                          color: Colors.grey[600],
+                                          fontSize: 18,
                                         ),
                                       ),
                                     ],
                                   ),
                                 )
-                              : ListView.builder(
-                                  itemCount: state.filteredConversations.length,
-                                  itemBuilder: (context, index) {
-                                    final conversation =
-                                        state.filteredConversations[index];
-                                    return ConversationListItem(
-                                      conversation: conversation,
-                                      isSelected:
-                                          state.selectedConversation?.roomId ==
-                                          conversation.roomId,
-                                      onTap: () {
-                                        context
-                                            .read<MessagesCubit>()
-                                            .selectConversation(conversation);
-                                      },
-                                    );
-                                  },
-                                ),
+                              : _buildChatView(state),
                         ),
                       ],
-                    ),
-                  ),
-
-                  // Messages area
-                  Expanded(
-                    child: state.selectedConversation == null
-                        ? const Center(
-                            child: Column(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                Icon(
-                                  Icons.message_outlined,
-                                  size: 64,
-                                  color: Colors.grey,
-                                ),
-                                SizedBox(height: 16),
-                                Text(
-                                  'Select a conversation to start messaging',
-                                  style: TextStyle(
-                                    fontSize: 16,
-                                    color: Colors.grey,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          )
-                        : Column(
-                            children: [
-                              // Chat header
-                              Container(
-                                padding: const EdgeInsets.all(16),
-                                decoration: BoxDecoration(
-                                  color: Colors.grey[50],
-                                  border: Border(
-                                    bottom: BorderSide(
-                                      color: Colors.grey[300]!,
-                                    ),
-                                  ),
-                                ),
-                                child: Row(
-                                  children: [
-                                    CircleAvatar(
-                                      radius: 20,
-                                      backgroundImage: NetworkImage(
-                                        state
-                                            .selectedConversation!
-                                            .displayImageUrl,
-                                      ),
-                                      backgroundColor: Colors.grey[300],
-                                      onBackgroundImageError: (_, __) {},
-                                    ),
-                                    const SizedBox(width: 12),
-                                    Expanded(
-                                      child: Column(
-                                        crossAxisAlignment:
-                                            CrossAxisAlignment.start,
-                                        children: [
-                                          Text(
-                                            state
-                                                .selectedConversation!
-                                                .displayName,
-                                            style: const TextStyle(
-                                              fontWeight: FontWeight.w600,
-                                              fontSize: 16,
-                                            ),
-                                          ),
-                                          Text(
-                                            state.selectedConversation!.type ==
-                                                    'group'
-                                                ? 'Group conversation'
-                                                : 'Private conversation',
-                                            style: TextStyle(
-                                              color: Colors.grey[600],
-                                              fontSize: 12,
-                                            ),
-                                          ),
-                                        ],
-                                      ),
-                                    ),
-                                    IconButton(
-                                      onPressed: () {
-                                        // TODO: Show conversation options
-                                      },
-                                      icon: const Icon(Icons.more_vert),
-                                    ),
-                                  ],
-                                ),
-                              ),
-
-                              // Messages
-                              Expanded(
-                                child: state.messages.isEmpty
-                                    ? const Center(
-                                        child: Column(
-                                          mainAxisAlignment:
-                                              MainAxisAlignment.center,
-                                          children: [
-                                            Icon(
-                                              Icons.message_outlined,
-                                              size: 64,
-                                              color: Colors.grey,
-                                            ),
-                                            SizedBox(height: 16),
-                                            Text(
-                                              'No messages yet',
-                                              style: TextStyle(
-                                                fontSize: 16,
-                                                color: Colors.grey,
-                                              ),
-                                            ),
-                                            Text(
-                                              'Start the conversation!',
-                                              style: TextStyle(
-                                                fontSize: 14,
-                                                color: Colors.grey,
-                                              ),
-                                            ),
-                                          ],
-                                        ),
-                                      )
-                                    : ListView.builder(
-                                        controller: _messagesScrollController,
-                                        padding: const EdgeInsets.symmetric(
-                                          vertical: 16,
-                                        ),
-                                        itemCount: state.messages.length,
-                                        itemBuilder: (context, index) {
-                                          final message = state.messages[index];
-                                          return MessageBubble(
-                                            message: message,
-                                            showGroupInfo:
-                                                state
-                                                    .selectedConversation!
-                                                    .type ==
-                                                'group',
-                                          );
-                                        },
-                                      ),
-                              ),
-
-                              // Message input
-                              MessageInput(
-                                conversationName:
-                                    state.selectedConversation!.displayName,
-                                isLoading: state is MessagesSending,
-                                onSendMessage: (text, mediaFiles) {
-                                  context.read<MessagesCubit>().sendMessage(
-                                    text,
-                                    mediaFiles: mediaFiles,
-                                  );
-                                },
-                              ),
-                            ],
-                          ),
-                  ),
-                ],
+                    );
+                  }
+                },
               );
             }
 
@@ -485,11 +217,286 @@ class _MessagesPageState extends State<MessagesPage> {
       ),
     );
   }
+
+  Widget _buildConversationsList(MessagesLoaded state) {
+    return Column(
+      children: [
+        // Header with search and filters
+        Container(
+          padding: const EdgeInsets.all(16),
+          decoration: BoxDecoration(
+            color: Colors.grey[50],
+            border: Border(
+              bottom: BorderSide(color: Colors.grey[300]!),
+            ),
+          ),
+          child: Column(
+            children: [
+              // Title and new message button
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  const Row(
+                    children: [
+                      Icon(
+                        Icons.message,
+                        color: AppColors.primaryLimeGreen,
+                        size: 20,
+                      ),
+                      SizedBox(width: 8),
+                      Text(
+                        'Messages',
+                        style: TextStyle(
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ],
+                  ),
+                  IconButton(
+                    onPressed: _showNewMessageModalDialog,
+                    icon: const Icon(Icons.add),
+                    style: IconButton.styleFrom(
+                      backgroundColor: AppColors.primaryLimeGreen,
+                      foregroundColor: Colors.white,
+                      fixedSize: const Size(36, 36),
+                    ),
+                  ),
+                ],
+              ),
+              
+              const SizedBox(height: 16),
+              
+              // Search bar
+              TextField(
+                controller: _searchController,
+                decoration: InputDecoration(
+                  hintText: 'Search messages...',
+                  prefixIcon: const Icon(Icons.search, size: 20),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(25),
+                    borderSide: BorderSide(color: Colors.grey[300]!),
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(25),
+                    borderSide: const BorderSide(color: AppColors.primaryLimeGreen),
+                  ),
+                  contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                ),
+                onChanged: (value) {
+                  context.read<MessagesCubit>().updateSearchQuery(value);
+                },
+              ),
+              
+              const SizedBox(height: 16),
+              
+              // Filter chips
+              Row(
+                children: ['all', 'private', 'group'].map((filter) {
+                  final isSelected = _selectedFilter == filter;
+                  return Padding(
+                    padding: const EdgeInsets.only(right: 8),
+                    child: ChoiceChip(
+                      label: Text(
+                        filter.capitalize(),
+                        style: TextStyle(
+                          fontSize: 13,
+                          fontWeight: FontWeight.w500,
+                          color: isSelected ? Colors.white : Colors.grey[600],
+                        ),
+                      ),
+                      selected: isSelected,
+                      onSelected: (selected) {
+                        setState(() {
+                          _selectedFilter = filter;
+                        });
+                        context.read<MessagesCubit>().updateFilterType(filter);
+                      },
+                      selectedColor: AppColors.primaryLimeGreen,
+                      backgroundColor: Colors.grey[100],
+                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+                    ),
+                  );
+                }).toList(),
+              ),
+            ],
+          ),
+        ),
+        
+        // Conversations list
+        Expanded(
+          child: state.filteredConversations.isEmpty
+              ? const Center(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(
+                        Icons.message_outlined,
+                        size: 64,
+                        color: Colors.grey,
+                      ),
+                      SizedBox(height: 16),
+                      Text(
+                        'No conversations found',
+                        style: TextStyle(
+                          color: Colors.grey,
+                          fontSize: 16,
+                        ),
+                      ),
+                    ],
+                  ),
+                )
+              : ListView.builder(
+                  itemCount: state.filteredConversations.length,
+                  itemBuilder: (context, index) {
+                    final conversation = state.filteredConversations[index];
+                    return ConversationListItem(
+                      conversation: conversation,
+                      isSelected: state.selectedConversation?.roomId == conversation.roomId,
+                      onTap: () {
+                        context.read<MessagesCubit>().selectConversation(conversation);
+                        setState(() {
+                          _showConversationsList = false; // Switch to chat view on mobile
+                        });
+                      },
+                    );
+                  },
+                ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildChatView(MessagesLoaded state) {
+    return Column(
+      children: [
+        // Chat header with back button
+        Container(
+          padding: const EdgeInsets.all(16),
+          decoration: BoxDecoration(
+            color: Colors.grey[50],
+            border: Border(
+              bottom: BorderSide(color: Colors.grey[300]!),
+            ),
+          ),
+          child: Row(
+            children: [
+              // Only show back button on mobile
+              if (MediaQuery.of(context).size.width < 800)
+                IconButton(
+                  onPressed: () {
+                    setState(() {
+                      _showConversationsList = true; // Go back to conversations list
+                    });
+                  },
+                  icon: const Icon(Icons.arrow_back),
+                  padding: EdgeInsets.zero,
+                  constraints: const BoxConstraints(),
+                ),
+              if (MediaQuery.of(context).size.width < 800)
+                const SizedBox(width: 8),
+              CircleAvatar(
+                radius: 20,
+                backgroundImage: NetworkImage(
+                  state.selectedConversation!.displayImageUrl,
+                ),
+                backgroundColor: Colors.grey[300],
+                onBackgroundImageError: (_, __) {},
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      state.selectedConversation!.displayName,
+                      style: const TextStyle(
+                        fontWeight: FontWeight.w600,
+                        fontSize: 16,
+                      ),
+                    ),
+                    Text(
+                      state.selectedConversation!.type == 'group'
+                          ? 'Group conversation'
+                          : 'Private conversation',
+                      style: TextStyle(
+                        color: Colors.grey[600],
+                        fontSize: 12,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              IconButton(
+                onPressed: () {
+                  // TODO: Show conversation options
+                },
+                icon: const Icon(Icons.more_vert),
+              ),
+            ],
+          ),
+        ),
+        
+        // Messages
+        Expanded(
+          child: state.messages.isEmpty
+              ? const Center(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(
+                        Icons.message_outlined,
+                        size: 64,
+                        color: Colors.grey,
+                      ),
+                      SizedBox(height: 16),
+                      Text(
+                        'No messages yet',
+                        style: TextStyle(
+                          fontSize: 16,
+                          color: Colors.grey,
+                        ),
+                      ),
+                      Text(
+                        'Start the conversation!',
+                        style: TextStyle(
+                          fontSize: 14,
+                          color: Colors.grey,
+                        ),
+                      ),
+                    ],
+                  ),
+                )
+              : ListView.builder(
+                  controller: _messagesScrollController,
+                  padding: const EdgeInsets.symmetric(vertical: 16),
+                  itemCount: state.messages.length,
+                  itemBuilder: (context, index) {
+                    final message = state.messages[index];
+                    return MessageBubble(
+                      message: message,
+                      showGroupInfo: state.selectedConversation!.type == 'group',
+                    );
+                  },
+                ),
+        ),
+        
+        // Message input
+        MessageInput(
+          conversationName: state.selectedConversation!.displayName,
+          isLoading: state is MessagesSending,
+          onSendMessage: (text, mediaFiles) {
+            context.read<MessagesCubit>().sendMessage(text, mediaFiles: mediaFiles);
+          },
+        ),
+      ],
+    );
+  }
 }
 
 extension StringExtension on String {
   String capitalize() {
     if (isEmpty) return this;
-    return this[0].toUpperCase() + substring(1);
+    return '${this[0].toUpperCase()}${substring(1)}';
   }
 }
