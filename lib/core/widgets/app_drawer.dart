@@ -117,6 +117,14 @@ class AppDrawer extends StatelessWidget {
                     context.push('/overview');
                   },
                 ),
+                ListTile(
+                  leading: const Icon(Icons.message),
+                  title: const Text('Messages'),
+                  onTap: () {
+                    Navigator.pop(context);
+                    context.push('/messages');
+                  },
+                ),
               ],
             ),
           ),

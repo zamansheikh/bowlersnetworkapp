@@ -48,6 +48,14 @@ import 'package:bowlersnetworkapp/features/home/presentation/bloc/home_bloc.dart
     as _i229;
 import 'package:bowlersnetworkapp/features/home/presentation/cubit/feed_cubit.dart'
     as _i813;
+import 'package:bowlersnetworkapp/features/messages/data/datasources/messages_remote_data_source.dart'
+    as _i154;
+import 'package:bowlersnetworkapp/features/messages/data/repositories/messages_repository_impl.dart'
+    as _i528;
+import 'package:bowlersnetworkapp/features/messages/domain/repositories/messages_repository.dart'
+    as _i599;
+import 'package:bowlersnetworkapp/features/messages/presentation/cubit/messages_cubit.dart'
+    as _i146;
 import 'package:bowlersnetworkapp/features/overview/data/datasources/overview_remote_data_source.dart'
     as _i946;
 import 'package:bowlersnetworkapp/features/overview/data/repositories/overview_repository_impl.dart'
@@ -103,6 +111,9 @@ extension GetItInjectableX on _i174.GetIt {
     gh.lazySingleton<_i1073.AuthRemoteDataSource>(
       () => _i1073.AuthRemoteDataSourceImpl(gh<_i361.Dio>()),
     );
+    gh.lazySingleton<_i154.MessagesRemoteDataSource>(
+      () => _i154.MessagesRemoteDataSourceImpl(gh<_i460.SharedPreferences>()),
+    );
     gh.lazySingleton<_i659.OverviewRepository>(
       () => _i659.OverviewRepositoryImpl(gh<_i946.OverviewRemoteDataSource>()),
     );
@@ -116,6 +127,9 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i607.ProPlayersRemoteDataSource>(),
       ),
     );
+    gh.lazySingleton<_i599.MessagesRepository>(
+      () => _i528.MessagesRepositoryImpl(gh<_i154.MessagesRemoteDataSource>()),
+    );
     gh.factory<_i450.GetUsers>(
       () => _i450.GetUsers(gh<_i637.UserRepository>()),
     );
@@ -127,6 +141,9 @@ extension GetItInjectableX on _i174.GetIt {
         remote: gh<_i1073.AuthRemoteDataSource>(),
         prefs: gh<_i460.SharedPreferences>(),
       ),
+    );
+    gh.factory<_i146.MessagesCubit>(
+      () => _i146.MessagesCubit(gh<_i599.MessagesRepository>()),
     );
     gh.factory<_i762.CreateUser>(
       () => _i762.CreateUser(gh<_i994.AuthRepository>()),

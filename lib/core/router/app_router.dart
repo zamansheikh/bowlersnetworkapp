@@ -14,6 +14,7 @@ import '../../features/profile/presentation/pages/profile_edit_page.dart';
 import '../../features/pro_players/presentation/pages/pro_players_page.dart';
 import '../../features/pro_players/presentation/pages/player_detail_page.dart';
 import '../../features/overview/presentation/pages/overview_page.dart';
+import '../../features/messages/presentation/pages/messages_page.dart';
 
 class AppRouter {
   static GoRouter create(AuthCubit authCubit) {
@@ -147,6 +148,18 @@ class AppRouter {
                 ? extra['userId']!
                 : userId;
             return PlayerDetailPage(userName: userId, userId: userIdParam);
+          },
+        ),
+        GoRoute(
+          path: '/messages',
+          name: 'messages',
+          builder: (context, state) {
+            final targetRoomId = state.uri.queryParameters['room_id'];
+            return MessagesPage(
+              targetRoomId: targetRoomId != null
+                  ? int.tryParse(targetRoomId)
+                  : null,
+            );
           },
         ),
       ],
