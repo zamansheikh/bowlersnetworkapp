@@ -32,11 +32,19 @@ class _MessageInputState extends State<MessageInput> {
 
   void _sendMessage() {
     final text = _textController.text.trim();
+
+    // Allow sending if either text is not empty OR there are media files
+    // This matches the web implementation
     if (text.isNotEmpty || _selectedFiles.isNotEmpty) {
+      print(
+        'Sending message: text="$text", media files: ${_selectedFiles.length}',
+      );
       widget.onSendMessage(text, List.from(_selectedFiles));
       _textController.clear();
       _selectedFiles.clear();
       setState(() {});
+    } else {
+      print('Cannot send empty message without text or media');
     }
   }
 

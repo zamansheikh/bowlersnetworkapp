@@ -31,9 +31,15 @@ class ConversationListItem extends StatelessWidget {
           children: [
             CircleAvatar(
               radius: 24,
-              backgroundImage: NetworkImage(conversation.displayImageUrl),
+              backgroundImage: conversation.displayImageUrl.isNotEmpty
+                  ? NetworkImage(conversation.displayImageUrl)
+                  : null,
               backgroundColor: Colors.grey[300],
-              onBackgroundImageError: (_, __) {},
+              onBackgroundImageError: (_, __) {
+                print(
+                  'Failed to load conversation image: ${conversation.displayImageUrl}',
+                );
+              },
               child: conversation.displayImageUrl.isEmpty
                   ? Text(
                       conversation.displayName.isNotEmpty

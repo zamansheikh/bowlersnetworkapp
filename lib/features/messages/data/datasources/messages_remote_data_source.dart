@@ -74,7 +74,11 @@ class MessagesRemoteDataSourceImpl implements MessagesRemoteDataSource {
   }
 
   String? _getAuthToken() {
-    return _prefs.getString(AppConstants.tokenKey);
+    final token = _prefs.getString(AppConstants.tokenKey);
+    print(
+      'Auth token retrieved: ${token != null ? 'Token exists (${token.length} chars)' : 'No token found'}',
+    );
+    return token;
   }
 
   @override
@@ -110,34 +114,54 @@ class MessagesRemoteDataSourceImpl implements MessagesRemoteDataSource {
   }) async {
     try {
       final formData = FormData();
+
+      // Always add text field (can be empty)
       formData.fields.add(MapEntry('text', text));
 
       // Add media files if provided
       if (mediaFiles != null && mediaFiles.isNotEmpty) {
         for (final file in mediaFiles) {
+          final fileName = file.path.split('/').last;
           final multipartFile = await MultipartFile.fromFile(
             file.path,
-            filename: file.path.split('/').last,
+            filename: fileName,
           );
+          // Use 'media' as field name to match web implementation
           formData.files.add(MapEntry('media', multipartFile));
         }
       }
 
+      print(
+        'Sending message to room $roomId with text: "$text" and ${mediaFiles?.length ?? 0} media files',
+      );
+
       final response = await _dio.post(
         '/api/chat/room/$roomId/messages',
         data: formData,
-        options: Options(headers: {'Content-Type': 'multipart/form-data'}),
+        options: Options(
+          headers: {'Content-Type': 'multipart/form-data'},
+          validateStatus: (status) {
+            return status != null &&
+                status < 500; // Accept all responses except server errors
+          },
+        ),
         onSendProgress: (count, total) {
-          // Progress callback can be used for upload progress
-          print(
-            'Upload progress: ${(count / total * 100).toStringAsFixed(1)}%',
-          );
+          final progress = (count / total * 100).toStringAsFixed(1);
+          print('Upload progress: $progress%');
         },
       );
 
-      return MessageModel.fromJson(response.data);
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        print('Message sent successfully: ${response.data}');
+        return MessageModel.fromJson(response.data);
+      } else {
+        throw Exception(
+          'Failed to send message. Status: ${response.statusCode}, Data: ${response.data}',
+        );
+      }
     } catch (e) {
       print('Error sending message: $e');
+
       // Return mock sent message for development
       return _getMockSentMessage(roomId, text, mediaFiles);
     }

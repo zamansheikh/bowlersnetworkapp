@@ -24,9 +24,15 @@ class MessageBubble extends StatelessWidget {
           if (!message.sentByMe) ...[
             CircleAvatar(
               radius: 16,
-              backgroundImage: NetworkImage(message.sender.profilePictureUrl),
+              backgroundImage: message.sender.profilePictureUrl.isNotEmpty
+                  ? NetworkImage(message.sender.profilePictureUrl)
+                  : null,
               backgroundColor: Colors.grey[300],
-              onBackgroundImageError: (_, __) {},
+              onBackgroundImageError: (_, __) {
+                print(
+                  'Failed to load profile picture: ${message.sender.profilePictureUrl}',
+                );
+              },
               child: message.sender.profilePictureUrl.isEmpty
                   ? Text(
                       message.sender.name.isNotEmpty

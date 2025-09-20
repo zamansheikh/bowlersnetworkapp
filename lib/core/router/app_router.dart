@@ -35,27 +35,35 @@ class AppRouter {
         final isCompletingProfile =
             state.matchedLocation == '/complete-profile';
 
+        print('🛣️ Router: Redirecting from ${state.matchedLocation}');
+        print('🛣️ Router: Auth state: ${authState.runtimeType}');
+
         // Show splash during initial auth loading or initial state
         if (isLoading || isInitial) {
+          print('🛣️ Router: Staying on splash (loading/initial)');
           return '/splash';
         }
 
         // If user has incomplete profile and not on completion page, redirect there
         if (isIncompleteProfile && !isCompletingProfile) {
+          print('🛣️ Router: Redirecting to profile completion');
           return '/complete-profile';
         }
 
         // If user is authenticated and on auth pages, go home
         if (isAuth &&
             (isSplash || isSigningIn || isSigningUp || isCompletingProfile)) {
+          print('🛣️ Router: Authenticated user, redirecting to home');
           return '/';
         }
 
-        // If user is not authenticated and not on auth/splash pages, go to signin
-        if (isUnauthenticated && !isSigningIn && !isSigningUp && !isSplash) {
+        // If user is not authenticated and not on auth pages, go to signin
+        if (isUnauthenticated && !isSigningIn && !isSigningUp) {
+          print('🛣️ Router: Unauthenticated user, redirecting to signin');
           return '/signin';
         }
 
+        print('🛣️ Router: No redirect needed');
         return null;
       },
       routes: [

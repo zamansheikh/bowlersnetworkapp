@@ -29,10 +29,10 @@ class _MessagesPageState extends State<MessagesPage> {
   @override
   void initState() {
     super.initState();
-    
+
     // Load conversations
     context.read<MessagesCubit>().loadConversations();
-    
+
     // If there's a target room ID, we'll handle it when conversations are loaded
     if (widget.targetRoomId != null) {
       setState(() {
@@ -53,9 +53,11 @@ class _MessagesPageState extends State<MessagesPage> {
       setState(() {
         _loadingMembers = true;
       });
-      
+
       try {
-        final members = await context.read<MessagesCubit>().loadAvailableMembers();
+        final members = await context
+            .read<MessagesCubit>()
+            .loadAvailableMembers();
         setState(() {
           _availableMembers = members;
           _loadingMembers = false;
@@ -65,9 +67,9 @@ class _MessagesPageState extends State<MessagesPage> {
           _loadingMembers = false;
         });
         if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('Failed to load members: $e')),
-          );
+          ScaffoldMessenger.of(
+            context,
+          ).showSnackBar(SnackBar(content: Text('Failed to load members: $e')));
         }
         return;
       }
@@ -123,7 +125,7 @@ class _MessagesPageState extends State<MessagesPage> {
                   ),
                 );
               }
-        
+
               if (state is MessagesError) {
                 return Center(
                   child: Column(
@@ -151,16 +153,17 @@ class _MessagesPageState extends State<MessagesPage> {
                   ),
                 );
               }
-        
+
               if (state is MessagesLoaded) {
                 return LayoutBuilder(
                   builder: (context, constraints) {
                     // Check if we're on a small screen (mobile)
                     final isSmallScreen = constraints.maxWidth < 800;
-                    
+
                     if (isSmallScreen) {
                       // Mobile layout: show either conversations list OR chat view
-                      if (_showConversationsList || state.selectedConversation == null) {
+                      if (_showConversationsList ||
+                          state.selectedConversation == null) {
                         return _buildConversationsList(state);
                       } else {
                         return _buildChatView(state);
@@ -179,13 +182,14 @@ class _MessagesPageState extends State<MessagesPage> {
                             ),
                             child: _buildConversationsList(state),
                           ),
-                          
+
                           // Chat Area
                           Expanded(
                             child: state.selectedConversation == null
                                 ? Center(
                                     child: Column(
-                                      mainAxisAlignment: MainAxisAlignment.center,
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.center,
                                       children: [
                                         const Icon(
                                           Icons.forum_outlined,
@@ -211,7 +215,7 @@ class _MessagesPageState extends State<MessagesPage> {
                   },
                 );
               }
-        
+
               return const Center(child: CircularProgressIndicator());
             },
           ),
@@ -228,9 +232,7 @@ class _MessagesPageState extends State<MessagesPage> {
           padding: const EdgeInsets.all(16),
           decoration: BoxDecoration(
             color: Colors.grey[50],
-            border: Border(
-              bottom: BorderSide(color: Colors.grey[300]!),
-            ),
+            border: Border(bottom: BorderSide(color: Colors.grey[300]!)),
           ),
           child: Column(
             children: [
@@ -266,9 +268,9 @@ class _MessagesPageState extends State<MessagesPage> {
                   ),
                 ],
               ),
-              
+
               const SizedBox(height: 16),
-              
+
               // Search bar
               TextField(
                 controller: _searchController,
@@ -281,17 +283,22 @@ class _MessagesPageState extends State<MessagesPage> {
                   ),
                   focusedBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(25),
-                    borderSide: const BorderSide(color: AppColors.primaryLimeGreen),
+                    borderSide: const BorderSide(
+                      color: AppColors.primaryLimeGreen,
+                    ),
                   ),
-                  contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                  contentPadding: const EdgeInsets.symmetric(
+                    horizontal: 20,
+                    vertical: 12,
+                  ),
                 ),
                 onChanged: (value) {
                   context.read<MessagesCubit>().updateSearchQuery(value);
                 },
               ),
-              
+
               const SizedBox(height: 16),
-              
+
               // Filter chips
               Row(
                 children: ['all', 'private', 'group'].map((filter) {
@@ -316,7 +323,10 @@ class _MessagesPageState extends State<MessagesPage> {
                       },
                       selectedColor: AppColors.primaryLimeGreen,
                       backgroundColor: Colors.grey[100],
-                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 12,
+                        vertical: 4,
+                      ),
                     ),
                   );
                 }).toList(),
@@ -324,7 +334,7 @@ class _MessagesPageState extends State<MessagesPage> {
             ],
           ),
         ),
-        
+
         // Conversations list
         Expanded(
           child: state.filteredConversations.isEmpty
@@ -340,10 +350,7 @@ class _MessagesPageState extends State<MessagesPage> {
                       SizedBox(height: 16),
                       Text(
                         'No conversations found',
-                        style: TextStyle(
-                          color: Colors.grey,
-                          fontSize: 16,
-                        ),
+                        style: TextStyle(color: Colors.grey, fontSize: 16),
                       ),
                     ],
                   ),
@@ -354,11 +361,16 @@ class _MessagesPageState extends State<MessagesPage> {
                     final conversation = state.filteredConversations[index];
                     return ConversationListItem(
                       conversation: conversation,
-                      isSelected: state.selectedConversation?.roomId == conversation.roomId,
+                      isSelected:
+                          state.selectedConversation?.roomId ==
+                          conversation.roomId,
                       onTap: () {
-                        context.read<MessagesCubit>().selectConversation(conversation);
+                        context.read<MessagesCubit>().selectConversation(
+                          conversation,
+                        );
                         setState(() {
-                          _showConversationsList = false; // Switch to chat view on mobile
+                          _showConversationsList =
+                              false; // Switch to chat view on mobile
                         });
                       },
                     );
@@ -377,9 +389,7 @@ class _MessagesPageState extends State<MessagesPage> {
           padding: const EdgeInsets.all(16),
           decoration: BoxDecoration(
             color: Colors.grey[50],
-            border: Border(
-              bottom: BorderSide(color: Colors.grey[300]!),
-            ),
+            border: Border(bottom: BorderSide(color: Colors.grey[300]!)),
           ),
           child: Row(
             children: [
@@ -388,7 +398,8 @@ class _MessagesPageState extends State<MessagesPage> {
                 IconButton(
                   onPressed: () {
                     setState(() {
-                      _showConversationsList = true; // Go back to conversations list
+                      _showConversationsList =
+                          true; // Go back to conversations list
                     });
                   },
                   icon: const Icon(Icons.arrow_back),
@@ -399,11 +410,28 @@ class _MessagesPageState extends State<MessagesPage> {
                 const SizedBox(width: 8),
               CircleAvatar(
                 radius: 20,
-                backgroundImage: NetworkImage(
-                  state.selectedConversation!.displayImageUrl,
-                ),
+                backgroundImage:
+                    state.selectedConversation!.displayImageUrl.isNotEmpty
+                    ? NetworkImage(state.selectedConversation!.displayImageUrl)
+                    : null,
                 backgroundColor: Colors.grey[300],
-                onBackgroundImageError: (_, __) {},
+                onBackgroundImageError: (_, __) {
+                  print(
+                    'Failed to load chat header image: ${state.selectedConversation!.displayImageUrl}',
+                  );
+                },
+                child: state.selectedConversation!.displayImageUrl.isEmpty
+                    ? Text(
+                        state.selectedConversation!.displayName.isNotEmpty
+                            ? state.selectedConversation!.displayName[0]
+                                  .toUpperCase()
+                            : '?',
+                        style: const TextStyle(
+                          fontWeight: FontWeight.bold,
+                          color: Colors.white,
+                        ),
+                      )
+                    : null,
               ),
               const SizedBox(width: 12),
               Expanded(
@@ -421,10 +449,7 @@ class _MessagesPageState extends State<MessagesPage> {
                       state.selectedConversation!.type == 'group'
                           ? 'Group conversation'
                           : 'Private conversation',
-                      style: TextStyle(
-                        color: Colors.grey[600],
-                        fontSize: 12,
-                      ),
+                      style: TextStyle(color: Colors.grey[600], fontSize: 12),
                     ),
                   ],
                 ),
@@ -438,7 +463,7 @@ class _MessagesPageState extends State<MessagesPage> {
             ],
           ),
         ),
-        
+
         // Messages
         Expanded(
           child: state.messages.isEmpty
@@ -454,17 +479,11 @@ class _MessagesPageState extends State<MessagesPage> {
                       SizedBox(height: 16),
                       Text(
                         'No messages yet',
-                        style: TextStyle(
-                          fontSize: 16,
-                          color: Colors.grey,
-                        ),
+                        style: TextStyle(fontSize: 16, color: Colors.grey),
                       ),
                       Text(
                         'Start the conversation!',
-                        style: TextStyle(
-                          fontSize: 14,
-                          color: Colors.grey,
-                        ),
+                        style: TextStyle(fontSize: 14, color: Colors.grey),
                       ),
                     ],
                   ),
@@ -477,18 +496,22 @@ class _MessagesPageState extends State<MessagesPage> {
                     final message = state.messages[index];
                     return MessageBubble(
                       message: message,
-                      showGroupInfo: state.selectedConversation!.type == 'group',
+                      showGroupInfo:
+                          state.selectedConversation!.type == 'group',
                     );
                   },
                 ),
         ),
-        
+
         // Message input
         MessageInput(
           conversationName: state.selectedConversation!.displayName,
           isLoading: state is MessagesSending,
           onSendMessage: (text, mediaFiles) {
-            context.read<MessagesCubit>().sendMessage(text, mediaFiles: mediaFiles);
+            context.read<MessagesCubit>().sendMessage(
+              text,
+              mediaFiles: mediaFiles,
+            );
           },
         ),
       ],

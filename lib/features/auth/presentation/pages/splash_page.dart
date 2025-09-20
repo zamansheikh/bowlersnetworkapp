@@ -42,6 +42,7 @@ class _SplashPageState extends State<SplashPage>
 
     // Start auth check after animations begin
     WidgetsBinding.instance.addPostFrameCallback((_) {
+      print('🚀 Splash: Starting auth check');
       context.read<AuthCubit>().checkAuthStatus();
     });
   }
