@@ -31,7 +31,8 @@ class ConversationListItem extends StatelessWidget {
           children: [
             CircleAvatar(
               radius: 24,
-              backgroundImage: (conversation.displayImageUrl?.isNotEmpty == true)
+              backgroundImage:
+                  (conversation.displayImageUrl?.isNotEmpty == true)
                   ? NetworkImage(conversation.displayImageUrl!)
                   : null,
               backgroundColor: Colors.grey[300],
