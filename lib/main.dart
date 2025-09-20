@@ -9,6 +9,7 @@ import 'features/home/presentation/bloc/home_bloc.dart';
 import 'features/auth/presentation/bloc/auth_cubit.dart';
 import 'features/auth/presentation/bloc/signup_cubit.dart';
 import 'features/home/presentation/cubit/feed_cubit.dart';
+import 'features/overview/presentation/cubit/overview_cubit.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -45,6 +46,9 @@ class _MyAppState extends State<MyApp> {
         BlocProvider<SignupCubit>(create: (_) => getIt<SignupCubit>()),
         // Provide FeedCubit globally to prevent recreation
         BlocProvider<FeedCubit>(create: (_) => getIt<FeedCubit>()),
+        BlocProvider<OverviewCubit>(
+          create: (_) => getIt<OverviewCubit>()..loadOverviewData(),
+        ),
       ],
       child: MaterialApp.router(
         title: AppStrings.appName,

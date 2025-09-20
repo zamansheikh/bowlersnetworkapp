@@ -109,10 +109,17 @@ class AppDrawer extends StatelessWidget {
                     context.push('/pro-players');
                   },
                 ),
+                ListTile(
+                  leading: const Icon(Icons.analytics),
+                  title: const Text('Overview'),
+                  onTap: () {
+                    Navigator.pop(context);
+                    context.push('/overview');
+                  },
+                ),
               ],
             ),
           ),
-          const Divider(),
           Padding(
             padding: const EdgeInsets.only(bottom: 16.0),
             child: BlocBuilder<AuthCubit, AuthState>(

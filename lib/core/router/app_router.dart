@@ -13,6 +13,7 @@ import '../../features/profile/presentation/pages/user_profile_page.dart';
 import '../../features/profile/presentation/pages/profile_edit_page.dart';
 import '../../features/pro_players/presentation/pages/pro_players_page.dart';
 import '../../features/pro_players/presentation/pages/player_detail_page.dart';
+import '../../features/overview/presentation/pages/overview_page.dart';
 
 class AppRouter {
   static GoRouter create(AuthCubit authCubit) {
@@ -117,6 +118,11 @@ class AppRouter {
           path: '/profile/edit',
           name: 'profile-edit',
           builder: (context, state) => const ProfileEditPage(),
+        ),
+        GoRoute(
+          path: '/overview',
+          name: 'overview',
+          builder: (context, state) => const OverviewPage(),
         ),
         GoRoute(
           path: '/post/:id',

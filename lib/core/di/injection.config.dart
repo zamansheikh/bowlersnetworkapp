@@ -48,6 +48,12 @@ import 'package:bowlersnetworkapp/features/home/presentation/bloc/home_bloc.dart
     as _i229;
 import 'package:bowlersnetworkapp/features/home/presentation/cubit/feed_cubit.dart'
     as _i813;
+import 'package:bowlersnetworkapp/features/overview/data/datasources/overview_remote_data_source.dart'
+    as _i946;
+import 'package:bowlersnetworkapp/features/overview/data/repositories/overview_repository_impl.dart'
+    as _i659;
+import 'package:bowlersnetworkapp/features/overview/presentation/cubit/overview_cubit.dart'
+    as _i547;
 import 'package:bowlersnetworkapp/features/pro_players/data/datasources/pro_players_remote_data_source.dart'
     as _i607;
 import 'package:bowlersnetworkapp/features/pro_players/data/repositories/pro_players_repository_impl.dart'
@@ -88,11 +94,17 @@ extension GetItInjectableX on _i174.GetIt {
     gh.factory<_i535.FeedRepository>(
       () => _i535.FeedRepository(gh<_i460.SharedPreferences>()),
     );
+    gh.lazySingleton<_i946.OverviewRemoteDataSource>(
+      () => _i946.OverviewRemoteDataSourceImpl(gh<_i460.SharedPreferences>()),
+    );
     gh.factory<_i813.FeedCubit>(
       () => _i813.FeedCubit(repository: gh<_i535.FeedRepository>()),
     );
     gh.lazySingleton<_i1073.AuthRemoteDataSource>(
       () => _i1073.AuthRemoteDataSourceImpl(gh<_i361.Dio>()),
+    );
+    gh.lazySingleton<_i659.OverviewRepository>(
+      () => _i659.OverviewRepositoryImpl(gh<_i946.OverviewRemoteDataSource>()),
     );
     gh.lazySingleton<_i637.UserRepository>(
       () => _i224.UserRepositoryImpl(
@@ -106,6 +118,9 @@ extension GetItInjectableX on _i174.GetIt {
     );
     gh.factory<_i450.GetUsers>(
       () => _i450.GetUsers(gh<_i637.UserRepository>()),
+    );
+    gh.factory<_i547.OverviewCubit>(
+      () => _i547.OverviewCubit(gh<_i659.OverviewRepository>()),
     );
     gh.lazySingleton<_i994.AuthRepository>(
       () => _i359.AuthRepositoryImpl(

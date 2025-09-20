@@ -45,6 +45,9 @@ dependencies:
   
   # Utils
   equatable: ^2.0.7
+  
+  # Charts
+  fl_chart: ^0.70.1
 
 dev_dependencies:
   flutter_test:
