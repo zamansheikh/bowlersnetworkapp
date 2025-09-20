@@ -125,6 +125,22 @@ class AppDrawer extends StatelessWidget {
                     context.push('/messages');
                   },
                 ),
+                ListTile(
+                  leading: const Icon(Icons.event),
+                  title: const Text('Events'),
+                  onTap: () {
+                    Navigator.pop(context);
+                    context.push('/events');
+                  },
+                ),
+                ListTile(
+                  leading: const Icon(Icons.event),
+                  title: const Text('Events'),
+                  onTap: () {
+                    Navigator.pop(context);
+                    context.push('/events');
+                  },
+                ),
               ],
             ),
           ),

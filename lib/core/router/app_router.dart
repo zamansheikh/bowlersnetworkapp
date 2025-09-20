@@ -15,6 +15,7 @@ import '../../features/pro_players/presentation/pages/pro_players_page.dart';
 import '../../features/pro_players/presentation/pages/player_detail_page.dart';
 import '../../features/overview/presentation/pages/overview_page.dart';
 import '../../features/messages/presentation/pages/messages_page.dart';
+import '../../features/events/presentation/pages/events_page.dart';
 
 class AppRouter {
   static GoRouter create(AuthCubit authCubit) {
@@ -169,6 +170,11 @@ class AppRouter {
                   : null,
             );
           },
+        ),
+        GoRoute(
+          path: '/events',
+          name: 'events',
+          builder: (context, state) => const EventsPage(),
         ),
       ],
       errorBuilder: (context, state) => const ErrorPage(),

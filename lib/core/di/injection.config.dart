@@ -34,6 +34,20 @@ import 'package:bowlersnetworkapp/features/auth/presentation/bloc/auth_cubit.dar
     as _i506;
 import 'package:bowlersnetworkapp/features/auth/presentation/bloc/signup_cubit.dart'
     as _i384;
+import 'package:bowlersnetworkapp/features/events/data/datasources/events_remote_data_source.dart'
+    as _i421;
+import 'package:bowlersnetworkapp/features/events/data/datasources/events_remote_data_source_impl.dart'
+    as _i154;
+import 'package:bowlersnetworkapp/features/events/data/repositories/events_repository_impl.dart'
+    as _i686;
+import 'package:bowlersnetworkapp/features/events/domain/repositories/events_repository.dart'
+    as _i924;
+import 'package:bowlersnetworkapp/features/events/domain/usecases/get_calendar_events.dart'
+    as _i956;
+import 'package:bowlersnetworkapp/features/events/domain/usecases/get_tournaments.dart'
+    as _i116;
+import 'package:bowlersnetworkapp/features/events/presentation/cubit/events_cubit.dart'
+    as _i415;
 import 'package:bowlersnetworkapp/features/home/data/datasources/user_remote_data_source.dart'
     as _i528;
 import 'package:bowlersnetworkapp/features/home/data/repositories/feed_repository.dart'
@@ -114,6 +128,9 @@ extension GetItInjectableX on _i174.GetIt {
     gh.lazySingleton<_i154.MessagesRemoteDataSource>(
       () => _i154.MessagesRemoteDataSourceImpl(gh<_i460.SharedPreferences>()),
     );
+    gh.lazySingleton<_i421.EventsRemoteDataSource>(
+      () => _i154.EventsRemoteDataSourceImpl(gh<_i460.SharedPreferences>()),
+    );
     gh.lazySingleton<_i659.OverviewRepository>(
       () => _i659.OverviewRepositoryImpl(gh<_i946.OverviewRemoteDataSource>()),
     );
@@ -129,6 +146,11 @@ extension GetItInjectableX on _i174.GetIt {
     );
     gh.lazySingleton<_i599.MessagesRepository>(
       () => _i528.MessagesRepositoryImpl(gh<_i154.MessagesRemoteDataSource>()),
+    );
+    gh.lazySingleton<_i924.EventsRepository>(
+      () => _i686.EventsRepositoryImpl(
+        remoteDataSource: gh<_i421.EventsRemoteDataSource>(),
+      ),
     );
     gh.factory<_i450.GetUsers>(
       () => _i450.GetUsers(gh<_i637.UserRepository>()),
@@ -188,6 +210,18 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i762.CreateUser>(),
         gh<_i459.Login>(),
         gh<_i298.GetProfile>(),
+      ),
+    );
+    gh.factory<_i956.GetCalendarEvents>(
+      () => _i956.GetCalendarEvents(gh<_i924.EventsRepository>()),
+    );
+    gh.factory<_i116.GetTournaments>(
+      () => _i116.GetTournaments(gh<_i924.EventsRepository>()),
+    );
+    gh.factory<_i415.EventsCubit>(
+      () => _i415.EventsCubit(
+        getTournaments: gh<_i116.GetTournaments>(),
+        getCalendarEvents: gh<_i956.GetCalendarEvents>(),
       ),
     );
     gh.factory<_i565.ProPlayersCubit>(

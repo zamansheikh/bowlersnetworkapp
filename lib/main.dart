@@ -11,6 +11,7 @@ import 'features/auth/presentation/bloc/signup_cubit.dart';
 import 'features/home/presentation/cubit/feed_cubit.dart';
 import 'features/overview/presentation/cubit/overview_cubit.dart';
 import 'features/messages/presentation/cubit/messages_cubit.dart';
+import 'features/events/presentation/cubit/events_cubit.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -51,6 +52,7 @@ class _MyAppState extends State<MyApp> {
           create: (_) => getIt<OverviewCubit>()..loadOverviewData(),
         ),
         BlocProvider<MessagesCubit>(create: (_) => getIt<MessagesCubit>()),
+        BlocProvider<EventsCubit>(create: (_) => getIt<EventsCubit>()),
       ],
       child: MaterialApp.router(
         title: AppStrings.appName,
