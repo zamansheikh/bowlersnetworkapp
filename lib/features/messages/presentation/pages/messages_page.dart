@@ -94,125 +94,127 @@ class _MessagesPageState extends State<MessagesPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: BlocConsumer<MessagesCubit, MessagesState>(
-          listener: (context, state) {
-            if (state is MessagesError) {
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(
-                  content: Text(state.message),
-                  backgroundColor: Colors.red,
-                ),
-              );
-            }
-          },
-          builder: (context, state) {
-            if (state is MessagesLoading) {
-              return const Center(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    CircularProgressIndicator(
-                      color: AppColors.primaryLimeGreen,
-                    ),
-                    SizedBox(height: 16),
-                    Text('Loading messages...'),
-                  ],
-                ),
-              );
-            }
-
-            if (state is MessagesError) {
-              return Center(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    const Icon(
-                      Icons.error_outline,
-                      size: 64,
-                      color: Colors.red,
-                    ),
-                    const SizedBox(height: 16),
-                    Text(
-                      'Error: ${state.message}',
-                      textAlign: TextAlign.center,
-                      style: const TextStyle(color: Colors.red),
-                    ),
-                    const SizedBox(height: 16),
-                    ElevatedButton(
-                      onPressed: () {
-                        context.read<MessagesCubit>().loadConversations();
-                      },
-                      child: const Text('Retry'),
-                    ),
-                  ],
-                ),
-              );
-            }
-
-            if (state is MessagesLoaded) {
-              return LayoutBuilder(
-                builder: (context, constraints) {
-                  // Check if we're on a small screen (mobile)
-                  final isSmallScreen = constraints.maxWidth < 800;
-                  
-                  if (isSmallScreen) {
-                    // Mobile layout: show either conversations list OR chat view
-                    if (_showConversationsList || state.selectedConversation == null) {
-                      return _buildConversationsList(state);
+      body: SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: BlocConsumer<MessagesCubit, MessagesState>(
+            listener: (context, state) {
+              if (state is MessagesError) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text(state.message),
+                    backgroundColor: Colors.red,
+                  ),
+                );
+              }
+            },
+            builder: (context, state) {
+              if (state is MessagesLoading) {
+                return const Center(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      CircularProgressIndicator(
+                        color: AppColors.primaryLimeGreen,
+                      ),
+                      SizedBox(height: 16),
+                      Text('Loading messages...'),
+                    ],
+                  ),
+                );
+              }
+        
+              if (state is MessagesError) {
+                return Center(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      const Icon(
+                        Icons.error_outline,
+                        size: 64,
+                        color: Colors.red,
+                      ),
+                      const SizedBox(height: 16),
+                      Text(
+                        'Error: ${state.message}',
+                        textAlign: TextAlign.center,
+                        style: const TextStyle(color: Colors.red),
+                      ),
+                      const SizedBox(height: 16),
+                      ElevatedButton(
+                        onPressed: () {
+                          context.read<MessagesCubit>().loadConversations();
+                        },
+                        child: const Text('Retry'),
+                      ),
+                    ],
+                  ),
+                );
+              }
+        
+              if (state is MessagesLoaded) {
+                return LayoutBuilder(
+                  builder: (context, constraints) {
+                    // Check if we're on a small screen (mobile)
+                    final isSmallScreen = constraints.maxWidth < 800;
+                    
+                    if (isSmallScreen) {
+                      // Mobile layout: show either conversations list OR chat view
+                      if (_showConversationsList || state.selectedConversation == null) {
+                        return _buildConversationsList(state);
+                      } else {
+                        return _buildChatView(state);
+                      }
                     } else {
-                      return _buildChatView(state);
-                    }
-                  } else {
-                    // Desktop layout: show both side by side
-                    return Row(
-                      children: [
-                        // Conversations List - wider on desktop
-                        Container(
-                          width: constraints.maxWidth * 0.4,
-                          decoration: BoxDecoration(
-                            border: Border(
-                              right: BorderSide(color: Colors.grey[300]!),
+                      // Desktop layout: show both side by side
+                      return Row(
+                        children: [
+                          // Conversations List - wider on desktop
+                          Container(
+                            width: constraints.maxWidth * 0.4,
+                            decoration: BoxDecoration(
+                              border: Border(
+                                right: BorderSide(color: Colors.grey[300]!),
+                              ),
                             ),
+                            child: _buildConversationsList(state),
                           ),
-                          child: _buildConversationsList(state),
-                        ),
-                        
-                        // Chat Area
-                        Expanded(
-                          child: state.selectedConversation == null
-                              ? Center(
-                                  child: Column(
-                                    mainAxisAlignment: MainAxisAlignment.center,
-                                    children: [
-                                      const Icon(
-                                        Icons.forum_outlined,
-                                        size: 80,
-                                        color: Colors.grey,
-                                      ),
-                                      const SizedBox(height: 16),
-                                      Text(
-                                        'Select a conversation to start messaging',
-                                        style: TextStyle(
-                                          color: Colors.grey[600],
-                                          fontSize: 18,
+                          
+                          // Chat Area
+                          Expanded(
+                            child: state.selectedConversation == null
+                                ? Center(
+                                    child: Column(
+                                      mainAxisAlignment: MainAxisAlignment.center,
+                                      children: [
+                                        const Icon(
+                                          Icons.forum_outlined,
+                                          size: 80,
+                                          color: Colors.grey,
                                         ),
-                                      ),
-                                    ],
-                                  ),
-                                )
-                              : _buildChatView(state),
-                        ),
-                      ],
-                    );
-                  }
-                },
-              );
-            }
-
-            return const Center(child: CircularProgressIndicator());
-          },
+                                        const SizedBox(height: 16),
+                                        Text(
+                                          'Select a conversation to start messaging',
+                                          style: TextStyle(
+                                            color: Colors.grey[600],
+                                            fontSize: 18,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  )
+                                : _buildChatView(state),
+                          ),
+                        ],
+                      );
+                    }
+                  },
+                );
+              }
+        
+              return const Center(child: CircularProgressIndicator());
+            },
+          ),
         ),
       ),
     );
