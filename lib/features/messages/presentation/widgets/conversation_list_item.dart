@@ -31,8 +31,8 @@ class ConversationListItem extends StatelessWidget {
           children: [
             CircleAvatar(
               radius: 24,
-              backgroundImage: conversation.displayImageUrl.isNotEmpty
-                  ? NetworkImage(conversation.displayImageUrl)
+              backgroundImage: (conversation.displayImageUrl?.isNotEmpty == true)
+                  ? NetworkImage(conversation.displayImageUrl!)
                   : null,
               backgroundColor: Colors.grey[300],
               onBackgroundImageError: (_, __) {
@@ -40,7 +40,7 @@ class ConversationListItem extends StatelessWidget {
                   'Failed to load conversation image: ${conversation.displayImageUrl}',
                 );
               },
-              child: conversation.displayImageUrl.isEmpty
+              child: (conversation.displayImageUrl?.isEmpty != false)
                   ? Text(
                       conversation.displayName.isNotEmpty
                           ? conversation.displayName[0].toUpperCase()
@@ -137,7 +137,7 @@ class ConversationListItem extends StatelessWidget {
               ),
             const SizedBox(height: 2),
             Text(
-              conversation.lastActivity,
+              conversation.lastActivity ?? 'Unknown',
               style: TextStyle(color: Colors.grey[400], fontSize: 11),
             ),
           ],

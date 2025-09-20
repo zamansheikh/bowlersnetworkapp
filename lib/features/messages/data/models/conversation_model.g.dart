@@ -11,9 +11,9 @@ ConversationModel _$ConversationModelFromJson(Map<String, dynamic> json) =>
       roomId: (json['room_id'] as num).toInt(),
       name: json['name'] as String,
       displayName: json['display_name'] as String,
-      displayImageUrl: json['display_image_url'] as String,
-      type: json['type'] as String,
-      lastActivity: json['last_activity'] as String,
+      displayImageUrl: json['display_image_url'] as String?,
+      type: json['type'] as String?,
+      lastActivity: json['last_activity'] as String?,
       lastMessage: json['last_message'] == null
           ? null
           : MessageModel.fromJson(json['last_message'] as Map<String, dynamic>),

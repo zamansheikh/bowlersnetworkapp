@@ -11,10 +11,10 @@ class ConversationModel {
   @JsonKey(name: 'display_name')
   final String displayName;
   @JsonKey(name: 'display_image_url')
-  final String displayImageUrl;
-  final String type; // 'private' or 'group'
+  final String? displayImageUrl; // Can be null, use fallback
+  final String? type; // 'private' or 'group' - optional, can be inferred
   @JsonKey(name: 'last_activity')
-  final String lastActivity;
+  final String? lastActivity; // Can be null in API response
   @JsonKey(name: 'last_message')
   final MessageModel? lastMessage;
   final int unreadCount; // Local calculated field
@@ -23,9 +23,9 @@ class ConversationModel {
     required this.roomId,
     required this.name,
     required this.displayName,
-    required this.displayImageUrl,
-    required this.type,
-    required this.lastActivity,
+    this.displayImageUrl,
+    this.type,
+    this.lastActivity,
     this.lastMessage,
     this.unreadCount = 0,
   });

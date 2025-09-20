@@ -411,8 +411,8 @@ class _MessagesPageState extends State<MessagesPage> {
               CircleAvatar(
                 radius: 20,
                 backgroundImage:
-                    state.selectedConversation!.displayImageUrl.isNotEmpty
-                    ? NetworkImage(state.selectedConversation!.displayImageUrl)
+                    (state.selectedConversation?.displayImageUrl?.isNotEmpty == true)
+                    ? NetworkImage(state.selectedConversation!.displayImageUrl!)
                     : null,
                 backgroundColor: Colors.grey[300],
                 onBackgroundImageError: (_, __) {
@@ -420,7 +420,7 @@ class _MessagesPageState extends State<MessagesPage> {
                     'Failed to load chat header image: ${state.selectedConversation!.displayImageUrl}',
                   );
                 },
-                child: state.selectedConversation!.displayImageUrl.isEmpty
+                child: (state.selectedConversation?.displayImageUrl?.isEmpty != false)
                     ? Text(
                         state.selectedConversation!.displayName.isNotEmpty
                             ? state.selectedConversation!.displayName[0]

@@ -10,8 +10,28 @@ class ChatRoomsResponseModel {
 
   const ChatRoomsResponseModel({required this.private, required this.group});
 
-  factory ChatRoomsResponseModel.fromJson(Map<String, dynamic> json) =>
-      _$ChatRoomsResponseModelFromJson(json);
+  factory ChatRoomsResponseModel.fromJson(Map<String, dynamic> json) {
+    // Parse private conversations and add type
+    final privateList = (json['private'] as List<dynamic>?)
+        ?.map((item) => ConversationModel.fromJson({
+              ...item as Map<String, dynamic>,
+              'type': 'private',
+            }))
+        .toList() ?? [];
+
+    // Parse group conversations and add type
+    final groupList = (json['group'] as List<dynamic>?)
+        ?.map((item) => ConversationModel.fromJson({
+              ...item as Map<String, dynamic>,
+              'type': 'group',
+            }))
+        .toList() ?? [];
+
+    return ChatRoomsResponseModel(
+      private: privateList,
+      group: groupList,
+    );
+  }
 
   Map<String, dynamic> toJson() => _$ChatRoomsResponseModelToJson(this);
 
