@@ -1,25 +1,10 @@
 import 'package:equatable/equatable.dart';
 
-enum EventType {
-  tournament,
-  league,
-  special,
-  practice,
-  maintenance,
-}
+enum EventType { tournament, league, special, practice, maintenance }
 
-enum EventStatus {
-  upcoming,
-  ongoing,
-  completed,
-  cancelled,
-}
+enum EventStatus { upcoming, ongoing, completed, cancelled }
 
-enum EventPriority {
-  high,
-  medium,
-  low,
-}
+enum EventPriority { high, medium, low }
 
 class CalendarEvent extends Equatable {
   final String id;
@@ -64,23 +49,23 @@ class CalendarEvent extends Equatable {
 
   @override
   List<Object?> get props => [
-        id,
-        title,
-        type,
-        date,
-        time,
-        endTime,
-        description,
-        location,
-        participants,
-        maxParticipants,
-        entryFee,
-        prizePool,
-        status,
-        priority,
-        organizer,
-        registrationDeadline,
-        format,
-        gameType,
-      ];
+    id,
+    title,
+    type,
+    date,
+    time,
+    endTime,
+    description,
+    location,
+    participants,
+    maxParticipants,
+    entryFee,
+    prizePool,
+    status,
+    priority,
+    organizer,
+    registrationDeadline,
+    format,
+    gameType,
+  ];
 }

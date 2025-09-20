@@ -27,15 +27,15 @@ class Tournament extends Equatable {
 
   @override
   List<Object?> get props => [
-        id,
-        name,
-        startDate,
-        regDeadline,
-        address,
-        regFee,
-        accessType,
-        format,
-        alreadyEnrolled,
-        participantsCount,
-      ];
+    id,
+    name,
+    startDate,
+    regDeadline,
+    address,
+    regFee,
+    accessType,
+    format,
+    alreadyEnrolled,
+    participantsCount,
+  ];
 }

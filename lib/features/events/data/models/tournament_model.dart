@@ -13,17 +13,17 @@ class TournamentModel extends Tournament {
     required int alreadyEnrolled,
     int? participantsCount,
   }) : super(
-          id: id,
-          name: name,
-          startDate: startDate,
-          regDeadline: regDeadline,
-          address: address,
-          regFee: regFee,
-          accessType: accessType,
-          format: format,
-          alreadyEnrolled: alreadyEnrolled,
-          participantsCount: participantsCount,
-        );
+         id: id,
+         name: name,
+         startDate: startDate,
+         regDeadline: regDeadline,
+         address: address,
+         regFee: regFee,
+         accessType: accessType,
+         format: format,
+         alreadyEnrolled: alreadyEnrolled,
+         participantsCount: participantsCount,
+       );
 
   factory TournamentModel.fromJson(Map<String, dynamic> json) {
     return TournamentModel(
@@ -56,15 +56,15 @@ class TournamentModel extends Tournament {
   }
 
   Tournament toEntity() => Tournament(
-        id: id,
-        name: name,
-        startDate: startDate,
-        regDeadline: regDeadline,
-        address: address,
-        regFee: regFee,
-        accessType: accessType,
-        format: format,
-        alreadyEnrolled: alreadyEnrolled,
-        participantsCount: participantsCount,
-      );
+    id: id,
+    name: name,
+    startDate: startDate,
+    regDeadline: regDeadline,
+    address: address,
+    regFee: regFee,
+    accessType: accessType,
+    format: format,
+    alreadyEnrolled: alreadyEnrolled,
+    participantsCount: participantsCount,
+  );
 }

@@ -44,7 +44,9 @@ class EventsLoaded extends EventsState {
       tournaments: tournaments ?? this.tournaments,
       events: events ?? this.events,
       currentDate: currentDate ?? this.currentDate,
-      selectedDate: clearSelectedDate ? null : (selectedDate ?? this.selectedDate),
+      selectedDate: clearSelectedDate
+          ? null
+          : (selectedDate ?? this.selectedDate),
       searchTerm: searchTerm ?? this.searchTerm,
       filterType: clearFilterType ? null : (filterType ?? this.filterType),
     );
@@ -52,13 +54,13 @@ class EventsLoaded extends EventsState {
 
   @override
   List<Object?> get props => [
-        tournaments,
-        events,
-        currentDate,
-        selectedDate,
-        searchTerm,
-        filterType,
-      ];
+    tournaments,
+    events,
+    currentDate,
+    selectedDate,
+    searchTerm,
+    filterType,
+  ];
 }
 
 class EventsError extends EventsState {

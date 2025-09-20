@@ -59,18 +59,11 @@ class _EventsPageState extends State<EventsPage> {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  const Icon(
-                    Icons.error_outline,
-                    size: 64,
-                    color: Colors.red,
-                  ),
+                  const Icon(Icons.error_outline, size: 64, color: Colors.red),
                   const SizedBox(height: 16),
                   const Text(
                     'Error',
-                    style: TextStyle(
-                      fontSize: 24,
-                      fontWeight: FontWeight.bold,
-                    ),
+                    style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
                   ),
                   const SizedBox(height: 8),
                   Padding(
@@ -109,17 +102,29 @@ class _EventsPageState extends State<EventsPage> {
       state.events,
     );
 
-    final filteredEvents = context.read<EventsCubit>().getFilteredEvents(state.selectedDate);
-    
+    final filteredEvents = context.read<EventsCubit>().getFilteredEvents(
+      state.selectedDate,
+    );
+
     return LayoutBuilder(
       builder: (context, constraints) {
         // Mobile layout (single column)
         if (constraints.maxWidth < 800) {
-          return _buildMobileLayout(context, state, calendarDays, filteredEvents);
+          return _buildMobileLayout(
+            context,
+            state,
+            calendarDays,
+            filteredEvents,
+          );
         }
         // Desktop/tablet layout (two columns)
         else {
-          return _buildDesktopLayout(context, state, calendarDays, filteredEvents);
+          return _buildDesktopLayout(
+            context,
+            state,
+            calendarDays,
+            filteredEvents,
+          );
         }
       },
     );
@@ -161,11 +166,11 @@ class _EventsPageState extends State<EventsPage> {
             },
           ),
           const SizedBox(height: 16),
-          
+
           // Event Types Legend
           _buildEventTypesLegend(state),
           const SizedBox(height: 16),
-          
+
           // Event Details
           SizedBox(
             height: 600,
@@ -183,7 +188,7 @@ class _EventsPageState extends State<EventsPage> {
             ),
           ),
           const SizedBox(height: 16),
-          
+
           // Monthly Stats
           _buildMonthlyStats(context, state),
         ],
@@ -231,7 +236,7 @@ class _EventsPageState extends State<EventsPage> {
             ),
           ),
           const SizedBox(width: 16),
-          
+
           // Sidebar (1/3 width)
           Expanded(
             flex: 1,
@@ -240,7 +245,7 @@ class _EventsPageState extends State<EventsPage> {
                 // Event Types Legend
                 _buildEventTypesLegend(state),
                 const SizedBox(height: 16),
-                
+
                 // Event Details
                 Expanded(
                   child: EventDetailsWidget(
@@ -257,7 +262,7 @@ class _EventsPageState extends State<EventsPage> {
                   ),
                 ),
                 const SizedBox(height: 16),
-                
+
                 // Monthly Stats
                 _buildMonthlyStats(context, state),
               ],
@@ -277,14 +282,14 @@ class _EventsPageState extends State<EventsPage> {
           children: [
             const Text(
               'Event Types',
-              style: TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
-              ),
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 12),
             ...EventType.values.map((type) {
-              final count = context.read<EventsCubit>().getEventCountByType(type, state.currentDate);
+              final count = context.read<EventsCubit>().getEventCountByType(
+                type,
+                state.currentDate,
+              );
               return Padding(
                 padding: const EdgeInsets.symmetric(vertical: 4),
                 child: Row(
@@ -321,9 +326,18 @@ class _EventsPageState extends State<EventsPage> {
   Widget _buildMonthlyStats(BuildContext context, EventsLoaded state) {
     final cubit = context.read<EventsCubit>();
     final totalEvents = cubit.getEventCountForMonth(state.currentDate);
-    final tournaments = cubit.getEventCountByType(EventType.tournament, state.currentDate);
-    final leagues = cubit.getEventCountByType(EventType.league, state.currentDate);
-    final practice = cubit.getEventCountByType(EventType.practice, state.currentDate);
+    final tournaments = cubit.getEventCountByType(
+      EventType.tournament,
+      state.currentDate,
+    );
+    final leagues = cubit.getEventCountByType(
+      EventType.league,
+      state.currentDate,
+    );
+    final practice = cubit.getEventCountByType(
+      EventType.practice,
+      state.currentDate,
+    );
 
     return Card(
       child: Padding(
@@ -333,17 +347,29 @@ class _EventsPageState extends State<EventsPage> {
           children: [
             const Text(
               'This Month',
-              style: TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
-              ),
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 12),
-            
-            _buildStatRow(Icons.emoji_events, 'Tournaments', tournaments, Colors.red),
-            _buildStatRow(Icons.calendar_today, 'League Games', leagues, Colors.blue),
-            _buildStatRow(Icons.sports_tennis, 'Practice Sessions', practice, Colors.green),
-            
+
+            _buildStatRow(
+              Icons.emoji_events,
+              'Tournaments',
+              tournaments,
+              Colors.red,
+            ),
+            _buildStatRow(
+              Icons.calendar_today,
+              'League Games',
+              leagues,
+              Colors.blue,
+            ),
+            _buildStatRow(
+              Icons.sports_tennis,
+              'Practice Sessions',
+              practice,
+              Colors.green,
+            ),
+
             const Divider(),
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -381,10 +407,7 @@ class _EventsPageState extends State<EventsPage> {
               Text(label),
             ],
           ),
-          Text(
-            '$count',
-            style: const TextStyle(fontWeight: FontWeight.bold),
-          ),
+          Text('$count', style: const TextStyle(fontWeight: FontWeight.bold)),
         ],
       ),
     );

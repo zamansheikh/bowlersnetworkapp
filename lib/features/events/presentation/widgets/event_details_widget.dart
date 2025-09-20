@@ -43,15 +43,12 @@ class EventDetailsWidget extends StatelessWidget {
                 ),
                 Text(
                   '${events.length} event(s)',
-                  style: const TextStyle(
-                    color: Colors.grey,
-                    fontSize: 14,
-                  ),
+                  style: const TextStyle(color: Colors.grey, fontSize: 14),
                 ),
               ],
             ),
             const SizedBox(height: 16),
-            
+
             // Search and Filter
             TextField(
               decoration: const InputDecoration(
@@ -63,7 +60,7 @@ class EventDetailsWidget extends StatelessWidget {
               onChanged: onSearchChanged,
             ),
             const SizedBox(height: 8),
-            
+
             DropdownButtonFormField<EventType?>(
               value: filterType,
               decoration: const InputDecoration(
@@ -76,15 +73,17 @@ class EventDetailsWidget extends StatelessWidget {
                   value: null,
                   child: Text('All Types'),
                 ),
-                ...EventType.values.map((type) => DropdownMenuItem<EventType?>(
-                      value: type,
-                      child: Text(_getEventTypeLabel(type)),
-                    )),
+                ...EventType.values.map(
+                  (type) => DropdownMenuItem<EventType?>(
+                    value: type,
+                    child: Text(_getEventTypeLabel(type)),
+                  ),
+                ),
               ],
               onChanged: onFilterChanged,
             ),
             const SizedBox(height: 16),
-            
+
             // Events List
             Expanded(
               child: events.isEmpty
@@ -156,13 +155,13 @@ class EventDetailsWidget extends StatelessWidget {
               ],
             ),
             const SizedBox(height: 8),
-            
+
             Row(
               children: [
                 const Icon(Icons.access_time, size: 16, color: Colors.grey),
                 const SizedBox(width: 4),
                 Text(
-                  event.endTime != null 
+                  event.endTime != null
                       ? '${event.time} - ${event.endTime}'
                       : event.time,
                   style: const TextStyle(color: Colors.grey),
@@ -170,7 +169,7 @@ class EventDetailsWidget extends StatelessWidget {
               ],
             ),
             const SizedBox(height: 4),
-            
+
             Row(
               children: [
                 const Icon(Icons.location_on, size: 16, color: Colors.grey),
@@ -183,7 +182,7 @@ class EventDetailsWidget extends StatelessWidget {
                 ),
               ],
             ),
-            
+
             if (event.participants > 0) ...[
               const SizedBox(height: 4),
               Row(
@@ -199,7 +198,7 @@ class EventDetailsWidget extends StatelessWidget {
                 ],
               ),
             ],
-            
+
             if (event.entryFee != null) ...[
               const SizedBox(height: 4),
               Row(
@@ -213,19 +212,22 @@ class EventDetailsWidget extends StatelessWidget {
                 ],
               ),
             ],
-            
+
             const SizedBox(height: 8),
             Text(
               event.description,
               style: const TextStyle(color: Colors.black87),
             ),
-            
+
             const SizedBox(height: 8),
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 8,
+                    vertical: 4,
+                  ),
                   decoration: BoxDecoration(
                     color: _getStatusColor(event.status),
                     borderRadius: BorderRadius.circular(12),
@@ -297,12 +299,8 @@ class EventDetailsWidget extends StatelessWidget {
         color = Colors.green;
         break;
     }
-    
-    return Icon(
-      Icons.flag,
-      size: 16,
-      color: color,
-    );
+
+    return Icon(Icons.flag, size: 16, color: color);
   }
 
   Color _getStatusColor(EventStatus status) {

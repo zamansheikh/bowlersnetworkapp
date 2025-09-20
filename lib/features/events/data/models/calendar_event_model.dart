@@ -23,25 +23,25 @@ class CalendarEventModel extends CalendarEvent {
     String? format,
     String? gameType,
   }) : super(
-          id: id,
-          title: title,
-          type: type,
-          date: date,
-          time: time,
-          endTime: endTime,
-          description: description,
-          location: location,
-          participants: participants,
-          maxParticipants: maxParticipants,
-          entryFee: entryFee,
-          prizePool: prizePool,
-          status: status,
-          priority: priority,
-          organizer: organizer,
-          registrationDeadline: registrationDeadline,
-          format: format,
-          gameType: gameType,
-        );
+         id: id,
+         title: title,
+         type: type,
+         date: date,
+         time: time,
+         endTime: endTime,
+         description: description,
+         location: location,
+         participants: participants,
+         maxParticipants: maxParticipants,
+         entryFee: entryFee,
+         prizePool: prizePool,
+         status: status,
+         priority: priority,
+         organizer: organizer,
+         registrationDeadline: registrationDeadline,
+         format: format,
+         gameType: gameType,
+       );
 
   // Convert Tournament to CalendarEvent
   factory CalendarEventModel.fromTournament(Tournament tournament) {
@@ -56,39 +56,48 @@ class CalendarEventModel extends CalendarEvent {
       date: tournament.startDate.split('T')[0], // Extract date part
       time: DateFormat('h:mm a').format(startDate),
       endTime: DateFormat('h:mm a').format(regDeadline),
-      description: '${tournament.format} tournament. Registration fee: \$${tournament.regFee}',
-      location: tournament.address.isNotEmpty ? tournament.address : 'Location TBD',
+      description:
+          '${tournament.format} tournament. Registration fee: \$${tournament.regFee}',
+      location: tournament.address.isNotEmpty
+          ? tournament.address
+          : 'Location TBD',
       participants: tournament.alreadyEnrolled,
       maxParticipants: tournament.participantsCount,
       entryFee: tournament.regFee,
       prizePool: null, // Not available in tournament data
-      status: regDeadline.isAfter(now) ? EventStatus.upcoming : EventStatus.completed,
-      priority: tournament.regFee > 50 ? EventPriority.high : EventPriority.medium,
+      status: regDeadline.isAfter(now)
+          ? EventStatus.upcoming
+          : EventStatus.completed,
+      priority: tournament.regFee > 50
+          ? EventPriority.high
+          : EventPriority.medium,
       organizer: 'Tournament Committee',
-      registrationDeadline: tournament.regDeadline.split('T')[0], // Extract date part
+      registrationDeadline: tournament.regDeadline.split(
+        'T',
+      )[0], // Extract date part
       format: tournament.format,
       gameType: 'Tournament',
     );
   }
 
   CalendarEvent toEntity() => CalendarEvent(
-        id: id,
-        title: title,
-        type: type,
-        date: date,
-        time: time,
-        endTime: endTime,
-        description: description,
-        location: location,
-        participants: participants,
-        maxParticipants: maxParticipants,
-        entryFee: entryFee,
-        prizePool: prizePool,
-        status: status,
-        priority: priority,
-        organizer: organizer,
-        registrationDeadline: registrationDeadline,
-        format: format,
-        gameType: gameType,
-      );
+    id: id,
+    title: title,
+    type: type,
+    date: date,
+    time: time,
+    endTime: endTime,
+    description: description,
+    location: location,
+    participants: participants,
+    maxParticipants: maxParticipants,
+    entryFee: entryFee,
+    prizePool: prizePool,
+    status: status,
+    priority: priority,
+    organizer: organizer,
+    registrationDeadline: registrationDeadline,
+    format: format,
+    gameType: gameType,
+  );
 }

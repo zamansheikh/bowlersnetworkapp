@@ -32,12 +32,18 @@ class EventsRemoteDataSourceImpl implements EventsRemoteDataSource {
       InterceptorsWrapper(
         onRequest: (options, handler) async {
           final token = _getAuthToken();
-          print('🏆 Interceptor: Token retrieved: ${token != null ? 'Token exists (${token.length} chars)' : 'No token found'}');
+          print(
+            '🏆 Interceptor: Token retrieved: ${token != null ? 'Token exists (${token.length} chars)' : 'No token found'}',
+          );
           if (token != null) {
             options.headers['Authorization'] = 'Bearer $token';
-            print('🏆 Interceptor: Added Authorization header: Bearer ${token.substring(0, 10)}...');
+            print(
+              '🏆 Interceptor: Added Authorization header: Bearer ${token.substring(0, 10)}...',
+            );
           } else {
-            print('🏆 Interceptor: No token found, skipping Authorization header');
+            print(
+              '🏆 Interceptor: No token found, skipping Authorization header',
+            );
           }
           print('🏆 Interceptor: Final headers: ${options.headers}');
           handler.next(options);
@@ -72,16 +78,18 @@ class EventsRemoteDataSourceImpl implements EventsRemoteDataSource {
   Future<List<TournamentModel>> getTournaments() async {
     try {
       print('🏆 EventsDataSource: Fetching tournaments from /api/tournaments');
-      
+
       final response = await _dio.get('/api/tournaments');
-      
+
       print('🏆 EventsDataSource: Response status: ${response.statusCode}');
       print('🏆 EventsDataSource: Response data: ${response.data}');
 
       if (response.statusCode == 200) {
         final List<dynamic> data = response.data as List<dynamic>;
         return data
-            .map((json) => TournamentModel.fromJson(json as Map<String, dynamic>))
+            .map(
+              (json) => TournamentModel.fromJson(json as Map<String, dynamic>),
+            )
             .toList();
       } else {
         throw Exception('Failed to load tournaments: ${response.statusCode}');
@@ -90,7 +98,9 @@ class EventsRemoteDataSourceImpl implements EventsRemoteDataSource {
       print('🏆 EventsDataSource: Dio error: ${e.message}');
       if (e.response != null) {
         print('🏆 EventsDataSource: Error response: ${e.response?.data}');
-        throw Exception('Failed to load tournaments: ${e.response?.statusCode} - ${e.response?.data}');
+        throw Exception(
+          'Failed to load tournaments: ${e.response?.statusCode} - ${e.response?.data}',
+        );
       }
       throw Exception('Network error: ${e.message}');
     } catch (e) {
@@ -103,10 +113,14 @@ class EventsRemoteDataSourceImpl implements EventsRemoteDataSource {
   Future<void> registerForTournament(int tournamentId) async {
     try {
       print('🏆 EventsDataSource: Registering for tournament $tournamentId');
-      
-      final response = await _dio.post('/api/tournaments/$tournamentId/register');
-      
-      print('🏆 EventsDataSource: Registration response: ${response.statusCode}');
+
+      final response = await _dio.post(
+        '/api/tournaments/$tournamentId/register',
+      );
+
+      print(
+        '🏆 EventsDataSource: Registration response: ${response.statusCode}',
+      );
 
       if (response.statusCode != 200 && response.statusCode != 201) {
         throw Exception('Failed to register: ${response.statusCode}');
@@ -114,7 +128,9 @@ class EventsRemoteDataSourceImpl implements EventsRemoteDataSource {
     } on DioException catch (e) {
       print('🏆 EventsDataSource: Registration error: ${e.message}');
       if (e.response != null) {
-        throw Exception('Registration failed: ${e.response?.statusCode} - ${e.response?.data}');
+        throw Exception(
+          'Registration failed: ${e.response?.statusCode} - ${e.response?.data}',
+        );
       }
       throw Exception('Network error: ${e.message}');
     }
@@ -124,10 +140,14 @@ class EventsRemoteDataSourceImpl implements EventsRemoteDataSource {
   Future<void> unregisterFromTournament(int tournamentId) async {
     try {
       print('🏆 EventsDataSource: Unregistering from tournament $tournamentId');
-      
-      final response = await _dio.delete('/api/tournaments/$tournamentId/register');
-      
-      print('🏆 EventsDataSource: Unregistration response: ${response.statusCode}');
+
+      final response = await _dio.delete(
+        '/api/tournaments/$tournamentId/register',
+      );
+
+      print(
+        '🏆 EventsDataSource: Unregistration response: ${response.statusCode}',
+      );
 
       if (response.statusCode != 200 && response.statusCode != 204) {
         throw Exception('Failed to unregister: ${response.statusCode}');
@@ -135,7 +155,9 @@ class EventsRemoteDataSourceImpl implements EventsRemoteDataSource {
     } on DioException catch (e) {
       print('🏆 EventsDataSource: Unregistration error: ${e.message}');
       if (e.response != null) {
-        throw Exception('Unregistration failed: ${e.response?.statusCode} - ${e.response?.data}');
+        throw Exception(
+          'Unregistration failed: ${e.response?.statusCode} - ${e.response?.data}',
+        );
       }
       throw Exception('Network error: ${e.message}');
     }

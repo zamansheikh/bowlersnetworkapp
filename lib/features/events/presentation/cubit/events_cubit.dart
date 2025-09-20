@@ -10,28 +10,28 @@ class EventsCubit extends Cubit<EventsState> {
   final GetTournaments getTournaments;
   final GetCalendarEvents getCalendarEvents;
 
-  EventsCubit({
-    required this.getTournaments,
-    required this.getCalendarEvents,
-  }) : super(EventsInitial());
+  EventsCubit({required this.getTournaments, required this.getCalendarEvents})
+    : super(EventsInitial());
 
   Future<void> loadEvents() async {
     try {
       emit(EventsLoading());
-      
+
       print('🏆 EventsCubit: Loading events...');
-      
+
       final tournaments = await getTournaments();
       final events = await getCalendarEvents();
-      
+
       print('🏆 EventsCubit: Loaded ${tournaments.length} tournaments');
       print('🏆 EventsCubit: Loaded ${events.length} events');
-      
-      emit(EventsLoaded(
-        tournaments: tournaments,
-        events: events,
-        currentDate: DateTime.now(),
-      ));
+
+      emit(
+        EventsLoaded(
+          tournaments: tournaments,
+          events: events,
+          currentDate: DateTime.now(),
+        ),
+      );
     } catch (e) {
       print('🏆 EventsCubit: Error loading events: $e');
       emit(EventsError('Failed to load events: $e'));
@@ -104,28 +104,36 @@ class EventsCubit extends Cubit<EventsState> {
   List<CalendarEvent> getFilteredEvents(DateTime? selectedDate) {
     if (state is EventsLoaded) {
       final current = state as EventsLoaded;
-      
+
       List<CalendarEvent> filteredEvents = current.events;
-      
+
       // Filter by selected date
       if (selectedDate != null) {
         final dateString = selectedDate.toIso8601String().split('T')[0];
-        filteredEvents = filteredEvents.where((event) => event.date == dateString).toList();
+        filteredEvents = filteredEvents
+            .where((event) => event.date == dateString)
+            .toList();
       }
-      
+
       // Filter by type
       if (current.filterType != null) {
-        filteredEvents = filteredEvents.where((event) => event.type == current.filterType).toList();
+        filteredEvents = filteredEvents
+            .where((event) => event.type == current.filterType)
+            .toList();
       }
-      
+
       // Filter by search term
       if (current.searchTerm.isNotEmpty) {
         final searchLower = current.searchTerm.toLowerCase();
-        filteredEvents = filteredEvents.where((event) =>
-            event.title.toLowerCase().contains(searchLower) ||
-            event.description.toLowerCase().contains(searchLower)).toList();
+        filteredEvents = filteredEvents
+            .where(
+              (event) =>
+                  event.title.toLowerCase().contains(searchLower) ||
+                  event.description.toLowerCase().contains(searchLower),
+            )
+            .toList();
       }
-      
+
       return filteredEvents;
     }
     return [];
@@ -147,9 +155,9 @@ class EventsCubit extends Cubit<EventsState> {
       final current = state as EventsLoaded;
       return current.events.where((event) {
         final eventDate = DateTime.parse(event.date);
-        return event.type == type && 
-               eventDate.year == date.year && 
-               eventDate.month == date.month;
+        return event.type == type &&
+            eventDate.year == date.year &&
+            eventDate.month == date.month;
       }).length;
     }
     return 0;
