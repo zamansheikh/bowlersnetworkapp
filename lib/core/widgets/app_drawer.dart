@@ -11,12 +11,9 @@ class AppDrawer extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final currentPath = GoRouter.of(context)
-        .routerDelegate
-        .currentConfiguration
-        .matches
-        .last
-        .matchedLocation;
+    final currentPath = GoRouter.of(
+      context,
+    ).routerDelegate.currentConfiguration.matches.last.matchedLocation;
 
     return Drawer(
       backgroundColor: AppColors.white,
@@ -66,13 +63,12 @@ class AppDrawer extends StatelessWidget {
                         CircleAvatar(
                           radius: 28,
                           backgroundColor: Colors.white,
-                          backgroundImage:
-                              photoUrl != null ? NetworkImage(photoUrl) : null,
+                          backgroundImage: photoUrl != null
+                              ? NetworkImage(photoUrl)
+                              : null,
                           child: photoUrl == null
                               ? Text(
-                                  name.isNotEmpty
-                                      ? name[0].toUpperCase()
-                                      : 'U',
+                                  name.isNotEmpty ? name[0].toUpperCase() : 'U',
                                   style: const TextStyle(
                                     fontSize: 22,
                                     fontWeight: FontWeight.bold,
@@ -311,8 +307,11 @@ class _NavItem extends StatelessWidget {
                 ),
               ),
               if (selected)
-                const Icon(Icons.check_circle,
-                    color: AppColors.primaryLimeGreen, size: 18),
+                const Icon(
+                  Icons.check_circle,
+                  color: AppColors.primaryLimeGreen,
+                  size: 18,
+                ),
             ],
           ),
         ),
@@ -323,12 +322,12 @@ class _NavItem extends StatelessWidget {
 
 void _go(BuildContext context, String path) {
   final router = GoRouter.of(context);
-  final current = router.routerDelegate.currentConfiguration.matches.last
-      .matchedLocation;
+  final current =
+      router.routerDelegate.currentConfiguration.matches.last.matchedLocation;
   if (current == path) return;
   if (path == '/') {
-    context.go(path);
+    context.go(path); // Home stays as go() since it's the base
   } else {
-    context.go(path);
+    context.push(path); // All other pages use push() to create navigation stack
   }
 }
