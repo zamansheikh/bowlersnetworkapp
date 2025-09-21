@@ -492,7 +492,7 @@ class _SignupPageState extends State<SignupPage> {
                         ),
                       ],
 
-                      // USBC Youth Bowler checkbox (for 13-18 year olds)
+                      // USBC Youth Bowler checkbox (for 13-18 year olds ONLY)
                       if (_isMinor) ...[
                         const SizedBox(height: 16),
                         Container(
@@ -538,49 +538,53 @@ class _SignupPageState extends State<SignupPage> {
                         ),
                       ],
 
-                      // USBC Youth Coach checkbox (for all ages)
-                      const SizedBox(height: 16),
-                      Container(
-                        decoration: BoxDecoration(
-                          color: AppColors.white,
-                          borderRadius: BorderRadius.circular(12),
-                          border: Border.all(
-                            color: _isUSBCYouthCoach
-                                ? AppColors.primaryLimeGreen
-                                : AppColors.outline,
-                          ),
-                          boxShadow: [
-                            BoxShadow(
-                              color: AppColors.shadow,
-                              blurRadius: 4,
-                              offset: const Offset(0, 2),
+                      // USBC Youth Coach checkbox (for 18+ ONLY)
+                      if (!_isMinor &&
+                          !_isUnder13 &&
+                          _selectedBirthDate != null) ...[
+                        const SizedBox(height: 16),
+                        Container(
+                          decoration: BoxDecoration(
+                            color: AppColors.white,
+                            borderRadius: BorderRadius.circular(12),
+                            border: Border.all(
+                              color: _isUSBCYouthCoach
+                                  ? AppColors.primaryLimeGreen
+                                  : AppColors.outline,
                             ),
-                          ],
-                        ),
-                        child: CheckboxListTile(
-                          value: _isUSBCYouthCoach,
-                          onChanged: (value) {
-                            setState(() {
-                              _isUSBCYouthCoach = value ?? false;
-                            });
-                          },
-                          title: const Text(
-                            'I am a USBC youth coach',
-                            style: TextStyle(
-                              fontWeight: FontWeight.w600,
-                              fontSize: 16,
+                            boxShadow: [
+                              BoxShadow(
+                                color: AppColors.shadow,
+                                blurRadius: 4,
+                                offset: const Offset(0, 2),
+                              ),
+                            ],
+                          ),
+                          child: CheckboxListTile(
+                            value: _isUSBCYouthCoach,
+                            onChanged: (value) {
+                              setState(() {
+                                _isUSBCYouthCoach = value ?? false;
+                              });
+                            },
+                            title: const Text(
+                              'I am a USBC youth coach',
+                              style: TextStyle(
+                                fontWeight: FontWeight.w600,
+                                fontSize: 16,
+                              ),
+                            ),
+                            subtitle: const Text(
+                              'Optional - Check if you coach youth bowling programs',
+                              style: TextStyle(fontSize: 12),
+                            ),
+                            activeColor: AppColors.primaryLimeGreen,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(8),
                             ),
                           ),
-                          subtitle: const Text(
-                            'Optional - Check if you coach youth bowling programs',
-                            style: TextStyle(fontSize: 12),
-                          ),
-                          activeColor: AppColors.primaryLimeGreen,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(8),
-                          ),
                         ),
-                      ),
+                      ],
 
                       const SizedBox(height: 24),
 
