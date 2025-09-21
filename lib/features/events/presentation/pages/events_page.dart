@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:table_calendar/table_calendar.dart';
+import '../../../../core/constants/colors.dart';
+import '../../../../core/theme/app_spacing.dart';
+import '../../../../core/theme/app_text_styles.dart';
 import '../../domain/entities/calendar_event.dart';
-import '../../domain/entities/calendar_day.dart';
 import '../cubit/events_cubit.dart';
 import '../cubit/events_state.dart';
-import '../widgets/calendar_widget.dart';
-import '../widgets/calendar_helper.dart';
-import '../widgets/event_details_widget.dart';
 
 class EventsPage extends StatefulWidget {
   const EventsPage({Key? key}) : super(key: key);
@@ -16,6 +16,10 @@ class EventsPage extends StatefulWidget {
 }
 
 class _EventsPageState extends State<EventsPage> {
+  CalendarFormat _calendarFormat = CalendarFormat.month;
+  DateTime _focusedDay = DateTime.now();
+  DateTime? _selectedDay;
+
   @override
   void initState() {
     super.initState();
@@ -26,16 +30,23 @@ class _EventsPageState extends State<EventsPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: AppColors.background,
       appBar: AppBar(
-        title: const Text('Events Calendar'),
-        backgroundColor: Colors.green,
-        foregroundColor: Colors.white,
+        elevation: 0,
+        backgroundColor: AppColors.white,
+        foregroundColor: AppColors.gray900,
+        title: Text(
+          'Events',
+          style: AppTextStyles.titleLarge.copyWith(
+            color: AppColors.gray900,
+            fontWeight: FontWeight.w700,
+          ),
+        ),
         actions: [
           IconButton(
             icon: const Icon(Icons.refresh),
-            onPressed: () {
-              context.read<EventsCubit>().loadEvents();
-            },
+            onPressed: () => context.read<EventsCubit>().loadEvents(),
+            color: AppColors.primaryLimeGreen,
           ),
         ],
       ),
@@ -46,7 +57,7 @@ class _EventsPageState extends State<EventsPage> {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  CircularProgressIndicator(),
+                  CircularProgressIndicator(color: AppColors.primaryLimeGreen),
                   SizedBox(height: 16),
                   Text('Loading events...'),
                 ],
@@ -97,14 +108,8 @@ class _EventsPageState extends State<EventsPage> {
   }
 
   Widget _buildEventsContent(BuildContext context, EventsLoaded state) {
-    final calendarDays = CalendarHelper.generateCalendar(
-      state.currentDate,
-      state.events,
-    );
-
-    final filteredEvents = context.read<EventsCubit>().getFilteredEvents(
-      state.selectedDate,
-    );
+    final filteredEvents =
+        context.read<EventsCubit>().getFilteredEvents(state.selectedDate);
 
     return LayoutBuilder(
       builder: (context, constraints) {
@@ -113,7 +118,6 @@ class _EventsPageState extends State<EventsPage> {
           return _buildMobileLayout(
             context,
             state,
-            calendarDays,
             filteredEvents,
           );
         }
@@ -122,7 +126,6 @@ class _EventsPageState extends State<EventsPage> {
           return _buildDesktopLayout(
             context,
             state,
-            calendarDays,
             filteredEvents,
           );
         }
@@ -133,61 +136,25 @@ class _EventsPageState extends State<EventsPage> {
   Widget _buildMobileLayout(
     BuildContext context,
     EventsLoaded state,
-    List<CalendarDay> calendarDays,
     List<CalendarEvent> filteredEvents,
   ) {
     return SingleChildScrollView(
-      padding: const EdgeInsets.all(16),
+      padding: EdgeInsets.all(AppSpacing.lg),
       child: Column(
         children: [
-          // Calendar
-          CalendarWidget(
-            calendarDays: calendarDays,
-            currentDate: state.currentDate,
-            selectedDate: state.selectedDate,
-            onDaySelected: (day) {
-              if (day.isCurrentMonth) {
-                final selectedDate = DateTime(
-                  state.currentDate.year,
-                  state.currentDate.month,
-                  day.date,
-                );
-                context.read<EventsCubit>().selectDate(selectedDate);
-              }
-            },
-            onPreviousMonth: () {
-              context.read<EventsCubit>().navigateMonth(false);
-            },
-            onNextMonth: () {
-              context.read<EventsCubit>().navigateMonth(true);
-            },
-            onToday: () {
-              context.read<EventsCubit>().setCurrentDate(DateTime.now());
-            },
-          ),
-          const SizedBox(height: 16),
+          _buildCalendar(state),
+          SizedBox(height: AppSpacing.lg),
 
           // Event Types Legend
           _buildEventTypesLegend(state),
-          const SizedBox(height: 16),
+          SizedBox(height: AppSpacing.lg),
 
           // Event Details
           SizedBox(
             height: 600,
-            child: EventDetailsWidget(
-              events: filteredEvents,
-              selectedDate: state.selectedDate,
-              searchTerm: state.searchTerm,
-              filterType: state.filterType,
-              onSearchChanged: (searchTerm) {
-                context.read<EventsCubit>().updateSearch(searchTerm);
-              },
-              onFilterChanged: (filterType) {
-                context.read<EventsCubit>().updateFilter(filterType);
-              },
-            ),
+            child: _buildEventsListCard(context, state, filteredEvents),
           ),
-          const SizedBox(height: 16),
+          SizedBox(height: AppSpacing.lg),
 
           // Monthly Stats
           _buildMonthlyStats(context, state),
@@ -199,43 +166,19 @@ class _EventsPageState extends State<EventsPage> {
   Widget _buildDesktopLayout(
     BuildContext context,
     EventsLoaded state,
-    List<CalendarDay> calendarDays,
     List<CalendarEvent> filteredEvents,
   ) {
     return Padding(
-      padding: const EdgeInsets.all(16),
+      padding: EdgeInsets.all(AppSpacing.lg),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           // Calendar section (2/3 width)
           Expanded(
             flex: 2,
-            child: CalendarWidget(
-              calendarDays: calendarDays,
-              currentDate: state.currentDate,
-              selectedDate: state.selectedDate,
-              onDaySelected: (day) {
-                if (day.isCurrentMonth) {
-                  final selectedDate = DateTime(
-                    state.currentDate.year,
-                    state.currentDate.month,
-                    day.date,
-                  );
-                  context.read<EventsCubit>().selectDate(selectedDate);
-                }
-              },
-              onPreviousMonth: () {
-                context.read<EventsCubit>().navigateMonth(false);
-              },
-              onNextMonth: () {
-                context.read<EventsCubit>().navigateMonth(true);
-              },
-              onToday: () {
-                context.read<EventsCubit>().setCurrentDate(DateTime.now());
-              },
-            ),
+            child: _buildCalendar(state),
           ),
-          const SizedBox(width: 16),
+          SizedBox(width: AppSpacing.lg),
 
           // Sidebar (1/3 width)
           Expanded(
@@ -244,24 +187,17 @@ class _EventsPageState extends State<EventsPage> {
               children: [
                 // Event Types Legend
                 _buildEventTypesLegend(state),
-                const SizedBox(height: 16),
+                SizedBox(height: AppSpacing.lg),
 
                 // Event Details
                 Expanded(
-                  child: EventDetailsWidget(
-                    events: filteredEvents,
-                    selectedDate: state.selectedDate,
-                    searchTerm: state.searchTerm,
-                    filterType: state.filterType,
-                    onSearchChanged: (searchTerm) {
-                      context.read<EventsCubit>().updateSearch(searchTerm);
-                    },
-                    onFilterChanged: (filterType) {
-                      context.read<EventsCubit>().updateFilter(filterType);
-                    },
+                  child: _buildEventsListCard(
+                    context,
+                    state,
+                    filteredEvents,
                   ),
                 ),
-                const SizedBox(height: 16),
+                SizedBox(height: AppSpacing.lg),
 
                 // Monthly Stats
                 _buildMonthlyStats(context, state),
@@ -273,25 +209,284 @@ class _EventsPageState extends State<EventsPage> {
     );
   }
 
-  Widget _buildEventTypesLegend(EventsLoaded state) {
+  Widget _buildCalendar(EventsLoaded state) {
+    _selectedDay = state.selectedDate;
+    _focusedDay = state.currentDate;
     return Card(
+      color: AppColors.white,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       child: Padding(
-        padding: const EdgeInsets.all(16),
+        padding: EdgeInsets.all(AppSpacing.md),
+        child: TableCalendar<CalendarEvent>(
+          firstDay: DateTime.utc(2020, 1, 1),
+          lastDay: DateTime.utc(2035, 12, 31),
+          focusedDay: _focusedDay,
+          calendarFormat: _calendarFormat,
+          selectedDayPredicate: (day) => isSameDay(_selectedDay, day),
+          onDaySelected: (selectedDay, focusedDay) {
+            setState(() {
+              _selectedDay = selectedDay;
+              _focusedDay = focusedDay;
+            });
+            context.read<EventsCubit>().selectDate(selectedDay);
+          },
+          onFormatChanged: (format) {
+            setState(() => _calendarFormat = format);
+          },
+          onPageChanged: (focusedDay) {
+            _focusedDay = focusedDay;
+            context.read<EventsCubit>().setCurrentDate(focusedDay);
+          },
+          eventLoader: (day) => context.read<EventsCubit>().getEventsForDate(day),
+          headerStyle: HeaderStyle(
+            titleCentered: true,
+            titleTextStyle: AppTextStyles.titleMedium.copyWith(
+              color: AppColors.gray900,
+              fontWeight: FontWeight.w700,
+            ),
+            formatButtonVisible: true,
+            leftChevronIcon: const Icon(Icons.chevron_left),
+            rightChevronIcon: const Icon(Icons.chevron_right),
+          ),
+          calendarStyle: CalendarStyle(
+            todayDecoration: BoxDecoration(
+              color: AppColors.primaryLimeGreen.withOpacity(0.2),
+              shape: BoxShape.circle,
+            ),
+            selectedDecoration: const BoxDecoration(
+              color: AppColors.primaryLimeGreen,
+              shape: BoxShape.circle,
+            ),
+            markerDecoration: const BoxDecoration(
+              color: AppColors.primaryLimeGreen,
+              shape: BoxShape.circle,
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildEventsListCard(
+    BuildContext context,
+    EventsLoaded state,
+    List<CalendarEvent> events,
+  ) {
+    return Card(
+      color: AppColors.white,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      child: Padding(
+        padding: EdgeInsets.all(AppSpacing.md),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text(
-              'Event Types',
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            Row(
+              children: [
+                Expanded(
+                  child: TextField(
+                    decoration: InputDecoration(
+                      hintText: 'Search events...',
+                      prefixIcon: const Icon(Icons.search),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      isDense: true,
+                    ),
+                    onChanged: (v) => context.read<EventsCubit>().updateSearch(v),
+                  ),
+                ),
+                SizedBox(width: AppSpacing.md),
+                PopupMenuButton<EventType?>(
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  initialValue: state.filterType,
+                  onSelected: (val) => context.read<EventsCubit>().updateFilter(val),
+                  itemBuilder: (context) => <PopupMenuEntry<EventType?>>[
+                    const PopupMenuItem<EventType?>(
+                      value: null,
+                      child: Text('All types'),
+                    ),
+                    ...EventType.values.map(
+                      (t) => PopupMenuItem<EventType?>(
+                        value: t,
+                        child: Text(_getEventTypeLabel(t)),
+                      ),
+                    ),
+                  ],
+                  child: Container(
+                    padding: EdgeInsets.symmetric(
+                      horizontal: AppSpacing.md,
+                      vertical: AppSpacing.sm,
+                    ),
+                    decoration: BoxDecoration(
+                      color: AppColors.primaryLimeGreen.withOpacity(0.1),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: Row(
+                      children: [
+                        const Icon(Icons.filter_list, color: AppColors.primaryLimeGreen),
+                        SizedBox(width: AppSpacing.xs),
+                        Text(
+                          state.filterType == null
+                              ? 'All types'
+                              : _getEventTypeLabel(state.filterType!),
+                          style: AppTextStyles.bodyMedium.copyWith(
+                            color: AppColors.primaryLimeGreen,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ],
             ),
-            const SizedBox(height: 12),
+            SizedBox(height: AppSpacing.md),
+
+            Expanded(
+              child: events.isEmpty
+                  ? Center(
+                      child: Text(
+                        state.selectedDate != null
+                            ? 'No events on this date'
+                            : 'No events found',
+                        style: AppTextStyles.bodyLarge.copyWith(
+                          color: AppColors.gray600,
+                        ),
+                      ),
+                    )
+                  : ListView.separated(
+                      itemCount: events.length,
+                      separatorBuilder: (_, __) => SizedBox(height: AppSpacing.sm),
+                      itemBuilder: (context, index) {
+                        final event = events[index];
+                        return _buildEventTile(event);
+                      },
+                    ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildEventTile(CalendarEvent event) {
+    final statusColor = _getStatusColor(event.status);
+    return Material(
+      color: AppColors.white,
+      borderRadius: BorderRadius.circular(12),
+      child: InkWell(
+        borderRadius: BorderRadius.circular(12),
+        onTap: () {
+          // TODO: Navigate to event details
+        },
+        child: Padding(
+          padding: EdgeInsets.all(AppSpacing.md),
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Container(
+                width: 40,
+                height: 40,
+                decoration: BoxDecoration(
+                  color: statusColor.withOpacity(0.15),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Icon(
+                  Icons.event,
+                  color: statusColor,
+                ),
+              ),
+              SizedBox(width: AppSpacing.md),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      event.title,
+                      style: AppTextStyles.bodyLarge.copyWith(
+                        color: AppColors.gray900,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                    SizedBox(height: AppSpacing.xs),
+                    Row(
+                      children: [
+                        const Icon(Icons.access_time, size: 14, color: AppColors.gray600),
+                        SizedBox(width: AppSpacing.xs),
+                        Text(
+                          event.endTime == null
+                              ? '${event.date} • ${event.time}'
+                              : '${event.date} • ${event.time} - ${event.endTime}',
+                          style: AppTextStyles.bodySmall.copyWith(color: AppColors.gray600),
+                        ),
+                      ],
+                    ),
+                    SizedBox(height: AppSpacing.xs),
+                    Row(
+                      children: [
+                        const Icon(Icons.place, size: 14, color: AppColors.gray600),
+                        SizedBox(width: AppSpacing.xs),
+                        Expanded(
+                          child: Text(
+                            event.location,
+                            style: AppTextStyles.bodySmall.copyWith(color: AppColors.gray600),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+              SizedBox(width: AppSpacing.md),
+              Container(
+                padding: EdgeInsets.symmetric(
+                  horizontal: AppSpacing.sm,
+                  vertical: AppSpacing.xs,
+                ),
+                decoration: BoxDecoration(
+                  color: statusColor.withOpacity(0.15),
+                  borderRadius: BorderRadius.circular(999),
+                ),
+                child: Text(
+                  _getStatusLabel(event.status),
+                  style: AppTextStyles.bodySmall.copyWith(color: statusColor, fontWeight: FontWeight.w600),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildEventTypesLegend(EventsLoaded state) {
+    return Card(
+      color: AppColors.white,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      child: Padding(
+        padding: EdgeInsets.all(AppSpacing.md),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'Event Types',
+              style: AppTextStyles.titleMedium.copyWith(
+                color: AppColors.gray900,
+                fontWeight: FontWeight.w700,
+              ),
+            ),
+            SizedBox(height: AppSpacing.sm),
             ...EventType.values.map((type) {
               final count = context.read<EventsCubit>().getEventCountByType(
                 type,
                 state.currentDate,
               );
               return Padding(
-                padding: const EdgeInsets.symmetric(vertical: 4),
+                padding: EdgeInsets.symmetric(vertical: AppSpacing.xs),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
@@ -305,14 +500,16 @@ class _EventsPageState extends State<EventsPage> {
                             borderRadius: BorderRadius.circular(4),
                           ),
                         ),
-                        const SizedBox(width: 8),
-                        Text(_getEventTypeLabel(type)),
+                        SizedBox(width: AppSpacing.sm),
+                        Text(
+                          _getEventTypeLabel(type),
+                          style: AppTextStyles.bodyMedium.copyWith(
+                            color: AppColors.gray800,
+                          ),
+                        ),
                       ],
                     ),
-                    Text(
-                      '$count',
-                      style: const TextStyle(fontWeight: FontWeight.bold),
-                    ),
+                    Text('$count', style: AppTextStyles.bodyMedium),
                   ],
                 ),
               );
@@ -340,16 +537,21 @@ class _EventsPageState extends State<EventsPage> {
     );
 
     return Card(
+      color: AppColors.white,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       child: Padding(
-        padding: const EdgeInsets.all(16),
+        padding: EdgeInsets.all(AppSpacing.md),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text(
+            Text(
               'This Month',
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+              style: AppTextStyles.titleMedium.copyWith(
+                color: AppColors.gray900,
+                fontWeight: FontWeight.w700,
+              ),
             ),
-            const SizedBox(height: 12),
+            SizedBox(height: AppSpacing.sm),
 
             _buildStatRow(
               Icons.emoji_events,
@@ -374,16 +576,12 @@ class _EventsPageState extends State<EventsPage> {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                const Text(
-                  'Total Events',
-                  style: TextStyle(fontWeight: FontWeight.bold),
-                ),
+                Text('Total Events', style: AppTextStyles.bodyMedium),
                 Text(
                   '$totalEvents',
-                  style: const TextStyle(
-                    fontSize: 20,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.green,
+                  style: AppTextStyles.titleMedium.copyWith(
+                    color: AppColors.primaryLimeGreen,
+                    fontWeight: FontWeight.w700,
                   ),
                 ),
               ],
@@ -396,18 +594,18 @@ class _EventsPageState extends State<EventsPage> {
 
   Widget _buildStatRow(IconData icon, String label, int count, Color color) {
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 4),
+      padding: EdgeInsets.symmetric(vertical: AppSpacing.xs),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           Row(
             children: [
               Icon(icon, size: 16, color: color),
-              const SizedBox(width: 8),
+              SizedBox(width: AppSpacing.sm),
               Text(label),
             ],
           ),
-          Text('$count', style: const TextStyle(fontWeight: FontWeight.bold)),
+          Text('$count', style: AppTextStyles.bodyMedium),
         ],
       ),
     );
@@ -440,6 +638,32 @@ class _EventsPageState extends State<EventsPage> {
         return Colors.green;
       case EventType.maintenance:
         return Colors.grey;
+    }
+  }
+
+  String _getStatusLabel(EventStatus status) {
+    switch (status) {
+      case EventStatus.upcoming:
+        return 'Upcoming';
+      case EventStatus.ongoing:
+        return 'Ongoing';
+      case EventStatus.completed:
+        return 'Completed';
+      case EventStatus.cancelled:
+        return 'Cancelled';
+    }
+  }
+
+  Color _getStatusColor(EventStatus status) {
+    switch (status) {
+      case EventStatus.upcoming:
+        return AppColors.info; // blue
+      case EventStatus.ongoing:
+        return AppColors.primaryLimeGreen; // brand
+      case EventStatus.completed:
+        return AppColors.success; // green
+      case EventStatus.cancelled:
+        return AppColors.error; // red
     }
   }
 }
