@@ -1,379 +1,1237 @@
 import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
-import '../../../../core/constants/colors.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:get_it/get_it.dart';
 
-class ProfileCompletionPage extends StatefulWidget {
+import '../../../../core/constants/colors.dart';
+import '../../domain/entities/brand.dart';
+import '../cubit/profile_completion_cubit.dart';
+import '../cubit/profile_completion_state.dart';
+
+class ProfileCompletionPage extends StatelessWidget {
   const ProfileCompletionPage({super.key});
 
   @override
-  State<ProfileCompletionPage> createState() => _ProfileCompletionPageState();
+  Widget build(BuildContext context) {
+    return BlocProvider(
+      create: (context) =>
+          GetIt.instance<ProfileCompletionCubit>()..loadBrands(),
+      child: const ProfileCompletionView(),
+    );
+  }
 }
 
-class _ProfileCompletionPageState extends State<ProfileCompletionPage> {
-  final _formKey = GlobalKey<FormState>();
-  final _bioController = TextEditingController();
+class ProfileCompletionView extends StatefulWidget {
+  const ProfileCompletionView({super.key});
 
-  String? _selectedAvatar;
-  DateTime? _birthDate;
+  @override
+  State<ProfileCompletionView> createState() => _ProfileCompletionViewState();
+}
 
-  final List<String> _avatarOptions = [
-    'https://profiles.bowlersnetwork.com/avatar1.png',
-    'https://profiles.bowlersnetwork.com/avatar2.png',
-    'https://profiles.bowlersnetwork.com/avatar3.png',
-    'https://profiles.bowlersnetwork.com/avatar4.png',
-  ];
+class _ProfileCompletionViewState extends State<ProfileCompletionView> {
+  final PageController _pageController = PageController();
 
   @override
   void dispose() {
-    _bioController.dispose();
+    _pageController.dispose();
     super.dispose();
-  }
-
-  Future<void> _selectBirthDate() async {
-    final DateTime? picked = await showDatePicker(
-      context: context,
-      initialDate: DateTime.now().subtract(const Duration(days: 18 * 365)),
-      firstDate: DateTime(1900),
-      lastDate: DateTime.now(),
-      builder: (context, child) {
-        return Theme(
-          data: Theme.of(context).copyWith(
-            colorScheme: Theme.of(context).colorScheme.copyWith(
-              primary: AppColors.primaryLimeGreen,
-              surface: AppColors.white,
-            ),
-          ),
-          child: child!,
-        );
-      },
-    );
-
-    if (picked != null && picked != _birthDate) {
-      setState(() {
-        _birthDate = picked;
-      });
-    }
-  }
-
-  void _completeProfile() {
-    if (_formKey.currentState!.validate()) {
-      // For now, just navigate to home since the profile completion
-      // would require additional API endpoints that weren't specified
-      context.go('/');
-
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: const Text('Profile completed successfully!'),
-          backgroundColor: AppColors.success,
-          behavior: SnackBarBehavior.floating,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(12),
-          ),
-        ),
-      );
-    }
-  }
-
-  void _skipForNow() {
-    context.go('/');
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Container(
-        decoration: const BoxDecoration(gradient: AppColors.backgroundGradient),
-        child: SafeArea(
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 24),
-            child: Form(
-              key: _formKey,
-              child: SingleChildScrollView(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    const SizedBox(height: 32),
+      backgroundColor: AppColors.lightGray,
+      body: SafeArea(
+        child: BlocBuilder<ProfileCompletionCubit, ProfileCompletionState>(
+          builder: (context, state) {
+            final cubit = context.read<ProfileCompletionCubit>();
 
-                    // Header
-                    Column(
+            return Column(
+              children: [
+                // Header with progress
+                _buildHeader(context, cubit),
+
+                // Step content
+                Expanded(
+                  child: PageView(
+                    controller: _pageController,
+                    physics: const NeverScrollableScrollPhysics(),
+                    children: [
+                      _BowlingStyleStep(cubit: cubit),
+                      _LocationStep(cubit: cubit),
+                      _BrandSelectionStep(cubit: cubit),
+                    ],
+                  ),
+                ),
+
+                // Navigation buttons
+                _buildNavigationButtons(context, cubit),
+              ],
+            );
+          },
+        ),
+      ),
+    );
+  }
+
+  Widget _buildHeader(BuildContext context, ProfileCompletionCubit cubit) {
+    return Container(
+      padding: const EdgeInsets.all(24),
+      decoration: const BoxDecoration(
+        color: AppColors.white,
+        boxShadow: [
+          BoxShadow(
+            color: AppColors.shadow,
+            blurRadius: 10,
+            offset: Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Container(
+                width: 40,
+                height: 40,
+                decoration: BoxDecoration(
+                  gradient: AppColors.primaryGradient,
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: const Icon(
+                  Icons.person_add,
+                  color: AppColors.white,
+                  size: 20,
+                ),
+              ),
+              const SizedBox(width: 16),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Complete Your Profile',
+                      style: Theme.of(context).textTheme.headlineSmall
+                          ?.copyWith(
+                            fontWeight: FontWeight.bold,
+                            color: AppColors.black,
+                          ),
+                    ),
+                    Text(
+                      'Step ${cubit.currentStep + 1} of 3',
+                      style: Theme.of(
+                        context,
+                      ).textTheme.bodyMedium?.copyWith(color: AppColors.gray),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+
+          const SizedBox(height: 20),
+
+          // Progress indicator
+          Row(
+            children: List.generate(3, (index) {
+              final isActive = index <= cubit.currentStep;
+
+              return Expanded(
+                child: Container(
+                  margin: EdgeInsets.only(right: index < 2 ? 8 : 0),
+                  height: 4,
+                  decoration: BoxDecoration(
+                    color: isActive
+                        ? AppColors.primaryLimeGreen
+                        : AppColors.gray.withValues(alpha: 0.3),
+                    borderRadius: BorderRadius.circular(2),
+                  ),
+                ),
+              );
+            }),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildNavigationButtons(
+    BuildContext context,
+    ProfileCompletionCubit cubit,
+  ) {
+    return Container(
+      padding: const EdgeInsets.all(24),
+      decoration: const BoxDecoration(
+        color: AppColors.white,
+        border: Border(top: BorderSide(color: AppColors.shadow, width: 0.5)),
+      ),
+      child: Row(
+        children: [
+          if (cubit.currentStep > 0)
+            Expanded(
+              child: OutlinedButton(
+                onPressed: () => _previousStep(cubit),
+                style: OutlinedButton.styleFrom(
+                  side: const BorderSide(color: AppColors.primaryLimeGreen),
+                  padding: const EdgeInsets.symmetric(vertical: 16),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                ),
+                child: const Text(
+                  'Previous',
+                  style: TextStyle(
+                    color: AppColors.primaryLimeGreen,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ),
+            ),
+
+          if (cubit.currentStep > 0) const SizedBox(width: 16),
+
+          Expanded(
+            flex: cubit.currentStep == 0 ? 1 : 1,
+            child: ElevatedButton(
+              onPressed: () => _nextStep(cubit),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: AppColors.primaryLimeGreen,
+                padding: const EdgeInsets.symmetric(vertical: 16),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                elevation: 0,
+              ),
+              child: Text(
+                cubit.currentStep == 2 ? 'Complete Profile' : 'Next',
+                style: const TextStyle(
+                  color: AppColors.white,
+                  fontWeight: FontWeight.w600,
+                  fontSize: 16,
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _previousStep(ProfileCompletionCubit cubit) {
+    cubit.previousStep();
+    _pageController.previousPage(
+      duration: const Duration(milliseconds: 300),
+      curve: Curves.easeInOut,
+    );
+  }
+
+  void _nextStep(ProfileCompletionCubit cubit) {
+    if (cubit.currentStep == 2) {
+      // Submit profile completion
+      cubit.completeProfile();
+    } else {
+      cubit.nextStep();
+      _pageController.nextPage(
+        duration: const Duration(milliseconds: 300),
+        curve: Curves.easeInOut,
+      );
+    }
+  }
+}
+
+// Step 1: Bowling Style & Membership
+class _BowlingStyleStep extends StatefulWidget {
+  final ProfileCompletionCubit cubit;
+
+  const _BowlingStyleStep({required this.cubit});
+
+  @override
+  State<_BowlingStyleStep> createState() => __BowlingStyleStepState();
+}
+
+class __BowlingStyleStepState extends State<_BowlingStyleStep> {
+  final _averageController = TextEditingController();
+
+  @override
+  void initState() {
+    super.initState();
+    _averageController.text = widget.cubit.data.average;
+  }
+
+  @override
+  void dispose() {
+    _averageController.dispose();
+    super.dispose();
+  }
+
+  void _updateData() {
+    widget.cubit.updateData(
+      widget.cubit.data.copyWith(average: _averageController.text),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final data = widget.cubit.data;
+
+    return Padding(
+      padding: const EdgeInsets.all(24),
+      child: SingleChildScrollView(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Welcome message
+            Container(
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: Colors.blue.shade50,
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(color: Colors.blue.shade200),
+              ),
+              child: Row(
+                children: [
+                  const Text('🎳', style: TextStyle(fontSize: 24)),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Container(
-                          width: 80,
-                          height: 80,
-                          decoration: BoxDecoration(
-                            gradient: AppColors.primaryGradient,
-                            borderRadius: BorderRadius.circular(20),
-                            boxShadow: [
-                              BoxShadow(
-                                color: AppColors.primaryLimeGreen.withValues(
-                                  alpha: 0.3,
-                                ),
-                                blurRadius: 15,
-                                offset: const Offset(0, 8),
-                              ),
-                            ],
-                          ),
-                          child: const Icon(
-                            Icons.person,
-                            size: 36,
-                            color: AppColors.white,
+                        const Text(
+                          'Welcome to Bowlers Network!',
+                          style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                            color: Colors.blue,
+                            fontSize: 16,
                           ),
                         ),
-                        const SizedBox(height: 24),
                         Text(
-                          'Complete Your Profile',
-                          style: Theme.of(context).textTheme.displaySmall
-                              ?.copyWith(
-                                fontWeight: FontWeight.bold,
-                                color: AppColors.black,
-                              ),
-                        ),
-                        const SizedBox(height: 8),
-                        Text(
-                          'Help us get to know you better!',
-                          style: Theme.of(context).textTheme.bodyLarge
-                              ?.copyWith(color: AppColors.gray),
-                          textAlign: TextAlign.center,
+                          'Let\'s start by learning about your bowling style and experience.',
+                          style: TextStyle(
+                            color: Colors.blue.shade700,
+                            fontSize: 14,
+                          ),
                         ),
                       ],
                     ),
+                  ),
+                ],
+              ),
+            ),
 
-                    const SizedBox(height: 40),
+            const SizedBox(height: 32),
 
-                    // Avatar Selection
-                    Text(
-                      'Choose Your Avatar',
-                      style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                        fontWeight: FontWeight.w600,
-                        color: AppColors.black,
+            Text(
+              'Bowling Style',
+              style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                fontWeight: FontWeight.bold,
+                color: AppColors.black,
+              ),
+            ),
+
+            const SizedBox(height: 16),
+
+            Row(
+              children: [
+                Expanded(
+                  child: _buildRadioOption(
+                    'One Handed',
+                    Icons.sports_cricket,
+                    data.bowlingStyle == 'One Handed',
+                    () => widget.cubit.updateData(
+                      data.copyWith(bowlingStyle: 'One Handed'),
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: _buildRadioOption(
+                    'Two Handed',
+                    Icons.sports_handball,
+                    data.bowlingStyle == 'Two Handed',
+                    () => widget.cubit.updateData(
+                      data.copyWith(bowlingStyle: 'Two Handed'),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+
+            const SizedBox(height: 24),
+
+            Text(
+              'Average Score',
+              style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                fontWeight: FontWeight.bold,
+                color: AppColors.black,
+              ),
+            ),
+
+            const SizedBox(height: 16),
+
+            TextFormField(
+              controller: _averageController,
+              keyboardType: TextInputType.number,
+              onChanged: (_) => _updateData(),
+              decoration: InputDecoration(
+                hintText: 'Enter your average score (e.g., 150)',
+                prefixIcon: const Icon(
+                  Icons.sports_score,
+                  color: AppColors.primaryLimeGreen,
+                ),
+                filled: true,
+                fillColor: AppColors.white,
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  borderSide: BorderSide.none,
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  borderSide: const BorderSide(
+                    color: AppColors.primaryLimeGreen,
+                    width: 2,
+                  ),
+                ),
+              ),
+            ),
+
+            const SizedBox(height: 24),
+
+            Text(
+              'Division',
+              style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                fontWeight: FontWeight.bold,
+                color: AppColors.black,
+              ),
+            ),
+
+            const SizedBox(height: 16),
+
+            Column(
+              children: [
+                _buildRadioOption(
+                  'Senior',
+                  Icons.elderly,
+                  data.division == 'Senior',
+                  () => widget.cubit.updateData(
+                    data.copyWith(division: 'Senior'),
+                  ),
+                ),
+                const SizedBox(height: 8),
+                _buildRadioOption(
+                  "Men's",
+                  Icons.man,
+                  data.division == "Men's",
+                  () =>
+                      widget.cubit.updateData(data.copyWith(division: "Men's")),
+                ),
+                const SizedBox(height: 8),
+                _buildRadioOption(
+                  "Women's",
+                  Icons.woman,
+                  data.division == "Women's",
+                  () => widget.cubit.updateData(
+                    data.copyWith(division: "Women's"),
+                  ),
+                ),
+              ],
+            ),
+
+            const SizedBox(height: 32),
+
+            Text(
+              'Membership Information',
+              style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                fontWeight: FontWeight.bold,
+                color: AppColors.black,
+              ),
+            ),
+
+            const SizedBox(height: 16),
+
+            // PBA Card Holder
+            Card(
+              elevation: 0,
+              color: AppColors.white,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+                side: BorderSide(
+                  color: data.isPBACardHolder
+                      ? AppColors.primaryLimeGreen
+                      : AppColors.gray.withValues(alpha: 0.3),
+                  width: data.isPBACardHolder ? 2 : 1,
+                ),
+              ),
+              child: CheckboxListTile(
+                value: data.isPBACardHolder,
+                onChanged: (value) {
+                  widget.cubit.updateData(
+                    data.copyWith(
+                      isPBACardHolder: value ?? false,
+                      pbaNumber: value == false ? null : data.pbaNumber,
+                    ),
+                  );
+                },
+                title: const Text(
+                  'PBA Card Holder',
+                  style: TextStyle(fontWeight: FontWeight.w600),
+                ),
+                subtitle: const Text('Professional Bowlers Association'),
+                activeColor: AppColors.primaryLimeGreen,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8),
+                ),
+              ),
+            ),
+
+            if (data.isPBACardHolder) ...[
+              const SizedBox(height: 12),
+              TextFormField(
+                initialValue: data.pbaNumber ?? '',
+                onChanged: (value) =>
+                    widget.cubit.updateData(data.copyWith(pbaNumber: value)),
+                decoration: InputDecoration(
+                  hintText: 'Enter PBA member number',
+                  prefixIcon: const Icon(
+                    Icons.card_membership,
+                    color: AppColors.primaryLimeGreen,
+                  ),
+                  filled: true,
+                  fillColor: AppColors.white,
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                    borderSide: BorderSide.none,
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                    borderSide: const BorderSide(
+                      color: AppColors.primaryLimeGreen,
+                      width: 2,
+                    ),
+                  ),
+                ),
+              ),
+            ],
+
+            const SizedBox(height: 16),
+
+            // USBC Member
+            Card(
+              elevation: 0,
+              color: AppColors.white,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+                side: BorderSide(
+                  color: data.isUSBCMember
+                      ? AppColors.primaryLimeGreen
+                      : AppColors.gray.withValues(alpha: 0.3),
+                  width: data.isUSBCMember ? 2 : 1,
+                ),
+              ),
+              child: CheckboxListTile(
+                value: data.isUSBCMember,
+                onChanged: (value) {
+                  widget.cubit.updateData(
+                    data.copyWith(
+                      isUSBCMember: value ?? false,
+                      usbcNumber: value == false ? null : data.usbcNumber,
+                    ),
+                  );
+                },
+                title: const Text(
+                  'USBC Member',
+                  style: TextStyle(fontWeight: FontWeight.w600),
+                ),
+                subtitle: const Text('United States Bowling Congress'),
+                activeColor: AppColors.primaryLimeGreen,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8),
+                ),
+              ),
+            ),
+
+            if (data.isUSBCMember) ...[
+              const SizedBox(height: 12),
+              TextFormField(
+                initialValue: data.usbcNumber ?? '',
+                onChanged: (value) =>
+                    widget.cubit.updateData(data.copyWith(usbcNumber: value)),
+                decoration: InputDecoration(
+                  hintText: 'Enter USBC member number',
+                  prefixIcon: const Icon(
+                    Icons.card_membership,
+                    color: AppColors.primaryLimeGreen,
+                  ),
+                  filled: true,
+                  fillColor: AppColors.white,
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                    borderSide: BorderSide.none,
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                    borderSide: const BorderSide(
+                      color: AppColors.primaryLimeGreen,
+                      width: 2,
+                    ),
+                  ),
+                ),
+              ),
+            ],
+
+            const SizedBox(height: 32),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildRadioOption(
+    String title,
+    IconData icon,
+    bool isSelected,
+    VoidCallback onTap,
+  ) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: AppColors.white,
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(
+            color: isSelected
+                ? AppColors.primaryLimeGreen
+                : AppColors.gray.withValues(alpha: 0.3),
+            width: isSelected ? 2 : 1,
+          ),
+          boxShadow: isSelected
+              ? [
+                  BoxShadow(
+                    color: AppColors.primaryLimeGreen.withValues(alpha: 0.1),
+                    blurRadius: 8,
+                    offset: const Offset(0, 2),
+                  ),
+                ]
+              : null,
+        ),
+        child: Row(
+          children: [
+            Icon(
+              icon,
+              color: isSelected ? AppColors.primaryLimeGreen : AppColors.gray,
+              size: 24,
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Text(
+                title,
+                style: TextStyle(
+                  fontWeight: FontWeight.w600,
+                  color: isSelected
+                      ? AppColors.primaryLimeGreen
+                      : AppColors.black,
+                  fontSize: 16,
+                ),
+              ),
+            ),
+            if (isSelected)
+              const Icon(
+                Icons.check_circle,
+                color: AppColors.primaryLimeGreen,
+                size: 20,
+              ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+// Step 2: Location Information
+class _LocationStep extends StatefulWidget {
+  final ProfileCompletionCubit cubit;
+
+  const _LocationStep({required this.cubit});
+
+  @override
+  State<_LocationStep> createState() => __LocationStepState();
+}
+
+class __LocationStepState extends State<_LocationStep> {
+  final _cityController = TextEditingController();
+  final _stateController = TextEditingController();
+  final _zipController = TextEditingController();
+
+  @override
+  void initState() {
+    super.initState();
+    final data = widget.cubit.data;
+    _cityController.text = data.city;
+    _stateController.text = data.state;
+    _zipController.text = data.zipCode;
+  }
+
+  @override
+  void dispose() {
+    _cityController.dispose();
+    _stateController.dispose();
+    _zipController.dispose();
+    super.dispose();
+  }
+
+  void _updateData() {
+    widget.cubit.updateData(
+      widget.cubit.data.copyWith(
+        city: _cityController.text,
+        state: _stateController.text,
+        zipCode: _zipController.text,
+      ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.all(24),
+      child: SingleChildScrollView(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Location info header
+            Container(
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: Colors.green.shade50,
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(color: Colors.green.shade200),
+              ),
+              child: Row(
+                children: [
+                  const Text('📍', style: TextStyle(fontSize: 24)),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Text(
+                          'Location Information',
+                          style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                            color: Colors.green,
+                            fontSize: 16,
+                          ),
+                        ),
+                        Text(
+                          'Help us connect you with nearby bowlers and events.',
+                          style: TextStyle(
+                            color: Colors.green.shade700,
+                            fontSize: 14,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+
+            const SizedBox(height: 32),
+
+            Text(
+              'Your Address',
+              style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                fontWeight: FontWeight.bold,
+                color: AppColors.black,
+              ),
+            ),
+
+            const SizedBox(height: 8),
+
+            Text(
+              'All fields are required to complete your profile',
+              style: Theme.of(
+                context,
+              ).textTheme.bodyMedium?.copyWith(color: AppColors.gray),
+            ),
+
+            const SizedBox(height: 24),
+
+            // City and State
+            Row(
+              children: [
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Text(
+                        'City *',
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w600,
+                          color: AppColors.black,
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      TextFormField(
+                        controller: _cityController,
+                        onChanged: (_) => _updateData(),
+                        decoration: InputDecoration(
+                          hintText: 'e.g., New York',
+                          prefixIcon: const Icon(
+                            Icons.location_city,
+                            color: AppColors.primaryLimeGreen,
+                          ),
+                          filled: true,
+                          fillColor: AppColors.white,
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12),
+                            borderSide: BorderSide.none,
+                          ),
+                          focusedBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12),
+                            borderSide: const BorderSide(
+                              color: AppColors.primaryLimeGreen,
+                              width: 2,
+                            ),
+                          ),
+                          errorBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12),
+                            borderSide: const BorderSide(
+                              color: AppColors.error,
+                              width: 2,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(width: 16),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Text(
+                        'State *',
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w600,
+                          color: AppColors.black,
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      TextFormField(
+                        controller: _stateController,
+                        onChanged: (_) => _updateData(),
+                        decoration: InputDecoration(
+                          hintText: 'e.g., NY',
+                          prefixIcon: const Icon(
+                            Icons.map,
+                            color: AppColors.primaryLimeGreen,
+                          ),
+                          filled: true,
+                          fillColor: AppColors.white,
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12),
+                            borderSide: BorderSide.none,
+                          ),
+                          focusedBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12),
+                            borderSide: const BorderSide(
+                              color: AppColors.primaryLimeGreen,
+                              width: 2,
+                            ),
+                          ),
+                          errorBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12),
+                            borderSide: const BorderSide(
+                              color: AppColors.error,
+                              width: 2,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+
+            const SizedBox(height: 24),
+
+            // ZIP Code
+            const Text(
+              'ZIP Code *',
+              style: TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.w600,
+                color: AppColors.black,
+              ),
+            ),
+            const SizedBox(height: 8),
+
+            TextFormField(
+              controller: _zipController,
+              keyboardType: TextInputType.number,
+              onChanged: (_) => _updateData(),
+              decoration: InputDecoration(
+                hintText: 'e.g., 12345',
+                prefixIcon: const Icon(
+                  Icons.local_post_office,
+                  color: AppColors.primaryLimeGreen,
+                ),
+                filled: true,
+                fillColor: AppColors.white,
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  borderSide: BorderSide.none,
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  borderSide: const BorderSide(
+                    color: AppColors.primaryLimeGreen,
+                    width: 2,
+                  ),
+                ),
+                errorBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  borderSide: const BorderSide(
+                    color: AppColors.error,
+                    width: 2,
+                  ),
+                ),
+              ),
+            ),
+
+            const SizedBox(height: 32),
+
+            // Info card
+            Container(
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: Colors.amber.shade50,
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(color: Colors.amber.shade200),
+              ),
+              child: Row(
+                children: [
+                  Icon(
+                    Icons.info_outline,
+                    color: Colors.amber.shade700,
+                    size: 24,
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Text(
+                      'Your location helps us recommend nearby bowling centers, tournaments, and connect you with local players.',
+                      style: TextStyle(
+                        color: Colors.amber.shade800,
+                        fontSize: 14,
                       ),
                     ),
+                  ),
+                ],
+              ),
+            ),
 
-                    const SizedBox(height: 20),
+            const SizedBox(height: 32),
+          ],
+        ),
+      ),
+    );
+  }
+}
 
-                    SizedBox(
-                      height: 100,
-                      child: ListView.builder(
-                        scrollDirection: Axis.horizontal,
-                        itemCount: _avatarOptions.length,
-                        itemBuilder: (context, index) {
-                          final avatar = _avatarOptions[index];
-                          final isSelected = _selectedAvatar == avatar;
+// Step 3: Brand Selection
+class _BrandSelectionStep extends StatelessWidget {
+  final ProfileCompletionCubit cubit;
 
-                          return GestureDetector(
-                            onTap: () =>
-                                setState(() => _selectedAvatar = avatar),
-                            child: Container(
-                              margin: const EdgeInsets.only(right: 20),
-                              decoration: BoxDecoration(
-                                shape: BoxShape.circle,
-                                border: isSelected
-                                    ? Border.all(
-                                        color: AppColors.primaryLimeGreen,
-                                        width: 3,
-                                      )
-                                    : null,
-                                boxShadow: isSelected
-                                    ? [
-                                        BoxShadow(
-                                          color: AppColors.primaryLimeGreen
-                                              .withValues(alpha: 0.3),
-                                          blurRadius: 10,
-                                          offset: const Offset(0, 4),
-                                        ),
-                                      ]
-                                    : [
-                                        BoxShadow(
-                                          color: AppColors.shadow,
-                                          blurRadius: 8,
-                                          offset: const Offset(0, 4),
-                                        ),
-                                      ],
-                              ),
-                              child: CircleAvatar(
-                                radius: 40,
-                                backgroundColor: AppColors.white,
-                                child: Icon(
-                                  Icons.person,
-                                  size: 40,
-                                  color: isSelected
-                                      ? AppColors.primaryLimeGreen
-                                      : AppColors.gray,
+  const _BrandSelectionStep({required this.cubit});
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.all(24),
+      child: BlocBuilder<ProfileCompletionCubit, ProfileCompletionState>(
+        builder: (context, state) {
+          if (state is BrandsLoading) {
+            return const Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  CircularProgressIndicator(color: AppColors.primaryLimeGreen),
+                  SizedBox(height: 16),
+                  Text(
+                    'Loading brands...',
+                    style: TextStyle(color: AppColors.gray, fontSize: 16),
+                  ),
+                ],
+              ),
+            );
+          }
+
+          if (state is BrandsError) {
+            return Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  const Icon(
+                    Icons.error_outline,
+                    size: 64,
+                    color: AppColors.error,
+                  ),
+                  const SizedBox(height: 16),
+                  Text(
+                    'Failed to load brands',
+                    style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                      color: AppColors.error,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    state.message,
+                    textAlign: TextAlign.center,
+                    style: const TextStyle(color: AppColors.gray, fontSize: 14),
+                  ),
+                  const SizedBox(height: 24),
+                  ElevatedButton(
+                    onPressed: () => cubit.loadBrands(),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: AppColors.primaryLimeGreen,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                    ),
+                    child: const Text(
+                      'Retry',
+                      style: TextStyle(color: AppColors.white),
+                    ),
+                  ),
+                ],
+              ),
+            );
+          }
+
+          if (state is BrandsLoaded) {
+            return SingleChildScrollView(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // Brand selection header
+                  Container(
+                    padding: const EdgeInsets.all(16),
+                    decoration: BoxDecoration(
+                      color: Colors.purple.shade50,
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(color: Colors.purple.shade200),
+                    ),
+                    child: Row(
+                      children: [
+                        const Text('🎯', style: TextStyle(fontSize: 24)),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              const Text(
+                                'Choose Your Favorite Brands',
+                                style: TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.purple,
+                                  fontSize: 16,
                                 ),
                               ),
+                              Text(
+                                'Select brands you love - you can choose multiple from each category.',
+                                style: TextStyle(
+                                  color: Colors.purple.shade700,
+                                  fontSize: 14,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+
+                  const SizedBox(height: 24),
+
+                  if (cubit.data.selectedBrandIds.isNotEmpty) ...[
+                    Container(
+                      padding: const EdgeInsets.all(12),
+                      decoration: BoxDecoration(
+                        color: AppColors.primaryLimeGreen.withValues(
+                          alpha: 0.1,
+                        ),
+                        borderRadius: BorderRadius.circular(8),
+                        border: Border.all(
+                          color: AppColors.primaryLimeGreen.withValues(
+                            alpha: 0.3,
+                          ),
+                        ),
+                      ),
+                      child: Row(
+                        children: [
+                          const Icon(
+                            Icons.check_circle,
+                            color: AppColors.primaryLimeGreen,
+                            size: 20,
+                          ),
+                          const SizedBox(width: 8),
+                          Text(
+                            '${cubit.data.selectedBrandIds.length} brands selected',
+                            style: const TextStyle(
+                              color: AppColors.primaryLimeGreen,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(height: 24),
+                  ],
+
+                  ...state.brands.brandsByCategory.entries.map((entry) {
+                    return _buildBrandCategory(entry.key, entry.value);
+                  }),
+                ],
+              ),
+            );
+          }
+
+          return const SizedBox();
+        },
+      ),
+    );
+  }
+
+  Widget _buildBrandCategory(String categoryName, List<Brand> brands) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Container(
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+          decoration: BoxDecoration(
+            color: AppColors.primaryLimeGreen.withValues(alpha: 0.1),
+            borderRadius: BorderRadius.circular(20),
+          ),
+          child: Text(
+            categoryName,
+            style: const TextStyle(
+              fontSize: 16,
+              fontWeight: FontWeight.bold,
+              color: AppColors.primaryLimeGreen,
+            ),
+          ),
+        ),
+        const SizedBox(height: 16),
+
+        GridView.builder(
+          shrinkWrap: true,
+          physics: const NeverScrollableScrollPhysics(),
+          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+            crossAxisCount: 2,
+            crossAxisSpacing: 12,
+            mainAxisSpacing: 12,
+            childAspectRatio: 2.5,
+          ),
+          itemCount: brands.length,
+          itemBuilder: (context, index) {
+            final brand = brands[index];
+            final isSelected = cubit.data.selectedBrandIds.contains(
+              brand.brandId,
+            );
+
+            return GestureDetector(
+              onTap: () => cubit.toggleBrandSelection(brand.brandId),
+              child: AnimatedContainer(
+                duration: const Duration(milliseconds: 200),
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: AppColors.white,
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(
+                    color: isSelected
+                        ? AppColors.primaryLimeGreen
+                        : AppColors.gray.withValues(alpha: 0.3),
+                    width: isSelected ? 2 : 1,
+                  ),
+                  boxShadow: isSelected
+                      ? [
+                          BoxShadow(
+                            color: AppColors.primaryLimeGreen.withValues(
+                              alpha: 0.2,
+                            ),
+                            blurRadius: 8,
+                            offset: const Offset(0, 2),
+                          ),
+                        ]
+                      : [
+                          BoxShadow(
+                            color: AppColors.shadow.withValues(alpha: 0.1),
+                            blurRadius: 4,
+                            offset: const Offset(0, 1),
+                          ),
+                        ],
+                ),
+                child: Row(
+                  children: [
+                    ClipRRect(
+                      borderRadius: BorderRadius.circular(8),
+                      child: Image.network(
+                        brand.logoUrl,
+                        width: 32,
+                        height: 32,
+                        fit: BoxFit.contain,
+                        errorBuilder: (context, error, stackTrace) {
+                          return Container(
+                            width: 32,
+                            height: 32,
+                            decoration: BoxDecoration(
+                              color: AppColors.gray.withValues(alpha: 0.3),
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                            child: const Icon(
+                              Icons.image_not_supported,
+                              size: 16,
+                              color: AppColors.gray,
                             ),
                           );
                         },
                       ),
                     ),
-
-                    const SizedBox(height: 32),
-
-                    // Birth Date
-                    Text(
-                      'Birth Date',
-                      style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                        fontWeight: FontWeight.w600,
-                        color: AppColors.black,
-                      ),
-                    ),
-
-                    const SizedBox(height: 16),
-
-                    Container(
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(16),
-                        boxShadow: [
-                          BoxShadow(
-                            color: AppColors.shadow,
-                            blurRadius: 10,
-                            offset: const Offset(0, 4),
-                          ),
-                        ],
-                      ),
-                      child: InkWell(
-                        onTap: _selectBirthDate,
-                        borderRadius: BorderRadius.circular(16),
-                        child: Container(
-                          padding: const EdgeInsets.all(16),
-                          decoration: BoxDecoration(
-                            color: AppColors.white,
-                            borderRadius: BorderRadius.circular(16),
-                          ),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              Text(
-                                _birthDate != null
-                                    ? '${_birthDate!.day}/${_birthDate!.month}/${_birthDate!.year}'
-                                    : 'Select your birth date',
-                                style: TextStyle(
-                                  fontSize: 16,
-                                  color: _birthDate != null
-                                      ? AppColors.black
-                                      : AppColors.gray,
-                                  fontWeight: FontWeight.w500,
-                                ),
-                              ),
-                              Icon(
-                                Icons.calendar_today,
-                                color: AppColors.primaryLimeGreen,
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-                    ),
-
-                    const SizedBox(height: 32),
-
-                    // Bio
-                    Text(
-                      'Bio (Optional)',
-                      style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                        fontWeight: FontWeight.w600,
-                        color: AppColors.black,
-                      ),
-                    ),
-
-                    const SizedBox(height: 16),
-
-                    Container(
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(16),
-                        boxShadow: [
-                          BoxShadow(
-                            color: AppColors.shadow,
-                            blurRadius: 10,
-                            offset: const Offset(0, 4),
-                          ),
-                        ],
-                      ),
-                      child: TextFormField(
-                        controller: _bioController,
-                        maxLines: 4,
-                        decoration: const InputDecoration(
-                          hintText:
-                              'Tell us a bit about yourself and your bowling experience...',
-                          fillColor: AppColors.white,
-                          filled: true,
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.all(Radius.circular(16)),
-                            borderSide: BorderSide.none,
-                          ),
-                          focusedBorder: OutlineInputBorder(
-                            borderRadius: BorderRadius.all(Radius.circular(16)),
-                            borderSide: BorderSide(
-                              color: AppColors.primaryLimeGreen,
-                              width: 2,
-                            ),
-                          ),
-                          contentPadding: EdgeInsets.all(16),
-                        ),
-                      ),
-                    ),
-
-                    const SizedBox(height: 40),
-
-                    // Complete Profile Button
-                    Container(
-                      height: 56,
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(16),
-                        gradient: AppColors.primaryGradient,
-                        boxShadow: [
-                          BoxShadow(
-                            color: AppColors.primaryLimeGreen.withValues(
-                              alpha: 0.4,
-                            ),
-                            blurRadius: 15,
-                            offset: const Offset(0, 8),
-                          ),
-                        ],
-                      ),
-                      child: ElevatedButton(
-                        onPressed: _completeProfile,
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.transparent,
-                          shadowColor: Colors.transparent,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(16),
-                          ),
-                        ),
-                        child: const Text(
-                          'Complete Profile',
-                          style: TextStyle(
-                            fontSize: 18,
-                            fontWeight: FontWeight.w600,
-                            color: AppColors.white,
-                          ),
-                        ),
-                      ),
-                    ),
-
-                    const SizedBox(height: 16),
-
-                    // Skip Button
-                    TextButton(
-                      onPressed: _skipForNow,
+                    const SizedBox(width: 12),
+                    Expanded(
                       child: Text(
-                        'Skip for now',
+                        brand.name,
                         style: TextStyle(
-                          color: AppColors.gray,
-                          fontSize: 16,
-                          fontWeight: FontWeight.w500,
+                          fontWeight: FontWeight.w600,
+                          color: isSelected
+                              ? AppColors.primaryLimeGreen
+                              : AppColors.black,
+                          fontSize: 14,
                         ),
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
                       ),
                     ),
-
-                    const SizedBox(height: 32),
+                    if (isSelected)
+                      const Icon(
+                        Icons.check_circle,
+                        color: AppColors.primaryLimeGreen,
+                        size: 20,
+                      ),
                   ],
                 ),
               ),
-            ),
-          ),
+            );
+          },
         ),
-      ),
+
+        const SizedBox(height: 32),
+      ],
     );
   }
 }
