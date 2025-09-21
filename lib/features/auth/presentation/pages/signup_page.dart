@@ -188,8 +188,6 @@ class _SignupPageState extends State<SignupPage> {
                       },
                     ),
 
-                    const SizedBox(height: 16),
-
                     // Last Name
                     _buildTextField(
                       controller: _lastNameCtrl,
@@ -202,8 +200,6 @@ class _SignupPageState extends State<SignupPage> {
                         return null;
                       },
                     ),
-
-                    const SizedBox(height: 16),
 
                     // Username
                     _buildTextField(
@@ -220,8 +216,6 @@ class _SignupPageState extends State<SignupPage> {
                         return null;
                       },
                     ),
-
-                    const SizedBox(height: 16),
 
                     // Email
                     _buildTextField(
@@ -241,8 +235,6 @@ class _SignupPageState extends State<SignupPage> {
                         return null;
                       },
                     ),
-
-                    const SizedBox(height: 16),
 
                     // Password
                     _buildTextField(
@@ -271,70 +263,8 @@ class _SignupPageState extends State<SignupPage> {
                       },
                     ),
 
-                    const SizedBox(height: 16),
-
                     // Birth Date
-                    GestureDetector(
-                      onTap: () async {
-                        final selectedDate = await showDatePicker(
-                          context: context,
-                          initialDate: DateTime.now().subtract(
-                            const Duration(days: 18 * 365),
-                          ),
-                          firstDate: DateTime(1900),
-                          lastDate: DateTime.now(),
-                          builder: (context, child) {
-                            return Theme(
-                              data: Theme.of(context).copyWith(
-                                colorScheme: Theme.of(context).colorScheme
-                                    .copyWith(
-                                      primary: AppColors.primaryLimeGreen,
-                                      surface: AppColors.white,
-                                    ),
-                              ),
-                              child: child!,
-                            );
-                          },
-                        );
-                        if (selectedDate != null) {
-                          setState(() {
-                            _selectedBirthDate = selectedDate;
-                            _birthDateCtrl.text =
-                                '${selectedDate.year}-${selectedDate.month.toString().padLeft(2, '0')}-${selectedDate.day.toString().padLeft(2, '0')}';
-                          });
-                        }
-                      },
-                      child: Container(
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(16),
-                          boxShadow: [
-                            BoxShadow(
-                              color: AppColors.shadow,
-                              blurRadius: 10,
-                              offset: const Offset(0, 4),
-                            ),
-                          ],
-                        ),
-                        child: TextFormField(
-                          controller: _birthDateCtrl,
-                          enabled: false,
-                          decoration: InputDecoration(
-                            labelText: 'Birth Date',
-                            prefixIcon: const Icon(Icons.calendar_today),
-                            fillColor: AppColors.white,
-                            suffixIcon: const Icon(Icons.arrow_drop_down),
-                          ),
-                          validator: (value) {
-                            if (value == null || value.trim().isEmpty) {
-                              return 'Please select your birth date';
-                            }
-                            return null;
-                          },
-                        ),
-                      ),
-                    ),
-
-                    const SizedBox(height: 16),
+                    _buildBirthDateField(),
 
                     // Age restriction warnings and parent information
                     if (_isUnder13) ...[
@@ -806,6 +736,114 @@ class _SignupPageState extends State<SignupPage> {
           errorStyle: AppTextStyles.bodySmall.copyWith(color: AppColors.error),
         ),
         validator: validator,
+      ),
+    );
+  }
+
+  Widget _buildBirthDateField() {
+    return Container(
+      margin: EdgeInsets.only(bottom: AppSpacing.md),
+      child: GestureDetector(
+        onTap: () async {
+          final selectedDate = await showDatePicker(
+            context: context,
+            initialDate: DateTime.now().subtract(
+              const Duration(days: 18 * 365),
+            ),
+            firstDate: DateTime(1900),
+            lastDate: DateTime.now(),
+            builder: (context, child) {
+              return Theme(
+                data: Theme.of(context).copyWith(
+                  colorScheme: ColorScheme.fromSeed(
+                    seedColor: AppColors.primaryLimeGreen,
+                    brightness: Brightness.light,
+                  ),
+                ),
+                child: child!,
+              );
+            },
+          );
+          if (selectedDate != null) {
+            setState(() {
+              _selectedBirthDate = selectedDate;
+              _birthDateCtrl.text =
+                  '${selectedDate.year}-${selectedDate.month.toString().padLeft(2, '0')}-${selectedDate.day.toString().padLeft(2, '0')}';
+            });
+          }
+        },
+        child: TextFormField(
+          controller: _birthDateCtrl,
+          enabled: false,
+          style: AppTextStyles.bodyLarge.copyWith(
+            color: AppColors.gray800,
+          ),
+          decoration: InputDecoration(
+            labelText: 'Birth Date',
+            labelStyle: AppTextStyles.bodyMedium.copyWith(
+              color: AppColors.gray600,
+            ),
+            prefixIcon: Icon(
+              Icons.calendar_today,
+              color: AppColors.gray500,
+              size: 20,
+            ),
+            suffixIcon: Icon(
+              Icons.arrow_drop_down,
+              color: AppColors.gray500,
+            ),
+            filled: true,
+            fillColor: AppColors.surface,
+            contentPadding: EdgeInsets.symmetric(
+              horizontal: AppSpacing.md,
+              vertical: AppSpacing.md,
+            ),
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(AppSpacing.inputRadius),
+              borderSide: const BorderSide(
+                color: AppColors.border,
+                width: 1,
+              ),
+            ),
+            enabledBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(AppSpacing.inputRadius),
+              borderSide: const BorderSide(
+                color: AppColors.border,
+                width: 1,
+              ),
+            ),
+            focusedBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(AppSpacing.inputRadius),
+              borderSide: const BorderSide(
+                color: AppColors.borderFocus,
+                width: 2,
+              ),
+            ),
+            errorBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(AppSpacing.inputRadius),
+              borderSide: const BorderSide(
+                color: AppColors.borderError,
+                width: 1,
+              ),
+            ),
+            focusedErrorBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(AppSpacing.inputRadius),
+              borderSide: const BorderSide(
+                color: AppColors.borderError,
+                width: 2,
+              ),
+            ),
+            errorStyle: AppTextStyles.bodySmall.copyWith(
+              color: AppColors.error,
+            ),
+          ),
+          validator: (value) {
+            if (value == null || value.trim().isEmpty) {
+              return 'Please select your birth date';
+            }
+            return null;
+          },
+        ),
       ),
     );
   }
