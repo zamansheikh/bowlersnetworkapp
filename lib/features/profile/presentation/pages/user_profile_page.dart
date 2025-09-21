@@ -342,7 +342,7 @@ class UserProfilePage extends StatelessWidget {
                 end: Alignment.bottomCenter,
                 colors: [
                   AppColors.primaryLimeGreen.withValues(alpha: 0.8),
-                  AppColors.darkLimeGreen.withValues(alpha: 0.9),
+                  AppColors.primaryDark.withValues(alpha: 0.9),
                 ],
               ),
             ),

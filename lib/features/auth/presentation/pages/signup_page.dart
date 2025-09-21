@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import '../../../../core/constants/colors.dart';
+import '../../../../core/theme/app_text_styles.dart';
+import '../../../../core/theme/app_spacing.dart';
 import '../bloc/signup_cubit.dart';
 
 class SignupPage extends StatefulWidget {
@@ -84,12 +86,11 @@ class _SignupPageState extends State<SignupPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Container(
-        decoration: const BoxDecoration(gradient: AppColors.backgroundGradient),
-        child: SafeArea(
-          child: SingleChildScrollView(
-            padding: const EdgeInsets.symmetric(horizontal: 24),
-            child: BlocConsumer<SignupCubit, SignupState>(
+      backgroundColor: AppColors.background,
+      body: SafeArea(
+        child: SingleChildScrollView(
+          padding: EdgeInsets.symmetric(horizontal: AppSpacing.screenMargin),
+          child: BlocConsumer<SignupCubit, SignupState>(
               listener: (context, state) {
                 if (state is SignupDataValid) {
                   // Navigate to email verification
@@ -129,14 +130,12 @@ class _SignupPageState extends State<SignupPage> {
                             height: 80,
                             decoration: BoxDecoration(
                               gradient: AppColors.primaryGradient,
-                              borderRadius: BorderRadius.circular(20),
+                              borderRadius: BorderRadius.circular(AppSpacing.radiusLG),
                               boxShadow: [
                                 BoxShadow(
-                                  color: AppColors.primaryLimeGreen.withValues(
-                                    alpha: 0.3,
-                                  ),
-                                  blurRadius: 15,
-                                  offset: const Offset(0, 8),
+                                  color: AppColors.shadowPrimary,
+                                  blurRadius: AppSpacing.elevationMD,
+                                  offset: const Offset(0, 4),
                                 ),
                               ],
                             ),
@@ -146,26 +145,27 @@ class _SignupPageState extends State<SignupPage> {
                               color: AppColors.white,
                             ),
                           ),
-                          const SizedBox(height: 24),
+                          SizedBox(height: AppSpacing.lg),
                           Text(
                             'Create Account',
-                            style: Theme.of(context).textTheme.displaySmall
-                                ?.copyWith(
-                                  fontWeight: FontWeight.bold,
-                                  color: AppColors.black,
-                                ),
+                            style: AppTextStyles.displaySmall.copyWith(
+                              color: AppColors.gray900,
+                              fontWeight: FontWeight.w700,
+                            ),
+                            textAlign: TextAlign.center,
                           ),
-                          const SizedBox(height: 8),
+                          SizedBox(height: AppSpacing.xs),
                           Text(
                             'Join the bowling community today',
-                            style: Theme.of(context).textTheme.bodyLarge
-                                ?.copyWith(color: AppColors.gray),
+                            style: AppTextStyles.bodyLarge.copyWith(
+                              color: AppColors.gray600,
+                            ),
                             textAlign: TextAlign.center,
                           ),
                         ],
                       ),
 
-                      const SizedBox(height: 40),
+                      SizedBox(height: AppSpacing.xl),
 
                       // First Name
                       _buildTextField(
@@ -656,21 +656,21 @@ class _SignupPageState extends State<SignupPage> {
                       else
                         Container(
                           height: 56,
+                          width: double.infinity,
                           decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(16),
+                            borderRadius: BorderRadius.circular(AppSpacing.buttonRadius),
                             gradient: _isUnder13
                                 ? LinearGradient(
-                                    colors: [AppColors.gray, AppColors.gray],
+                                    colors: [AppColors.gray400, AppColors.gray400],
                                   )
                                 : AppColors.primaryGradient,
                             boxShadow: _isUnder13
                                 ? []
                                 : [
                                     BoxShadow(
-                                      color: AppColors.primaryLimeGreen
-                                          .withValues(alpha: 0.4),
-                                      blurRadius: 15,
-                                      offset: const Offset(0, 8),
+                                      color: AppColors.shadowPrimary,
+                                      blurRadius: AppSpacing.elevationMD,
+                                      offset: const Offset(0, 4),
                                     ),
                                   ],
                           ),
@@ -680,25 +680,23 @@ class _SignupPageState extends State<SignupPage> {
                               backgroundColor: Colors.transparent,
                               shadowColor: Colors.transparent,
                               shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(16),
+                                borderRadius: BorderRadius.circular(AppSpacing.buttonRadius),
                               ),
                             ),
                             child: Text(
                               _isUnder13
                                   ? 'Age Requirement Not Met'
                                   : 'Continue',
-                              style: TextStyle(
-                                fontSize: 18,
-                                fontWeight: FontWeight.w600,
+                              style: AppTextStyles.button.copyWith(
                                 color: _isUnder13
-                                    ? AppColors.gray
+                                    ? AppColors.gray600
                                     : AppColors.white,
                               ),
                             ),
                           ),
                         ),
 
-                      const SizedBox(height: 24),
+                      SizedBox(height: AppSpacing.lg),
 
                       // Login link
                       Row(
@@ -706,14 +704,15 @@ class _SignupPageState extends State<SignupPage> {
                         children: [
                           Text(
                             'Already have an account? ',
-                            style: Theme.of(context).textTheme.bodyMedium
-                                ?.copyWith(color: AppColors.gray),
+                            style: AppTextStyles.bodyMedium.copyWith(
+                              color: AppColors.gray600,
+                            ),
                           ),
                           TextButton(
                             onPressed: () => context.go('/signin'),
                             child: Text(
                               'Sign In',
-                              style: TextStyle(
+                              style: AppTextStyles.labelLarge.copyWith(
                                 color: AppColors.primaryLimeGreen,
                                 fontWeight: FontWeight.w600,
                               ),
@@ -722,7 +721,7 @@ class _SignupPageState extends State<SignupPage> {
                         ],
                       ),
 
-                      const SizedBox(height: 32),
+                      SizedBox(height: AppSpacing.xl),
                     ],
                   ),
                 );
@@ -730,8 +729,7 @@ class _SignupPageState extends State<SignupPage> {
             ),
           ),
         ),
-      ),
-    );
+      );
   }
 
   Widget _buildTextField({
@@ -744,25 +742,69 @@ class _SignupPageState extends State<SignupPage> {
     String? Function(String?)? validator,
   }) {
     return Container(
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(16),
-        boxShadow: [
-          BoxShadow(
-            color: AppColors.shadow,
-            blurRadius: 10,
-            offset: const Offset(0, 4),
-          ),
-        ],
-      ),
+      margin: EdgeInsets.only(bottom: AppSpacing.md),
       child: TextFormField(
         controller: controller,
         keyboardType: keyboardType,
         obscureText: obscureText,
+        style: AppTextStyles.bodyLarge.copyWith(
+          color: AppColors.gray800,
+        ),
         decoration: InputDecoration(
           labelText: label,
-          prefixIcon: Icon(icon),
-          fillColor: AppColors.white,
+          labelStyle: AppTextStyles.bodyMedium.copyWith(
+            color: AppColors.gray600,
+          ),
+          prefixIcon: Icon(
+            icon,
+            color: AppColors.gray500,
+            size: 20,
+          ),
           suffixIcon: suffixIcon,
+          filled: true,
+          fillColor: AppColors.surface,
+          contentPadding: EdgeInsets.symmetric(
+            horizontal: AppSpacing.md,
+            vertical: AppSpacing.md,
+          ),
+          border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(AppSpacing.inputRadius),
+            borderSide: const BorderSide(
+              color: AppColors.border,
+              width: 1,
+            ),
+          ),
+          enabledBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(AppSpacing.inputRadius),
+            borderSide: const BorderSide(
+              color: AppColors.border,
+              width: 1,
+            ),
+          ),
+          focusedBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(AppSpacing.inputRadius),
+            borderSide: const BorderSide(
+              color: AppColors.borderFocus,
+              width: 2,
+            ),
+          ),
+          errorBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(AppSpacing.inputRadius),
+            borderSide: const BorderSide(
+              color: AppColors.borderError,
+              width: 1,
+            ),
+          ),
+          focusedErrorBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(AppSpacing.inputRadius),
+            borderSide: const BorderSide(
+              color: AppColors.borderError,
+              width: 2,
+            ),
+          ),
+          errorStyle: AppTextStyles.bodySmall.copyWith(
+            color: AppColors.error,
+          ),
         ),
         validator: validator,
       ),
