@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:go_router/go_router.dart';
 import '../cubit/messages_cubit.dart';
 import '../cubit/messages_state.dart';
 import '../widgets/conversation_list_item.dart';
@@ -8,6 +9,8 @@ import '../widgets/message_input.dart';
 import '../widgets/new_message_modal.dart';
 import '../../data/models/available_member_model.dart';
 import '../../../../core/constants/colors.dart';
+import '../../../../core/theme/app_spacing.dart';
+import '../../../../core/theme/app_text_styles.dart';
 
 class MessagesPage extends StatefulWidget {
   final int? targetRoomId;
@@ -96,6 +99,49 @@ class _MessagesPageState extends State<MessagesPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: AppColors.gray50,
+      appBar: AppBar(
+        elevation: 0,
+        backgroundColor: AppColors.white,
+        foregroundColor: AppColors.gray900,
+        leading: Container(
+          margin: EdgeInsets.all(AppSpacing.sm),
+          decoration: BoxDecoration(
+            color: AppColors.gray50,
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(color: AppColors.gray200),
+          ),
+          child: IconButton(
+            icon: const Icon(Icons.arrow_back_ios_rounded),
+            onPressed: () => context.pop(),
+            color: AppColors.gray700,
+            iconSize: 18,
+          ),
+        ),
+        title: Text(
+          'Messages',
+          style: AppTextStyles.headlineMedium.copyWith(
+            color: AppColors.gray900,
+            fontWeight: FontWeight.w800,
+          ),
+        ),
+        actions: [
+          Container(
+            margin: EdgeInsets.only(right: AppSpacing.md),
+            decoration: BoxDecoration(
+              color: AppColors.primaryLimeGreen.withOpacity(0.1),
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(color: AppColors.primaryLimeGreen.withOpacity(0.3)),
+            ),
+            child: IconButton(
+              icon: const Icon(Icons.add_rounded),
+              onPressed: _showNewMessageModalDialog,
+              color: AppColors.primaryLimeGreen,
+              iconSize: 20,
+            ),
+          ),
+        ],
+      ),
       body: SafeArea(
         child: Padding(
           padding: const EdgeInsets.all(16.0),

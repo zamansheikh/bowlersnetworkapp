@@ -2,6 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import '../../../../core/di/injection.dart';
+import '../../../../core/constants/colors.dart';
+import '../../../../core/theme/app_spacing.dart';
+import '../../../../core/theme/app_text_styles.dart';
 import '../../domain/entities/pro_player.dart';
 import '../cubit/pro_players_cubit.dart';
 import '../widgets/player_card.dart';
@@ -78,21 +81,47 @@ class _ProPlayersPageState extends State<ProPlayersPage> {
     return BlocProvider.value(
       value: _cubit,
       child: Scaffold(
-        backgroundColor: Colors.grey[50],
+        backgroundColor: AppColors.gray50,
         appBar: AppBar(
-          title: const Text(
-            'Professional Bowlers',
-            style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white),
+          elevation: 0,
+          backgroundColor: AppColors.white,
+          foregroundColor: AppColors.gray900,
+          leading: Container(
+            margin: EdgeInsets.all(AppSpacing.sm),
+            decoration: BoxDecoration(
+              color: AppColors.gray50,
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(color: AppColors.gray200),
+            ),
+            child: IconButton(
+              icon: const Icon(Icons.arrow_back_ios_rounded),
+              onPressed: () => context.pop(),
+              color: AppColors.gray700,
+              iconSize: 18,
+            ),
           ),
-          backgroundColor: const Color(0xFF8BC342),
-          foregroundColor: Colors.white,
-          elevation: 4,
-          shadowColor: const Color(0xFF8BC342).withOpacity(0.3),
+          title: Text(
+            'Professional Bowlers',
+            style: AppTextStyles.headlineMedium.copyWith(
+              color: AppColors.gray900,
+              fontWeight: FontWeight.w800,
+            ),
+          ),
           actions: [
-            IconButton(
-              icon: const Icon(Icons.refresh),
-              onPressed: () => _cubit.loadProPlayers(),
-              tooltip: 'Refresh',
+            Container(
+              margin: EdgeInsets.only(right: AppSpacing.md),
+              decoration: BoxDecoration(
+                color: AppColors.primaryLimeGreen.withOpacity(0.1),
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(color: AppColors.primaryLimeGreen.withOpacity(0.3)),
+              ),
+              child: IconButton(
+                icon: const Icon(Icons.refresh_rounded),
+                onPressed: () => _cubit.loadProPlayers(),
+                color: AppColors.primaryLimeGreen,
+                iconSize: 20,
+                tooltip: 'Refresh',
+              ),
             ),
           ],
         ),

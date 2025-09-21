@@ -4,6 +4,8 @@ import 'package:go_router/go_router.dart';
 import '../../../auth/presentation/bloc/auth_cubit.dart';
 import '../../../home/data/models/user_model.dart';
 import '../../../../core/constants/colors.dart';
+import '../../../../core/theme/app_spacing.dart';
+import '../../../../core/theme/app_text_styles.dart';
 
 class UserProfilePage extends StatelessWidget {
   const UserProfilePage({super.key});
@@ -17,22 +19,25 @@ class UserProfilePage extends StatelessWidget {
         elevation: 0,
         scrolledUnderElevation: 1,
         surfaceTintColor: AppColors.white,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: AppColors.black),
-          onPressed: () {
-            if (Navigator.canPop(context)) {
-              Navigator.pop(context);
-            } else {
-              context.go('/');
-            }
-          },
+        leading: Container(
+          margin: EdgeInsets.all(AppSpacing.sm),
+          decoration: BoxDecoration(
+            color: AppColors.gray50,
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(color: AppColors.gray200),
+          ),
+          child: IconButton(
+            icon: const Icon(Icons.arrow_back_ios_rounded),
+            onPressed: () => context.pop(),
+            color: AppColors.gray700,
+            iconSize: 18,
+          ),
         ),
-        title: const Text(
+        title: Text(
           'Profile',
-          style: TextStyle(
-            color: AppColors.black,
-            fontWeight: FontWeight.w600,
-            fontSize: 20,
+          style: AppTextStyles.headlineMedium.copyWith(
+            color: AppColors.gray900,
+            fontWeight: FontWeight.w800,
           ),
         ),
         actions: [
