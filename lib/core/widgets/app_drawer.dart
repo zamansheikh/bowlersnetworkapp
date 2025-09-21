@@ -1,4 +1,5 @@
 import 'package:bowlersnetworkapp/core/constants/colors.dart';
+import 'package:bowlersnetworkapp/core/theme/app_text_styles.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
@@ -10,155 +11,202 @@ class AppDrawer extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final currentPath = GoRouter.of(context)
+        .routerDelegate
+        .currentConfiguration
+        .matches
+        .last
+        .matchedLocation;
+
     return Drawer(
-      child: Column(
-        children: [
-          Expanded(
-            child: ListView(
-              padding: EdgeInsets.zero,
-              children: [
-                BlocBuilder<AuthCubit, AuthState>(
-                  builder: (context, state) {
-                    if (state is Authenticated) {
-                      final user = state.user;
-                      Widget profileImage = CircleAvatar(
-                        backgroundColor: Colors.white,
-                        child: Text(
-                          user.name[0].toUpperCase(),
-                          style: TextStyle(
-                            fontSize: 24.0,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.blue[800],
-                          ),
+      backgroundColor: AppColors.white,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.only(
+          topRight: Radius.circular(16),
+          bottomRight: Radius.circular(16),
+        ),
+      ),
+      child: SafeArea(
+        child: Column(
+          children: [
+            // Modern header
+            Padding(
+              padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
+              child: BlocBuilder<AuthCubit, AuthState>(
+                builder: (context, state) {
+                  String name = 'Guest';
+                  String email = '';
+                  String? photoUrl;
+                  if (state is Authenticated) {
+                    name = state.user.name;
+                    email = state.user.email;
+                    if (state.user is UserModel) {
+                      final m = state.user as UserModel;
+                      if (m.profilePictureUrl.isNotEmpty) {
+                        photoUrl = m.profilePictureUrl;
+                      }
+                    }
+                  }
+
+                  return Container(
+                    decoration: BoxDecoration(
+                      gradient: AppColors.primaryGradient,
+                      borderRadius: BorderRadius.circular(16),
+                      boxShadow: [
+                        BoxShadow(
+                          color: AppColors.shadow,
+                          blurRadius: 10,
+                          offset: const Offset(0, 4),
                         ),
-                      );
-                      if (user is UserModel &&
-                          user.profilePictureUrl.isNotEmpty) {
-                        profileImage = CircleAvatar(
+                      ],
+                    ),
+                    padding: const EdgeInsets.all(16),
+                    child: Row(
+                      children: [
+                        CircleAvatar(
+                          radius: 28,
                           backgroundColor: Colors.white,
-                          backgroundImage: NetworkImage(user.profilePictureUrl),
-                          onBackgroundImageError: (_, __) {},
-                          child: user.profilePictureUrl.isEmpty
+                          backgroundImage:
+                              photoUrl != null ? NetworkImage(photoUrl) : null,
+                          child: photoUrl == null
                               ? Text(
-                                  user.name[0].toUpperCase(),
-                                  style: TextStyle(
-                                    fontSize: 24.0,
+                                  name.isNotEmpty
+                                      ? name[0].toUpperCase()
+                                      : 'U',
+                                  style: const TextStyle(
+                                    fontSize: 22,
                                     fontWeight: FontWeight.bold,
-                                    color: Colors.blue[800],
+                                    color: AppColors.black,
                                   ),
                                 )
                               : null,
-                        );
-                      }
-                      return UserAccountsDrawerHeader(
-                        decoration: BoxDecoration(
-                          gradient: AppColors.primaryGradient,
                         ),
-                        accountName: Text(
-                          user.name,
-                          style: const TextStyle(
-                            fontWeight: FontWeight.bold,
-                            fontSize: 16,
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                name,
+                                style: AppTextStyles.titleMedium.copyWith(
+                                  color: AppColors.white,
+                                  fontWeight: FontWeight.w700,
+                                ),
+                              ),
+                              if (email.isNotEmpty)
+                                Text(
+                                  email,
+                                  style: AppTextStyles.bodySmall.copyWith(
+                                    color: AppColors.white.withOpacity(0.9),
+                                  ),
+                                ),
+                            ],
                           ),
                         ),
-                        accountEmail: Text(
-                          user.email,
-                          style: const TextStyle(fontSize: 14),
+                      ],
+                    ),
+                  );
+                },
+              ),
+            ),
+
+            // Nav list
+            Expanded(
+              child: ListView(
+                padding: const EdgeInsets.symmetric(horizontal: 12),
+                children: [
+                  const SizedBox(height: 8),
+                  _SectionHeader(title: 'Discover'),
+                  _NavItem(
+                    icon: Icons.home,
+                    label: 'Home',
+                    selected: currentPath == '/',
+                    onTap: () => _go(context, '/'),
+                  ),
+                  _NavItem(
+                    icon: Icons.star,
+                    label: 'Pro Players',
+                    selected: currentPath.startsWith('/pro-players'),
+                    onTap: () => _go(context, '/pro-players'),
+                  ),
+                  _NavItem(
+                    icon: Icons.analytics,
+                    label: 'Overview',
+                    selected: currentPath.startsWith('/overview'),
+                    onTap: () => _go(context, '/overview'),
+                  ),
+                  const SizedBox(height: 12),
+                  _SectionHeader(title: 'Social'),
+                  _NavItem(
+                    icon: Icons.message,
+                    label: 'Messages',
+                    selected: currentPath.startsWith('/messages'),
+                    onTap: () => _go(context, '/messages'),
+                  ),
+                  _NavItem(
+                    icon: Icons.event,
+                    label: 'Events',
+                    selected: currentPath.startsWith('/events'),
+                    onTap: () => _go(context, '/events'),
+                  ),
+                  const SizedBox(height: 12),
+                  _SectionHeader(title: 'Account'),
+                  _NavItem(
+                    icon: Icons.person,
+                    label: 'Profile',
+                    selected: currentPath.startsWith('/profile'),
+                    onTap: () => _go(context, '/profile'),
+                  ),
+                  const SizedBox(height: 24),
+                ],
+              ),
+            ),
+
+            // Logout
+            Padding(
+              padding: const EdgeInsets.fromLTRB(12, 0, 12, 16),
+              child: BlocBuilder<AuthCubit, AuthState>(
+                builder: (context, state) {
+                  if (state is Authenticated) {
+                    return InkWell(
+                      borderRadius: BorderRadius.circular(12),
+                      onTap: () {
+                        Navigator.pop(context);
+                        _showLogoutDialog(context);
+                      },
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 12,
+                          vertical: 12,
                         ),
-                        currentAccountPicture: profileImage,
-                      );
-                    }
-                    return const DrawerHeader(
-                      decoration: BoxDecoration(color: Colors.blue),
-                      child: Text(
-                        'Menu',
-                        style: TextStyle(color: Colors.white, fontSize: 24),
+                        decoration: BoxDecoration(
+                          color: AppColors.error.withOpacity(0.06),
+                          borderRadius: BorderRadius.circular(12),
+                          border: Border.all(
+                            color: AppColors.error.withOpacity(0.2),
+                          ),
+                        ),
+                        child: Row(
+                          children: [
+                            const Icon(Icons.logout, color: AppColors.error),
+                            const SizedBox(width: 12),
+                            Text(
+                              'Logout',
+                              style: AppTextStyles.button.copyWith(
+                                color: AppColors.error,
+                              ),
+                            ),
+                          ],
+                        ),
                       ),
                     );
-                  },
-                ),
-                ListTile(
-                  leading: const Icon(Icons.home),
-                  title: const Text('Home'),
-                  onTap: () {
-                    Navigator.pop(context);
-                    if (GoRouter.of(context)
-                            .routerDelegate
-                            .currentConfiguration
-                            .matches
-                            .last
-                            .matchedLocation !=
-                        '/') {
-                      context.pushReplacement('/');
-                    }
-                  },
-                ),
-                ListTile(
-                  leading: const Icon(Icons.person),
-                  title: const Text('Profile'),
-                  onTap: () {
-                    Navigator.pop(context);
-                    context.push('/profile');
-                  },
-                ),
-                ListTile(
-                  leading: const Icon(Icons.star),
-                  title: const Text('Pro Players'),
-                  onTap: () {
-                    Navigator.pop(context);
-                    context.push('/pro-players');
-                  },
-                ),
-                ListTile(
-                  leading: const Icon(Icons.analytics),
-                  title: const Text('Overview'),
-                  onTap: () {
-                    Navigator.pop(context);
-                    context.push('/overview');
-                  },
-                ),
-                ListTile(
-                  leading: const Icon(Icons.message),
-                  title: const Text('Messages'),
-                  onTap: () {
-                    Navigator.pop(context);
-                    context.push('/messages');
-                  },
-                ),
-                ListTile(
-                  leading: const Icon(Icons.event),
-                  title: const Text('Events'),
-                  onTap: () {
-                    Navigator.pop(context);
-                    context.push('/events');
-                  },
-                ),
-              ],
+                  }
+                  return const SizedBox.shrink();
+                },
+              ),
             ),
-          ),
-          Padding(
-            padding: const EdgeInsets.only(bottom: 16.0),
-            child: BlocBuilder<AuthCubit, AuthState>(
-              builder: (context, state) {
-                if (state is Authenticated) {
-                  return ListTile(
-                    leading: const Icon(Icons.logout, color: Colors.red),
-                    title: const Text(
-                      'Logout',
-                      style: TextStyle(color: Colors.red),
-                    ),
-                    onTap: () {
-                      Navigator.pop(context);
-                      _showLogoutDialog(context);
-                    },
-                  );
-                }
-                return const SizedBox.shrink();
-              },
-            ),
-          ),
-          const SizedBox(height: 24),
-        ],
+          ],
+        ),
       ),
     );
   }
@@ -192,5 +240,95 @@ class AppDrawer extends StatelessWidget {
         );
       },
     );
+  }
+}
+
+class _SectionHeader extends StatelessWidget {
+  final String title;
+  const _SectionHeader({required this.title});
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(12, 8, 12, 6),
+      child: Text(
+        title,
+        style: AppTextStyles.bodySmall.copyWith(
+          color: AppColors.gray,
+          fontWeight: FontWeight.w600,
+          letterSpacing: 0.3,
+        ),
+      ),
+    );
+  }
+}
+
+class _NavItem extends StatelessWidget {
+  final IconData icon;
+  final String label;
+  final bool selected;
+  final VoidCallback onTap;
+
+  const _NavItem({
+    required this.icon,
+    required this.label,
+    required this.selected,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final color = selected ? AppColors.primaryLimeGreen : AppColors.black;
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 0),
+      child: InkWell(
+        onTap: () {
+          Navigator.pop(context);
+          onTap();
+        },
+        borderRadius: BorderRadius.circular(12),
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+          decoration: BoxDecoration(
+            color: selected
+                ? AppColors.primaryLimeGreen.withOpacity(0.08)
+                : AppColors.white,
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(
+              color: selected
+                  ? AppColors.primaryLimeGreen.withOpacity(0.3)
+                  : AppColors.border,
+            ),
+          ),
+          child: Row(
+            children: [
+              Icon(icon, color: color),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Text(
+                  label,
+                  style: AppTextStyles.bodyMedium.copyWith(color: color),
+                ),
+              ),
+              if (selected)
+                const Icon(Icons.check_circle,
+                    color: AppColors.primaryLimeGreen, size: 18),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+void _go(BuildContext context, String path) {
+  final router = GoRouter.of(context);
+  final current = router.routerDelegate.currentConfiguration.matches.last
+      .matchedLocation;
+  if (current == path) return;
+  if (path == '/') {
+    context.go(path);
+  } else {
+    context.go(path);
   }
 }
