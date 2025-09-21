@@ -239,10 +239,14 @@ class _ProfileCompletionViewState extends State<ProfileCompletionView> {
   }
 
   void _previousStep(ProfileCompletionCubit cubit) {
+    // Dismiss keyboard when navigating
+    FocusScope.of(context).unfocus();
     cubit.previousStep();
   }
 
   void _nextStep(ProfileCompletionCubit cubit) {
+    // Dismiss keyboard when navigating
+    FocusScope.of(context).unfocus();
     if (cubit.currentStep == 2) {
       // Submit profile completion
       cubit.completeProfile();
@@ -976,7 +980,12 @@ class _BrandSelectionStep extends StatelessWidget {
       padding: const EdgeInsets.all(24),
       child: BlocBuilder<ProfileCompletionCubit, ProfileCompletionState>(
         builder: (context, state) {
+          final cached = cubit.brands;
           if (state is BrandsLoading) {
+            // If we already have brands cached, render them to avoid blank UI
+            if (cached != null) {
+              return _buildLoadedBrands(context, cached);
+            }
             return const Center(
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
@@ -1036,95 +1045,104 @@ class _BrandSelectionStep extends StatelessWidget {
           }
 
           if (state is BrandsLoaded) {
-            return SingleChildScrollView(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  // Brand selection header
-                  Container(
-                    padding: const EdgeInsets.all(16),
-                    decoration: BoxDecoration(
-                      color: Colors.purple.shade50,
-                      borderRadius: BorderRadius.circular(12),
-                      border: Border.all(color: Colors.purple.shade200),
-                    ),
-                    child: Row(
-                      children: [
-                        const Text('🎯', style: TextStyle(fontSize: 24)),
-                        const SizedBox(width: 12),
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              const Text(
-                                'Choose Your Favorite Brands',
-                                style: TextStyle(
-                                  fontWeight: FontWeight.bold,
-                                  color: Colors.purple,
-                                  fontSize: 16,
-                                ),
-                              ),
-                              Text(
-                                'Select brands you love - you can choose multiple from each category.',
-                                style: TextStyle(
-                                  color: Colors.purple.shade700,
-                                  fontSize: 14,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
+            return _buildLoadedBrands(context, state.brands);
+          }
 
-                  const SizedBox(height: 24),
-
-                  if (cubit.data.selectedBrandIds.isNotEmpty) ...[
-                    Container(
-                      padding: const EdgeInsets.all(12),
-                      decoration: BoxDecoration(
-                        color: AppColors.primaryLimeGreen.withValues(
-                          alpha: 0.1,
-                        ),
-                        borderRadius: BorderRadius.circular(8),
-                        border: Border.all(
-                          color: AppColors.primaryLimeGreen.withValues(
-                            alpha: 0.3,
-                          ),
-                        ),
-                      ),
-                      child: Row(
-                        children: [
-                          const Icon(
-                            Icons.check_circle,
-                            color: AppColors.primaryLimeGreen,
-                            size: 20,
-                          ),
-                          const SizedBox(width: 8),
-                          Text(
-                            '${cubit.data.selectedBrandIds.length} brands selected',
-                            style: const TextStyle(
-                              color: AppColors.primaryLimeGreen,
-                              fontWeight: FontWeight.w600,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                    const SizedBox(height: 24),
-                  ],
-
-                  ...state.brands.brandsByCategory.entries.map((entry) {
-                    return _buildBrandCategory(entry.key, entry.value);
-                  }),
-                ],
-              ),
-            );
+          // In other states (e.g., ProfileDataChanged), keep rendering cached brands
+          if (cached != null) {
+            return _buildLoadedBrands(context, cached);
           }
 
           return const SizedBox();
         },
+      ),
+    );
+  }
+
+  Widget _buildLoadedBrands(BuildContext context, BrandResponse brands) {
+    return SingleChildScrollView(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Brand selection header
+          Container(
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: Colors.purple.shade50,
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(color: Colors.purple.shade200),
+            ),
+            child: Row(
+              children: [
+                const Text('🎯', style: TextStyle(fontSize: 24)),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Text(
+                        'Choose Your Favorite Brands',
+                        style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                          color: Colors.purple,
+                          fontSize: 16,
+                        ),
+                      ),
+                      Text(
+                        'Select brands you love - you can choose multiple from each category.',
+                        style: TextStyle(
+                          color: Colors.purple.shade700,
+                          fontSize: 14,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+
+          const SizedBox(height: 24),
+
+          if (cubit.data.selectedBrandIds.isNotEmpty) ...[
+            Container(
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: AppColors.primaryLimeGreen.withValues(
+                  alpha: 0.1,
+                ),
+                borderRadius: BorderRadius.circular(8),
+                border: Border.all(
+                  color: AppColors.primaryLimeGreen.withValues(
+                    alpha: 0.3,
+                  ),
+                ),
+              ),
+              child: Row(
+                children: [
+                  const Icon(
+                    Icons.check_circle,
+                    color: AppColors.primaryLimeGreen,
+                    size: 20,
+                  ),
+                  const SizedBox(width: 8),
+                  Text(
+                    '${cubit.data.selectedBrandIds.length} brands selected',
+                    style: const TextStyle(
+                      color: AppColors.primaryLimeGreen,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: 24),
+          ],
+
+          ...brands.brandsByCategory.entries.map((entry) {
+            return _buildBrandCategory(entry.key, entry.value);
+          }),
+        ],
       ),
     );
   }

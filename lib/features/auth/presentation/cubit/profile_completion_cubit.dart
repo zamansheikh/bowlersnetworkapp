@@ -2,6 +2,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:injectable/injectable.dart';
 import '../../data/datasources/brands_remote_data_source.dart';
 import '../../domain/repositories/auth_repository.dart';
+import '../../domain/entities/brand.dart';
 import 'profile_completion_state.dart';
 
 @injectable
@@ -11,12 +12,14 @@ class ProfileCompletionCubit extends Cubit<ProfileCompletionState> {
 
   int _currentStep = 0;
   ProfileCompletionData _data = const ProfileCompletionData();
+  BrandResponse? _brands;
 
   ProfileCompletionCubit(this._brandsDataSource, this._authRepository)
     : super(ProfileCompletionInitial());
 
   int get currentStep => _currentStep;
   ProfileCompletionData get data => _data;
+  BrandResponse? get brands => _brands;
 
   void updateData(ProfileCompletionData newData) {
     _data = newData;
@@ -65,8 +68,8 @@ class ProfileCompletionCubit extends Cubit<ProfileCompletionState> {
   Future<void> loadBrands() async {
     try {
       emit(BrandsLoading());
-      final brands = await _brandsDataSource.getBrands();
-      emit(BrandsLoaded(brands));
+      _brands = await _brandsDataSource.getBrands();
+      emit(BrandsLoaded(_brands!));
     } catch (e) {
       print('❌ Error loading brands: $e');
       emit(BrandsError('Failed to load brands: ${e.toString()}'));
@@ -106,6 +109,7 @@ class ProfileCompletionCubit extends Cubit<ProfileCompletionState> {
   void reset() {
     _currentStep = 0;
     _data = const ProfileCompletionData();
+    _brands = null;
     emit(ProfileCompletionInitial());
   }
 }
