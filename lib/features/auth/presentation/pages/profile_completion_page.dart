@@ -77,61 +77,62 @@ class _ProfileCompletionViewState extends State<ProfileCompletionView> {
 
   Widget _buildHeader(BuildContext context, ProfileCompletionCubit cubit) {
     return Container(
-      padding: const EdgeInsets.all(24),
-      decoration: const BoxDecoration(
+      padding: EdgeInsets.all(AppSpacing.lg),
+      decoration: BoxDecoration(
         color: AppColors.white,
         boxShadow: [
           BoxShadow(
             color: AppColors.shadow,
             blurRadius: 10,
-            offset: Offset(0, 2),
+            offset: const Offset(0, 2),
           ),
         ],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Row(
-            children: [
-              Container(
-                width: 40,
-                height: 40,
-                decoration: BoxDecoration(
-                  gradient: AppColors.primaryGradient,
-                  borderRadius: BorderRadius.circular(12),
+          // Logo
+          Container(
+            width: 60,
+            height: 60,
+            padding: EdgeInsets.all(AppSpacing.sm),
+            decoration: BoxDecoration(
+              color: AppColors.white,
+              borderRadius: BorderRadius.circular(12),
+              boxShadow: [
+                BoxShadow(
+                  color: AppColors.shadow,
+                  blurRadius: 8,
+                  offset: const Offset(0, 2),
                 ),
-                child: const Icon(
-                  Icons.person_add,
-                  color: AppColors.white,
-                  size: 20,
-                ),
-              ),
-              const SizedBox(width: 16),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'Complete Your Profile',
-                      style: Theme.of(context).textTheme.headlineSmall
-                          ?.copyWith(
-                            fontWeight: FontWeight.bold,
-                            color: AppColors.black,
-                          ),
-                    ),
-                    Text(
-                      'Step ${cubit.currentStep + 1} of 3',
-                      style: Theme.of(
-                        context,
-                      ).textTheme.bodyMedium?.copyWith(color: AppColors.gray),
-                    ),
-                  ],
-                ),
-              ),
-            ],
+              ],
+            ),
+            child: Image.asset(
+              'assets/icon/icon.png',
+              fit: BoxFit.contain,
+            ),
+          ),
+          
+          SizedBox(height: AppSpacing.md),
+          
+          Text(
+            'Complete Your Profile',
+            style: AppTextStyles.headlineMedium.copyWith(
+              color: AppColors.gray800,
+              fontWeight: FontWeight.w700,
+            ),
+          ),
+          
+          SizedBox(height: AppSpacing.xs),
+          
+          Text(
+            'Step ${cubit.currentStep + 1} of 3',
+            style: AppTextStyles.bodyMedium.copyWith(
+              color: AppColors.gray600,
+            ),
           ),
 
-          const SizedBox(height: 20),
+          SizedBox(height: AppSpacing.lg),
 
           // Progress indicator
           Row(
@@ -162,10 +163,15 @@ class _ProfileCompletionViewState extends State<ProfileCompletionView> {
     ProfileCompletionCubit cubit,
   ) {
     return Container(
-      padding: const EdgeInsets.all(24),
-      decoration: const BoxDecoration(
+      padding: EdgeInsets.all(AppSpacing.lg),
+      decoration: BoxDecoration(
         color: AppColors.white,
-        border: Border(top: BorderSide(color: AppColors.shadow, width: 0.5)),
+        border: Border(
+          top: BorderSide(
+            color: AppColors.border,
+            width: 1,
+          ),
+        ),
       ),
       child: Row(
         children: [
@@ -174,23 +180,22 @@ class _ProfileCompletionViewState extends State<ProfileCompletionView> {
               child: OutlinedButton(
                 onPressed: () => _previousStep(cubit),
                 style: OutlinedButton.styleFrom(
-                  side: const BorderSide(color: AppColors.primaryLimeGreen),
-                  padding: const EdgeInsets.symmetric(vertical: 16),
+                  side: BorderSide(color: AppColors.primaryLimeGreen),
+                  padding: EdgeInsets.symmetric(vertical: AppSpacing.md),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(12),
                   ),
                 ),
-                child: const Text(
+                child: Text(
                   'Previous',
-                  style: TextStyle(
+                  style: AppTextStyles.button.copyWith(
                     color: AppColors.primaryLimeGreen,
-                    fontWeight: FontWeight.w600,
                   ),
                 ),
               ),
             ),
 
-          if (cubit.currentStep > 0) const SizedBox(width: 16),
+          if (cubit.currentStep > 0) SizedBox(width: AppSpacing.md),
 
           Expanded(
             flex: cubit.currentStep == 0 ? 1 : 1,
@@ -198,7 +203,7 @@ class _ProfileCompletionViewState extends State<ProfileCompletionView> {
               onPressed: () => _nextStep(cubit),
               style: ElevatedButton.styleFrom(
                 backgroundColor: AppColors.primaryLimeGreen,
-                padding: const EdgeInsets.symmetric(vertical: 16),
+                padding: EdgeInsets.symmetric(vertical: AppSpacing.md),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(12),
                 ),
@@ -206,10 +211,8 @@ class _ProfileCompletionViewState extends State<ProfileCompletionView> {
               ),
               child: Text(
                 cubit.currentStep == 2 ? 'Complete Profile' : 'Next',
-                style: const TextStyle(
+                style: AppTextStyles.button.copyWith(
                   color: AppColors.white,
-                  fontWeight: FontWeight.w600,
-                  fontSize: 16,
                 ),
               ),
             ),

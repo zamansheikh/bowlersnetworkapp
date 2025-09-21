@@ -368,8 +368,6 @@ class _SignupPageState extends State<SignupPage> {
                             ),
                       ),
 
-                      const SizedBox(height: 16),
-
                       // Parent's First and Last Name
                       Row(
                         children: [
@@ -404,8 +402,6 @@ class _SignupPageState extends State<SignupPage> {
                           ),
                         ],
                       ),
-
-                      const SizedBox(height: 16),
 
                       // Parent's Email
                       _buildTextField(
