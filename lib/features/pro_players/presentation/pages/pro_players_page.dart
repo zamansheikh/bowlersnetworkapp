@@ -113,7 +113,9 @@ class _ProPlayersPageState extends State<ProPlayersPage> {
               decoration: BoxDecoration(
                 color: AppColors.primaryLimeGreen.withOpacity(0.1),
                 borderRadius: BorderRadius.circular(12),
-                border: Border.all(color: AppColors.primaryLimeGreen.withOpacity(0.3)),
+                border: Border.all(
+                  color: AppColors.primaryLimeGreen.withOpacity(0.3),
+                ),
               ),
               child: IconButton(
                 icon: const Icon(Icons.refresh_rounded),
@@ -437,7 +439,8 @@ class _ProPlayersPageState extends State<ProPlayersPage> {
   }
 
   void _navigateToPlayerDetail(ProPlayer player) {
-    context.push('/player/${player.username}',
+    context.push(
+      '/player/${player.username}',
       extra: {'userId': player.userId.toString()},
     );
   }
