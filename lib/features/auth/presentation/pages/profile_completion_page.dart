@@ -311,7 +311,7 @@ class __BowlingStyleStepState extends State<_BowlingStyleStep> {
               ),
             ),
 
-            const SizedBox(height: 32),
+            SizedBox(height: AppSpacing.lg),
 
             Text(
               'Bowling Style',
@@ -321,7 +321,7 @@ class __BowlingStyleStepState extends State<_BowlingStyleStep> {
               ),
             ),
 
-            const SizedBox(height: 16),
+            SizedBox(height: AppSpacing.md),
 
             Row(
               children: [
@@ -349,7 +349,7 @@ class __BowlingStyleStepState extends State<_BowlingStyleStep> {
               ],
             ),
 
-            const SizedBox(height: 24),
+            SizedBox(height: AppSpacing.lg),
 
             Text(
               'Average Score',
@@ -359,7 +359,7 @@ class __BowlingStyleStepState extends State<_BowlingStyleStep> {
               ),
             ),
 
-            const SizedBox(height: 16),
+            SizedBox(height: AppSpacing.md),
 
             TextFormField(
               controller: _averageController,
@@ -387,7 +387,7 @@ class __BowlingStyleStepState extends State<_BowlingStyleStep> {
               ),
             ),
 
-            const SizedBox(height: 24),
+            SizedBox(height: AppSpacing.lg),
 
             Text(
               'Division',
@@ -409,7 +409,7 @@ class __BowlingStyleStepState extends State<_BowlingStyleStep> {
                     data.copyWith(division: 'Senior'),
                   ),
                 ),
-                const SizedBox(height: 8),
+                SizedBox(height: AppSpacing.xs),
                 _buildRadioOption(
                   "Men's",
                   Icons.man,
@@ -417,7 +417,7 @@ class __BowlingStyleStepState extends State<_BowlingStyleStep> {
                   () =>
                       widget.cubit.updateData(data.copyWith(division: "Men's")),
                 ),
-                const SizedBox(height: 8),
+                SizedBox(height: AppSpacing.xs),
                 _buildRadioOption(
                   "Women's",
                   Icons.woman,
@@ -429,7 +429,7 @@ class __BowlingStyleStepState extends State<_BowlingStyleStep> {
               ],
             ),
 
-            const SizedBox(height: 32),
+            SizedBox(height: AppSpacing.lg),
 
             Text(
               'Membership Information',
@@ -439,7 +439,7 @@ class __BowlingStyleStepState extends State<_BowlingStyleStep> {
               ),
             ),
 
-            const SizedBox(height: 16),
+            SizedBox(height: AppSpacing.md),
 
             // PBA Card Holder
             Card(
@@ -477,7 +477,7 @@ class __BowlingStyleStepState extends State<_BowlingStyleStep> {
             ),
 
             if (data.isPBACardHolder) ...[
-              const SizedBox(height: 12),
+              SizedBox(height: AppSpacing.sm),
               TextFormField(
                 initialValue: data.pbaNumber ?? '',
                 onChanged: (value) =>
@@ -505,7 +505,7 @@ class __BowlingStyleStepState extends State<_BowlingStyleStep> {
               ),
             ],
 
-            const SizedBox(height: 16),
+            SizedBox(height: AppSpacing.md),
 
             // USBC Member
             Card(
@@ -543,7 +543,7 @@ class __BowlingStyleStepState extends State<_BowlingStyleStep> {
             ),
 
             if (data.isUSBCMember) ...[
-              const SizedBox(height: 12),
+              SizedBox(height: AppSpacing.sm),
               TextFormField(
                 initialValue: data.usbcNumber ?? '',
                 onChanged: (value) =>

@@ -120,7 +120,7 @@ class _SignupPageState extends State<SignupPage> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
-                    const SizedBox(height: 32),
+                    SizedBox(height: AppSpacing.lg),
 
                     // Header
                     Column(
@@ -153,7 +153,7 @@ class _SignupPageState extends State<SignupPage> {
                             ),
                           ),
                         ),
-                        SizedBox(height: AppSpacing.lg),
+                        SizedBox(height: AppSpacing.md),
                         Text(
                           'Create Account',
                           style: AppTextStyles.displaySmall.copyWith(
@@ -173,7 +173,7 @@ class _SignupPageState extends State<SignupPage> {
                       ],
                     ),
 
-                    SizedBox(height: AppSpacing.xl),
+                    SizedBox(height: AppSpacing.md),
 
                     // First Name
                     _buildTextField(
@@ -356,7 +356,7 @@ class _SignupPageState extends State<SignupPage> {
                         ),
                       ),
 
-                      const SizedBox(height: 20),
+                      SizedBox(height: AppSpacing.sm),
 
                       // Parent's information section
                       Text(
@@ -428,7 +428,7 @@ class _SignupPageState extends State<SignupPage> {
 
                     // USBC Youth Bowler checkbox (for 13-18 year olds ONLY)
                     if (_isMinor) ...[
-                      const SizedBox(height: 16),
+                      SizedBox(height: AppSpacing.md),
                       Container(
                         decoration: BoxDecoration(
                           color: AppColors.white,
@@ -476,7 +476,7 @@ class _SignupPageState extends State<SignupPage> {
                     if (!_isMinor &&
                         !_isUnder13 &&
                         _selectedBirthDate != null) ...[
-                      const SizedBox(height: 16),
+                      SizedBox(height: AppSpacing.md),
                       Container(
                         decoration: BoxDecoration(
                           color: AppColors.white,
@@ -520,7 +520,7 @@ class _SignupPageState extends State<SignupPage> {
                       ),
                     ],
 
-                    const SizedBox(height: 24),
+                    SizedBox(height: AppSpacing.md),
 
                     // Validation errors
                     if (state is SignupDataInvalid) ...[
@@ -635,7 +635,7 @@ class _SignupPageState extends State<SignupPage> {
                         ),
                       ),
 
-                    SizedBox(height: AppSpacing.lg),
+                    SizedBox(height: AppSpacing.md),
 
                     // Login link
                     Row(
@@ -660,7 +660,7 @@ class _SignupPageState extends State<SignupPage> {
                       ],
                     ),
 
-                    SizedBox(height: AppSpacing.xl),
+                    SizedBox(height: AppSpacing.lg),
                   ],
                 ),
               );
@@ -681,7 +681,7 @@ class _SignupPageState extends State<SignupPage> {
     String? Function(String?)? validator,
   }) {
     return Container(
-      margin: EdgeInsets.only(bottom: AppSpacing.md),
+      margin: EdgeInsets.only(bottom: AppSpacing.sm),
       child: TextFormField(
         controller: controller,
         keyboardType: keyboardType,
@@ -738,7 +738,7 @@ class _SignupPageState extends State<SignupPage> {
 
   Widget _buildBirthDateField() {
     return Container(
-      margin: EdgeInsets.only(bottom: AppSpacing.md),
+      margin: EdgeInsets.only(bottom: AppSpacing.sm),
       child: GestureDetector(
         onTap: () async {
           final selectedDate = await showDatePicker(

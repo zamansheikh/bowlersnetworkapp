@@ -49,7 +49,7 @@ class _SignInPageState extends State<SignInPage> {
                     mainAxisAlignment: MainAxisAlignment.center,
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
-                      SizedBox(height: AppSpacing.xl),
+                      SizedBox(height: AppSpacing.md),
 
                       // Logo and Welcome
                       Column(
@@ -103,7 +103,7 @@ class _SignInPageState extends State<SignInPage> {
                         ],
                       ),
 
-                      SizedBox(height: AppSpacing.xl),
+                      SizedBox(height: AppSpacing.md),
 
                       // Username Field
                       _buildTextField(
@@ -141,7 +141,7 @@ class _SignInPageState extends State<SignInPage> {
                         },
                       ),
 
-                      SizedBox(height: AppSpacing.xl),
+                      SizedBox(height: AppSpacing.md),
 
                       // Sign In Button
                       if (state is AuthLoading)
@@ -241,7 +241,7 @@ class _SignInPageState extends State<SignInPage> {
                           ),
                         ),
 
-                      SizedBox(height: AppSpacing.xl),
+                      SizedBox(height: AppSpacing.md),
 
                       // Sign Up Link
                       Row(
@@ -266,7 +266,7 @@ class _SignInPageState extends State<SignInPage> {
                         ],
                       ),
 
-                      SizedBox(height: AppSpacing.xl),
+                      SizedBox(height: AppSpacing.lg),
                     ],
                   ),
                 );
@@ -288,7 +288,7 @@ class _SignInPageState extends State<SignInPage> {
     String? Function(String?)? validator,
   }) {
     return Container(
-      margin: EdgeInsets.only(bottom: AppSpacing.sm),
+  margin: EdgeInsets.only(bottom: AppSpacing.sm),
       child: TextFormField(
         controller: controller,
         keyboardType: keyboardType,
