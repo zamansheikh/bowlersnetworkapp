@@ -19,7 +19,29 @@ class _SignupPageState extends State<SignupPage> {
   final _emailCtrl = TextEditingController();
   final _passwordCtrl = TextEditingController();
   final _birthDateCtrl = TextEditingController();
+
+  // Parent information controllers
+  final _parentFirstNameCtrl = TextEditingController();
+  final _parentLastNameCtrl = TextEditingController();
+  final _parentEmailCtrl = TextEditingController();
+
   bool _obscurePassword = true;
+  bool _isUSBCYouthBowler = false;
+  bool _isUSBCYouthCoach = false;
+  DateTime? _selectedBirthDate;
+
+  // Age validation states
+  bool get _isUnder13 {
+    if (_selectedBirthDate == null) return false;
+    final age = DateTime.now().difference(_selectedBirthDate!).inDays / 365.25;
+    return age < 13;
+  }
+
+  bool get _isMinor {
+    if (_selectedBirthDate == null) return false;
+    final age = DateTime.now().difference(_selectedBirthDate!).inDays / 365.25;
+    return age >= 13 && age < 18;
+  }
 
   @override
   void dispose() {
@@ -29,10 +51,25 @@ class _SignupPageState extends State<SignupPage> {
     _emailCtrl.dispose();
     _passwordCtrl.dispose();
     _birthDateCtrl.dispose();
+    _parentFirstNameCtrl.dispose();
+    _parentLastNameCtrl.dispose();
+    _parentEmailCtrl.dispose();
     super.dispose();
   }
 
   void _validateSignupData() {
+    if (_isUnder13) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text(
+            'You must be at least 13 years old to create an account.',
+          ),
+          backgroundColor: AppColors.error,
+        ),
+      );
+      return;
+    }
+
     if (_formKey.currentState!.validate()) {
       context.read<SignupCubit>().validateData(
         firstName: _firstNameCtrl.text.trim(),
@@ -253,6 +290,7 @@ class _SignupPageState extends State<SignupPage> {
                           );
                           if (selectedDate != null) {
                             setState(() {
+                              _selectedBirthDate = selectedDate;
                               _birthDateCtrl.text =
                                   '${selectedDate.year}-${selectedDate.month.toString().padLeft(2, '0')}-${selectedDate.day.toString().padLeft(2, '0')}';
                             });
@@ -284,6 +322,262 @@ class _SignupPageState extends State<SignupPage> {
                               }
                               return null;
                             },
+                          ),
+                        ),
+                      ),
+
+                      const SizedBox(height: 16),
+
+                      // Age restriction warnings and parent information
+                      if (_isUnder13) ...[
+                        Container(
+                          padding: const EdgeInsets.all(16),
+                          decoration: BoxDecoration(
+                            color: AppColors.error.withValues(alpha: 0.1),
+                            borderRadius: BorderRadius.circular(12),
+                            border: Border.all(
+                              color: AppColors.error.withValues(alpha: 0.3),
+                            ),
+                          ),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Row(
+                                children: [
+                                  Icon(
+                                    Icons.warning_amber_rounded,
+                                    color: AppColors.error,
+                                    size: 24,
+                                  ),
+                                  const SizedBox(width: 12),
+                                  Expanded(
+                                    child: Text(
+                                      'Age Restriction',
+                                      style: TextStyle(
+                                        fontWeight: FontWeight.bold,
+                                        color: AppColors.error,
+                                        fontSize: 16,
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              const SizedBox(height: 8),
+                              Text(
+                                'You must be at least 13 years old to create an account on this platform.',
+                                style: TextStyle(
+                                  color: AppColors.error,
+                                  fontSize: 14,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+
+                      if (_isMinor) ...[
+                        Container(
+                          padding: const EdgeInsets.all(16),
+                          decoration: BoxDecoration(
+                            color: Colors.blue.shade50,
+                            borderRadius: BorderRadius.circular(12),
+                            border: Border.all(color: Colors.blue.shade200),
+                          ),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Row(
+                                children: [
+                                  Icon(
+                                    Icons.family_restroom,
+                                    color: Colors.blue.shade700,
+                                    size: 24,
+                                  ),
+                                  const SizedBox(width: 12),
+                                  Expanded(
+                                    child: Text(
+                                      'Parent/Guardian Information Required',
+                                      style: TextStyle(
+                                        fontWeight: FontWeight.bold,
+                                        color: Colors.blue.shade700,
+                                        fontSize: 16,
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              const SizedBox(height: 8),
+                              Text(
+                                'Since you are under 18, we need your parent or guardian\'s information for account verification and safety purposes.',
+                                style: TextStyle(
+                                  color: Colors.blue.shade700,
+                                  fontSize: 14,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+
+                        const SizedBox(height: 20),
+
+                        // Parent's information section
+                        Text(
+                          'Parent\'s Information',
+                          style: Theme.of(context).textTheme.titleMedium
+                              ?.copyWith(
+                                fontWeight: FontWeight.bold,
+                                color: AppColors.onSurface,
+                              ),
+                        ),
+
+                        const SizedBox(height: 16),
+
+                        // Parent's First and Last Name
+                        Row(
+                          children: [
+                            Expanded(
+                              child: _buildTextField(
+                                controller: _parentFirstNameCtrl,
+                                label: 'Parent\'s First Name',
+                                icon: Icons.person_outline,
+                                validator: (value) {
+                                  if (_isMinor &&
+                                      (value == null || value.trim().isEmpty)) {
+                                    return 'Parent\'s first name is required';
+                                  }
+                                  return null;
+                                },
+                              ),
+                            ),
+                            const SizedBox(width: 12),
+                            Expanded(
+                              child: _buildTextField(
+                                controller: _parentLastNameCtrl,
+                                label: 'Parent\'s Last Name',
+                                icon: Icons.person_outline,
+                                validator: (value) {
+                                  if (_isMinor &&
+                                      (value == null || value.trim().isEmpty)) {
+                                    return 'Parent\'s last name is required';
+                                  }
+                                  return null;
+                                },
+                              ),
+                            ),
+                          ],
+                        ),
+
+                        const SizedBox(height: 16),
+
+                        // Parent's Email
+                        _buildTextField(
+                          controller: _parentEmailCtrl,
+                          label: 'Parent\'s Email Address',
+                          icon: Icons.email_outlined,
+                          keyboardType: TextInputType.emailAddress,
+                          validator: (value) {
+                            if (_isMinor) {
+                              if (value == null || value.trim().isEmpty) {
+                                return 'Parent\'s email is required';
+                              }
+                              final emailRegExp = RegExp(
+                                r'^[\w\.-]+@[\w\.-]+\.\w+$',
+                              );
+                              if (!emailRegExp.hasMatch(value.trim())) {
+                                return 'Please enter a valid email address';
+                              }
+                            }
+                            return null;
+                          },
+                        ),
+                      ],
+
+                      // USBC Youth Bowler checkbox (for 13-18 year olds)
+                      if (_isMinor) ...[
+                        const SizedBox(height: 16),
+                        Container(
+                          decoration: BoxDecoration(
+                            color: AppColors.white,
+                            borderRadius: BorderRadius.circular(12),
+                            border: Border.all(
+                              color: _isUSBCYouthBowler
+                                  ? AppColors.primaryLimeGreen
+                                  : AppColors.outline,
+                            ),
+                            boxShadow: [
+                              BoxShadow(
+                                color: AppColors.shadow,
+                                blurRadius: 4,
+                                offset: const Offset(0, 2),
+                              ),
+                            ],
+                          ),
+                          child: CheckboxListTile(
+                            value: _isUSBCYouthBowler,
+                            onChanged: (value) {
+                              setState(() {
+                                _isUSBCYouthBowler = value ?? false;
+                              });
+                            },
+                            title: const Text(
+                              'I am a USBC youth bowler',
+                              style: TextStyle(
+                                fontWeight: FontWeight.w600,
+                                fontSize: 16,
+                              ),
+                            ),
+                            subtitle: const Text(
+                              'Optional - Check if you participate in USBC youth programs',
+                              style: TextStyle(fontSize: 12),
+                            ),
+                            activeColor: AppColors.primaryLimeGreen,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                          ),
+                        ),
+                      ],
+
+                      // USBC Youth Coach checkbox (for all ages)
+                      const SizedBox(height: 16),
+                      Container(
+                        decoration: BoxDecoration(
+                          color: AppColors.white,
+                          borderRadius: BorderRadius.circular(12),
+                          border: Border.all(
+                            color: _isUSBCYouthCoach
+                                ? AppColors.primaryLimeGreen
+                                : AppColors.outline,
+                          ),
+                          boxShadow: [
+                            BoxShadow(
+                              color: AppColors.shadow,
+                              blurRadius: 4,
+                              offset: const Offset(0, 2),
+                            ),
+                          ],
+                        ),
+                        child: CheckboxListTile(
+                          value: _isUSBCYouthCoach,
+                          onChanged: (value) {
+                            setState(() {
+                              _isUSBCYouthCoach = value ?? false;
+                            });
+                          },
+                          title: const Text(
+                            'I am a USBC youth coach',
+                            style: TextStyle(
+                              fontWeight: FontWeight.w600,
+                              fontSize: 16,
+                            ),
+                          ),
+                          subtitle: const Text(
+                            'Optional - Check if you coach youth bowling programs',
+                            style: TextStyle(fontSize: 12),
+                          ),
+                          activeColor: AppColors.primaryLimeGreen,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(8),
                           ),
                         ),
                       ),
@@ -360,19 +654,24 @@ class _SignupPageState extends State<SignupPage> {
                           height: 56,
                           decoration: BoxDecoration(
                             borderRadius: BorderRadius.circular(16),
-                            gradient: AppColors.primaryGradient,
-                            boxShadow: [
-                              BoxShadow(
-                                color: AppColors.primaryLimeGreen.withValues(
-                                  alpha: 0.4,
-                                ),
-                                blurRadius: 15,
-                                offset: const Offset(0, 8),
-                              ),
-                            ],
+                            gradient: _isUnder13
+                                ? LinearGradient(
+                                    colors: [AppColors.gray, AppColors.gray],
+                                  )
+                                : AppColors.primaryGradient,
+                            boxShadow: _isUnder13
+                                ? []
+                                : [
+                                    BoxShadow(
+                                      color: AppColors.primaryLimeGreen
+                                          .withValues(alpha: 0.4),
+                                      blurRadius: 15,
+                                      offset: const Offset(0, 8),
+                                    ),
+                                  ],
                           ),
                           child: ElevatedButton(
-                            onPressed: _validateSignupData,
+                            onPressed: _isUnder13 ? null : _validateSignupData,
                             style: ElevatedButton.styleFrom(
                               backgroundColor: Colors.transparent,
                               shadowColor: Colors.transparent,
@@ -380,12 +679,16 @@ class _SignupPageState extends State<SignupPage> {
                                 borderRadius: BorderRadius.circular(16),
                               ),
                             ),
-                            child: const Text(
-                              'Continue',
+                            child: Text(
+                              _isUnder13
+                                  ? 'Age Requirement Not Met'
+                                  : 'Continue',
                               style: TextStyle(
                                 fontSize: 18,
                                 fontWeight: FontWeight.w600,
-                                color: AppColors.white,
+                                color: _isUnder13
+                                    ? AppColors.gray
+                                    : AppColors.white,
                               ),
                             ),
                           ),
