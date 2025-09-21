@@ -14,6 +14,10 @@ import 'package:bowlersnetworkapp/core/network/network_info.dart' as _i149;
 import 'package:bowlersnetworkapp/core/network/network_module.dart' as _i516;
 import 'package:bowlersnetworkapp/features/auth/data/datasources/auth_remote_data_source.dart'
     as _i1073;
+import 'package:bowlersnetworkapp/features/auth/data/datasources/brands_remote_data_source.dart'
+    as _i394;
+import 'package:bowlersnetworkapp/features/auth/data/datasources/brands_remote_data_source_impl.dart'
+    as _i483;
 import 'package:bowlersnetworkapp/features/auth/data/repositories/auth_repository_impl.dart'
     as _i359;
 import 'package:bowlersnetworkapp/features/auth/domain/repositories/auth_repository.dart'
@@ -34,6 +38,8 @@ import 'package:bowlersnetworkapp/features/auth/presentation/bloc/auth_cubit.dar
     as _i506;
 import 'package:bowlersnetworkapp/features/auth/presentation/bloc/signup_cubit.dart'
     as _i384;
+import 'package:bowlersnetworkapp/features/auth/presentation/cubit/profile_completion_cubit.dart'
+    as _i605;
 import 'package:bowlersnetworkapp/features/events/data/datasources/events_remote_data_source.dart'
     as _i421;
 import 'package:bowlersnetworkapp/features/events/data/datasources/events_remote_data_source_impl.dart'
@@ -119,6 +125,9 @@ extension GetItInjectableX on _i174.GetIt {
     gh.lazySingleton<_i946.OverviewRemoteDataSource>(
       () => _i946.OverviewRemoteDataSourceImpl(gh<_i460.SharedPreferences>()),
     );
+    gh.lazySingleton<_i394.BrandsRemoteDataSource>(
+      () => _i483.BrandsRemoteDataSourceImpl(gh<_i460.SharedPreferences>()),
+    );
     gh.factory<_i813.FeedCubit>(
       () => _i813.FeedCubit(repository: gh<_i535.FeedRepository>()),
     );
@@ -182,6 +191,12 @@ extension GetItInjectableX on _i174.GetIt {
     );
     gh.factory<_i546.VerifyEmail>(
       () => _i546.VerifyEmail(gh<_i994.AuthRepository>()),
+    );
+    gh.factory<_i605.ProfileCompletionCubit>(
+      () => _i605.ProfileCompletionCubit(
+        gh<_i394.BrandsRemoteDataSource>(),
+        gh<_i994.AuthRepository>(),
+      ),
     );
     gh.factory<_i506.AuthCubit>(
       () => _i506.AuthCubit(
