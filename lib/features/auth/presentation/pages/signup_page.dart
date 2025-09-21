@@ -129,22 +129,28 @@ class _SignupPageState extends State<SignupPage> {
                           width: 80,
                           height: 80,
                           decoration: BoxDecoration(
-                            gradient: AppColors.primaryGradient,
                             borderRadius: BorderRadius.circular(
                               AppSpacing.radiusLG,
                             ),
+                            color: AppColors.white,
                             boxShadow: [
                               BoxShadow(
-                                color: AppColors.shadowPrimary,
-                                blurRadius: AppSpacing.elevationMD,
-                                offset: const Offset(0, 4),
+                                color: AppColors.shadow,
+                                blurRadius: AppSpacing.elevationSM,
+                                offset: const Offset(0, 2),
                               ),
                             ],
                           ),
-                          child: const Icon(
-                            Icons.person_add,
-                            size: 36,
-                            color: AppColors.white,
+                          child: ClipRRect(
+                            borderRadius: BorderRadius.circular(
+                              AppSpacing.radiusLG,
+                            ),
+                            child: Image.asset(
+                              'assets/icon/icon.png',
+                              width: 60,
+                              height: 60,
+                              fit: BoxFit.contain,
+                            ),
                           ),
                         ),
                         SizedBox(height: AppSpacing.lg),

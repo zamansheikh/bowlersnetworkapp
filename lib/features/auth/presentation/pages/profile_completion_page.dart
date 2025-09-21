@@ -3,6 +3,8 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:get_it/get_it.dart';
 
 import '../../../../core/constants/colors.dart';
+import '../../../../core/theme/app_text_styles.dart';
+import '../../../../core/theme/app_spacing.dart';
 import '../../domain/entities/brand.dart';
 import '../cubit/profile_completion_cubit.dart';
 import '../cubit/profile_completion_state.dart';
@@ -39,7 +41,7 @@ class _ProfileCompletionViewState extends State<ProfileCompletionView> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.lightGray,
+      backgroundColor: AppColors.background,
       body: SafeArea(
         child: BlocBuilder<ProfileCompletionCubit, ProfileCompletionState>(
           builder: (context, state) {
