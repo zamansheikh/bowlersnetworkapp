@@ -107,14 +107,11 @@ class _ProfileCompletionViewState extends State<ProfileCompletionView> {
                 ),
               ],
             ),
-            child: Image.asset(
-              'assets/icon/icon.png',
-              fit: BoxFit.contain,
-            ),
+            child: Image.asset('assets/icon/icon.png', fit: BoxFit.contain),
           ),
-          
+
           SizedBox(height: AppSpacing.md),
-          
+
           Text(
             'Complete Your Profile',
             style: AppTextStyles.headlineMedium.copyWith(
@@ -122,14 +119,12 @@ class _ProfileCompletionViewState extends State<ProfileCompletionView> {
               fontWeight: FontWeight.w700,
             ),
           ),
-          
+
           SizedBox(height: AppSpacing.xs),
-          
+
           Text(
             'Step ${cubit.currentStep + 1} of 3',
-            style: AppTextStyles.bodyMedium.copyWith(
-              color: AppColors.gray600,
-            ),
+            style: AppTextStyles.bodyMedium.copyWith(color: AppColors.gray600),
           ),
 
           SizedBox(height: AppSpacing.lg),
@@ -166,12 +161,7 @@ class _ProfileCompletionViewState extends State<ProfileCompletionView> {
       padding: EdgeInsets.all(AppSpacing.lg),
       decoration: BoxDecoration(
         color: AppColors.white,
-        border: Border(
-          top: BorderSide(
-            color: AppColors.border,
-            width: 1,
-          ),
-        ),
+        border: Border(top: BorderSide(color: AppColors.border, width: 1)),
       ),
       child: Row(
         children: [
@@ -211,9 +201,7 @@ class _ProfileCompletionViewState extends State<ProfileCompletionView> {
               ),
               child: Text(
                 cubit.currentStep == 2 ? 'Complete Profile' : 'Next',
-                style: AppTextStyles.button.copyWith(
-                  color: AppColors.white,
-                ),
+                style: AppTextStyles.button.copyWith(color: AppColors.white),
               ),
             ),
           ),
