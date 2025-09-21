@@ -775,9 +775,7 @@ class _SignupPageState extends State<SignupPage> {
         child: TextFormField(
           controller: _birthDateCtrl,
           enabled: false,
-          style: AppTextStyles.bodyLarge.copyWith(
-            color: AppColors.gray800,
-          ),
+          style: AppTextStyles.bodyLarge.copyWith(color: AppColors.gray800),
           decoration: InputDecoration(
             labelText: 'Birth Date',
             labelStyle: AppTextStyles.bodyMedium.copyWith(
@@ -788,10 +786,7 @@ class _SignupPageState extends State<SignupPage> {
               color: AppColors.gray500,
               size: 20,
             ),
-            suffixIcon: Icon(
-              Icons.arrow_drop_down,
-              color: AppColors.gray500,
-            ),
+            suffixIcon: Icon(Icons.arrow_drop_down, color: AppColors.gray500),
             filled: true,
             fillColor: AppColors.surface,
             contentPadding: EdgeInsets.symmetric(
@@ -800,17 +795,11 @@ class _SignupPageState extends State<SignupPage> {
             ),
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(AppSpacing.inputRadius),
-              borderSide: const BorderSide(
-                color: AppColors.border,
-                width: 1,
-              ),
+              borderSide: const BorderSide(color: AppColors.border, width: 1),
             ),
             enabledBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(AppSpacing.inputRadius),
-              borderSide: const BorderSide(
-                color: AppColors.border,
-                width: 1,
-              ),
+              borderSide: const BorderSide(color: AppColors.border, width: 1),
             ),
             focusedBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(AppSpacing.inputRadius),

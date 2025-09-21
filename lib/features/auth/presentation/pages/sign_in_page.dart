@@ -288,7 +288,7 @@ class _SignInPageState extends State<SignInPage> {
     String? Function(String?)? validator,
   }) {
     return Container(
-      margin: EdgeInsets.only(bottom: AppSpacing.md),
+      margin: EdgeInsets.only(bottom: AppSpacing.sm),
       child: TextFormField(
         controller: controller,
         keyboardType: keyboardType,
