@@ -35,6 +35,20 @@ class _EventsPageState extends State<EventsPage> {
         elevation: 0,
         backgroundColor: AppColors.white,
         foregroundColor: AppColors.gray900,
+        leading: Container(
+          margin: EdgeInsets.all(AppSpacing.sm),
+          decoration: BoxDecoration(
+            color: AppColors.gray50,
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(color: AppColors.gray200),
+          ),
+          child: IconButton(
+            icon: const Icon(Icons.arrow_back_ios_rounded),
+            onPressed: () => Navigator.of(context).pop(),
+            color: AppColors.gray700,
+            iconSize: 18,
+          ),
+        ),
         title: Text(
           'Events',
           style: AppTextStyles.headlineMedium.copyWith(
