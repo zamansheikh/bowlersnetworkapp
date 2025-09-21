@@ -298,7 +298,8 @@ class _EmailVerificationPageState extends State<EmailVerificationPage> {
                               style: const TextStyle(
                                 fontSize: 24,
                                 fontWeight: FontWeight.bold,
-                                color: AppColors.gray900, // Darker color for better visibility
+                                color: AppColors
+                                    .gray900, // Darker color for better visibility
                               ),
                               decoration: InputDecoration(
                                 counterText: '',
