@@ -30,23 +30,30 @@ class _EventsPageState extends State<EventsPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.background,
+      backgroundColor: AppColors.gray50,
       appBar: AppBar(
         elevation: 0,
         backgroundColor: AppColors.white,
         foregroundColor: AppColors.gray900,
         title: Text(
           'Events',
-          style: AppTextStyles.titleLarge.copyWith(
+          style: AppTextStyles.headlineMedium.copyWith(
             color: AppColors.gray900,
-            fontWeight: FontWeight.w700,
+            fontWeight: FontWeight.w800,
           ),
         ),
         actions: [
-          IconButton(
-            icon: const Icon(Icons.refresh),
-            onPressed: () => context.read<EventsCubit>().loadEvents(),
-            color: AppColors.primaryLimeGreen,
+          Container(
+            margin: EdgeInsets.only(right: AppSpacing.md),
+            decoration: BoxDecoration(
+              color: AppColors.primaryLimeGreen.withOpacity(0.1),
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: IconButton(
+              icon: const Icon(Icons.refresh_rounded),
+              onPressed: () => context.read<EventsCubit>().loadEvents(),
+              color: AppColors.primaryLimeGreen,
+            ),
           ),
         ],
       ),
@@ -108,26 +115,19 @@ class _EventsPageState extends State<EventsPage> {
   }
 
   Widget _buildEventsContent(BuildContext context, EventsLoaded state) {
-    final filteredEvents =
-        context.read<EventsCubit>().getFilteredEvents(state.selectedDate);
+    final filteredEvents = context.read<EventsCubit>().getFilteredEvents(
+      state.selectedDate,
+    );
 
     return LayoutBuilder(
       builder: (context, constraints) {
         // Mobile layout (single column)
         if (constraints.maxWidth < 800) {
-          return _buildMobileLayout(
-            context,
-            state,
-            filteredEvents,
-          );
+          return _buildMobileLayout(context, state, filteredEvents);
         }
         // Desktop/tablet layout (two columns)
         else {
-          return _buildDesktopLayout(
-            context,
-            state,
-            filteredEvents,
-          );
+          return _buildDesktopLayout(context, state, filteredEvents);
         }
       },
     );
@@ -138,28 +138,111 @@ class _EventsPageState extends State<EventsPage> {
     EventsLoaded state,
     List<CalendarEvent> filteredEvents,
   ) {
-    return SingleChildScrollView(
-      padding: EdgeInsets.all(AppSpacing.lg),
-      child: Column(
-        children: [
-          _buildCalendar(state),
-          SizedBox(height: AppSpacing.lg),
-
-          // Event Types Legend
-          _buildEventTypesLegend(state),
-          SizedBox(height: AppSpacing.lg),
-
-          // Event Details
-          SizedBox(
-            height: 600,
-            child: _buildEventsListCard(context, state, filteredEvents),
+    return CustomScrollView(
+      slivers: [
+        // Search and Filter Section
+        SliverToBoxAdapter(
+          child: Container(
+            color: AppColors.white,
+            padding: EdgeInsets.fromLTRB(
+              AppSpacing.lg,
+              AppSpacing.md,
+              AppSpacing.lg,
+              AppSpacing.lg,
+            ),
+            child: _buildSearchAndFilters(state),
           ),
-          SizedBox(height: AppSpacing.lg),
+        ),
 
-          // Monthly Stats
-          _buildMonthlyStats(context, state),
-        ],
-      ),
+        // Calendar Section
+        SliverToBoxAdapter(
+          child: Padding(
+            padding: EdgeInsets.symmetric(horizontal: AppSpacing.lg),
+            child: _buildCompactCalendar(state),
+          ),
+        ),
+
+        SliverToBoxAdapter(
+          child: SizedBox(height: AppSpacing.lg),
+        ),
+
+        // Events List Header
+        SliverToBoxAdapter(
+          child: Padding(
+            padding: EdgeInsets.symmetric(horizontal: AppSpacing.lg),
+            child: Row(
+              children: [
+                Icon(
+                  Icons.event_note_rounded,
+                  size: 24,
+                  color: AppColors.primaryLimeGreen,
+                ),
+                SizedBox(width: AppSpacing.sm),
+                Text(
+                  state.selectedDate != null
+                      ? 'Events on ${_formatSelectedDate(state.selectedDate!)}'
+                      : 'All Events',
+                  style: AppTextStyles.titleLarge.copyWith(
+                    fontWeight: FontWeight.w700,
+                    color: AppColors.gray900,
+                  ),
+                ),
+                const Spacer(),
+                if (filteredEvents.isNotEmpty)
+                  Container(
+                    padding: EdgeInsets.symmetric(
+                      horizontal: AppSpacing.sm,
+                      vertical: AppSpacing.xs,
+                    ),
+                    decoration: BoxDecoration(
+                      color: AppColors.primaryLimeGreen.withOpacity(0.1),
+                      borderRadius: BorderRadius.circular(999),
+                    ),
+                    child: Text(
+                      '${filteredEvents.length}',
+                      style: AppTextStyles.labelMedium.copyWith(
+                        color: AppColors.primaryLimeGreen,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ),
+              ],
+            ),
+          ),
+        ),
+
+        SliverToBoxAdapter(
+          child: SizedBox(height: AppSpacing.md),
+        ),
+
+        // Events List
+        filteredEvents.isEmpty
+            ? SliverToBoxAdapter(
+                child: _buildEmptyState(state),
+              )
+            : SliverList(
+                delegate: SliverChildBuilderDelegate(
+                  (context, index) {
+                    final event = filteredEvents[index];
+                    return Padding(
+                      padding: EdgeInsets.fromLTRB(
+                        AppSpacing.lg,
+                        AppSpacing.xs,
+                        AppSpacing.lg,
+                        AppSpacing.xs,
+                      ),
+                      child: _buildModernEventCard(event),
+                    );
+                  },
+                  childCount: filteredEvents.length,
+                ),
+              ),
+
+        // Bottom padding
+        SliverToBoxAdapter(
+          child: SizedBox(height: AppSpacing.xxl),
+        ),
+      ],
     );
   }
 
@@ -168,318 +251,103 @@ class _EventsPageState extends State<EventsPage> {
     EventsLoaded state,
     List<CalendarEvent> filteredEvents,
   ) {
-    return Padding(
-      padding: EdgeInsets.all(AppSpacing.lg),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // Calendar section (2/3 width)
-          Expanded(
-            flex: 2,
-            child: _buildCalendar(state),
-          ),
-          SizedBox(width: AppSpacing.lg),
-
-          // Sidebar (1/3 width)
-          Expanded(
-            flex: 1,
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        // Left: Calendar + Stats
+        Expanded(
+          flex: 2,
+          child: Padding(
+            padding: EdgeInsets.all(AppSpacing.lg),
             child: Column(
               children: [
-                // Event Types Legend
+                _buildCompactCalendar(state),
+                SizedBox(height: AppSpacing.lg),
                 _buildEventTypesLegend(state),
                 SizedBox(height: AppSpacing.lg),
-
-                // Event Details
-                Expanded(
-                  child: _buildEventsListCard(
-                    context,
-                    state,
-                    filteredEvents,
-                  ),
-                ),
-                SizedBox(height: AppSpacing.lg),
-
-                // Monthly Stats
                 _buildMonthlyStats(context, state),
               ],
             ),
           ),
-        ],
-      ),
-    );
-  }
+        ),
 
-  Widget _buildCalendar(EventsLoaded state) {
-    _selectedDay = state.selectedDate;
-    _focusedDay = state.currentDate;
-    return Card(
-      color: AppColors.white,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-      child: Padding(
-        padding: EdgeInsets.all(AppSpacing.md),
-        child: TableCalendar<CalendarEvent>(
-          firstDay: DateTime.utc(2020, 1, 1),
-          lastDay: DateTime.utc(2035, 12, 31),
-          focusedDay: _focusedDay,
-          calendarFormat: _calendarFormat,
-          selectedDayPredicate: (day) => isSameDay(_selectedDay, day),
-          onDaySelected: (selectedDay, focusedDay) {
-            setState(() {
-              _selectedDay = selectedDay;
-              _focusedDay = focusedDay;
-            });
-            context.read<EventsCubit>().selectDate(selectedDay);
-          },
-          onFormatChanged: (format) {
-            setState(() => _calendarFormat = format);
-          },
-          onPageChanged: (focusedDay) {
-            _focusedDay = focusedDay;
-            context.read<EventsCubit>().setCurrentDate(focusedDay);
-          },
-          eventLoader: (day) => context.read<EventsCubit>().getEventsForDate(day),
-          headerStyle: HeaderStyle(
-            titleCentered: true,
-            titleTextStyle: AppTextStyles.titleMedium.copyWith(
-              color: AppColors.gray900,
-              fontWeight: FontWeight.w700,
-            ),
-            formatButtonVisible: true,
-            leftChevronIcon: const Icon(Icons.chevron_left),
-            rightChevronIcon: const Icon(Icons.chevron_right),
-          ),
-          calendarStyle: CalendarStyle(
-            todayDecoration: BoxDecoration(
-              color: AppColors.primaryLimeGreen.withOpacity(0.2),
-              shape: BoxShape.circle,
-            ),
-            selectedDecoration: const BoxDecoration(
-              color: AppColors.primaryLimeGreen,
-              shape: BoxShape.circle,
-            ),
-            markerDecoration: const BoxDecoration(
-              color: AppColors.primaryLimeGreen,
-              shape: BoxShape.circle,
+        // Right: Search + Events List
+        Expanded(
+          flex: 3,
+          child: Container(
+            height: MediaQuery.of(context).size.height,
+            color: AppColors.white,
+            child: Column(
+              children: [
+                // Search and filters
+                Container(
+                  padding: EdgeInsets.all(AppSpacing.lg),
+                  decoration: const BoxDecoration(
+                    border: Border(
+                      bottom: BorderSide(color: AppColors.gray200),
+                    ),
+                  ),
+                  child: _buildSearchAndFilters(state),
+                ),
+
+                // Events list
+                Expanded(
+                  child: filteredEvents.isEmpty
+                      ? _buildEmptyState(state)
+                      : ListView.separated(
+                          padding: EdgeInsets.all(AppSpacing.lg),
+                          itemCount: filteredEvents.length,
+                          separatorBuilder: (_, __) =>
+                              SizedBox(height: AppSpacing.md),
+                          itemBuilder: (context, index) {
+                            return _buildModernEventCard(filteredEvents[index]);
+                          },
+                        ),
+                ),
+              ],
             ),
           ),
         ),
-      ),
+      ],
     );
   }
 
-  Widget _buildEventsListCard(
-    BuildContext context,
-    EventsLoaded state,
-    List<CalendarEvent> events,
-  ) {
+  
+
+  
+
+  
+
+  
+
+  Widget _buildEventTypesLegend(EventsLoaded state) {
     return Card(
       color: AppColors.white,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+      elevation: 2,
       child: Padding(
-        padding: EdgeInsets.all(AppSpacing.md),
+        padding: EdgeInsets.all(AppSpacing.lg),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Row(
               children: [
-                Expanded(
-                  child: TextField(
-                    decoration: InputDecoration(
-                      hintText: 'Search events...',
-                      prefixIcon: const Icon(Icons.search),
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      isDense: true,
-                    ),
-                    onChanged: (v) => context.read<EventsCubit>().updateSearch(v),
-                  ),
+                Icon(
+                  Icons.legend_toggle_rounded,
+                  color: AppColors.primaryLimeGreen,
+                  size: 20,
                 ),
-                SizedBox(width: AppSpacing.md),
-                PopupMenuButton<EventType?>(
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  initialValue: state.filterType,
-                  onSelected: (val) => context.read<EventsCubit>().updateFilter(val),
-                  itemBuilder: (context) => <PopupMenuEntry<EventType?>>[
-                    const PopupMenuItem<EventType?>(
-                      value: null,
-                      child: Text('All types'),
-                    ),
-                    ...EventType.values.map(
-                      (t) => PopupMenuItem<EventType?>(
-                        value: t,
-                        child: Text(_getEventTypeLabel(t)),
-                      ),
-                    ),
-                  ],
-                  child: Container(
-                    padding: EdgeInsets.symmetric(
-                      horizontal: AppSpacing.md,
-                      vertical: AppSpacing.sm,
-                    ),
-                    decoration: BoxDecoration(
-                      color: AppColors.primaryLimeGreen.withOpacity(0.1),
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    child: Row(
-                      children: [
-                        const Icon(Icons.filter_list, color: AppColors.primaryLimeGreen),
-                        SizedBox(width: AppSpacing.xs),
-                        Text(
-                          state.filterType == null
-                              ? 'All types'
-                              : _getEventTypeLabel(state.filterType!),
-                          style: AppTextStyles.bodyMedium.copyWith(
-                            color: AppColors.primaryLimeGreen,
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
-                      ],
-                    ),
+                SizedBox(width: AppSpacing.sm),
+                Text(
+                  'Event Types',
+                  style: AppTextStyles.titleMedium.copyWith(
+                    color: AppColors.gray900,
+                    fontWeight: FontWeight.w700,
                   ),
                 ),
               ],
             ),
             SizedBox(height: AppSpacing.md),
-
-            Expanded(
-              child: events.isEmpty
-                  ? Center(
-                      child: Text(
-                        state.selectedDate != null
-                            ? 'No events on this date'
-                            : 'No events found',
-                        style: AppTextStyles.bodyLarge.copyWith(
-                          color: AppColors.gray600,
-                        ),
-                      ),
-                    )
-                  : ListView.separated(
-                      itemCount: events.length,
-                      separatorBuilder: (_, __) => SizedBox(height: AppSpacing.sm),
-                      itemBuilder: (context, index) {
-                        final event = events[index];
-                        return _buildEventTile(event);
-                      },
-                    ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildEventTile(CalendarEvent event) {
-    final statusColor = _getStatusColor(event.status);
-    return Material(
-      color: AppColors.white,
-      borderRadius: BorderRadius.circular(12),
-      child: InkWell(
-        borderRadius: BorderRadius.circular(12),
-        onTap: () {
-          // TODO: Navigate to event details
-        },
-        child: Padding(
-          padding: EdgeInsets.all(AppSpacing.md),
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Container(
-                width: 40,
-                height: 40,
-                decoration: BoxDecoration(
-                  color: statusColor.withOpacity(0.15),
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                child: Icon(
-                  Icons.event,
-                  color: statusColor,
-                ),
-              ),
-              SizedBox(width: AppSpacing.md),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      event.title,
-                      style: AppTextStyles.bodyLarge.copyWith(
-                        color: AppColors.gray900,
-                        fontWeight: FontWeight.w700,
-                      ),
-                    ),
-                    SizedBox(height: AppSpacing.xs),
-                    Row(
-                      children: [
-                        const Icon(Icons.access_time, size: 14, color: AppColors.gray600),
-                        SizedBox(width: AppSpacing.xs),
-                        Text(
-                          event.endTime == null
-                              ? '${event.date} • ${event.time}'
-                              : '${event.date} • ${event.time} - ${event.endTime}',
-                          style: AppTextStyles.bodySmall.copyWith(color: AppColors.gray600),
-                        ),
-                      ],
-                    ),
-                    SizedBox(height: AppSpacing.xs),
-                    Row(
-                      children: [
-                        const Icon(Icons.place, size: 14, color: AppColors.gray600),
-                        SizedBox(width: AppSpacing.xs),
-                        Expanded(
-                          child: Text(
-                            event.location,
-                            style: AppTextStyles.bodySmall.copyWith(color: AppColors.gray600),
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
-              ),
-              SizedBox(width: AppSpacing.md),
-              Container(
-                padding: EdgeInsets.symmetric(
-                  horizontal: AppSpacing.sm,
-                  vertical: AppSpacing.xs,
-                ),
-                decoration: BoxDecoration(
-                  color: statusColor.withOpacity(0.15),
-                  borderRadius: BorderRadius.circular(999),
-                ),
-                child: Text(
-                  _getStatusLabel(event.status),
-                  style: AppTextStyles.bodySmall.copyWith(color: statusColor, fontWeight: FontWeight.w600),
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildEventTypesLegend(EventsLoaded state) {
-    return Card(
-      color: AppColors.white,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-      child: Padding(
-        padding: EdgeInsets.all(AppSpacing.md),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              'Event Types',
-              style: AppTextStyles.titleMedium.copyWith(
-                color: AppColors.gray900,
-                fontWeight: FontWeight.w700,
-              ),
-            ),
-            SizedBox(height: AppSpacing.sm),
             ...EventType.values.map((type) {
               final count = context.read<EventsCubit>().getEventCountByType(
                 type,
@@ -488,28 +356,41 @@ class _EventsPageState extends State<EventsPage> {
               return Padding(
                 padding: EdgeInsets.symmetric(vertical: AppSpacing.xs),
                 child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Row(
-                      children: [
-                        Container(
-                          width: 16,
-                          height: 16,
-                          decoration: BoxDecoration(
-                            color: _getEventTypeColor(type),
-                            borderRadius: BorderRadius.circular(4),
-                          ),
-                        ),
-                        SizedBox(width: AppSpacing.sm),
-                        Text(
-                          _getEventTypeLabel(type),
-                          style: AppTextStyles.bodyMedium.copyWith(
-                            color: AppColors.gray800,
-                          ),
-                        ),
-                      ],
+                    Container(
+                      width: 12,
+                      height: 12,
+                      decoration: BoxDecoration(
+                        color: _getEventTypeColor(type),
+                        borderRadius: BorderRadius.circular(6),
+                      ),
                     ),
-                    Text('$count', style: AppTextStyles.bodyMedium),
+                    SizedBox(width: AppSpacing.sm),
+                    Expanded(
+                      child: Text(
+                        _getEventTypeLabel(type),
+                        style: AppTextStyles.bodyMedium.copyWith(
+                          color: AppColors.gray700,
+                        ),
+                      ),
+                    ),
+                    Container(
+                      padding: EdgeInsets.symmetric(
+                        horizontal: AppSpacing.sm,
+                        vertical: AppSpacing.xs,
+                      ),
+                      decoration: BoxDecoration(
+                        color: AppColors.gray100,
+                        borderRadius: BorderRadius.circular(999),
+                      ),
+                      child: Text(
+                        '$count',
+                        style: AppTextStyles.labelSmall.copyWith(
+                          color: AppColors.gray700,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ),
                   ],
                 ),
               );
@@ -538,53 +419,83 @@ class _EventsPageState extends State<EventsPage> {
 
     return Card(
       color: AppColors.white,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+      elevation: 2,
       child: Padding(
-        padding: EdgeInsets.all(AppSpacing.md),
+        padding: EdgeInsets.all(AppSpacing.lg),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(
-              'This Month',
-              style: AppTextStyles.titleMedium.copyWith(
-                color: AppColors.gray900,
-                fontWeight: FontWeight.w700,
-              ),
-            ),
-            SizedBox(height: AppSpacing.sm),
-
-            _buildStatRow(
-              Icons.emoji_events,
-              'Tournaments',
-              tournaments,
-              Colors.red,
-            ),
-            _buildStatRow(
-              Icons.calendar_today,
-              'League Games',
-              leagues,
-              Colors.blue,
-            ),
-            _buildStatRow(
-              Icons.sports_tennis,
-              'Practice Sessions',
-              practice,
-              Colors.green,
-            ),
-
-            const Divider(),
             Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Text('Total Events', style: AppTextStyles.bodyMedium),
+                Icon(
+                  Icons.bar_chart_rounded,
+                  color: AppColors.primaryLimeGreen,
+                  size: 20,
+                ),
+                SizedBox(width: AppSpacing.sm),
                 Text(
-                  '$totalEvents',
+                  'This Month',
                   style: AppTextStyles.titleMedium.copyWith(
-                    color: AppColors.primaryLimeGreen,
+                    color: AppColors.gray900,
                     fontWeight: FontWeight.w700,
                   ),
                 ),
               ],
+            ),
+            SizedBox(height: AppSpacing.md),
+
+            _buildStatRow(
+              Icons.emoji_events_rounded,
+              'Tournaments',
+              tournaments,
+              AppColors.error,
+            ),
+            SizedBox(height: AppSpacing.sm),
+            _buildStatRow(
+              Icons.groups_rounded,
+              'League Games',
+              leagues,
+              AppColors.info,
+            ),
+            SizedBox(height: AppSpacing.sm),
+            _buildStatRow(
+              Icons.sports_rounded,
+              'Practice Sessions',
+              practice,
+              AppColors.success,
+            ),
+
+            Padding(
+              padding: EdgeInsets.symmetric(vertical: AppSpacing.md),
+              child: const Divider(color: AppColors.gray200),
+            ),
+
+            Container(
+              padding: EdgeInsets.all(AppSpacing.md),
+              decoration: BoxDecoration(
+                color: AppColors.primaryLimeGreen.withOpacity(0.1),
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    'Total Events',
+                    style: AppTextStyles.titleSmall.copyWith(
+                      fontWeight: FontWeight.w600,
+                      color: AppColors.gray900,
+                    ),
+                  ),
+                  Text(
+                    '$totalEvents',
+                    style: AppTextStyles.headlineSmall.copyWith(
+                      color: AppColors.primaryLimeGreen,
+                      fontWeight: FontWeight.w800,
+                    ),
+                  ),
+                ],
+              ),
             ),
           ],
         ),
@@ -593,21 +504,565 @@ class _EventsPageState extends State<EventsPage> {
   }
 
   Widget _buildStatRow(IconData icon, String label, int count, Color color) {
-    return Padding(
-      padding: EdgeInsets.symmetric(vertical: AppSpacing.xs),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Row(
-            children: [
-              Icon(icon, size: 16, color: color),
-              SizedBox(width: AppSpacing.sm),
-              Text(label),
-            ],
+    return Row(
+      children: [
+        Container(
+          width: 32,
+          height: 32,
+          decoration: BoxDecoration(
+            color: color.withOpacity(0.1),
+            borderRadius: BorderRadius.circular(8),
           ),
-          Text('$count', style: AppTextStyles.bodyMedium),
+          child: Icon(icon, size: 16, color: color),
+        ),
+        SizedBox(width: AppSpacing.md),
+        Expanded(
+          child: Text(
+            label,
+            style: AppTextStyles.bodyMedium.copyWith(
+              color: AppColors.gray700,
+            ),
+          ),
+        ),
+        Container(
+          padding: EdgeInsets.symmetric(
+            horizontal: AppSpacing.sm,
+            vertical: AppSpacing.xs,
+          ),
+          decoration: BoxDecoration(
+            color: AppColors.gray100,
+            borderRadius: BorderRadius.circular(999),
+          ),
+          child: Text(
+            '$count',
+            style: AppTextStyles.labelSmall.copyWith(
+              color: AppColors.gray700,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  String _formatSelectedDate(DateTime date) {
+    final months = [
+      'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
+      'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'
+    ];
+    return '${months[date.month - 1]} ${date.day}';
+  }
+
+  String _getFormattedMonth(DateTime date) {
+    final months = [
+      'January', 'February', 'March', 'April', 'May', 'June',
+      'July', 'August', 'September', 'October', 'November', 'December'
+    ];
+    return '${months[date.month - 1]} ${date.year}';
+  }
+
+  IconData _getEventTypeIcon(EventType type) {
+    switch (type) {
+      case EventType.tournament:
+        return Icons.emoji_events_rounded;
+      case EventType.league:
+        return Icons.groups_rounded;
+      case EventType.special:
+        return Icons.star_rounded;
+      case EventType.practice:
+        return Icons.sports_rounded;
+      case EventType.maintenance:
+        return Icons.build_rounded;
+    }
+  }
+
+  Widget _buildCompactCalendar(EventsLoaded state) {
+    _selectedDay = state.selectedDate;
+    _focusedDay = state.currentDate;
+    
+    return Container(
+      decoration: BoxDecoration(
+        color: AppColors.white,
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: AppColors.gray900.withOpacity(0.05),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
+          ),
         ],
       ),
+      child: Column(
+        children: [
+          // Header
+          Container(
+            padding: EdgeInsets.all(AppSpacing.lg),
+            decoration: const BoxDecoration(
+              border: Border(
+                bottom: BorderSide(color: AppColors.gray100),
+              ),
+            ),
+            child: Row(
+              children: [
+                Icon(
+                  Icons.calendar_month_rounded,
+                  color: AppColors.primaryLimeGreen,
+                  size: 24,
+                ),
+                SizedBox(width: AppSpacing.sm),
+                Text(
+                  _getFormattedMonth(_focusedDay),
+                  style: AppTextStyles.titleLarge.copyWith(
+                    fontWeight: FontWeight.w700,
+                    color: AppColors.gray900,
+                  ),
+                ),
+                const Spacer(),
+                Row(
+                  children: [
+                    _buildCalendarNavButton(
+                      Icons.chevron_left_rounded,
+                      () {
+                        final newDate = DateTime(
+                          _focusedDay.year,
+                          _focusedDay.month - 1,
+                          1,
+                        );
+                        setState(() => _focusedDay = newDate);
+                        context.read<EventsCubit>().setCurrentDate(newDate);
+                      },
+                    ),
+                    SizedBox(width: AppSpacing.sm),
+                    _buildCalendarNavButton(
+                      Icons.chevron_right_rounded,
+                      () {
+                        final newDate = DateTime(
+                          _focusedDay.year,
+                          _focusedDay.month + 1,
+                          1,
+                        );
+                        setState(() => _focusedDay = newDate);
+                        context.read<EventsCubit>().setCurrentDate(newDate);
+                      },
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+
+          // Calendar
+          Padding(
+            padding: EdgeInsets.all(AppSpacing.md),
+            child: TableCalendar<CalendarEvent>(
+              firstDay: DateTime.utc(2020, 1, 1),
+              lastDay: DateTime.utc(2035, 12, 31),
+              focusedDay: _focusedDay,
+              calendarFormat: CalendarFormat.month,
+              selectedDayPredicate: (day) => isSameDay(_selectedDay, day),
+              onDaySelected: (selectedDay, focusedDay) {
+                setState(() {
+                  _selectedDay = selectedDay;
+                  _focusedDay = focusedDay;
+                });
+                context.read<EventsCubit>().selectDate(selectedDay);
+              },
+              onPageChanged: (focusedDay) {
+                setState(() => _focusedDay = focusedDay);
+                context.read<EventsCubit>().setCurrentDate(focusedDay);
+              },
+              eventLoader: (day) => context.read<EventsCubit>().getEventsForDate(day),
+              headerVisible: false,
+              daysOfWeekHeight: 40,
+              rowHeight: 48,
+              daysOfWeekStyle: DaysOfWeekStyle(
+                weekdayStyle: AppTextStyles.labelMedium.copyWith(
+                  color: AppColors.gray600,
+                  fontWeight: FontWeight.w600,
+                ),
+                weekendStyle: AppTextStyles.labelMedium.copyWith(
+                  color: AppColors.gray400,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+              calendarStyle: CalendarStyle(
+                outsideDaysVisible: false,
+                weekendTextStyle: AppTextStyles.bodyMedium.copyWith(
+                  color: AppColors.gray400,
+                ),
+                defaultTextStyle: AppTextStyles.bodyMedium.copyWith(
+                  color: AppColors.gray700,
+                ),
+                todayDecoration: BoxDecoration(
+                  color: AppColors.primaryLimeGreen.withOpacity(0.2),
+                  shape: BoxShape.circle,
+                ),
+                todayTextStyle: AppTextStyles.bodyMedium.copyWith(
+                  color: AppColors.primaryLimeGreen,
+                  fontWeight: FontWeight.w600,
+                ),
+                selectedDecoration: const BoxDecoration(
+                  color: AppColors.primaryLimeGreen,
+                  shape: BoxShape.circle,
+                ),
+                selectedTextStyle: AppTextStyles.bodyMedium.copyWith(
+                  color: AppColors.white,
+                  fontWeight: FontWeight.w600,
+                ),
+                markerDecoration: const BoxDecoration(
+                  color: AppColors.error,
+                  shape: BoxShape.circle,
+                ),
+                markersMaxCount: 3,
+                canMarkersOverflow: false,
+                markerMargin: const EdgeInsets.symmetric(horizontal: 1),
+                markerSize: 6,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildCalendarNavButton(IconData icon, VoidCallback onTap) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        width: 36,
+        height: 36,
+        decoration: BoxDecoration(
+          color: AppColors.gray50,
+          borderRadius: BorderRadius.circular(8),
+          border: Border.all(color: AppColors.gray200),
+        ),
+        child: Icon(
+          icon,
+          size: 18,
+          color: AppColors.gray600,
+        ),
+      ),
+    );
+  }
+
+  Widget _buildEmptyState(EventsLoaded state) {
+    return Center(
+      child: Padding(
+        padding: EdgeInsets.all(AppSpacing.xl),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Container(
+              width: 80,
+              height: 80,
+              decoration: BoxDecoration(
+                color: AppColors.gray100,
+                borderRadius: BorderRadius.circular(40),
+              ),
+              child: Icon(
+                Icons.event_busy_rounded,
+                size: 40,
+                color: AppColors.gray400,
+              ),
+            ),
+            SizedBox(height: AppSpacing.lg),
+            Text(
+              state.selectedDate != null
+                  ? 'No events on this date'
+                  : state.searchTerm.isNotEmpty || state.filterType != null
+                      ? 'No events match your filters'
+                      : 'No events available',
+              style: AppTextStyles.titleMedium.copyWith(
+                color: AppColors.gray700,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+            SizedBox(height: AppSpacing.sm),
+            Text(
+              state.selectedDate != null
+                  ? 'Try selecting a different date'
+                  : 'Check back later for new events',
+              style: AppTextStyles.bodyMedium.copyWith(
+                color: AppColors.gray500,
+              ),
+              textAlign: TextAlign.center,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildModernEventCard(CalendarEvent event) {
+    final statusColor = _getStatusColor(event.status);
+    final typeColor = _getEventTypeColor(event.type);
+    
+    return Container(
+      decoration: BoxDecoration(
+        color: AppColors.white,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: AppColors.gray100),
+        boxShadow: [
+          BoxShadow(
+            color: AppColors.gray900.withOpacity(0.04),
+            blurRadius: 8,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          borderRadius: BorderRadius.circular(16),
+          onTap: () {
+            // TODO: Navigate to event details
+          },
+          child: Padding(
+            padding: EdgeInsets.all(AppSpacing.lg),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // Header row
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // Event icon
+                    Container(
+                      width: 48,
+                      height: 48,
+                      decoration: BoxDecoration(
+                        color: typeColor.withOpacity(0.1),
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: Icon(
+                        _getEventTypeIcon(event.type),
+                        color: typeColor,
+                        size: 24,
+                      ),
+                    ),
+                    
+                    SizedBox(width: AppSpacing.md),
+                    
+                    // Title and type
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            event.title,
+                            style: AppTextStyles.titleMedium.copyWith(
+                              fontWeight: FontWeight.w700,
+                              color: AppColors.gray900,
+                            ),
+                            maxLines: 2,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                          SizedBox(height: AppSpacing.xs),
+                          Container(
+                            padding: EdgeInsets.symmetric(
+                              horizontal: AppSpacing.sm,
+                              vertical: AppSpacing.xs,
+                            ),
+                            decoration: BoxDecoration(
+                              color: typeColor.withOpacity(0.1),
+                              borderRadius: BorderRadius.circular(999),
+                            ),
+                            child: Text(
+                              _getEventTypeLabel(event.type),
+                              style: AppTextStyles.labelSmall.copyWith(
+                                color: typeColor,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    
+                    // Status badge
+                    Container(
+                      padding: EdgeInsets.symmetric(
+                        horizontal: AppSpacing.sm,
+                        vertical: AppSpacing.xs,
+                      ),
+                      decoration: BoxDecoration(
+                        color: statusColor.withOpacity(0.1),
+                        borderRadius: BorderRadius.circular(999),
+                      ),
+                      child: Text(
+                        _getStatusLabel(event.status),
+                        style: AppTextStyles.labelSmall.copyWith(
+                          color: statusColor,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+                
+                SizedBox(height: AppSpacing.md),
+                
+                // Event details
+                _buildEventDetailRow(
+                  Icons.schedule_rounded,
+                  event.endTime == null
+                      ? '${event.time}'
+                      : '${event.time} - ${event.endTime}',
+                ),
+                
+                SizedBox(height: AppSpacing.sm),
+                
+                _buildEventDetailRow(
+                  Icons.location_on_rounded,
+                  event.location,
+                ),
+                
+                if (event.participants > 0) ...[
+                  SizedBox(height: AppSpacing.sm),
+                  _buildEventDetailRow(
+                    Icons.people_rounded,
+                    event.maxParticipants != null
+                        ? '${event.participants}/${event.maxParticipants} participants'
+                        : '${event.participants} participants',
+                  ),
+                ],
+                
+                if (event.entryFee != null && event.entryFee! > 0) ...[
+                  SizedBox(height: AppSpacing.sm),
+                  _buildEventDetailRow(
+                    Icons.attach_money_rounded,
+                    '\$${event.entryFee!.toStringAsFixed(0)} entry fee',
+                  ),
+                ],
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildEventDetailRow(IconData icon, String text) {
+    return Row(
+      children: [
+        Icon(
+          icon,
+          size: 16,
+          color: AppColors.gray500,
+        ),
+        SizedBox(width: AppSpacing.sm),
+        Expanded(
+          child: Text(
+            text,
+            style: AppTextStyles.bodyMedium.copyWith(
+              color: AppColors.gray600,
+            ),
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildSearchAndFilters(EventsLoaded state) {
+    return Row(
+      children: [
+        // Search field
+        Expanded(
+          child: Container(
+            height: 48,
+            decoration: BoxDecoration(
+              color: AppColors.gray50,
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(color: AppColors.gray200),
+            ),
+            child: TextField(
+              decoration: InputDecoration(
+                hintText: 'Search events...',
+                hintStyle: AppTextStyles.bodyMedium.copyWith(
+                  color: AppColors.gray400,
+                ),
+                prefixIcon: Icon(
+                  Icons.search_rounded,
+                  color: AppColors.gray400,
+                  size: 20,
+                ),
+                border: InputBorder.none,
+                contentPadding: EdgeInsets.symmetric(
+                  horizontal: AppSpacing.md,
+                  vertical: AppSpacing.sm,
+                ),
+              ),
+              onChanged: (v) => context.read<EventsCubit>().updateSearch(v),
+            ),
+          ),
+        ),
+
+        SizedBox(width: AppSpacing.md),
+
+        // Filter button
+        Container(
+          height: 48,
+          decoration: BoxDecoration(
+            color: state.filterType != null
+                ? AppColors.primaryLimeGreen
+                : AppColors.white,
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(
+              color: state.filterType != null
+                  ? AppColors.primaryLimeGreen
+                  : AppColors.gray200,
+            ),
+          ),
+          child: PopupMenuButton<EventType?>(
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(12),
+            ),
+            initialValue: state.filterType,
+            onSelected: (val) => context.read<EventsCubit>().updateFilter(val),
+            itemBuilder: (context) => <PopupMenuEntry<EventType?>>[
+              const PopupMenuItem<EventType?>(
+                value: null,
+                child: Text('All types'),
+              ),
+              ...EventType.values.map(
+                (t) => PopupMenuItem<EventType?>(
+                  value: t,
+                  child: Text(_getEventTypeLabel(t)),
+                ),
+              ),
+            ],
+            child: Padding(
+              padding: EdgeInsets.symmetric(horizontal: AppSpacing.md),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(
+                    Icons.filter_list_rounded,
+                    color: state.filterType != null
+                        ? AppColors.white
+                        : AppColors.gray600,
+                    size: 20,
+                  ),
+                  SizedBox(width: AppSpacing.xs),
+                  Text(
+                    state.filterType == null
+                        ? 'Filter'
+                        : _getEventTypeLabel(state.filterType!),
+                    style: AppTextStyles.labelLarge.copyWith(
+                      color: state.filterType != null
+                          ? AppColors.white
+                          : AppColors.gray600,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ],
     );
   }
 
