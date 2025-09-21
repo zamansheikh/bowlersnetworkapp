@@ -8,20 +8,19 @@ import 'profile_completion_state.dart';
 class ProfileCompletionCubit extends Cubit<ProfileCompletionState> {
   final BrandsRemoteDataSource _brandsDataSource;
   final AuthRepository _authRepository;
-  
+
   int _currentStep = 0;
   ProfileCompletionData _data = const ProfileCompletionData();
 
-  ProfileCompletionCubit(
-    this._brandsDataSource,
-    this._authRepository,
-  ) : super(ProfileCompletionInitial());
+  ProfileCompletionCubit(this._brandsDataSource, this._authRepository)
+    : super(ProfileCompletionInitial());
 
   int get currentStep => _currentStep;
   ProfileCompletionData get data => _data;
 
   void updateData(ProfileCompletionData newData) {
     _data = newData;
+    emit(ProfileDataChanged(data: _data, step: _currentStep));
   }
 
   void nextStep() {
@@ -31,13 +30,14 @@ class ProfileCompletionCubit extends Cubit<ProfileCompletionState> {
         // Load brands when reaching step 3
         loadBrands();
       }
+      emit(ProfileStepChanged(_currentStep));
     }
   }
 
   void previousStep() {
     if (_currentStep > 0) {
       _currentStep--;
-      emit(ProfileCompletionInitial());
+      emit(ProfileStepChanged(_currentStep));
     }
   }
 
@@ -45,9 +45,8 @@ class ProfileCompletionCubit extends Cubit<ProfileCompletionState> {
     _currentStep = step;
     if (_currentStep == 2) {
       loadBrands();
-    } else {
-      emit(ProfileCompletionInitial());
     }
+    emit(ProfileStepChanged(_currentStep));
   }
 
   bool canProceedFromCurrentStep() {
@@ -77,17 +76,19 @@ class ProfileCompletionCubit extends Cubit<ProfileCompletionState> {
   Future<void> completeProfile() async {
     try {
       emit(ProfileCompletionLoading());
-      
+
       // Update favorite brands
       await _brandsDataSource.updateFavoriteBrands(_data.selectedBrandIds);
-      
+
       // Refresh user profile to get updated completion status
       await _authRepository.getProfile();
-      
+
       emit(ProfileCompletionSuccess());
     } catch (e) {
       print('❌ Error completing profile: $e');
-      emit(ProfileCompletionError('Failed to complete profile: ${e.toString()}'));
+      emit(
+        ProfileCompletionError('Failed to complete profile: ${e.toString()}'),
+      );
     }
   }
 
@@ -99,6 +100,7 @@ class ProfileCompletionCubit extends Cubit<ProfileCompletionState> {
       currentIds.add(brandId);
     }
     _data = _data.copyWith(selectedBrandIds: currentIds);
+    emit(ProfileDataChanged(data: _data, step: _currentStep));
   }
 
   void reset() {

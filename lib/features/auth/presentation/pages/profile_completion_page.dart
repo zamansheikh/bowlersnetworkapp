@@ -43,33 +43,54 @@ class _ProfileCompletionViewState extends State<ProfileCompletionView> {
     return Scaffold(
       backgroundColor: AppColors.background,
       body: SafeArea(
-        child: BlocBuilder<ProfileCompletionCubit, ProfileCompletionState>(
-          builder: (context, state) {
-            final cubit = context.read<ProfileCompletionCubit>();
-
-            return Column(
-              children: [
-                // Header with progress
-                _buildHeader(context, cubit),
-
-                // Step content
-                Expanded(
-                  child: PageView(
-                    controller: _pageController,
-                    physics: const NeverScrollableScrollPhysics(),
-                    children: [
-                      _BowlingStyleStep(cubit: cubit),
-                      _LocationStep(cubit: cubit),
-                      _BrandSelectionStep(cubit: cubit),
-                    ],
-                  ),
+        child: BlocListener<ProfileCompletionCubit, ProfileCompletionState>(
+          listenWhen: (previous, current) =>
+              current is ProfileStepChanged ||
+              current is ProfileCompletionSuccess,
+          listener: (context, state) async {
+            if (state is ProfileStepChanged) {
+              await _pageController.animateToPage(
+                state.step,
+                duration: const Duration(milliseconds: 300),
+                curve: Curves.easeInOut,
+              );
+            } else if (state is ProfileCompletionSuccess) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(
+                  content: Text('Profile completed successfully!'),
+                  behavior: SnackBarBehavior.floating,
                 ),
-
-                // Navigation buttons
-                _buildNavigationButtons(context, cubit),
-              ],
-            );
+              );
+            }
           },
+          child: BlocBuilder<ProfileCompletionCubit, ProfileCompletionState>(
+            builder: (context, state) {
+              final cubit = context.read<ProfileCompletionCubit>();
+
+              return Column(
+                children: [
+                  // Header with progress
+                  _buildHeader(context, cubit),
+
+                  // Step content
+                  Expanded(
+                    child: PageView(
+                      controller: _pageController,
+                      physics: const NeverScrollableScrollPhysics(),
+                      children: [
+                        _BowlingStyleStep(cubit: cubit),
+                        _LocationStep(cubit: cubit),
+                        _BrandSelectionStep(cubit: cubit),
+                      ],
+                    ),
+                  ),
+
+                  // Navigation buttons
+                  _buildNavigationButtons(context, cubit),
+                ],
+              );
+            },
+          ),
         ),
       ),
     );
@@ -189,20 +210,27 @@ class _ProfileCompletionViewState extends State<ProfileCompletionView> {
 
           Expanded(
             flex: cubit.currentStep == 0 ? 1 : 1,
-            child: ElevatedButton(
-              onPressed: () => _nextStep(cubit),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: AppColors.primaryLimeGreen,
-                padding: EdgeInsets.symmetric(vertical: AppSpacing.md),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                elevation: 0,
-              ),
-              child: Text(
-                cubit.currentStep == 2 ? 'Complete Profile' : 'Next',
-                style: AppTextStyles.button.copyWith(color: AppColors.white),
-              ),
+            child: BlocBuilder<ProfileCompletionCubit, ProfileCompletionState>(
+              builder: (context, state) {
+                final canProceed = cubit.canProceedFromCurrentStep();
+                return ElevatedButton(
+                  onPressed: canProceed ? () => _nextStep(cubit) : null,
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppColors.primaryLimeGreen,
+                    padding: EdgeInsets.symmetric(vertical: AppSpacing.md),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    elevation: 0,
+                  ),
+                  child: Text(
+                    cubit.currentStep == 2 ? 'Complete Profile' : 'Next',
+                    style: AppTextStyles.button.copyWith(
+                      color: AppColors.white,
+                    ),
+                  ),
+                );
+              },
             ),
           ),
         ],
@@ -212,10 +240,6 @@ class _ProfileCompletionViewState extends State<ProfileCompletionView> {
 
   void _previousStep(ProfileCompletionCubit cubit) {
     cubit.previousStep();
-    _pageController.previousPage(
-      duration: const Duration(milliseconds: 300),
-      curve: Curves.easeInOut,
-    );
   }
 
   void _nextStep(ProfileCompletionCubit cubit) {
@@ -224,10 +248,6 @@ class _ProfileCompletionViewState extends State<ProfileCompletionView> {
       cubit.completeProfile();
     } else {
       cubit.nextStep();
-      _pageController.nextPage(
-        duration: const Duration(milliseconds: 300),
-        curve: Curves.easeInOut,
-      );
     }
   }
 }
@@ -587,7 +607,11 @@ class __BowlingStyleStepState extends State<_BowlingStyleStep> {
     return GestureDetector(
       onTap: onTap,
       child: Container(
-        padding: const EdgeInsets.all(16),
+        padding: EdgeInsets.symmetric(
+          horizontal: AppSpacing.md,
+          vertical: AppSpacing.sm,
+        ),
+        constraints: const BoxConstraints(minHeight: 56),
         decoration: BoxDecoration(
           color: AppColors.white,
           borderRadius: BorderRadius.circular(12),
@@ -608,31 +632,36 @@ class __BowlingStyleStepState extends State<_BowlingStyleStep> {
               : null,
         ),
         child: Row(
+          mainAxisAlignment: MainAxisAlignment.start,
+          crossAxisAlignment: CrossAxisAlignment.center,
           children: [
             Icon(
               icon,
               color: isSelected ? AppColors.primaryLimeGreen : AppColors.gray,
-              size: 24,
+              size: 20,
             ),
-            const SizedBox(width: 12),
+            SizedBox(width: AppSpacing.sm),
             Expanded(
               child: Text(
                 title,
-                style: TextStyle(
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: AppTextStyles.bodyMedium.copyWith(
                   fontWeight: FontWeight.w600,
                   color: isSelected
                       ? AppColors.primaryLimeGreen
                       : AppColors.black,
-                  fontSize: 16,
                 ),
               ),
             ),
-            if (isSelected)
+            if (isSelected) ...[
+              SizedBox(width: AppSpacing.sm),
               const Icon(
                 Icons.check_circle,
                 color: AppColors.primaryLimeGreen,
-                size: 20,
+                size: 18,
               ),
+            ],
           ],
         ),
       ),

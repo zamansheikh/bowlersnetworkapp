@@ -13,6 +13,27 @@ class ProfileCompletionInitial extends ProfileCompletionState {}
 
 class ProfileCompletionLoading extends ProfileCompletionState {}
 
+/// Emitted when form data changes within any step
+class ProfileDataChanged extends ProfileCompletionState {
+  final ProfileCompletionData data;
+  final int step;
+
+  const ProfileDataChanged({required this.data, required this.step});
+
+  @override
+  List<Object?> get props => [data, step];
+}
+
+/// Emitted when the current step changes
+class ProfileStepChanged extends ProfileCompletionState {
+  final int step;
+
+  const ProfileStepChanged(this.step);
+
+  @override
+  List<Object?> get props => [step];
+}
+
 class BrandsLoading extends ProfileCompletionState {}
 
 class BrandsLoaded extends ProfileCompletionState {
@@ -107,15 +128,13 @@ class ProfileCompletionData {
 
   bool get isStep1Valid {
     return average.isNotEmpty &&
-           division.isNotEmpty &&
-           (!isPBACardHolder || (pbaNumber?.isNotEmpty ?? false)) &&
-           (!isUSBCMember || (usbcNumber?.isNotEmpty ?? false));
+        division.isNotEmpty &&
+        (!isPBACardHolder || (pbaNumber?.isNotEmpty ?? false)) &&
+        (!isUSBCMember || (usbcNumber?.isNotEmpty ?? false));
   }
 
   bool get isStep2Valid {
-    return city.isNotEmpty &&
-           state.isNotEmpty &&
-           zipCode.isNotEmpty;
+    return city.isNotEmpty && state.isNotEmpty && zipCode.isNotEmpty;
   }
 
   bool get isStep3Valid {
