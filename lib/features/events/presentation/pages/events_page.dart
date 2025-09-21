@@ -162,9 +162,7 @@ class _EventsPageState extends State<EventsPage> {
           ),
         ),
 
-        SliverToBoxAdapter(
-          child: SizedBox(height: AppSpacing.lg),
-        ),
+        SliverToBoxAdapter(child: SizedBox(height: AppSpacing.lg)),
 
         // Events List Header
         SliverToBoxAdapter(
@@ -211,37 +209,28 @@ class _EventsPageState extends State<EventsPage> {
           ),
         ),
 
-        SliverToBoxAdapter(
-          child: SizedBox(height: AppSpacing.md),
-        ),
+        SliverToBoxAdapter(child: SizedBox(height: AppSpacing.md)),
 
         // Events List
         filteredEvents.isEmpty
-            ? SliverToBoxAdapter(
-                child: _buildEmptyState(state),
-              )
+            ? SliverToBoxAdapter(child: _buildEmptyState(state))
             : SliverList(
-                delegate: SliverChildBuilderDelegate(
-                  (context, index) {
-                    final event = filteredEvents[index];
-                    return Padding(
-                      padding: EdgeInsets.fromLTRB(
-                        AppSpacing.lg,
-                        AppSpacing.xs,
-                        AppSpacing.lg,
-                        AppSpacing.xs,
-                      ),
-                      child: _buildModernEventCard(event),
-                    );
-                  },
-                  childCount: filteredEvents.length,
-                ),
+                delegate: SliverChildBuilderDelegate((context, index) {
+                  final event = filteredEvents[index];
+                  return Padding(
+                    padding: EdgeInsets.fromLTRB(
+                      AppSpacing.lg,
+                      AppSpacing.xs,
+                      AppSpacing.lg,
+                      AppSpacing.xs,
+                    ),
+                    child: _buildModernEventCard(event),
+                  );
+                }, childCount: filteredEvents.length),
               ),
 
         // Bottom padding
-        SliverToBoxAdapter(
-          child: SizedBox(height: AppSpacing.xxl),
-        ),
+        SliverToBoxAdapter(child: SizedBox(height: AppSpacing.xxl)),
       ],
     );
   }
@@ -311,14 +300,6 @@ class _EventsPageState extends State<EventsPage> {
       ],
     );
   }
-
-  
-
-  
-
-  
-
-  
 
   Widget _buildEventTypesLegend(EventsLoaded state) {
     return Card(
@@ -519,9 +500,7 @@ class _EventsPageState extends State<EventsPage> {
         Expanded(
           child: Text(
             label,
-            style: AppTextStyles.bodyMedium.copyWith(
-              color: AppColors.gray700,
-            ),
+            style: AppTextStyles.bodyMedium.copyWith(color: AppColors.gray700),
           ),
         ),
         Container(
@@ -547,16 +526,36 @@ class _EventsPageState extends State<EventsPage> {
 
   String _formatSelectedDate(DateTime date) {
     final months = [
-      'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
-      'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'
+      'Jan',
+      'Feb',
+      'Mar',
+      'Apr',
+      'May',
+      'Jun',
+      'Jul',
+      'Aug',
+      'Sep',
+      'Oct',
+      'Nov',
+      'Dec',
     ];
     return '${months[date.month - 1]} ${date.day}';
   }
 
   String _getFormattedMonth(DateTime date) {
     final months = [
-      'January', 'February', 'March', 'April', 'May', 'June',
-      'July', 'August', 'September', 'October', 'November', 'December'
+      'January',
+      'February',
+      'March',
+      'April',
+      'May',
+      'June',
+      'July',
+      'August',
+      'September',
+      'October',
+      'November',
+      'December',
     ];
     return '${months[date.month - 1]} ${date.year}';
   }
@@ -579,7 +578,7 @@ class _EventsPageState extends State<EventsPage> {
   Widget _buildCompactCalendar(EventsLoaded state) {
     _selectedDay = state.selectedDate;
     _focusedDay = state.currentDate;
-    
+
     return Container(
       decoration: BoxDecoration(
         color: AppColors.white,
@@ -598,9 +597,7 @@ class _EventsPageState extends State<EventsPage> {
           Container(
             padding: EdgeInsets.all(AppSpacing.lg),
             decoration: const BoxDecoration(
-              border: Border(
-                bottom: BorderSide(color: AppColors.gray100),
-              ),
+              border: Border(bottom: BorderSide(color: AppColors.gray100)),
             ),
             child: Row(
               children: [
@@ -620,31 +617,25 @@ class _EventsPageState extends State<EventsPage> {
                 const Spacer(),
                 Row(
                   children: [
-                    _buildCalendarNavButton(
-                      Icons.chevron_left_rounded,
-                      () {
-                        final newDate = DateTime(
-                          _focusedDay.year,
-                          _focusedDay.month - 1,
-                          1,
-                        );
-                        setState(() => _focusedDay = newDate);
-                        context.read<EventsCubit>().setCurrentDate(newDate);
-                      },
-                    ),
+                    _buildCalendarNavButton(Icons.chevron_left_rounded, () {
+                      final newDate = DateTime(
+                        _focusedDay.year,
+                        _focusedDay.month - 1,
+                        1,
+                      );
+                      setState(() => _focusedDay = newDate);
+                      context.read<EventsCubit>().setCurrentDate(newDate);
+                    }),
                     SizedBox(width: AppSpacing.sm),
-                    _buildCalendarNavButton(
-                      Icons.chevron_right_rounded,
-                      () {
-                        final newDate = DateTime(
-                          _focusedDay.year,
-                          _focusedDay.month + 1,
-                          1,
-                        );
-                        setState(() => _focusedDay = newDate);
-                        context.read<EventsCubit>().setCurrentDate(newDate);
-                      },
-                    ),
+                    _buildCalendarNavButton(Icons.chevron_right_rounded, () {
+                      final newDate = DateTime(
+                        _focusedDay.year,
+                        _focusedDay.month + 1,
+                        1,
+                      );
+                      setState(() => _focusedDay = newDate);
+                      context.read<EventsCubit>().setCurrentDate(newDate);
+                    }),
                   ],
                 ),
               ],
@@ -671,7 +662,8 @@ class _EventsPageState extends State<EventsPage> {
                 setState(() => _focusedDay = focusedDay);
                 context.read<EventsCubit>().setCurrentDate(focusedDay);
               },
-              eventLoader: (day) => context.read<EventsCubit>().getEventsForDate(day),
+              eventLoader: (day) =>
+                  context.read<EventsCubit>().getEventsForDate(day),
               headerVisible: false,
               daysOfWeekHeight: 40,
               rowHeight: 48,
@@ -736,11 +728,7 @@ class _EventsPageState extends State<EventsPage> {
           borderRadius: BorderRadius.circular(8),
           border: Border.all(color: AppColors.gray200),
         ),
-        child: Icon(
-          icon,
-          size: 18,
-          color: AppColors.gray600,
-        ),
+        child: Icon(icon, size: 18, color: AppColors.gray600),
       ),
     );
   }
@@ -770,8 +758,8 @@ class _EventsPageState extends State<EventsPage> {
               state.selectedDate != null
                   ? 'No events on this date'
                   : state.searchTerm.isNotEmpty || state.filterType != null
-                      ? 'No events match your filters'
-                      : 'No events available',
+                  ? 'No events match your filters'
+                  : 'No events available',
               style: AppTextStyles.titleMedium.copyWith(
                 color: AppColors.gray700,
                 fontWeight: FontWeight.w600,
@@ -796,7 +784,7 @@ class _EventsPageState extends State<EventsPage> {
   Widget _buildModernEventCard(CalendarEvent event) {
     final statusColor = _getStatusColor(event.status);
     final typeColor = _getEventTypeColor(event.type);
-    
+
     return Container(
       decoration: BoxDecoration(
         color: AppColors.white,
@@ -840,9 +828,9 @@ class _EventsPageState extends State<EventsPage> {
                         size: 24,
                       ),
                     ),
-                    
+
                     SizedBox(width: AppSpacing.md),
-                    
+
                     // Title and type
                     Expanded(
                       child: Column(
@@ -878,7 +866,7 @@ class _EventsPageState extends State<EventsPage> {
                         ],
                       ),
                     ),
-                    
+
                     // Status badge
                     Container(
                       padding: EdgeInsets.symmetric(
@@ -899,9 +887,9 @@ class _EventsPageState extends State<EventsPage> {
                     ),
                   ],
                 ),
-                
+
                 SizedBox(height: AppSpacing.md),
-                
+
                 // Event details
                 _buildEventDetailRow(
                   Icons.schedule_rounded,
@@ -909,14 +897,11 @@ class _EventsPageState extends State<EventsPage> {
                       ? '${event.time}'
                       : '${event.time} - ${event.endTime}',
                 ),
-                
+
                 SizedBox(height: AppSpacing.sm),
-                
-                _buildEventDetailRow(
-                  Icons.location_on_rounded,
-                  event.location,
-                ),
-                
+
+                _buildEventDetailRow(Icons.location_on_rounded, event.location),
+
                 if (event.participants > 0) ...[
                   SizedBox(height: AppSpacing.sm),
                   _buildEventDetailRow(
@@ -926,7 +911,7 @@ class _EventsPageState extends State<EventsPage> {
                         : '${event.participants} participants',
                   ),
                 ],
-                
+
                 if (event.entryFee != null && event.entryFee! > 0) ...[
                   SizedBox(height: AppSpacing.sm),
                   _buildEventDetailRow(
@@ -945,18 +930,12 @@ class _EventsPageState extends State<EventsPage> {
   Widget _buildEventDetailRow(IconData icon, String text) {
     return Row(
       children: [
-        Icon(
-          icon,
-          size: 16,
-          color: AppColors.gray500,
-        ),
+        Icon(icon, size: 16, color: AppColors.gray500),
         SizedBox(width: AppSpacing.sm),
         Expanded(
           child: Text(
             text,
-            style: AppTextStyles.bodyMedium.copyWith(
-              color: AppColors.gray600,
-            ),
+            style: AppTextStyles.bodyMedium.copyWith(color: AppColors.gray600),
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
           ),
