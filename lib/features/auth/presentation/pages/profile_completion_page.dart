@@ -1108,14 +1108,10 @@ class _BrandSelectionStep extends StatelessWidget {
             Container(
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
-                color: AppColors.primaryLimeGreen.withValues(
-                  alpha: 0.1,
-                ),
+                color: AppColors.primaryLimeGreen.withValues(alpha: 0.1),
                 borderRadius: BorderRadius.circular(8),
                 border: Border.all(
-                  color: AppColors.primaryLimeGreen.withValues(
-                    alpha: 0.3,
-                  ),
+                  color: AppColors.primaryLimeGreen.withValues(alpha: 0.3),
                 ),
               ),
               child: Row(
