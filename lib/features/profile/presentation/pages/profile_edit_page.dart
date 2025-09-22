@@ -6,6 +6,7 @@ import 'dart:io';
 import '../../../auth/presentation/bloc/auth_cubit.dart';
 import '../../../home/data/models/user_model.dart';
 import '../../../../core/constants/colors.dart';
+import '../../../../core/widgets/custom_app_bar.dart';
 
 class ProfileEditPage extends StatefulWidget {
   const ProfileEditPage({super.key});
@@ -62,18 +63,20 @@ class _ProfileEditPageState extends State<ProfileEditPage> {
   }
 
   void _populateFields(UserModel user) {
-    _firstNameController.text = user.firstName;
-    _lastNameController.text = user.lastName;
-    _usernameController.text = user.username;
-    _emailController.text = user.email;
-    _averageScoreController.text = user.stats.averageScore.toString();
-    _highGameController.text = user.stats.highGame.toString();
-    _highSeriesController.text = user.stats.highSeries.toString();
-    _experienceController.text = user.stats.experience.toString();
+    setState(() {
+      _firstNameController.text = user.firstName;
+      _lastNameController.text = user.lastName;
+      _usernameController.text = user.username;
+      _emailController.text = user.email;
+      _averageScoreController.text = user.stats.averageScore.toString();
+      _highGameController.text = user.stats.highGame.toString();
+      _highSeriesController.text = user.stats.highSeries.toString();
+      _experienceController.text = user.stats.experience.toString();
 
-    _existingProfilePictureUrl = user.profilePictureUrl;
-    _existingCoverPhotoUrl = user.coverPhotoUrl;
-    _existingIntroVideoUrl = user.introVideoUrl;
+      _existingProfilePictureUrl = user.profilePictureUrl;
+      _existingCoverPhotoUrl = user.coverPhotoUrl;
+      _existingIntroVideoUrl = user.introVideoUrl;
+    });
   }
 
   Future<void> _pickImage(String type) async {
@@ -135,33 +138,11 @@ class _ProfileEditPageState extends State<ProfileEditPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColors.surface,
-      appBar: AppBar(
-        backgroundColor: AppColors.white,
-        elevation: 0,
-        scrolledUnderElevation: 1,
-        surfaceTintColor: AppColors.white,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: AppColors.black),
-          onPressed: () => context.pop(),
-        ),
-        title: const Text(
-          'Edit Profile',
-          style: TextStyle(
-            color: AppColors.black,
-            fontWeight: FontWeight.w600,
-            fontSize: 20,
-          ),
-        ),
+      appBar: CustomAppBar(
+        title: 'Edit Profile',
         actions: [
-          TextButton(
+          CustomSaveButton(
             onPressed: _saveProfile,
-            child: const Text(
-              'Save',
-              style: TextStyle(
-                color: AppColors.primaryLimeGreen,
-                fontWeight: FontWeight.w600,
-              ),
-            ),
           ),
         ],
       ),
@@ -192,38 +173,45 @@ class _ProfileEditPageState extends State<ProfileEditPage> {
     return Container(
       decoration: const BoxDecoration(gradient: AppColors.backgroundGradient),
       child: SingleChildScrollView(
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 20),
         child: Form(
           key: _formKey,
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               _buildMediaSection(user),
-              const SizedBox(height: 24),
+              const SizedBox(height: 20),
               _buildPersonalInfoSection(),
-              const SizedBox(height: 24),
+              const SizedBox(height: 20),
               _buildStatsSection(),
-              const SizedBox(height: 32),
-              SizedBox(
-                width: double.infinity,
-                child: ElevatedButton(
-                  onPressed: _saveProfile,
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: AppColors.primaryLimeGreen,
-                    foregroundColor: AppColors.black,
-                    padding: const EdgeInsets.symmetric(vertical: 16),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                  ),
-                  child: const Text(
-                    'Save Changes',
-                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
-                  ),
-                ),
-              ),
+              const SizedBox(height: 24),
+              _buildSaveButton(),
+              const SizedBox(height: 20), // Bottom padding for scroll
             ],
           ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildSaveButton() {
+    return SizedBox(
+      width: double.infinity,
+      child: ElevatedButton(
+        onPressed: _saveProfile,
+        style: ElevatedButton.styleFrom(
+          backgroundColor: AppColors.primaryLimeGreen,
+          foregroundColor: AppColors.black,
+          padding: const EdgeInsets.symmetric(vertical: 16),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
+          elevation: 2,
+          shadowColor: AppColors.primaryLimeGreen.withOpacity(0.3),
+        ),
+        child: const Text(
+          'Save Changes',
+          style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
         ),
       ),
     );
@@ -239,7 +227,7 @@ class _ProfileEditPageState extends State<ProfileEditPage> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text(
+            Text(
               'Media & Display',
               style: TextStyle(
                 fontSize: 18,
@@ -247,7 +235,7 @@ class _ProfileEditPageState extends State<ProfileEditPage> {
                 color: AppColors.black,
               ),
             ),
-            const SizedBox(height: 16),
+            const SizedBox(height: 20),
 
             // Profile Picture
             _buildImagePickerSection(
@@ -257,7 +245,7 @@ class _ProfileEditPageState extends State<ProfileEditPage> {
               () => _pickImage('profile'),
               isCircular: true,
             ),
-            const SizedBox(height: 16),
+            const SizedBox(height: 20),
 
             // Cover Photo or Intro Video based on user type
             if (user.isPro)
@@ -529,7 +517,7 @@ class _ProfileEditPageState extends State<ProfileEditPage> {
           return null;
         },
       ),
-      const SizedBox(height: 16),
+      const SizedBox(height: 20),
       _buildTextField(
         controller: _lastNameController,
         label: 'Last Name',
@@ -541,7 +529,7 @@ class _ProfileEditPageState extends State<ProfileEditPage> {
           return null;
         },
       ),
-      const SizedBox(height: 16),
+      const SizedBox(height: 20),
       _buildTextField(
         controller: _usernameController,
         label: 'Username',
@@ -554,7 +542,7 @@ class _ProfileEditPageState extends State<ProfileEditPage> {
           return null;
         },
       ),
-      const SizedBox(height: 16),
+      const SizedBox(height: 20),
       _buildTextField(
         controller: _emailController,
         label: 'Email',
@@ -594,7 +582,7 @@ class _ProfileEditPageState extends State<ProfileEditPage> {
               },
             ),
           ),
-          const SizedBox(width: 16),
+          const SizedBox(width: 20),
           Expanded(
             child: _buildTextField(
               controller: _highGameController,
@@ -614,7 +602,7 @@ class _ProfileEditPageState extends State<ProfileEditPage> {
           ),
         ],
       ),
-      const SizedBox(height: 16),
+      const SizedBox(height: 20),
       Row(
         children: [
           Expanded(
@@ -634,7 +622,7 @@ class _ProfileEditPageState extends State<ProfileEditPage> {
               },
             ),
           ),
-          const SizedBox(width: 16),
+          const SizedBox(width: 20),
           Expanded(
             child: _buildTextField(
               controller: _experienceController,
@@ -669,13 +657,13 @@ class _ProfileEditPageState extends State<ProfileEditPage> {
           children: [
             Text(
               title,
-              style: const TextStyle(
+              style: TextStyle(
                 fontSize: 18,
                 fontWeight: FontWeight.w600,
                 color: AppColors.black,
               ),
             ),
-            const SizedBox(height: 16),
+            const SizedBox(height: 20),
             ...children,
           ],
         ),

@@ -7,6 +7,8 @@ import '../../../home/data/models/user_model.dart';
 import '../../../home/presentation/widgets/feed_post_card.dart';
 import '../cubit/profile_cubit.dart';
 import '../../../../core/di/injection.dart';
+import '../../../../core/constants/colors.dart';
+import '../../../../core/widgets/custom_app_bar.dart';
 
 class UserProfilePage extends StatefulWidget {
   const UserProfilePage({super.key});
@@ -77,27 +79,14 @@ class _UserProfilePageState extends State<UserProfilePage> {
 
   Widget _buildLoadingView() {
     return Scaffold(
-      appBar: AppBar(
-        backgroundColor: const Color(0xFF8BC342),
+      appBar: CustomAppBar(
+        title: 'Profile',
+        backgroundColor: AppColors.primaryLimeGreen,
         foregroundColor: Colors.white,
-        title: const Text('Profile'),
-        leading: Padding(
-          padding: const EdgeInsets.all(8.0),
-          child: Container(
-            decoration: BoxDecoration(
-              color: Colors.white.withOpacity(0.2),
-              shape: BoxShape.circle,
-            ),
-            child: IconButton(
-              icon: const Icon(Icons.arrow_back, color: Colors.white),
-              onPressed: () => context.pop(),
-            ),
-          ),
-        ),
       ),
       body: const Center(
         child: CircularProgressIndicator(
-          valueColor: AlwaysStoppedAnimation<Color>(Color(0xFF8BC342)),
+          valueColor: AlwaysStoppedAnimation<Color>(AppColors.primaryLimeGreen),
         ),
       ),
     );
@@ -105,23 +94,10 @@ class _UserProfilePageState extends State<UserProfilePage> {
 
   Widget _buildIncompleteProfileMessage(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        backgroundColor: const Color(0xFF8BC342),
+      appBar: CustomAppBar(
+        title: 'Profile',
+        backgroundColor: AppColors.primaryLimeGreen,
         foregroundColor: Colors.white,
-        title: const Text('Profile'),
-        leading: Padding(
-          padding: const EdgeInsets.all(8.0),
-          child: Container(
-            decoration: BoxDecoration(
-              color: Colors.white.withOpacity(0.2),
-              shape: BoxShape.circle,
-            ),
-            child: IconButton(
-              icon: const Icon(Icons.arrow_back, color: Colors.white),
-              onPressed: () => context.pop(),
-            ),
-          ),
-        ),
       ),
       body: Center(
         child: Padding(
@@ -149,7 +125,7 @@ class _UserProfilePageState extends State<UserProfilePage> {
               ElevatedButton(
                 onPressed: () => context.go('/complete-profile'),
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFF8BC342),
+                  backgroundColor: AppColors.primaryLimeGreen,
                   foregroundColor: Colors.white,
                 ),
                 child: const Text('Complete Profile'),
@@ -175,12 +151,14 @@ class _UserProfilePageState extends State<UserProfilePage> {
               padding: const EdgeInsets.all(8.0),
               child: Container(
                 decoration: BoxDecoration(
-                  color: Colors.black.withOpacity(0.5),
+                  color: Colors.black.withOpacity(0.6),
                   shape: BoxShape.circle,
                 ),
                 child: IconButton(
-                  icon: const Icon(Icons.arrow_back, color: Colors.white),
+                  icon: const Icon(Icons.arrow_back_ios_new, 
+                    color: Colors.white, size: 18),
                   onPressed: () => context.pop(),
+                  splashRadius: 20,
                 ),
               ),
             ),
@@ -189,12 +167,13 @@ class _UserProfilePageState extends State<UserProfilePage> {
                 padding: const EdgeInsets.all(8.0),
                 child: Container(
                   decoration: BoxDecoration(
-                    color: Colors.black.withOpacity(0.5),
+                    color: Colors.black.withOpacity(0.6),
                     shape: BoxShape.circle,
                   ),
                   child: IconButton(
-                    icon: const Icon(Icons.edit, color: Colors.white),
+                    icon: const Icon(Icons.edit, color: Colors.white, size: 18),
                     onPressed: () => context.push('/profile/edit'),
+                    splashRadius: 20,
                   ),
                 ),
               ),
