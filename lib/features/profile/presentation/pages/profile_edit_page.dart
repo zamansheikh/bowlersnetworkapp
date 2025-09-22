@@ -300,33 +300,127 @@ class _ProfileEditPageState extends State<ProfileEditPage> {
         const SizedBox(height: 8),
         GestureDetector(
           onTap: onTap,
-          child: Container(
-            height: isCircular ? 120 : 150,
-            width: double.infinity,
-            decoration: BoxDecoration(
-              color: AppColors.surface,
-              borderRadius: BorderRadius.circular(isCircular ? 60 : 12),
-              border: Border.all(color: AppColors.outline),
-            ),
-            child: imageFile != null
-                ? ClipRRect(
-                    borderRadius: BorderRadius.circular(isCircular ? 60 : 12),
-                    child: Image.file(imageFile, fit: BoxFit.cover),
-                  )
-                : existingUrl != null && existingUrl.isNotEmpty
-                ? ClipRRect(
-                    borderRadius: BorderRadius.circular(isCircular ? 60 : 12),
-                    child: Image.network(
-                      existingUrl,
-                      fit: BoxFit.cover,
-                      errorBuilder: (context, error, stackTrace) =>
-                          _buildPlaceholder(title, isCircular),
-                    ),
-                  )
-                : _buildPlaceholder(title, isCircular),
-          ),
+          child: isCircular
+              ? _buildCircularProfilePicture(imageFile, existingUrl, title)
+              : _buildRectangularImage(imageFile, existingUrl, title),
         ),
       ],
+    );
+  }
+
+  Widget _buildCircularProfilePicture(
+    File? imageFile,
+    String? existingUrl,
+    String title,
+  ) {
+    const size = 120.0;
+    return Center(
+      child: Container(
+        width: size,
+        height: size,
+        decoration: BoxDecoration(
+          shape: BoxShape.circle,
+          border: Border.all(color: AppColors.primaryLimeGreen, width: 3),
+          boxShadow: [
+            BoxShadow(
+              color: AppColors.primaryLimeGreen.withValues(alpha: 0.3),
+              blurRadius: 8,
+              offset: const Offset(0, 4),
+            ),
+          ],
+        ),
+        child: ClipOval(
+          child: imageFile != null
+              ? Image.file(
+                  imageFile,
+                  fit: BoxFit.cover,
+                  width: size,
+                  height: size,
+                )
+              : existingUrl != null && existingUrl.isNotEmpty
+              ? Image.network(
+                  existingUrl,
+                  fit: BoxFit.cover,
+                  width: size,
+                  height: size,
+                  errorBuilder: (context, error, stackTrace) =>
+                      _buildCircularPlaceholder(title),
+                )
+              : _buildCircularPlaceholder(title),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildRectangularImage(
+    File? imageFile,
+    String? existingUrl,
+    String title,
+  ) {
+    return Container(
+      height: 150,
+      width: double.infinity,
+      decoration: BoxDecoration(
+        color: AppColors.surface,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: AppColors.outline),
+      ),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(12),
+        child: imageFile != null
+            ? Image.file(imageFile, fit: BoxFit.cover)
+            : existingUrl != null && existingUrl.isNotEmpty
+            ? Image.network(
+                existingUrl,
+                fit: BoxFit.cover,
+                errorBuilder: (context, error, stackTrace) =>
+                    _buildRectangularPlaceholder(title),
+              )
+            : _buildRectangularPlaceholder(title),
+      ),
+    );
+  }
+
+  Widget _buildCircularPlaceholder(String title) {
+    return Container(
+      decoration: BoxDecoration(
+        shape: BoxShape.circle,
+        color: AppColors.surface,
+      ),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(Icons.person_add, size: 40, color: AppColors.primaryLimeGreen),
+          const SizedBox(height: 4),
+          Text(
+            'Add Photo',
+            style: TextStyle(
+              color: AppColors.primaryLimeGreen,
+              fontSize: 10,
+              fontWeight: FontWeight.w500,
+            ),
+            textAlign: TextAlign.center,
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildRectangularPlaceholder(String title) {
+    return Container(
+      color: AppColors.surface,
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(Icons.image, size: 32, color: AppColors.gray),
+          const SizedBox(height: 8),
+          Text(
+            'Tap to select $title',
+            style: const TextStyle(color: AppColors.gray, fontSize: 12),
+            textAlign: TextAlign.center,
+          ),
+        ],
+      ),
     );
   }
 
@@ -417,24 +511,6 @@ class _ProfileEditPageState extends State<ProfileEditPage> {
               ],
             ),
           ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildPlaceholder(String title, bool isCircular) {
-    return Column(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        Icon(
-          isCircular ? Icons.person : Icons.image,
-          size: 32,
-          color: AppColors.gray,
-        ),
-        const SizedBox(height: 8),
-        Text(
-          'Tap to select $title',
-          style: const TextStyle(color: AppColors.gray, fontSize: 12),
         ),
       ],
     );

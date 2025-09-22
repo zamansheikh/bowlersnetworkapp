@@ -70,17 +70,22 @@ class ProfileCubit extends Cubit<ProfileState> {
     try {
       print('👤 ProfileCubit: Making request to /api/user/posts');
       final response = await _dio.get('/api/user/posts');
-      print('👤 ProfileCubit: Response received - Status: ${response.statusCode}');
+      print(
+        '👤 ProfileCubit: Response received - Status: ${response.statusCode}',
+      );
 
-      if (response.data is List) {
-        final posts = (response.data as List<dynamic>)
+      if (response.data is Map<String, dynamic> &&
+          response.data['posts'] is List) {
+        final posts = (response.data['posts'] as List<dynamic>)
             .map((e) => FeedPost.fromJson(e as Map<String, dynamic>))
             .toList();
 
         print('👤 ProfileCubit: Successfully parsed ${posts.length} posts');
         emit(ProfileLoaded(posts: posts, isLoadingPosts: false));
       } else {
-        throw Exception('Invalid response format: expected List');
+        throw Exception(
+          'Invalid response format: expected Map with posts array',
+        );
       }
     } catch (e) {
       print('👤 ProfileCubit: Error loading posts: $e');
