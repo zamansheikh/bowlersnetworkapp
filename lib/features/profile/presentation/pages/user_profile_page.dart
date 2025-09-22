@@ -155,8 +155,11 @@ class _UserProfilePageState extends State<UserProfilePage> {
                   shape: BoxShape.circle,
                 ),
                 child: IconButton(
-                  icon: const Icon(Icons.arrow_back_ios_new, 
-                    color: Colors.white, size: 18),
+                  icon: const Icon(
+                    Icons.arrow_back_ios_new,
+                    color: Colors.white,
+                    size: 18,
+                  ),
                   onPressed: () => context.pop(),
                   splashRadius: 20,
                 ),

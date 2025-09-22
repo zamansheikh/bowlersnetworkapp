@@ -140,11 +140,7 @@ class _ProfileEditPageState extends State<ProfileEditPage> {
       backgroundColor: AppColors.surface,
       appBar: CustomAppBar(
         title: 'Edit Profile',
-        actions: [
-          CustomSaveButton(
-            onPressed: _saveProfile,
-          ),
-        ],
+        actions: [CustomSaveButton(onPressed: _saveProfile)],
       ),
       body: BlocBuilder<AuthCubit, AuthState>(
         builder: (context, state) {
