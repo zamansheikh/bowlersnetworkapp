@@ -92,6 +92,8 @@ import 'package:bowlersnetworkapp/features/pro_players/domain/usecases/pro_playe
     as _i74;
 import 'package:bowlersnetworkapp/features/pro_players/presentation/cubit/pro_players_cubit.dart'
     as _i565;
+import 'package:bowlersnetworkapp/features/profile/presentation/cubit/profile_cubit.dart'
+    as _i341;
 import 'package:dio/dio.dart' as _i361;
 import 'package:get_it/get_it.dart' as _i174;
 import 'package:injectable/injectable.dart' as _i526;
@@ -128,6 +130,7 @@ extension GetItInjectableX on _i174.GetIt {
     gh.lazySingleton<_i394.BrandsRemoteDataSource>(
       () => _i483.BrandsRemoteDataSourceImpl(gh<_i460.SharedPreferences>()),
     );
+    gh.factory<_i341.ProfileCubit>(() => _i341.ProfileCubit(gh<_i361.Dio>()));
     gh.factory<_i813.FeedCubit>(
       () => _i813.FeedCubit(repository: gh<_i535.FeedRepository>()),
     );

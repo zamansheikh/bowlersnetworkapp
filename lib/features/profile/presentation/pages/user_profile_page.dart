@@ -4,6 +4,9 @@ import 'package:go_router/go_router.dart';
 import 'package:video_player/video_player.dart';
 import '../../../auth/presentation/bloc/auth_cubit.dart';
 import '../../../home/data/models/user_model.dart';
+import '../../../home/presentation/widgets/feed_post_card.dart';
+import '../cubit/profile_cubit.dart';
+import '../../../../core/di/injection.dart';
 
 class UserProfilePage extends StatefulWidget {
   const UserProfilePage({super.key});
@@ -14,10 +17,22 @@ class UserProfilePage extends StatefulWidget {
 
 class _UserProfilePageState extends State<UserProfilePage> {
   VideoPlayerController? _videoController;
+  late ProfileCubit _profileCubit;
+
+  @override
+  void initState() {
+    super.initState();
+    _profileCubit = getIt<ProfileCubit>();
+    // Load user posts when the page initializes
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _profileCubit.loadUserPosts();
+    });
+  }
 
   @override
   void dispose() {
     _videoController?.dispose();
+    _profileCubit.close();
     super.dispose();
   }
 
@@ -37,22 +52,25 @@ class _UserProfilePageState extends State<UserProfilePage> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Colors.grey[50],
-      body: BlocBuilder<AuthCubit, AuthState>(
-        builder: (context, state) {
-          if (state is Authenticated) {
-            // Only show profile if user is UserModel (full data)
-            if (state.user is UserModel) {
-              final userModel = state.user as UserModel;
-              return _buildProfileDetailView(userModel);
-            } else {
-              // Show message for basic user entity
-              return _buildIncompleteProfileMessage(context);
+    return BlocProvider.value(
+      value: _profileCubit,
+      child: Scaffold(
+        backgroundColor: Colors.grey[50],
+        body: BlocBuilder<AuthCubit, AuthState>(
+          builder: (context, state) {
+            if (state is Authenticated) {
+              // Only show profile if user is UserModel (full data)
+              if (state.user is UserModel) {
+                final userModel = state.user as UserModel;
+                return _buildProfileDetailView(userModel);
+              } else {
+                // Show message for basic user entity
+                return _buildIncompleteProfileMessage(context);
+              }
             }
-          }
-          return _buildLoadingView();
-        },
+            return _buildLoadingView();
+          },
+        ),
       ),
     );
   }
@@ -410,6 +428,45 @@ class _UserProfilePageState extends State<UserProfilePage> {
                   ],
                 ),
               ),
+            ),
+          ),
+
+          // Posts Section Header
+          SliverToBoxAdapter(
+            child: Container(
+              margin: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+              padding: const EdgeInsets.symmetric(vertical: 16),
+              decoration: const BoxDecoration(
+                border: Border(
+                  bottom: BorderSide(color: Colors.grey, width: 0.5),
+                ),
+                color: Colors.white,
+              ),
+              child: const Text(
+                'My Posts',
+                style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.w600,
+                  color: Colors.black87,
+                ),
+              ),
+            ),
+          ),
+
+          // Posts Grid
+          SliverPadding(
+            padding: const EdgeInsets.symmetric(horizontal: 24),
+            sliver: BlocBuilder<ProfileCubit, ProfileState>(
+              builder: (context, state) {
+                if (state is ProfileLoaded) {
+                  return _buildPostsSection(
+                    state.posts,
+                    state.isLoadingPosts,
+                    state.postsError,
+                  );
+                }
+                return _buildPostsSection(null, true, null);
+              },
             ),
           ),
         ],
@@ -772,6 +829,101 @@ class _UserProfilePageState extends State<UserProfilePage> {
                 ),
               ),
             ),
+    );
+  }
+
+  Widget _buildPostsSection(List<dynamic>? posts, bool isLoading, String? error) {
+    if (isLoading) {
+      return const SliverToBoxAdapter(
+        child: Center(
+          child: Padding(
+            padding: EdgeInsets.all(32.0),
+            child: CircularProgressIndicator(),
+          ),
+        ),
+      );
+    }
+
+    if (error != null) {
+      return SliverToBoxAdapter(
+        child: Center(
+          child: Padding(
+            padding: const EdgeInsets.all(32.0),
+            child: Column(
+              children: [
+                Icon(
+                  Icons.error_outline,
+                  size: 64,
+                  color: Colors.grey[400],
+                ),
+                const SizedBox(height: 16),
+                Text(
+                  'Failed to load posts',
+                  style: TextStyle(
+                    fontSize: 16,
+                    color: Colors.grey[600],
+                  ),
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  error,
+                  style: TextStyle(
+                    fontSize: 14,
+                    color: Colors.grey[500],
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      );
+    }
+
+    if (posts == null || posts.isEmpty) {
+      return SliverToBoxAdapter(
+        child: Center(
+          child: Padding(
+            padding: const EdgeInsets.all(32.0),
+            child: Column(
+              children: [
+                Icon(
+                  Icons.post_add,
+                  size: 64,
+                  color: Colors.grey[400],
+                ),
+                const SizedBox(height: 16),
+                Text(
+                  'No posts yet',
+                  style: TextStyle(
+                    fontSize: 16,
+                    color: Colors.grey[600],
+                  ),
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  'Your posts will appear here',
+                  style: TextStyle(
+                    fontSize: 14,
+                    color: Colors.grey[500],
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      );
+    }
+
+    return SliverList(
+      delegate: SliverChildBuilderDelegate(
+        (context, index) {
+          return Padding(
+            padding: const EdgeInsets.only(bottom: 16.0),
+            child: FeedPostCard(post: posts[index], postIndex: index),
+          );
+        },
+        childCount: posts.length,
+      ),
     );
   }
 }
