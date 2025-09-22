@@ -124,13 +124,15 @@ extension GetItInjectableX on _i174.GetIt {
     gh.factory<_i535.FeedRepository>(
       () => _i535.FeedRepository(gh<_i460.SharedPreferences>()),
     );
+    gh.factory<_i341.ProfileCubit>(
+      () => _i341.ProfileCubit(gh<_i460.SharedPreferences>()),
+    );
     gh.lazySingleton<_i946.OverviewRemoteDataSource>(
       () => _i946.OverviewRemoteDataSourceImpl(gh<_i460.SharedPreferences>()),
     );
     gh.lazySingleton<_i394.BrandsRemoteDataSource>(
       () => _i483.BrandsRemoteDataSourceImpl(gh<_i460.SharedPreferences>()),
     );
-    gh.factory<_i341.ProfileCubit>(() => _i341.ProfileCubit(gh<_i361.Dio>()));
     gh.factory<_i813.FeedCubit>(
       () => _i813.FeedCubit(repository: gh<_i535.FeedRepository>()),
     );

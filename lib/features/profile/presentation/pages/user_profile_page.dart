@@ -832,7 +832,11 @@ class _UserProfilePageState extends State<UserProfilePage> {
     );
   }
 
-  Widget _buildPostsSection(List<dynamic>? posts, bool isLoading, String? error) {
+  Widget _buildPostsSection(
+    List<dynamic>? posts,
+    bool isLoading,
+    String? error,
+  ) {
     if (isLoading) {
       return const SliverToBoxAdapter(
         child: Center(
@@ -851,26 +855,16 @@ class _UserProfilePageState extends State<UserProfilePage> {
             padding: const EdgeInsets.all(32.0),
             child: Column(
               children: [
-                Icon(
-                  Icons.error_outline,
-                  size: 64,
-                  color: Colors.grey[400],
-                ),
+                Icon(Icons.error_outline, size: 64, color: Colors.grey[400]),
                 const SizedBox(height: 16),
                 Text(
                   'Failed to load posts',
-                  style: TextStyle(
-                    fontSize: 16,
-                    color: Colors.grey[600],
-                  ),
+                  style: TextStyle(fontSize: 16, color: Colors.grey[600]),
                 ),
                 const SizedBox(height: 8),
                 Text(
                   error,
-                  style: TextStyle(
-                    fontSize: 14,
-                    color: Colors.grey[500],
-                  ),
+                  style: TextStyle(fontSize: 14, color: Colors.grey[500]),
                 ),
               ],
             ),
@@ -886,26 +880,16 @@ class _UserProfilePageState extends State<UserProfilePage> {
             padding: const EdgeInsets.all(32.0),
             child: Column(
               children: [
-                Icon(
-                  Icons.post_add,
-                  size: 64,
-                  color: Colors.grey[400],
-                ),
+                Icon(Icons.post_add, size: 64, color: Colors.grey[400]),
                 const SizedBox(height: 16),
                 Text(
                   'No posts yet',
-                  style: TextStyle(
-                    fontSize: 16,
-                    color: Colors.grey[600],
-                  ),
+                  style: TextStyle(fontSize: 16, color: Colors.grey[600]),
                 ),
                 const SizedBox(height: 8),
                 Text(
                   'Your posts will appear here',
-                  style: TextStyle(
-                    fontSize: 14,
-                    color: Colors.grey[500],
-                  ),
+                  style: TextStyle(fontSize: 14, color: Colors.grey[500]),
                 ),
               ],
             ),
@@ -915,15 +899,12 @@ class _UserProfilePageState extends State<UserProfilePage> {
     }
 
     return SliverList(
-      delegate: SliverChildBuilderDelegate(
-        (context, index) {
-          return Padding(
-            padding: const EdgeInsets.only(bottom: 16.0),
-            child: FeedPostCard(post: posts[index], postIndex: index),
-          );
-        },
-        childCount: posts.length,
-      ),
+      delegate: SliverChildBuilderDelegate((context, index) {
+        return Padding(
+          padding: const EdgeInsets.only(bottom: 16.0),
+          child: FeedPostCard(post: posts[index], postIndex: index),
+        );
+      }, childCount: posts.length),
     );
   }
 }

@@ -11,11 +11,7 @@ class ProfileLoaded extends ProfileState {
   final bool isLoadingPosts;
   final String? postsError;
 
-  ProfileLoaded({
-    this.posts,
-    this.isLoadingPosts = false,
-    this.postsError,
-  });
+  ProfileLoaded({this.posts, this.isLoadingPosts = false, this.postsError});
 
   ProfileLoaded copyWith({
     List<FeedPost>? posts,
