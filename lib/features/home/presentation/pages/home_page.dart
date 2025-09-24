@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../../../../core/constants/colors.dart';
 import '../../../../core/widgets/app_drawer.dart';
 import '../cubit/feed_cubit.dart';
@@ -64,21 +65,21 @@ class HomePageView extends StatelessWidget {
                   title: Row(
                     children: [
                       ClipRRect(
-                        borderRadius: BorderRadius.circular(4),
+                        borderRadius: BorderRadius.circular(4.r),
                         child: Image.asset(
                           'assets/icon/icon.png',
-                          width: 28,
-                          height: 28,
+                          width: 28.w,
+                          height: 28.w,
                           fit: BoxFit.cover,
                         ),
                       ),
-                      const SizedBox(width: 12),
-                      const Text(
+                      SizedBox(width: 12.w),
+                      Text(
                         'Bowlers Network',
                         style: TextStyle(
                           color: AppColors.black,
                           fontWeight: FontWeight.bold,
-                          fontSize: 20,
+                          fontSize: 20.sp,
                         ),
                       ),
                     ],
@@ -89,12 +90,12 @@ class HomePageView extends StatelessWidget {
                 SliverToBoxAdapter(
                   child: Column(
                     children: [
-                      const SizedBox(height: 16),
+                      SizedBox(height: 16.h),
 
                       // Create Post Section
                       const CreatePostSection(),
 
-                      const SizedBox(height: 16),
+                      SizedBox(height: 16.h),
 
                       // Feed Content
                       BlocConsumer<FeedCubit, FeedState>(
@@ -162,8 +163,8 @@ class HomePageView extends StatelessWidget {
 
   Widget _buildLoadingWidget() {
     return Container(
-      padding: const EdgeInsets.symmetric(vertical: 60),
-      child: const Center(
+      padding: EdgeInsets.symmetric(vertical: 60.h),
+      child: Center(
         child: Column(
           children: [
             CircularProgressIndicator(
@@ -171,10 +172,10 @@ class HomePageView extends StatelessWidget {
                 AppColors.primaryLimeGreen,
               ),
             ),
-            SizedBox(height: 16),
+            SizedBox(height: 16.h),
             Text(
               'Loading feed...',
-              style: TextStyle(color: AppColors.gray, fontSize: 16),
+              style: TextStyle(color: AppColors.gray, fontSize: 16.sp),
             ),
           ],
         ),
@@ -184,27 +185,27 @@ class HomePageView extends StatelessWidget {
 
   Widget _buildErrorWidget(String message, BuildContext context) {
     return Container(
-      padding: const EdgeInsets.all(24),
+      padding: EdgeInsets.all(24.w),
       child: Center(
         child: Column(
           children: [
-            const Icon(Icons.error_outline, size: 64, color: AppColors.error),
-            const SizedBox(height: 16),
-            const Text(
+            Icon(Icons.error_outline, size: 64.w, color: AppColors.error),
+            SizedBox(height: 16.h),
+            Text(
               'Oops! Something went wrong',
               style: TextStyle(
-                fontSize: 18,
+                fontSize: 18.sp,
                 fontWeight: FontWeight.w600,
                 color: AppColors.black,
               ),
             ),
-            const SizedBox(height: 8),
+            SizedBox(height: 8.h),
             Text(
               message,
-              style: const TextStyle(color: AppColors.gray, fontSize: 14),
+              style: TextStyle(color: AppColors.gray, fontSize: 14.sp),
               textAlign: TextAlign.center,
             ),
-            const SizedBox(height: 24),
+            SizedBox(height: 24.h),
             ElevatedButton(
               onPressed: () {
                 context.read<FeedCubit>().loadFeed();
@@ -212,12 +213,12 @@ class HomePageView extends StatelessWidget {
               style: ElevatedButton.styleFrom(
                 backgroundColor: AppColors.primaryLimeGreen,
                 foregroundColor: AppColors.black,
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 32,
-                  vertical: 12,
+                padding: EdgeInsets.symmetric(
+                  horizontal: 32.w,
+                  vertical: 12.h,
                 ),
                 shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
+                  borderRadius: BorderRadius.circular(12.r),
                 ),
               ),
               child: const Text(

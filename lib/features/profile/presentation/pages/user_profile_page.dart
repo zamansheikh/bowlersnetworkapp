@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
 import 'package:video_player/video_player.dart';
 import '../../../auth/presentation/bloc/auth_cubit.dart';
@@ -101,27 +102,27 @@ class _UserProfilePageState extends State<UserProfilePage> {
       ),
       body: Center(
         child: Padding(
-          padding: const EdgeInsets.all(32),
+          padding: EdgeInsets.all(32.w),
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              const Icon(Icons.person_outline, size: 64, color: Colors.grey),
-              const SizedBox(height: 16),
-              const Text(
+              Icon(Icons.person_outline, size: 64.w, color: Colors.grey),
+              SizedBox(height: 16.h),
+              Text(
                 'Profile Incomplete',
                 style: TextStyle(
-                  fontSize: 20,
+                  fontSize: 20.sp,
                   fontWeight: FontWeight.w600,
                   color: Colors.black,
                 ),
               ),
-              const SizedBox(height: 8),
-              const Text(
+              SizedBox(height: 8.h),
+              Text(
                 'Complete your profile to access all features',
                 textAlign: TextAlign.center,
-                style: TextStyle(color: Colors.grey, fontSize: 14),
+                style: TextStyle(color: Colors.grey, fontSize: 14.sp),
               ),
-              const SizedBox(height: 24),
+              SizedBox(height: 24.h),
               ElevatedButton(
                 onPressed: () => context.go('/complete-profile'),
                 style: ElevatedButton.styleFrom(
@@ -143,40 +144,40 @@ class _UserProfilePageState extends State<UserProfilePage> {
         slivers: [
           // Header with back button and video/cover
           SliverAppBar(
-            expandedHeight: 180,
+            expandedHeight: 180.h,
             pinned: false,
             backgroundColor: Colors.transparent,
             elevation: 0,
             leading: Padding(
-              padding: const EdgeInsets.all(8.0),
+              padding: EdgeInsets.all(8.w),
               child: Container(
                 decoration: BoxDecoration(
                   color: Colors.black.withOpacity(0.6),
                   shape: BoxShape.circle,
                 ),
                 child: IconButton(
-                  icon: const Icon(
+                  icon: Icon(
                     Icons.arrow_back_ios_new,
                     color: Colors.white,
-                    size: 18,
+                    size: 18.w,
                   ),
                   onPressed: () => context.pop(),
-                  splashRadius: 20,
+                  splashRadius: 20.w,
                 ),
               ),
             ),
             actions: [
               Padding(
-                padding: const EdgeInsets.all(8.0),
+                padding: EdgeInsets.all(8.w),
                 child: Container(
                   decoration: BoxDecoration(
                     color: Colors.black.withOpacity(0.6),
                     shape: BoxShape.circle,
                   ),
                   child: IconButton(
-                    icon: const Icon(Icons.edit, color: Colors.white, size: 18),
+                    icon: Icon(Icons.edit, color: Colors.white, size: 18.w),
                     onPressed: () => context.push('/profile/edit'),
-                    splashRadius: 20,
+                    splashRadius: 20.w,
                   ),
                 ),
               ),
@@ -234,9 +235,9 @@ class _UserProfilePageState extends State<UserProfilePage> {
           // Profile Info Section
           SliverToBoxAdapter(
             child: Transform.translate(
-              offset: const Offset(0, 10),
+              offset: Offset(0, 10.h),
               child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 24),
+                padding: EdgeInsets.symmetric(horizontal: 24.w),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -246,17 +247,17 @@ class _UserProfilePageState extends State<UserProfilePage> {
                       children: [
                         // Profile Picture
                         Container(
-                          width: 120,
-                          height: 120,
+                          width: 120.w,
+                          height: 120.w,
                           decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(16),
-                            border: Border.all(color: Colors.white, width: 3),
+                            borderRadius: BorderRadius.circular(16.r),
+                            border: Border.all(color: Colors.white, width: 3.w),
                             boxShadow: [
                               BoxShadow(
                                 color: Colors.black.withOpacity(0.2),
-                                blurRadius: 10,
-                                spreadRadius: 2,
-                                offset: const Offset(0, 5),
+                                blurRadius: 10.r,
+                                spreadRadius: 2.r,
+                                offset: Offset(0, 5.h),
                               ),
                             ],
                           ),
@@ -275,8 +276,8 @@ class _UserProfilePageState extends State<UserProfilePage> {
                                                 ? user.firstName[0]
                                                       .toUpperCase()
                                                 : user.name[0].toUpperCase(),
-                                            style: const TextStyle(
-                                              fontSize: 36,
+                                            style: TextStyle(
+                                              fontSize: 36.sp,
                                               fontWeight: FontWeight.bold,
                                               color: Color(0xFF8BC342),
                                             ),
@@ -292,8 +293,8 @@ class _UserProfilePageState extends State<UserProfilePage> {
                                         user.firstName.isNotEmpty
                                             ? user.firstName[0].toUpperCase()
                                             : user.name[0].toUpperCase(),
-                                        style: const TextStyle(
-                                          fontSize: 36,
+                                        style: TextStyle(
+                                          fontSize: 36.sp,
                                           fontWeight: FontWeight.bold,
                                           color: Color(0xFF8BC342),
                                         ),

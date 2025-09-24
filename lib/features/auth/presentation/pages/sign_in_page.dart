@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
 import '../../../../core/constants/colors.dart';
 import '../../../../core/theme/app_text_styles.dart';
@@ -56,8 +57,8 @@ class _SignInPageState extends State<SignInPage> {
                         children: [
                           // App Logo
                           Container(
-                            width: 100,
-                            height: 100,
+                            width: 100.w,
+                            height: 100.w,
                             decoration: BoxDecoration(
                               borderRadius: BorderRadius.circular(
                                 AppSpacing.radiusLG,
@@ -67,7 +68,7 @@ class _SignInPageState extends State<SignInPage> {
                                 BoxShadow(
                                   color: AppColors.shadow,
                                   blurRadius: AppSpacing.elevationSM,
-                                  offset: const Offset(0, 2),
+                                  offset: Offset(0, 2.h),
                                 ),
                               ],
                             ),
@@ -77,8 +78,8 @@ class _SignInPageState extends State<SignInPage> {
                               ),
                               child: Image.asset(
                                 'assets/icon/icon.png',
-                                width: 80,
-                                height: 80,
+                                width: 80.w,
+                                height: 80.w,
                                 fit: BoxFit.contain,
                               ),
                             ),
@@ -146,7 +147,7 @@ class _SignInPageState extends State<SignInPage> {
                       // Sign In Button
                       if (state is AuthLoading)
                         Container(
-                          height: 56,
+                          height: 56.h,
                           width: double.infinity,
                           decoration: BoxDecoration(
                             borderRadius: BorderRadius.circular(
@@ -154,16 +155,16 @@ class _SignInPageState extends State<SignInPage> {
                             ),
                             gradient: AppColors.primaryGradient,
                           ),
-                          child: const Center(
+                          child: Center(
                             child: CircularProgressIndicator(
                               color: AppColors.white,
-                              strokeWidth: 2,
+                              strokeWidth: 2.w,
                             ),
                           ),
                         )
                       else
                         Container(
-                          height: 56,
+                          height: 56.h,
                           width: double.infinity,
                           decoration: BoxDecoration(
                             borderRadius: BorderRadius.circular(
@@ -174,7 +175,7 @@ class _SignInPageState extends State<SignInPage> {
                               BoxShadow(
                                 color: AppColors.shadowPrimary,
                                 blurRadius: AppSpacing.elevationMD,
-                                offset: const Offset(0, 4),
+                                offset: Offset(0, 4.h),
                               ),
                             ],
                           ),

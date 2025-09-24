@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import '../../../../core/constants/colors.dart';
 import '../bloc/auth_cubit.dart';
@@ -56,17 +57,15 @@ class _SplashPageState extends State<SplashPage>
 
   @override
   Widget build(BuildContext context) {
-    final size = MediaQuery.of(context).size;
-
     return Scaffold(
       body: Container(
-        width: size.width,
-        height: size.height,
+        width: 1.sw, // 100% screen width
+        height: 1.sh, // 100% screen height
         decoration: const BoxDecoration(color: Colors.white),
         child: Stack(
           children: [
             // Decorative Background with Ellipses
-            _buildDecorativeBackground(size),
+            _buildDecorativeBackground(),
 
             // Main Content
             Center(
@@ -82,12 +81,12 @@ class _SplashPageState extends State<SplashPage>
                         child: FadeTransition(
                           opacity: _fadeAnimation,
                           child: SizedBox(
-                            width: 160,
-                            height: 160,
+                            width: 160.w, // Responsive width
+                            height: 160.h, // Responsive height
                             child: SvgPicture.asset(
                               'assets/splash/logo.svg',
-                              width: 160,
-                              height: 160,
+                              width: 160.w,
+                              height: 160.h,
                               fit: BoxFit.contain,
                             ),
                           ),
@@ -96,7 +95,7 @@ class _SplashPageState extends State<SplashPage>
                     },
                   ),
 
-                  const SizedBox(height: 16),
+                  SizedBox(height: 16.h), // Responsive height
 
                   // App Name Text as SVG
                   AnimatedBuilder(
@@ -105,12 +104,12 @@ class _SplashPageState extends State<SplashPage>
                       return FadeTransition(
                         opacity: _fadeAnimation,
                         child: SizedBox(
-                          width: 258,
-                          height: 26,
+                          width: 258.w, // Responsive width
+                          height: 26.h, // Responsive height
                           child: SvgPicture.asset(
                             'assets/splash/text.svg',
-                            width: 258,
-                            height: 26,
+                            width: 258.w,
+                            height: 26.h,
                             fit: BoxFit.contain,
                           ),
                         ),
@@ -118,7 +117,7 @@ class _SplashPageState extends State<SplashPage>
                     },
                   ),
 
-                  const SizedBox(height: 60),
+                  SizedBox(height: 60.h), // Responsive height
 
                   // Loading Indicator
                   BlocBuilder<AuthCubit, AuthState>(
@@ -127,20 +126,23 @@ class _SplashPageState extends State<SplashPage>
                         return Column(
                           children: [
                             SizedBox(
-                              width: 40,
-                              height: 40,
+                              width: 40.w, // Responsive width
+                              height: 40.h, // Responsive height
                               child: CircularProgressIndicator(
-                                strokeWidth: 3,
+                                strokeWidth: 3.w, // Responsive stroke width
                                 valueColor: AlwaysStoppedAnimation<Color>(
                                   AppColors.primaryLimeGreen,
                                 ),
                               ),
                             ),
-                            const SizedBox(height: 16),
+                            SizedBox(height: 16.h), // Responsive height
                             Text(
                               'Loading...',
                               style: Theme.of(context).textTheme.bodyMedium
-                                  ?.copyWith(color: AppColors.gray),
+                                  ?.copyWith(
+                                color: AppColors.gray,
+                                fontSize: 14.sp, // Responsive font size
+                              ),
                             ),
                           ],
                         );
@@ -148,15 +150,16 @@ class _SplashPageState extends State<SplashPage>
                         return Column(
                           children: [
                             Container(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 24,
-                                vertical: 12,
+                              padding: EdgeInsets.symmetric(
+                                horizontal: 24.w, // Responsive horizontal padding
+                                vertical: 12.h, // Responsive vertical padding
                               ),
                               decoration: BoxDecoration(
                                 color: AppColors.error.withValues(alpha: 0.1),
-                                borderRadius: BorderRadius.circular(12),
+                                borderRadius: BorderRadius.circular(12.r), // Responsive border radius
                                 border: Border.all(
                                   color: AppColors.error.withValues(alpha: 0.3),
+                                  width: 1.w, // Responsive border width
                                 ),
                               ),
                               child: Row(
@@ -165,22 +168,23 @@ class _SplashPageState extends State<SplashPage>
                                   Icon(
                                     Icons.error_outline,
                                     color: AppColors.error,
-                                    size: 20,
+                                    size: 20.sp, // Responsive icon size
                                   ),
-                                  const SizedBox(width: 8),
+                                  SizedBox(width: 8.w), // Responsive width
                                   Flexible(
                                     child: Text(
                                       'Connection Error',
                                       style: TextStyle(
                                         color: AppColors.error,
                                         fontWeight: FontWeight.w500,
+                                        fontSize: 14.sp, // Responsive font size
                                       ),
                                     ),
                                   ),
                                 ],
                               ),
                             ),
-                            const SizedBox(height: 16),
+                            SizedBox(height: 16.h), // Responsive height
                             TextButton(
                               onPressed: () {
                                 context.read<AuthCubit>().checkAuthStatus();
@@ -190,6 +194,7 @@ class _SplashPageState extends State<SplashPage>
                                 style: TextStyle(
                                   color: AppColors.primaryLimeGreen,
                                   fontWeight: FontWeight.w600,
+                                  fontSize: 16.sp, // Responsive font size
                                 ),
                               ),
                             ),
@@ -208,53 +213,52 @@ class _SplashPageState extends State<SplashPage>
     );
   }
 
-  Widget _buildDecorativeBackground(Size size) {
+  Widget _buildDecorativeBackground() {
     // Create a scaled-down version of the decorative pattern
     return Positioned.fill(
       child: Stack(
         children: [
           // Background bowling image (with opacity)
           Positioned(
-            bottom: -100,
-            left: size.width * 0.5 - 150,
+            bottom: -100.h, // Responsive bottom position
+            left: 0.5.sw - 150.w, // Responsive left position (screen width * 0.5 - 150w)
             child: Opacity(
               opacity: 0.15,
               child: Image.asset(
                 'assets/splash/bowling_image.png',
-                width: 300,
-                height: 300,
+                width: 300.w, // Responsive width
+                height: 300.h, // Responsive height
                 fit: BoxFit.contain,
               ),
             ),
           ),
 
           // Decorative ellipses pattern
-          _buildEllipsesPattern(size),
+          _buildEllipsesPattern(),
         ],
       ),
     );
   }
 
-  Widget _buildEllipsesPattern(Size size) {
+  Widget _buildEllipsesPattern() {
     return Positioned.fill(
       child: AnimatedBuilder(
         animation: _animationController,
         builder: (context, child) {
           return Transform.translate(
             offset: Offset(
-              -150 +
-                  (_animationController.value * 20), // Subtle parallax effect
-              -50 + (_animationController.value * 10),
+              -150.w + (_animationController.value * 20.w), // Responsive parallax effect
+              -50.h + (_animationController.value * 10.h),
             ),
-            child: _buildEllipseGrid(size),
+            child: _buildEllipseGrid(),
           );
         },
       ),
     );
   }
 
-  Widget _buildEllipseGrid(Size size) {
-    final ellipsePositions = _generateEllipsePositions(size);
+  Widget _buildEllipseGrid() {
+    final ellipsePositions = _generateEllipsePositions();
 
     return Stack(
       children: ellipsePositions.map((position) {
@@ -278,8 +282,8 @@ class _SplashPageState extends State<SplashPage>
                   scale: 0.3 + (staggeredValue * 0.2), // Smaller ellipses
                   child: SvgPicture.asset(
                     'assets/splash/ellipse.svg',
-                    width: 80, // Much smaller than original 244px
-                    height: 80,
+                    width: 80.w, // Responsive width
+                    height: 80.h, // Responsive height
                     fit: BoxFit.contain,
                   ),
                 ),
@@ -291,21 +295,20 @@ class _SplashPageState extends State<SplashPage>
     );
   }
 
-  List<Offset> _generateEllipsePositions(Size size) {
+  List<Offset> _generateEllipsePositions() {
     // Generate a grid of ellipse positions adapted for mobile screen
     List<Offset> positions = [];
 
-    // Create a pattern that works for mobile screens
-    const spacing = 60.0;
+    // Create a pattern that works for mobile screens with responsive spacing
+    final spacing = 60.0.w; // Responsive spacing
 
     for (int row = 0; row < 12; row++) {
       for (int col = 0; col < 6; col++) {
-        double x =
-            -200 + (col * spacing) + ((row % 2) * 30); // Offset every other row
-        double y = -100 + (row * 45);
+        double x = -200.w + (col * spacing) + ((row % 2) * 30.w); // Responsive offset every other row
+        double y = -100.h + (row * 45.h); // Responsive row spacing
 
-        if (x < size.width + 100 && y < size.height + 100) {
-          // Only add visible ellipses
+        if (x < 1.sw + 100.w && y < 1.sh + 100.h) {
+          // Only add visible ellipses - using screen width/height
           positions.add(Offset(x, y));
         }
       }
