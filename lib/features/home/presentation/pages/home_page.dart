@@ -213,10 +213,7 @@ class HomePageView extends StatelessWidget {
               style: ElevatedButton.styleFrom(
                 backgroundColor: AppColors.primaryLimeGreen,
                 foregroundColor: AppColors.black,
-                padding: EdgeInsets.symmetric(
-                  horizontal: 32.w,
-                  vertical: 12.h,
-                ),
+                padding: EdgeInsets.symmetric(horizontal: 32.w, vertical: 12.h),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(12.r),
                 ),

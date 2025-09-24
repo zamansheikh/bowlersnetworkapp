@@ -56,7 +56,10 @@ class _MyAppState extends State<MyApp> {
         BlocProvider<EventsCubit>(create: (_) => getIt<EventsCubit>()),
       ],
       child: ScreenUtilInit(
-        designSize: const Size(375, 812), // Design size based on iPhone X/11/12/13 mini
+        designSize: const Size(
+          375,
+          812,
+        ), // Design size based on iPhone X/11/12/13 mini
         minTextAdapt: true,
         splitScreenMode: true,
         builder: (context, child) {

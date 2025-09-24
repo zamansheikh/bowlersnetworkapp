@@ -96,7 +96,6 @@ class _SplashPageState extends State<SplashPage>
                   ),
 
                   SizedBox(height: 16.h), // Responsive height
-
                   // App Name Text as SVG
                   AnimatedBuilder(
                     animation: _fadeAnimation,
@@ -118,7 +117,6 @@ class _SplashPageState extends State<SplashPage>
                   ),
 
                   SizedBox(height: 60.h), // Responsive height
-
                   // Loading Indicator
                   BlocBuilder<AuthCubit, AuthState>(
                     builder: (context, state) {
@@ -140,9 +138,9 @@ class _SplashPageState extends State<SplashPage>
                               'Loading...',
                               style: Theme.of(context).textTheme.bodyMedium
                                   ?.copyWith(
-                                color: AppColors.gray,
-                                fontSize: 14.sp, // Responsive font size
-                              ),
+                                    color: AppColors.gray,
+                                    fontSize: 14.sp, // Responsive font size
+                                  ),
                             ),
                           ],
                         );
@@ -151,12 +149,15 @@ class _SplashPageState extends State<SplashPage>
                           children: [
                             Container(
                               padding: EdgeInsets.symmetric(
-                                horizontal: 24.w, // Responsive horizontal padding
+                                horizontal:
+                                    24.w, // Responsive horizontal padding
                                 vertical: 12.h, // Responsive vertical padding
                               ),
                               decoration: BoxDecoration(
                                 color: AppColors.error.withValues(alpha: 0.1),
-                                borderRadius: BorderRadius.circular(12.r), // Responsive border radius
+                                borderRadius: BorderRadius.circular(
+                                  12.r,
+                                ), // Responsive border radius
                                 border: Border.all(
                                   color: AppColors.error.withValues(alpha: 0.3),
                                   width: 1.w, // Responsive border width
@@ -221,7 +222,9 @@ class _SplashPageState extends State<SplashPage>
           // Background bowling image (with opacity)
           Positioned(
             bottom: -100.h, // Responsive bottom position
-            left: 0.5.sw - 150.w, // Responsive left position (screen width * 0.5 - 150w)
+            left:
+                0.5.sw -
+                150.w, // Responsive left position (screen width * 0.5 - 150w)
             child: Opacity(
               opacity: 0.15,
               child: Image.asset(
@@ -247,7 +250,9 @@ class _SplashPageState extends State<SplashPage>
         builder: (context, child) {
           return Transform.translate(
             offset: Offset(
-              -150.w + (_animationController.value * 20.w), // Responsive parallax effect
+              -150.w +
+                  (_animationController.value *
+                      20.w), // Responsive parallax effect
               -50.h + (_animationController.value * 10.h),
             ),
             child: _buildEllipseGrid(),
@@ -304,7 +309,10 @@ class _SplashPageState extends State<SplashPage>
 
     for (int row = 0; row < 12; row++) {
       for (int col = 0; col < 6; col++) {
-        double x = -200.w + (col * spacing) + ((row % 2) * 30.w); // Responsive offset every other row
+        double x =
+            -200.w +
+            (col * spacing) +
+            ((row % 2) * 30.w); // Responsive offset every other row
         double y = -100.h + (row * 45.h); // Responsive row spacing
 
         if (x < 1.sw + 100.w && y < 1.sh + 100.h) {
