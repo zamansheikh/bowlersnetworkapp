@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:flutter_svg/svg.dart';
 import '../../../../core/constants/colors.dart';
 import '../../../../core/widgets/app_drawer.dart';
 import '../cubit/feed_cubit.dart';
@@ -58,18 +59,23 @@ class HomePageView extends StatelessWidget {
                   snap: true,
                   leading: Builder(
                     builder: (context) => IconButton(
-                      icon: const Icon(Icons.menu, color: AppColors.black),
+                      icon: SvgPicture.asset(
+                        'assets/icons/menu.svg',
+                        height: 24.h,
+                        width: 24.w,
+                      ),
                       onPressed: () => Scaffold.of(context).openDrawer(),
                     ),
                   ),
                   title: Row(
+                    mainAxisAlignment:  MainAxisAlignment.start,
                     children: [
                       ClipRRect(
                         borderRadius: BorderRadius.circular(4.r),
                         child: Image.asset(
                           'assets/icon/icon.png',
-                          width: 28.w,
-                          height: 28.w,
+                          width: 24.w,
+                          height: 24.w,
                           fit: BoxFit.cover,
                         ),
                       ),
@@ -78,8 +84,8 @@ class HomePageView extends StatelessWidget {
                         'Bowlers Network',
                         style: TextStyle(
                           color: AppColors.black,
-                          fontWeight: FontWeight.bold,
-                          fontSize: 20.sp,
+                          fontWeight: FontWeight.w500,
+                          fontSize: 16.sp,
                         ),
                       ),
                     ],
