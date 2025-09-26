@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:flutter_svg/svg.dart';
 import 'package:go_router/go_router.dart';
 import '../constants/colors.dart';
 
@@ -41,15 +42,13 @@ class MainShell extends StatelessWidget {
       ),
       child: SafeArea(
         child: Container(
-          height: 68.h,
-          padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 6.h),
+          height: 64.h,
+          padding: EdgeInsets.symmetric(horizontal: 20.w, ),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceAround,
             children: [
               _buildNavItem(
                 context: context,
-                icon: Icons.home_outlined,
-                activeIcon: Icons.home,
                 label: 'Home',
                 index: 0,
                 currentIndex: currentIndex,
@@ -57,8 +56,6 @@ class MainShell extends StatelessWidget {
               ),
               _buildNavItem(
                 context: context,
-                icon: Icons.message_outlined,
-                activeIcon: Icons.message,
                 label: 'Messages',
                 index: 1,
                 currentIndex: currentIndex,
@@ -66,8 +63,6 @@ class MainShell extends StatelessWidget {
               ),
               _buildNavItem(
                 context: context,
-                icon: Icons.event_outlined,
-                activeIcon: Icons.event,
                 label: 'Events',
                 index: 2,
                 currentIndex: currentIndex,
@@ -75,8 +70,6 @@ class MainShell extends StatelessWidget {
               ),
               _buildNavItem(
                 context: context,
-                icon: Icons.person_outline,
-                activeIcon: Icons.person,
                 label: 'Profile',
                 index: 3,
                 currentIndex: currentIndex,
@@ -91,8 +84,6 @@ class MainShell extends StatelessWidget {
 
   Widget _buildNavItem({
     required BuildContext context,
-    required IconData icon,
-    required IconData activeIcon,
     required String label,
     required int index,
     required int currentIndex,
@@ -113,10 +104,11 @@ class MainShell extends StatelessWidget {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(
-              isActive ? activeIcon : icon,
-              color: isActive ? AppColors.primaryLimeGreen : AppColors.gray500,
-              size: 24.w,
+
+            SvgPicture.asset(
+              isActive ? 'assets/navbar/${label.toLowerCase()}_active.svg' : 'assets/navbar/${label.toLowerCase()}.svg',
+              width: 20.w,
+              height: 20.w,
             ),
             SizedBox(height: 4.h),
             Text(
