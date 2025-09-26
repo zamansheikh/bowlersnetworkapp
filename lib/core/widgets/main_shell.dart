@@ -26,6 +26,10 @@ class MainShell extends StatelessWidget {
 
     return Container(
       decoration: BoxDecoration(
+        borderRadius:  BorderRadius.only(
+          topLeft: Radius.circular(16.r),
+          topRight: Radius.circular(16.r),
+        ),
         color: Colors.white,
         boxShadow: [
           BoxShadow(
@@ -37,8 +41,8 @@ class MainShell extends StatelessWidget {
       ),
       child: SafeArea(
         child: Container(
-          height: 72.h,
-          padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 8.h),
+          height: 68.h,
+          padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 6.h),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceAround,
             children: [
