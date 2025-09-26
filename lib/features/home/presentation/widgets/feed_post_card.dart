@@ -229,69 +229,69 @@ class _FeedPostCardState extends State<FeedPostCard> {
     return Column(
       children: [
         // Liked by section
-        if (widget.post.metadata.totalLikes > 0)
-          Container(
-            margin: EdgeInsets.only(bottom: 8.h),
-            child: Container(
-              padding: EdgeInsets.symmetric(horizontal: 4.w, vertical: 4.h),
-              decoration: BoxDecoration(
-                color: const Color(0xFFF4F9ED),
-                borderRadius: BorderRadius.circular(90.r),
-              ),
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  // Overlapping avatars
-                  Container(
-                    padding: EdgeInsets.only(right: 8.w),
-                    child: Stack(
-                      children: [
-                        Container(
-                          width: 20.w,
-                          height: 20.h,
-                          decoration: BoxDecoration(
-                            shape: BoxShape.circle,
-                            color: Colors.grey[300],
-                          ),
-                        ),
-                        Positioned(
-                          left: 12.w,
-                          child: Container(
-                            width: 20.w,
-                            height: 20.h,
-                            decoration: BoxDecoration(
-                              shape: BoxShape.circle,
-                              color: Colors.grey[400],
-                            ),
-                          ),
-                        ),
-                        Positioned(
-                          left: 24.w,
-                          child: Container(
-                            width: 20.w,
-                            height: 20.h,
-                            decoration: BoxDecoration(
-                              shape: BoxShape.circle,
-                              color: Colors.grey[500],
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  Text(
-                    'Liked by picklu and momit',
-                    style: TextStyle(
-                      fontFamily: 'Poppins',
-                      fontSize: 12.sp,
-                      fontWeight: FontWeight.w400,
-                      color: const Color(0xFF191919),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
+        // if (widget.post.metadata.totalLikes > 0)
+        //   Container(
+        //     margin: EdgeInsets.only(bottom: 8.h),
+        //     child: Container(
+        //       padding: EdgeInsets.symmetric(horizontal: 4.w, vertical: 4.h),
+        //       decoration: BoxDecoration(
+        //         color: const Color(0xFFF4F9ED),
+        //         borderRadius: BorderRadius.circular(90.r),
+        //       ),
+        //       child: Row(
+        //         mainAxisSize: MainAxisSize.min,
+        //         children: [
+        //           // Overlapping avatars
+        //           Container(
+        //             padding: EdgeInsets.only(right: 8.w),
+        //             child: Stack(
+        //               children: [
+        //                 Container(
+        //                   width: 20.w,
+        //                   height: 20.h,
+        //                   decoration: BoxDecoration(
+        //                     shape: BoxShape.circle,
+        //                     color: Colors.grey[300],
+        //                   ),
+        //                 ),
+        //                 Positioned(
+        //                   left: 12.w,
+        //                   child: Container(
+        //                     width: 20.w,
+        //                     height: 20.h,
+        //                     decoration: BoxDecoration(
+        //                       shape: BoxShape.circle,
+        //                       color: Colors.grey[400],
+        //                     ),
+        //                   ),
+        //                 ),
+        //                 Positioned(
+        //                   left: 24.w,
+        //                   child: Container(
+        //                     width: 20.w,
+        //                     height: 20.h,
+        //                     decoration: BoxDecoration(
+        //                       shape: BoxShape.circle,
+        //                       color: Colors.grey[500],
+        //                     ),
+        //                   ),
+        //                 ),
+        //               ],
+        //             ),
+        //           ),
+        //           Text(
+        //             'Liked by picklu and momit',
+        //             style: TextStyle(
+        //               fontFamily: 'Poppins',
+        //               fontSize: 12.sp,
+        //               fontWeight: FontWeight.w400,
+        //               color: const Color(0xFF191919),
+        //             ),
+        //           ),
+        //         ],
+        //       ),
+        //     ),
+        //   ),
 
         // Action bar
         Row(
