@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import '../../../../core/constants/colors.dart';
@@ -121,59 +122,18 @@ class _FeedPostCardState extends State<FeedPostCard> {
     }
   }
 
-  Widget _buildTextWithTags(String text, List<String> tags) {
-    if (tags.isEmpty) {
-      return Text(
-        text,
-        style: const TextStyle(
-          fontSize: 15,
-          height: 1.4,
-          color: AppColors.black,
-        ),
-      );
-    }
-
-    final parts = text.split(RegExp(r'(#\w+)'));
-    final spans = <TextSpan>[];
-
-    for (final part in parts) {
-      if (part.startsWith('#')) {
-        spans.add(
-          TextSpan(
-            text: part,
-            style: const TextStyle(
-              color: AppColors.primaryLimeGreen,
-              fontWeight: FontWeight.w500,
-            ),
-          ),
-        );
-      } else {
-        spans.add(
-          TextSpan(
-            text: part,
-            style: const TextStyle(color: AppColors.black),
-          ),
-        );
-      }
-    }
-
-    return RichText(
-      text: TextSpan(
-        children: spans,
-        style: const TextStyle(fontSize: 15, height: 1.4),
-      ),
-    );
-  }
-
   Widget _buildMediaGallery() {
     if (widget.post.media.isEmpty) return const SizedBox.shrink();
 
     return Container(
-      margin: const EdgeInsets.symmetric(vertical: 12),
-      child: MediaGallery(
-        mediaUrls: widget.post.media,
-        height: 300,
-        borderRadius: BorderRadius.circular(12),
+      margin: EdgeInsets.symmetric(vertical: 12.h),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(12.r),
+        child: MediaGallery(
+          mediaUrls: widget.post.media,
+          height: 224.h,
+          borderRadius: BorderRadius.circular(12.r),
+        ),
       ),
     );
   }
@@ -183,25 +143,27 @@ class _FeedPostCardState extends State<FeedPostCard> {
     if (poll == null) return const SizedBox.shrink();
 
     return Container(
-      margin: const EdgeInsets.symmetric(vertical: 12),
-      padding: const EdgeInsets.all(16),
+      margin: EdgeInsets.symmetric(vertical: 12.h),
+      padding: EdgeInsets.all(12.w),
       decoration: BoxDecoration(
-        color: AppColors.surface,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: AppColors.lightGray),
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(12.r),
+        border: Border.all(color: const Color(0xFFEFEFEF), width: 1.w),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
             poll.title,
-            style: const TextStyle(
-              fontSize: 16,
-              fontWeight: FontWeight.w600,
-              color: AppColors.black,
+            style: TextStyle(
+              fontFamily: 'Poppins',
+              fontSize: 12.sp,
+              fontWeight: FontWeight.w500,
+              color: const Color(0xFF424242),
+              height: 1.5,
             ),
           ),
-          const SizedBox(height: 12),
+          SizedBox(height: 12.h),
           ...poll.options.map((option) => _buildPollOption(option)),
         ],
       ),
@@ -212,23 +174,16 @@ class _FeedPostCardState extends State<FeedPostCard> {
     final isSelected = _selectedPollOption == option.optionId;
 
     return Container(
-      margin: const EdgeInsets.only(bottom: 8),
+      margin: EdgeInsets.only(bottom: 8.h),
       child: InkWell(
         onTap: () => _handlePollVote(option.optionId),
-        borderRadius: BorderRadius.circular(8),
+        borderRadius: BorderRadius.circular(8.r),
         child: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+          padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 8.h),
           decoration: BoxDecoration(
-            color: isSelected
-                ? AppColors.primaryLimeGreen.withValues(alpha: 0.1)
-                : AppColors.white,
-            borderRadius: BorderRadius.circular(8),
-            border: Border.all(
-              color: isSelected
-                  ? AppColors.primaryLimeGreen
-                  : AppColors.lightGray,
-              width: 2,
-            ),
+            color: isSelected ? const Color(0xFFF4F9ED) : Colors.white,
+            borderRadius: BorderRadius.circular(8.r),
+            border: Border.all(color: const Color(0xFFE2E2E2), width: 1.w),
           ),
           child: Row(
             children: [
@@ -236,29 +191,30 @@ class _FeedPostCardState extends State<FeedPostCard> {
                 child: Text(
                   option.content,
                   style: TextStyle(
-                    fontSize: 14,
-                    color: isSelected
-                        ? AppColors.primaryLimeGreen
-                        : AppColors.black,
-                    fontWeight: isSelected
-                        ? FontWeight.w500
-                        : FontWeight.normal,
+                    fontFamily: 'Poppins',
+                    fontSize: 14.sp,
+                    color: const Color(0xFF6D6D6D),
+                    fontWeight: FontWeight.w500,
                   ),
                 ),
               ),
-              const SizedBox(width: 8),
+              SizedBox(width: 8.w),
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                padding: EdgeInsets.symmetric(horizontal: 6.w, vertical: 4.h),
                 decoration: BoxDecoration(
-                  color: AppColors.lightGray,
-                  borderRadius: BorderRadius.circular(12),
+                  color: const Color(0xFFF4F9ED), // Lime green background
+                  borderRadius: BorderRadius.circular(90.r),
                 ),
-                child: Text(
-                  '${option.perc}%',
-                  style: const TextStyle(
-                    fontSize: 12,
-                    fontWeight: FontWeight.w500,
-                    color: AppColors.darkGray,
+                width: 40.w,
+                child: Center(
+                  child: Text(
+                    '${option.perc}%',
+                    style: TextStyle(
+                      fontFamily: 'Poppins',
+                      fontSize: 10.sp,
+                      fontWeight: FontWeight.w500,
+                      color: const Color(0xFF6D6D6D),
+                    ),
                   ),
                 ),
               ),
@@ -269,217 +225,402 @@ class _FeedPostCardState extends State<FeedPostCard> {
     );
   }
 
-  Widget _buildActionBar() {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 8),
-      child: Row(
-        children: [
-          // Like button
-          InkWell(
-            onTap: _handleLike,
-            borderRadius: BorderRadius.circular(20),
+  Widget _buildLikedByAndActions() {
+    return Column(
+      children: [
+        // Liked by section
+        if (widget.post.metadata.totalLikes > 0)
+          Container(
+            margin: EdgeInsets.only(bottom: 8.h),
             child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+              padding: EdgeInsets.symmetric(horizontal: 4.w, vertical: 4.h),
+              decoration: BoxDecoration(
+                color: const Color(0xFFF4F9ED),
+                borderRadius: BorderRadius.circular(90.r),
+              ),
               child: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Icon(
-                    widget.post.isLikedByMe
-                        ? Icons.favorite
-                        : Icons.favorite_border,
-                    color: widget.post.isLikedByMe
-                        ? Colors.red
-                        : AppColors.gray,
-                    size: 20,
-                  ),
-                  const SizedBox(width: 4),
-                  Text(
-                    '${widget.post.metadata.totalLikes}',
-                    style: const TextStyle(
-                      color: AppColors.darkGray,
-                      fontSize: 14,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
-          const SizedBox(width: 16),
-          // Comment button
-          InkWell(
-            onTap: () {
-              context.push('/post/${widget.post.metadata.id}');
-            },
-            borderRadius: BorderRadius.circular(20),
-            child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  const Icon(
-                    Icons.comment_outlined,
-                    color: AppColors.gray,
-                    size: 20,
-                  ),
-                  const SizedBox(width: 4),
-                  Text(
-                    '${widget.post.metadata.totalComments}',
-                    style: const TextStyle(
-                      color: AppColors.darkGray,
-                      fontSize: 14,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
-          const Spacer(),
-          // Share button
-          InkWell(
-            onTap: () {
-              // TODO: Implement share functionality
-            },
-            borderRadius: BorderRadius.circular(20),
-            child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-              child: const Icon(
-                Icons.share_outlined,
-                color: AppColors.gray,
-                size: 20,
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Card(
-      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-      elevation: 2,
-      shadowColor: AppColors.cardShadow,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // Post header
-            Row(
-              children: [
-                // User avatar
-                GestureDetector(
-                  onTap: () {
-                    // TODO: Navigate to user profile
-                  },
-                  child: CircleAvatar(
-                    radius: 24,
-                    backgroundColor: AppColors.lightGray,
-                    backgroundImage:
-                        widget.post.author.profilePictureUrl.isNotEmpty
-                        ? NetworkImage(widget.post.author.profilePictureUrl)
-                        : null,
-                    child: widget.post.author.profilePictureUrl.isEmpty
-                        ? Text(
-                            widget.post.author.name.isNotEmpty
-                                ? widget.post.author.name[0].toUpperCase()
-                                : 'U',
-                            style: const TextStyle(
-                              color: AppColors.darkGray,
-                              fontWeight: FontWeight.w600,
-                              fontSize: 18,
-                            ),
-                          )
-                        : null,
-                  ),
-                ),
-                const SizedBox(width: 12),
-                // User info
-                Expanded(
-                  child: GestureDetector(
-                    onTap: () {
-                      // TODO: Navigate to user profile
-                    },
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
+                  // Overlapping avatars
+                  Container(
+                    padding: EdgeInsets.only(right: 8.w),
+                    child: Stack(
                       children: [
-                        Text(
-                          widget.post.author.name,
-                          style: const TextStyle(
-                            fontWeight: FontWeight.w600,
-                            fontSize: 16,
-                            color: AppColors.black,
+                        Container(
+                          width: 20.w,
+                          height: 20.h,
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            color: Colors.grey[300],
                           ),
                         ),
+                        Positioned(
+                          left: 12.w,
+                          child: Container(
+                            width: 20.w,
+                            height: 20.h,
+                            decoration: BoxDecoration(
+                              shape: BoxShape.circle,
+                              color: Colors.grey[400],
+                            ),
+                          ),
+                        ),
+                        Positioned(
+                          left: 24.w,
+                          child: Container(
+                            width: 20.w,
+                            height: 20.h,
+                            decoration: BoxDecoration(
+                              shape: BoxShape.circle,
+                              color: Colors.grey[500],
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  Text(
+                    'Liked by picklu and momit',
+                    style: TextStyle(
+                      fontFamily: 'Poppins',
+                      fontSize: 12.sp,
+                      fontWeight: FontWeight.w400,
+                      color: const Color(0xFF191919),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+
+        // Action bar
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            // Left side - action buttons
+            Row(
+              children: [
+                // Like button
+                Container(
+                  padding: EdgeInsets.symmetric(
+                    horizontal: 12.w,
+                    vertical: 8.h,
+                  ),
+                  decoration: BoxDecoration(
+                    border: Border.all(
+                      color: const Color(0xFFE2E2E2),
+                      width: 1.w,
+                    ),
+                    borderRadius: BorderRadius.circular(50.r),
+                  ),
+                  child: InkWell(
+                    onTap: _handleLike,
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        SvgPicture.asset(
+                          'assets/icons/favourite.svg',
+                          width: 20.w,
+                          height: 20.h,
+                          colorFilter: ColorFilter.mode(
+                            widget.post.isLikedByMe
+                                ? Colors.red
+                                : const Color(0xFF6D6D6D),
+                            BlendMode.srcIn,
+                          ),
+                        ),
+                        SizedBox(width: 8.w),
                         Text(
-                          _formatTimeAgo(widget.post.metadata.createdAt),
-                          style: const TextStyle(
-                            color: AppColors.gray,
-                            fontSize: 14,
+                          '${widget.post.metadata.totalLikes}',
+                          style: TextStyle(
+                            fontFamily: 'Poppins',
+                            fontSize: 14.sp,
+                            fontWeight: FontWeight.w500,
+                            color: const Color(0xFF6D6D6D),
                           ),
                         ),
                       ],
                     ),
                   ),
                 ),
-                // Follow button
-                if (!widget.post.author.viewerIsAuthor &&
-                    !widget.post.author.isFollowing)
-                  GestureDetector(
-                    onTap: _handleFollow,
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 16,
-                        vertical: 6,
+                SizedBox(width: 6.w),
+                // Share button
+                Container(
+                  padding: EdgeInsets.symmetric(
+                    horizontal: 12.w,
+                    vertical: 8.h,
+                  ),
+                  decoration: BoxDecoration(
+                    border: Border.all(
+                      color: const Color(0xFFE2E2E2),
+                      width: 1.w,
+                    ),
+                    borderRadius: BorderRadius.circular(50.r),
+                  ),
+                  child: InkWell(
+                    onTap: () {
+                      // TODO: Implement share functionality
+                    },
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        SvgPicture.asset(
+                          'assets/icons/share.svg',
+                          width: 20.w,
+                          height: 20.h,
+                          colorFilter: const ColorFilter.mode(
+                            Color(0xFF6D6D6D),
+                            BlendMode.srcIn,
+                          ),
+                        ),
+                        SizedBox(width: 8.w),
+                        Text(
+                          '13',
+                          style: TextStyle(
+                            fontFamily: 'Poppins',
+                            fontSize: 14.sp,
+                            fontWeight: FontWeight.w500,
+                            color: const Color(0xFF6D6D6D),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+                SizedBox(width: 6.w),
+                // Comment button
+                Container(
+                  padding: EdgeInsets.symmetric(
+                    horizontal: 12.w,
+                    vertical: 8.h,
+                  ),
+                  decoration: BoxDecoration(
+                    border: Border.all(
+                      color: const Color(0xFFE2E2E2),
+                      width: 1.w,
+                    ),
+                    borderRadius: BorderRadius.circular(50.r),
+                  ),
+                  child: InkWell(
+                    onTap: () {
+                      context.push('/post/${widget.post.metadata.id}');
+                    },
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        SvgPicture.asset(
+                          'assets/icons/comment.svg',
+                          width: 20.w,
+                          height: 20.h,
+                          colorFilter: const ColorFilter.mode(
+                            Color(0xFF6D6D6D),
+                            BlendMode.srcIn,
+                          ),
+                        ),
+                        SizedBox(width: 8.w),
+                        Text(
+                          '${widget.post.metadata.totalComments}',
+                          style: TextStyle(
+                            fontFamily: 'Poppins',
+                            fontSize: 14.sp,
+                            fontWeight: FontWeight.w500,
+                            color: const Color(0xFF6D6D6D),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            // Right side - Bookmark button
+            Container(
+              padding: EdgeInsets.all(8.w),
+              decoration: BoxDecoration(
+                border: Border.all(color: const Color(0xFFF0EEEE), width: 1.w),
+                borderRadius: BorderRadius.circular(50.r),
+              ),
+              child: SvgPicture.asset(
+                'assets/icons/bookmark.svg',
+                width: 20.w,
+                height: 20.h,
+                colorFilter: const ColorFilter.mode(
+                  Color(0xFF6D6D6D),
+                  BlendMode.srcIn,
+                ),
+              ),
+            ),
+          ],
+        ),
+      ],
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      margin: EdgeInsets.symmetric( vertical: 10.h),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(20.r),
+        border: Border.all(color: const Color(0xFFE6E6E6), width: 1.w),
+      ),
+      padding: EdgeInsets.all(12.w),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Post header
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              // Left side - User info
+              Expanded(
+                child: Row(
+                  children: [
+                    // User avatar
+                    GestureDetector(
+                      onTap: () {
+                        // TODO: Navigate to user profile
+                      },
+                      child: CircleAvatar(
+                        radius: 24.r,
+                        backgroundColor: AppColors.lightGray,
+                        backgroundImage:
+                            widget.post.author.profilePictureUrl.isNotEmpty
+                            ? NetworkImage(widget.post.author.profilePictureUrl)
+                            : null,
+                        child: widget.post.author.profilePictureUrl.isEmpty
+                            ? Text(
+                                widget.post.author.name.isNotEmpty
+                                    ? widget.post.author.name[0].toUpperCase()
+                                    : 'U',
+                                style: TextStyle(
+                                  color: AppColors.darkGray,
+                                  fontWeight: FontWeight.w600,
+                                  fontSize: 18.sp,
+                                ),
+                              )
+                            : null,
                       ),
-                      decoration: BoxDecoration(
-                        border: Border.all(color: AppColors.primaryLimeGreen),
-                        borderRadius: BorderRadius.circular(20),
-                      ),
-                      child: const Text(
-                        '+ Follow',
-                        style: TextStyle(
-                          color: AppColors.primaryLimeGreen,
-                          fontSize: 14,
-                          fontWeight: FontWeight.w500,
+                    ),
+                    SizedBox(width: 8.w),
+                    // User info
+                    Expanded(
+                      child: GestureDetector(
+                        onTap: () {
+                          // TODO: Navigate to user profile
+                        },
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Row(
+                              children: [
+                                Text(
+                                  widget.post.author.name,
+                                  style: TextStyle(
+                                    fontFamily: 'Poppins',
+                                    fontWeight: FontWeight.w600,
+                                    fontSize: 16.sp,
+                                    color: Colors.black,
+                                  ),
+                                ),
+                                SizedBox(width: 2.w),
+                                // Verification badge
+                                SvgPicture.asset(
+                                  'assets/icons/verification.svg',
+                                  width: 16.w,
+                                  height: 16.h,
+                                ),
+                              ],
+                            ),
+                            Text(
+                              _formatTimeAgo(widget.post.metadata.createdAt),
+                              style: TextStyle(
+                                fontFamily: 'Poppins',
+                                color: const Color(0xFF6D6D6D),
+                                fontSize: 12.sp,
+                                fontWeight: FontWeight.w400,
+                              ),
+                            ),
+                          ],
                         ),
                       ),
                     ),
+                  ],
+                ),
+              ),
+              // Right side - Follow button
+              if (!widget.post.author.viewerIsAuthor)
+                GestureDetector(
+                  onTap: _handleFollow,
+                  child: Container(
+                    padding: EdgeInsets.symmetric(
+                      horizontal: 10.w,
+                      vertical: 8.h,
+                    ),
+                    decoration: BoxDecoration(
+                      color: widget.post.author.isFollowing
+                          ? AppColors.primaryLimeGreen
+                          : Colors.transparent,
+                      border: Border.all(
+                        color: AppColors.primaryLimeGreen,
+                        width: 1.w,
+                      ),
+                      borderRadius: BorderRadius.circular(8.r),
+                    ),
+                    child: Text(
+                      widget.post.author.isFollowing ? 'Following' : 'Follow',
+                      style: TextStyle(
+                        fontFamily: 'Poppins',
+                        color: widget.post.author.isFollowing
+                            ? Colors.white
+                            : AppColors.primaryLimeGreen,
+                        fontSize: 14.sp,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
                   ),
+                ),
+            ],
+          ),
+
+          SizedBox(height: 16.h),
+
+          // Post content - clickable
+          GestureDetector(
+            onTap: () {
+              context.push('/post/${widget.post.metadata.id}');
+            },
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // Post content
+                if (widget.post.caption.isNotEmpty)
+                  Text(
+                    widget.post.caption,
+                    style: TextStyle(
+                      fontFamily: 'Poppins',
+                      color: const Color(0xFF424242),
+                      fontSize: 14.sp,
+                      fontWeight: FontWeight.w400,
+                      height: 1.3,
+                    ),
+                  ),
+
+                // Media gallery
+                _buildMediaGallery(),
+
+                // Poll
+                _buildPoll(),
               ],
             ),
+          ),
 
-            const SizedBox(height: 12),
+          SizedBox(height: 12.h),
 
-            // Post content - clickable
-            GestureDetector(
-              onTap: () {
-                context.push('/post/${widget.post.metadata.id}');
-              },
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  // Post content
-                  if (widget.post.caption.isNotEmpty)
-                    _buildTextWithTags(widget.post.caption, widget.post.tags),
-
-                  // Media gallery
-                  _buildMediaGallery(),
-
-                  // Poll
-                  _buildPoll(),
-                ],
-              ),
-            ),
-
-            const SizedBox(height: 8),
-
-            // Action bar
-            _buildActionBar(),
-          ],
-        ),
+          // Liked by section and Action bar
+          _buildLikedByAndActions(),
+        ],
       ),
     );
   }

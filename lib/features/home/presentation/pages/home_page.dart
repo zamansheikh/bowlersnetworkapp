@@ -299,18 +299,14 @@ class HomePageView extends StatelessWidget {
         ListView.builder(
           shrinkWrap: true,
           physics: const NeverScrollableScrollPhysics(),
-          padding: const EdgeInsets.symmetric(horizontal: 16),
           itemCount: posts.length,
           itemBuilder: (context, index) {
-            return Padding(
-              padding: const EdgeInsets.only(bottom: 16),
-              child: FeedPostCard(
-                post: posts[index],
-                postIndex: index,
-                onPostUpdate: () {
-                  context.read<FeedCubit>().loadFeed();
-                },
-              ),
+            return FeedPostCard(
+              post: posts[index],
+              postIndex: index,
+              onPostUpdate: () {
+                context.read<FeedCubit>().loadFeed();
+              },
             );
           },
         ),
