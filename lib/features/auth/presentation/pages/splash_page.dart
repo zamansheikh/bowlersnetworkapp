@@ -221,10 +221,9 @@ class _SplashPageState extends State<SplashPage>
         children: [
           // Background bowling image (with opacity)
           Positioned(
-            bottom: -100.h, // Responsive bottom position
-            left:
-                0.5.sw -
-                150.w, // Responsive left position (screen width * 0.5 - 150w)
+            bottom: -50.h, // Responsive bottom position
+            left: 0.w,
+            right: 0.w,
             child: Opacity(
               opacity: 0.15,
               child: Image.asset(
