@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import '../../../../core/constants/colors.dart';
 import '../cubit/feed_cubit.dart';
 import 'create_post_modal.dart';
@@ -23,199 +25,200 @@ class CreatePostSection extends StatelessWidget {
             : null;
 
         return Container(
-          margin: const EdgeInsets.symmetric(horizontal: 16),
-          child: Card(
-            elevation: 2,
-            shadowColor: AppColors.cardShadow,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(16),
-            ),
-            child: Padding(
-              padding: const EdgeInsets.all(16),
-              child: Column(
-                children: [
-                  // Quick action buttons
-                  Row(
-                    children: [
-                      Expanded(
-                        child: _buildActionButton(
-                          icon: Icons.edit_note,
-                          label: 'Create Post',
-                          color: AppColors.info,
-                          onTap: () =>
-                              _showCreatePostModal(context, PostType.text),
-                        ),
-                      ),
-                      const SizedBox(width: 12),
-                      Expanded(
-                        child: _buildActionButton(
-                          icon: Icons.photo_camera,
-                          label: 'Add Media',
-                          color: AppColors.error,
-                          onTap: () =>
-                              _showCreatePostModal(context, PostType.media),
-                        ),
-                      ),
-                      const SizedBox(width: 12),
-                      Expanded(
-                        child: _buildActionButton(
-                          icon: Icons.poll,
-                          label: 'Create Poll',
-                          color: AppColors.warning,
-                          onTap: () =>
-                              _showCreatePostModal(context, PostType.poll),
-                        ),
-                      ),
-                    ],
-                  ),
-
-                  const SizedBox(height: 16),
-
-                  // Main post input area
-                  Row(
-                    children: [
-                      CircleAvatar(
-                        radius: 20,
-                        backgroundImage:
-                            userModel != null &&
-                                userModel.profilePictureUrl.isNotEmpty
-                            ? NetworkImage(userModel.profilePictureUrl)
-                            : null,
-                        backgroundColor: AppColors.primaryLimeGreen,
-                        child: userModel?.profilePictureUrl.isEmpty ?? true
-                            ? Text(
-                                userModel?.firstName.isNotEmpty == true
-                                    ? userModel!.firstName[0].toUpperCase()
-                                    : authState.user.name.isNotEmpty
-                                    ? authState.user.name[0].toUpperCase()
-                                    : 'U',
-                                style: const TextStyle(
-                                  color: AppColors.white,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              )
-                            : null,
-                      ),
-                      const SizedBox(width: 12),
-                      Expanded(
-                        child: GestureDetector(
-                          onTap: () =>
-                              _showCreatePostModal(context, PostType.text),
-                          child: Container(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 16,
-                              vertical: 12,
-                            ),
-                            decoration: BoxDecoration(
-                              color: AppColors.surface,
-                              borderRadius: BorderRadius.circular(24),
-                              border: Border.all(
-                                color: AppColors.outline.withValues(alpha: 0.5),
-                              ),
-                            ),
-                            child: Text(
-                              'What\'s on your mind, ${userModel?.firstName ?? authState.user.name}?',
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(20),
+            border: Border.all(color: const Color(0xFFEDEDED), width: 1),
+          ),
+          padding: const EdgeInsets.all(12),
+          child: Column(
+            children: [
+              // Main post input area
+              Padding(
+                padding: const EdgeInsets.only(bottom: 21),
+                child: Row(
+                  children: [
+                    // Profile picture
+                    CircleAvatar(
+                      radius: 12,
+                      backgroundImage:
+                          userModel != null &&
+                              userModel.profilePictureUrl.isNotEmpty
+                          ? NetworkImage(userModel.profilePictureUrl)
+                          : null,
+                      backgroundColor: AppColors.primaryLimeGreen,
+                      child: userModel?.profilePictureUrl.isEmpty ?? true
+                          ? Text(
+                              userModel?.firstName.isNotEmpty == true
+                                  ? userModel!.firstName[0].toUpperCase()
+                                  : authState.user.name.isNotEmpty
+                                  ? authState.user.name[0].toUpperCase()
+                                  : 'U',
                               style: const TextStyle(
-                                color: AppColors.gray,
-                                fontSize: 16,
+                                color: Colors.white,
+                                fontWeight: FontWeight.bold,
+                                fontSize: 12,
+                              ),
+                            )
+                          : null,
+                    ),
+                    const SizedBox(width: 8),
+                    // Text input
+                    Expanded(
+                      child: GestureDetector(
+                        onTap: () =>
+                            _showCreatePostModal(context, PostType.text),
+                        child: Text(
+                          'What\'s on your mind ${userModel?.firstName ?? authState.user.name}?',
+                          style: const TextStyle(
+                            color: Color(0xFF6D6D6D),
+                            fontSize: 12,
+                            fontFamily: 'Poppins',
+                            fontWeight: FontWeight.w400,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+        
+              // Divider line
+              Container(
+                height: 1,
+                color: const Color(0xFFEDEDED),
+                margin: const EdgeInsets.only(bottom: 12),
+              ),
+        
+              // Bottom row with icons and post button
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  // Left side - icons and public dropdown
+                  Row(
+                    children: [
+                      // Camera icon
+                      GestureDetector(
+                        onTap: () =>
+                            _showCreatePostModal(context, PostType.media),
+                        child: Container(
+                          padding: const EdgeInsets.all(4),
+                          decoration: BoxDecoration(
+                            border: Border.all(
+                              color: const Color(0xFFEEEEEE),
+                              width: 1,
+                            ),
+                            borderRadius: BorderRadius.circular(50),
+                          ),
+                          child: SvgPicture.asset(
+                            'assets/icons/camera.svg',
+                            width: 16.w,
+                            height: 16.h,
+                            // colorFilter: const ColorFilter.mode(
+                            //   Color(0xFF666666),
+                            //   BlendMode.srcIn,
+                            // ),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+                      // Poll icon
+                      GestureDetector(
+                        onTap: () =>
+                            _showCreatePostModal(context, PostType.poll),
+                        child: Container(
+                          padding: const EdgeInsets.all(4),
+                          decoration: BoxDecoration(
+                            border: Border.all(
+                              color: const Color(0xFFEEEEEE),
+                              width: 1,
+                            ),
+                            borderRadius: BorderRadius.circular(50),
+                          ),
+                          child: SvgPicture.asset(
+                            'assets/icons/poll.svg',
+                            width: 16.w,
+                            height: 16.h,
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+                      // Public dropdown
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 4,
+                          vertical: 4,
+                        ),
+                        decoration: BoxDecoration(
+                          border: Border.all(
+                            color: const Color(0xFFEFEDED),
+                            width: 1,
+                          ),
+                          borderRadius: BorderRadius.circular(50),
+                        ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            const Icon(
+                              Icons.public,
+                              size: 16,
+                              color: Color(0xFF818181),
+                            ),
+                            const SizedBox(width: 2),
+                            const Text(
+                              'Public',
+                              style: TextStyle(
+                                color: Color(0xFF949494),
+                                fontSize: 10,
+                                fontFamily: 'Poppins',
+                                fontWeight: FontWeight.w500,
                               ),
                             ),
-                          ),
+                            const SizedBox(width: 4),
+                            const Icon(
+                              Icons.keyboard_arrow_down,
+                              size: 12,
+                              color: Color(0xFF818181),
+                            ),
+                          ],
                         ),
                       ),
                     ],
                   ),
-
-                  const SizedBox(height: 16),
-
-                  // Privacy and post button
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Row(
-                        children: [
-                          Icon(Icons.public, size: 16, color: AppColors.gray),
-                          const SizedBox(width: 4),
-                          const Text(
-                            'Public',
-                            style: TextStyle(
-                              color: AppColors.gray,
-                              fontSize: 14,
-                              fontWeight: FontWeight.w500,
-                            ),
-                          ),
-                          const SizedBox(width: 4),
-                          Icon(
-                            Icons.keyboard_arrow_down,
-                            size: 16,
-                            color: AppColors.gray,
-                          ),
-                        ],
-                      ),
-                      ElevatedButton(
-                        onPressed: () =>
-                            _showCreatePostModal(context, PostType.text),
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: AppColors.surface,
-                          foregroundColor: AppColors.gray,
-                          elevation: 0,
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 24,
-                            vertical: 8,
-                          ),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(20),
-                            side: BorderSide(
-                              color: AppColors.outline.withValues(alpha: 0.5),
-                            ),
-                          ),
+                  // Right side - Post button
+                  Container(
+                    decoration: BoxDecoration(
+                      color: const Color(0xFFB8BBB4),
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: TextButton(
+                      onPressed: () =>
+                          _showCreatePostModal(context, PostType.text),
+                      style: TextButton.styleFrom(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 20,
+                          vertical: 5,
                         ),
-                        child: const Text(
-                          'Post',
-                          style: TextStyle(fontWeight: FontWeight.w600),
+                        minimumSize: Size.zero,
+                        tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                      ),
+                      child: const Text(
+                        'Post',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 10,
+                          fontFamily: 'Poppins',
+                          fontWeight: FontWeight.w500,
                         ),
                       ),
-                    ],
+                    ),
                   ),
                 ],
               ),
-            ),
+            ],
           ),
         );
       },
-    );
-  }
-
-  Widget _buildActionButton({
-    required IconData icon,
-    required String label,
-    required Color color,
-    required VoidCallback onTap,
-  }) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        padding: const EdgeInsets.symmetric(vertical: 12),
-        decoration: BoxDecoration(
-          color: color.withValues(alpha: 0.1),
-          borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: color.withValues(alpha: 0.3)),
-        ),
-        child: Column(
-          children: [
-            Icon(icon, color: color, size: 20),
-            const SizedBox(height: 4),
-            Text(
-              label,
-              style: TextStyle(
-                color: color,
-                fontSize: 12,
-                fontWeight: FontWeight.w500,
-              ),
-            ),
-          ],
-        ),
-      ),
     );
   }
 
