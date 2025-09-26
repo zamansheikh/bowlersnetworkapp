@@ -179,7 +179,7 @@ class OverviewPage extends StatelessWidget {
               borderRadius: BorderRadius.circular(20),
               boxShadow: [
                 BoxShadow(
-                  color: AppColors.primaryLimeGreen.withOpacity(0.3),
+                  color: AppColors.primaryLimeGreen.withValues(alpha: 0.3),
                   blurRadius: 20,
                   offset: const Offset(0, 10),
                 ),
@@ -194,7 +194,7 @@ class OverviewPage extends StatelessWidget {
                   decoration: BoxDecoration(
                     shape: BoxShape.circle,
                     border: Border.all(
-                      color: Colors.white.withOpacity(0.3),
+                      color: Colors.white.withValues(alpha: 0.3),
                       width: 2,
                     ),
                   ),
@@ -204,7 +204,7 @@ class OverviewPage extends StatelessWidget {
                             imageUrl: userAvatar,
                             fit: BoxFit.cover,
                             placeholder: (context, url) => Container(
-                              color: Colors.white.withOpacity(0.2),
+                              color: Colors.white.withValues(alpha: 0.2),
                               child: const Icon(
                                 Icons.person,
                                 color: Colors.white,
@@ -212,7 +212,7 @@ class OverviewPage extends StatelessWidget {
                               ),
                             ),
                             errorWidget: (context, url, error) => Container(
-                              color: Colors.white.withOpacity(0.2),
+                              color: Colors.white.withValues(alpha: 0.2),
                               child: const Icon(
                                 Icons.person,
                                 color: Colors.white,
@@ -221,7 +221,7 @@ class OverviewPage extends StatelessWidget {
                             ),
                           )
                         : Container(
-                            color: Colors.white.withOpacity(0.2),
+                            color: Colors.white.withValues(alpha: 0.2),
                             child: const Icon(
                               Icons.person,
                               color: Colors.white,
@@ -240,7 +240,7 @@ class OverviewPage extends StatelessWidget {
                       Text(
                         'Welcome back,',
                         style: AppTextStyles.bodyMedium.copyWith(
-                          color: Colors.white.withOpacity(0.9),
+                          color: Colors.white.withValues(alpha: 0.9),
                           fontWeight: FontWeight.w500,
                         ),
                       ),
@@ -383,7 +383,7 @@ class OverviewPage extends StatelessWidget {
         border: Border.all(color: AppColors.gray200),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.04),
+            color: Colors.black.withValues(alpha: 0.04),
             blurRadius: 8,
             offset: const Offset(0, 2),
           ),
@@ -397,7 +397,7 @@ class OverviewPage extends StatelessWidget {
               Container(
                 padding: EdgeInsets.all(AppSpacing.sm),
                 decoration: BoxDecoration(
-                  color: color.withOpacity(0.1),
+                  color: color.withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: Icon(icon, color: color, size: 20),
@@ -550,7 +550,7 @@ class OverviewPage extends StatelessWidget {
             borderRadius: BorderRadius.circular(20),
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withOpacity(0.06),
+                color: Colors.black.withValues(alpha: 0.06),
                 blurRadius: 12,
                 offset: const Offset(0, 4),
               ),
@@ -768,7 +768,7 @@ class OverviewPage extends StatelessWidget {
         border: Border.all(color: AppColors.gray200),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.04),
+            color: Colors.black.withValues(alpha: 0.04),
             blurRadius: 8,
             offset: const Offset(0, 2),
           ),
@@ -783,10 +783,10 @@ class OverviewPage extends StatelessWidget {
                 vertical: AppSpacing.md,
               ),
               decoration: BoxDecoration(
-                color: AppColors.primaryLimeGreen.withOpacity(0.1),
+                color: AppColors.primaryLimeGreen.withValues(alpha: 0.1),
                 borderRadius: BorderRadius.circular(8),
                 border: Border.all(
-                  color: AppColors.primaryLimeGreen.withOpacity(0.3),
+                  color: AppColors.primaryLimeGreen.withValues(alpha: 0.3),
                 ),
               ),
               child: Row(

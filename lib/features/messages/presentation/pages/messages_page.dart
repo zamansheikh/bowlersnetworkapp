@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:go_router/go_router.dart';
 import '../cubit/messages_cubit.dart';
 import '../cubit/messages_state.dart';
 import '../widgets/conversation_list_item.dart';
@@ -104,20 +103,7 @@ class _MessagesPageState extends State<MessagesPage> {
         elevation: 0,
         backgroundColor: AppColors.white,
         foregroundColor: AppColors.gray900,
-        leading: Container(
-          margin: EdgeInsets.all(AppSpacing.sm),
-          decoration: BoxDecoration(
-            color: AppColors.gray50,
-            borderRadius: BorderRadius.circular(12),
-            border: Border.all(color: AppColors.gray200),
-          ),
-          child: IconButton(
-            icon: const Icon(Icons.arrow_back_ios_rounded),
-            onPressed: () => context.pop(),
-            color: AppColors.gray700,
-            iconSize: 18,
-          ),
-        ),
+        automaticallyImplyLeading: false,
         title: Text(
           'Messages',
           style: AppTextStyles.headlineMedium.copyWith(
@@ -129,10 +115,10 @@ class _MessagesPageState extends State<MessagesPage> {
           Container(
             margin: EdgeInsets.only(right: AppSpacing.md),
             decoration: BoxDecoration(
-              color: AppColors.primaryLimeGreen.withOpacity(0.1),
+              color: AppColors.primaryLimeGreen.withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(12),
               border: Border.all(
-                color: AppColors.primaryLimeGreen.withOpacity(0.3),
+                color: AppColors.primaryLimeGreen.withValues(alpha: 0.3),
               ),
             ),
             child: IconButton(

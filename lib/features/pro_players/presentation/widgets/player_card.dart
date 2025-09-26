@@ -33,13 +33,13 @@ class PlayerCard extends StatelessWidget {
           gradient: LinearGradient(
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
-            colors: [Colors.white, primaryColor.withOpacity(0.05)],
+            colors: [Colors.white, primaryColor.withValues(alpha: 0.05)],
           ),
           borderRadius: BorderRadius.circular(20),
           border: Border.all(color: primaryColor, width: 2),
           boxShadow: [
             BoxShadow(
-              color: primaryColor.withOpacity(0.2),
+              color: primaryColor.withValues(alpha: 0.2),
               blurRadius: 15,
               spreadRadius: 2,
               offset: const Offset(0, 8),
@@ -57,7 +57,7 @@ class PlayerCard extends StatelessWidget {
                 height: 200,
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
-                  color: primaryColor.withOpacity(0.05),
+                  color: primaryColor.withValues(alpha: 0.05),
                 ),
               ),
             ),
@@ -80,7 +80,7 @@ class PlayerCard extends StatelessWidget {
                           border: Border.all(color: primaryColor, width: 4),
                           boxShadow: [
                             BoxShadow(
-                              color: primaryColor.withOpacity(0.3),
+                              color: primaryColor.withValues(alpha: 0.3),
                               blurRadius: 10,
                               spreadRadius: 2,
                             ),
@@ -93,7 +93,9 @@ class PlayerCard extends StatelessWidget {
                                   fit: BoxFit.cover,
                                   errorBuilder: (context, error, stackTrace) {
                                     return Container(
-                                      color: primaryColor.withOpacity(0.1),
+                                      color: primaryColor.withValues(
+                                        alpha: 0.1,
+                                      ),
                                       child: Icon(
                                         Icons.person,
                                         size: 60,
@@ -103,7 +105,7 @@ class PlayerCard extends StatelessWidget {
                                   },
                                 )
                               : Container(
-                                  color: primaryColor.withOpacity(0.1),
+                                  color: primaryColor.withValues(alpha: 0.1),
                                   child: Icon(
                                     Icons.person,
                                     size: 60,
@@ -187,7 +189,7 @@ class PlayerCard extends StatelessWidget {
                       color: Colors.white,
                       borderRadius: BorderRadius.circular(15),
                       border: Border.all(
-                        color: primaryColor.withOpacity(0.2),
+                        color: primaryColor.withValues(alpha: 0.2),
                         width: 1,
                       ),
                     ),
@@ -248,7 +250,7 @@ class PlayerCard extends StatelessWidget {
                             : primaryColor,
                         foregroundColor: Colors.white,
                         elevation: 4,
-                        shadowColor: primaryColor.withOpacity(0.3),
+                        shadowColor: primaryColor.withValues(alpha: 0.3),
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(24),
                         ),

@@ -61,7 +61,7 @@ class _NewMessageModalState extends State<NewMessageModal> {
                   onPressed: widget.onClose,
                   icon: const Icon(Icons.close),
                   style: IconButton.styleFrom(
-                    backgroundColor: Colors.red.withOpacity(0.1),
+                    backgroundColor: Colors.red.withValues(alpha: 0.1),
                     foregroundColor: Colors.red,
                   ),
                 ),

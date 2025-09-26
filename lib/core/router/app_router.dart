@@ -16,6 +16,7 @@ import '../../features/pro_players/presentation/pages/player_detail_page.dart';
 import '../../features/overview/presentation/pages/overview_page.dart';
 import '../../features/messages/presentation/pages/messages_page.dart';
 import '../../features/events/presentation/pages/events_page.dart';
+import '../widgets/main_shell.dart';
 
 class AppRouter {
   static GoRouter create(AuthCubit authCubit) {
@@ -74,11 +75,6 @@ class AppRouter {
           builder: (context, state) => const SplashPage(),
         ),
         GoRoute(
-          path: '/',
-          name: 'home',
-          builder: (context, state) => const HomePage(),
-        ),
-        GoRoute(
           path: '/signin',
           name: 'signin',
           builder: (context, state) => const SignInPage(),
@@ -88,6 +84,45 @@ class AppRouter {
           path: '/login',
           name: 'login',
           builder: (context, state) => const SignInPage(),
+        ),
+
+        // Shell route for main app navigation with bottom nav bar
+        ShellRoute(
+          builder: (context, state, child) {
+            return MainShell(
+              currentLocation: state.matchedLocation,
+              child: child,
+            );
+          },
+          routes: [
+            GoRoute(
+              path: '/',
+              name: 'home',
+              builder: (context, state) => const HomePage(),
+            ),
+            GoRoute(
+              path: '/messages',
+              name: 'messages',
+              builder: (context, state) {
+                final targetRoomId = state.uri.queryParameters['room_id'];
+                return MessagesPage(
+                  targetRoomId: targetRoomId != null
+                      ? int.tryParse(targetRoomId)
+                      : null,
+                );
+              },
+            ),
+            GoRoute(
+              path: '/events',
+              name: 'events',
+              builder: (context, state) => const EventsPage(),
+            ),
+            GoRoute(
+              path: '/profile',
+              name: 'profile',
+              builder: (context, state) => const UserProfilePage(),
+            ),
+          ],
         ),
         GoRoute(
           path: '/signup',
@@ -114,15 +149,12 @@ class AppRouter {
             );
           },
         ),
+
+        // Routes outside shell (no bottom nav bar)
         GoRoute(
           path: '/complete-profile',
           name: 'complete-profile',
           builder: (context, state) => const ProfileCompletionPage(),
-        ),
-        GoRoute(
-          path: '/profile',
-          name: 'profile',
-          builder: (context, state) => const UserProfilePage(),
         ),
         GoRoute(
           path: '/profile/edit',
@@ -158,23 +190,6 @@ class AppRouter {
                 : userId;
             return PlayerDetailPage(userName: userId, userId: userIdParam);
           },
-        ),
-        GoRoute(
-          path: '/messages',
-          name: 'messages',
-          builder: (context, state) {
-            final targetRoomId = state.uri.queryParameters['room_id'];
-            return MessagesPage(
-              targetRoomId: targetRoomId != null
-                  ? int.tryParse(targetRoomId)
-                  : null,
-            );
-          },
-        ),
-        GoRoute(
-          path: '/events',
-          name: 'events',
-          builder: (context, state) => const EventsPage(),
         ),
       ],
       errorBuilder: (context, state) => const ErrorPage(),

@@ -93,7 +93,9 @@ class AppDrawer extends StatelessWidget {
                                 Text(
                                   email,
                                   style: AppTextStyles.bodySmall.copyWith(
-                                    color: AppColors.white.withOpacity(0.9),
+                                    color: AppColors.white.withValues(
+                                      alpha: 0.9,
+                                    ),
                                   ),
                                 ),
                             ],
@@ -114,12 +116,6 @@ class AppDrawer extends StatelessWidget {
                   const SizedBox(height: 8),
                   _SectionHeader(title: 'Discover'),
                   _NavItem(
-                    icon: Icons.home,
-                    label: 'Home',
-                    selected: currentPath == '/',
-                    onTap: () => _go(context, '/'),
-                  ),
-                  _NavItem(
                     icon: Icons.star,
                     label: 'Pro Players',
                     selected: currentPath.startsWith('/pro-players'),
@@ -130,28 +126,6 @@ class AppDrawer extends StatelessWidget {
                     label: 'Overview',
                     selected: currentPath.startsWith('/overview'),
                     onTap: () => _go(context, '/overview'),
-                  ),
-                  const SizedBox(height: 12),
-                  _SectionHeader(title: 'Social'),
-                  _NavItem(
-                    icon: Icons.message,
-                    label: 'Messages',
-                    selected: currentPath.startsWith('/messages'),
-                    onTap: () => _go(context, '/messages'),
-                  ),
-                  _NavItem(
-                    icon: Icons.event,
-                    label: 'Events',
-                    selected: currentPath.startsWith('/events'),
-                    onTap: () => _go(context, '/events'),
-                  ),
-                  const SizedBox(height: 12),
-                  _SectionHeader(title: 'Account'),
-                  _NavItem(
-                    icon: Icons.person,
-                    label: 'Profile',
-                    selected: currentPath.startsWith('/profile'),
-                    onTap: () => _go(context, '/profile'),
                   ),
                   const SizedBox(height: 24),
                 ],
@@ -176,10 +150,10 @@ class AppDrawer extends StatelessWidget {
                           vertical: 12,
                         ),
                         decoration: BoxDecoration(
-                          color: AppColors.error.withOpacity(0.06),
+                          color: AppColors.error.withValues(alpha: 0.06),
                           borderRadius: BorderRadius.circular(12),
                           border: Border.all(
-                            color: AppColors.error.withOpacity(0.2),
+                            color: AppColors.error.withValues(alpha: 0.2),
                           ),
                         ),
                         child: Row(
@@ -287,12 +261,12 @@ class _NavItem extends StatelessWidget {
           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
           decoration: BoxDecoration(
             color: selected
-                ? AppColors.primaryLimeGreen.withOpacity(0.08)
+                ? AppColors.primaryLimeGreen.withValues(alpha: 0.08)
                 : AppColors.white,
             borderRadius: BorderRadius.circular(12),
             border: Border.all(
               color: selected
-                  ? AppColors.primaryLimeGreen.withOpacity(0.3)
+                  ? AppColors.primaryLimeGreen.withValues(alpha: 0.3)
                   : AppColors.border,
             ),
           ),

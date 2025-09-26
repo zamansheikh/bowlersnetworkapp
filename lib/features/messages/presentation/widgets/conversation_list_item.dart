@@ -18,7 +18,9 @@ class ConversationListItem extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       decoration: BoxDecoration(
-        color: isSelected ? AppColors.primaryLimeGreen.withOpacity(0.1) : null,
+        color: isSelected
+            ? AppColors.primaryLimeGreen.withValues(alpha: 0.1)
+            : null,
         border: isSelected
             ? Border(
                 right: BorderSide(color: AppColors.primaryLimeGreen, width: 3),
@@ -97,7 +99,7 @@ class ConversationListItem extends StatelessWidget {
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                 decoration: BoxDecoration(
-                  color: Colors.blue.withOpacity(0.1),
+                  color: Colors.blue.withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: const Text(

@@ -129,16 +129,16 @@ class CalendarWidget extends StatelessWidget {
                             height: 80,
                             decoration: BoxDecoration(
                               color: isSelected
-                                  ? Colors.green.withOpacity(0.2)
+                                  ? Colors.green.withValues(alpha: 0.2)
                                   : day.isCurrentMonth
                                   ? Colors.white
-                                  : Colors.grey.withOpacity(0.1),
+                                  : Colors.grey.withValues(alpha: 0.1),
                               border: day.isToday
                                   ? Border.all(color: Colors.green, width: 2)
                                   : isSelected
                                   ? Border.all(color: Colors.green, width: 2)
                                   : Border.all(
-                                      color: Colors.grey.withOpacity(0.3),
+                                      color: Colors.grey.withValues(alpha: 0.3),
                                     ),
                               borderRadius: BorderRadius.circular(8),
                             ),

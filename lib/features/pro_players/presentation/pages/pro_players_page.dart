@@ -111,10 +111,10 @@ class _ProPlayersPageState extends State<ProPlayersPage> {
             Container(
               margin: EdgeInsets.only(right: AppSpacing.md),
               decoration: BoxDecoration(
-                color: AppColors.primaryLimeGreen.withOpacity(0.1),
+                color: AppColors.primaryLimeGreen.withValues(alpha: 0.1),
                 borderRadius: BorderRadius.circular(12),
                 border: Border.all(
-                  color: AppColors.primaryLimeGreen.withOpacity(0.3),
+                  color: AppColors.primaryLimeGreen.withValues(alpha: 0.3),
                 ),
               ),
               child: IconButton(
@@ -198,13 +198,13 @@ class _ProPlayersPageState extends State<ProPlayersPage> {
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
                 colors: [
-                  const Color(0xFF8BC342).withOpacity(0.1),
+                  const Color(0xFF8BC342).withValues(alpha: 0.1),
                   Colors.white,
                 ],
               ),
               borderRadius: BorderRadius.circular(20),
               border: Border.all(
-                color: const Color(0xFF8BC342).withOpacity(0.2),
+                color: const Color(0xFF8BC342).withValues(alpha: 0.2),
                 width: 1,
               ),
             ),
@@ -217,7 +217,7 @@ class _ProPlayersPageState extends State<ProPlayersPage> {
                     Container(
                       padding: const EdgeInsets.all(12),
                       decoration: BoxDecoration(
-                        color: const Color(0xFF8BC342).withOpacity(0.1),
+                        color: const Color(0xFF8BC342).withValues(alpha: 0.1),
                         borderRadius: BorderRadius.circular(12),
                       ),
                       child: const Icon(
@@ -300,7 +300,7 @@ class _ProPlayersPageState extends State<ProPlayersPage> {
         color: Colors.white,
         borderRadius: BorderRadius.circular(20),
         border: Border.all(
-          color: const Color(0xFF8BC342).withOpacity(0.3),
+          color: const Color(0xFF8BC342).withValues(alpha: 0.3),
           width: 1,
         ),
       ),
@@ -332,7 +332,7 @@ class _ProPlayersPageState extends State<ProPlayersPage> {
             Container(
               padding: const EdgeInsets.all(24),
               decoration: BoxDecoration(
-                color: Colors.red.withOpacity(0.1),
+                color: Colors.red.withValues(alpha: 0.1),
                 borderRadius: BorderRadius.circular(20),
               ),
               child: const Icon(
@@ -390,7 +390,7 @@ class _ProPlayersPageState extends State<ProPlayersPage> {
             Container(
               padding: const EdgeInsets.all(24),
               decoration: BoxDecoration(
-                color: const Color(0xFF8BC342).withOpacity(0.1),
+                color: const Color(0xFF8BC342).withValues(alpha: 0.1),
                 borderRadius: BorderRadius.circular(20),
               ),
               child: const Icon(

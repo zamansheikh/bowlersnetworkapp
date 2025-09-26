@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:table_calendar/table_calendar.dart';
-import 'package:go_router/go_router.dart';
 import '../../../../core/constants/colors.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/theme/app_text_styles.dart';
@@ -35,20 +34,7 @@ class _EventsPageState extends State<EventsPage> {
         elevation: 0,
         backgroundColor: AppColors.white,
         foregroundColor: AppColors.gray900,
-        leading: Container(
-          margin: EdgeInsets.all(AppSpacing.sm),
-          decoration: BoxDecoration(
-            color: AppColors.gray50,
-            borderRadius: BorderRadius.circular(12),
-            border: Border.all(color: AppColors.gray200),
-          ),
-          child: IconButton(
-            icon: const Icon(Icons.arrow_back_ios_rounded),
-            onPressed: () => context.pop(),
-            color: AppColors.gray700,
-            iconSize: 18,
-          ),
-        ),
+        automaticallyImplyLeading: false,
         title: Text(
           'Events',
           style: AppTextStyles.headlineMedium.copyWith(
@@ -60,7 +46,7 @@ class _EventsPageState extends State<EventsPage> {
           Container(
             margin: EdgeInsets.only(right: AppSpacing.md),
             decoration: BoxDecoration(
-              color: AppColors.primaryLimeGreen.withOpacity(0.1),
+              color: AppColors.primaryLimeGreen.withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(12),
             ),
             child: IconButton(
@@ -207,7 +193,7 @@ class _EventsPageState extends State<EventsPage> {
                       vertical: AppSpacing.xs,
                     ),
                     decoration: BoxDecoration(
-                      color: AppColors.primaryLimeGreen.withOpacity(0.1),
+                      color: AppColors.primaryLimeGreen.withValues(alpha: 0.1),
                       borderRadius: BorderRadius.circular(999),
                     ),
                     child: Text(
@@ -469,7 +455,7 @@ class _EventsPageState extends State<EventsPage> {
             Container(
               padding: EdgeInsets.all(AppSpacing.md),
               decoration: BoxDecoration(
-                color: AppColors.primaryLimeGreen.withOpacity(0.1),
+                color: AppColors.primaryLimeGreen.withValues(alpha: 0.1),
                 borderRadius: BorderRadius.circular(12),
               ),
               child: Row(
@@ -505,7 +491,7 @@ class _EventsPageState extends State<EventsPage> {
           width: 32,
           height: 32,
           decoration: BoxDecoration(
-            color: color.withOpacity(0.1),
+            color: color.withValues(alpha: 0.1),
             borderRadius: BorderRadius.circular(8),
           ),
           child: Icon(icon, size: 16, color: color),
@@ -599,7 +585,7 @@ class _EventsPageState extends State<EventsPage> {
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-            color: AppColors.gray900.withOpacity(0.05),
+            color: AppColors.gray900.withValues(alpha: 0.05),
             blurRadius: 10,
             offset: const Offset(0, 4),
           ),
@@ -700,7 +686,7 @@ class _EventsPageState extends State<EventsPage> {
                   color: AppColors.gray700,
                 ),
                 todayDecoration: BoxDecoration(
-                  color: AppColors.primaryLimeGreen.withOpacity(0.2),
+                  color: AppColors.primaryLimeGreen.withValues(alpha: 0.2),
                   shape: BoxShape.circle,
                 ),
                 todayTextStyle: AppTextStyles.bodyMedium.copyWith(
@@ -806,7 +792,7 @@ class _EventsPageState extends State<EventsPage> {
         border: Border.all(color: AppColors.gray100),
         boxShadow: [
           BoxShadow(
-            color: AppColors.gray900.withOpacity(0.04),
+            color: AppColors.gray900.withValues(alpha: 0.04),
             blurRadius: 8,
             offset: const Offset(0, 2),
           ),
@@ -833,7 +819,7 @@ class _EventsPageState extends State<EventsPage> {
                       width: 48,
                       height: 48,
                       decoration: BoxDecoration(
-                        color: typeColor.withOpacity(0.1),
+                        color: typeColor.withValues(alpha: 0.1),
                         borderRadius: BorderRadius.circular(12),
                       ),
                       child: Icon(
@@ -866,7 +852,7 @@ class _EventsPageState extends State<EventsPage> {
                               vertical: AppSpacing.xs,
                             ),
                             decoration: BoxDecoration(
-                              color: typeColor.withOpacity(0.1),
+                              color: typeColor.withValues(alpha: 0.1),
                               borderRadius: BorderRadius.circular(999),
                             ),
                             child: Text(
@@ -888,7 +874,7 @@ class _EventsPageState extends State<EventsPage> {
                         vertical: AppSpacing.xs,
                       ),
                       decoration: BoxDecoration(
-                        color: statusColor.withOpacity(0.1),
+                        color: statusColor.withValues(alpha: 0.1),
                         borderRadius: BorderRadius.circular(999),
                       ),
                       child: Text(

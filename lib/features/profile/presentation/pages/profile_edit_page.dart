@@ -203,7 +203,7 @@ class _ProfileEditPageState extends State<ProfileEditPage> {
             borderRadius: BorderRadius.circular(12),
           ),
           elevation: 2,
-          shadowColor: AppColors.primaryLimeGreen.withOpacity(0.3),
+          shadowColor: AppColors.primaryLimeGreen.withValues(alpha: 0.3),
         ),
         child: const Text(
           'Save Changes',

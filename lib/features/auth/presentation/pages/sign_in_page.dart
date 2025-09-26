@@ -213,7 +213,7 @@ class _SignInPageState extends State<SignInPage> {
                         Container(
                           padding: EdgeInsets.all(AppSpacing.md),
                           decoration: BoxDecoration(
-                            color: AppColors.error.withOpacity(0.1),
+                            color: AppColors.error.withValues(alpha: 0.1),
                             borderRadius: BorderRadius.circular(
                               AppSpacing.radiusSM,
                             ),
