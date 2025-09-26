@@ -88,69 +88,72 @@ class HomePageView extends StatelessWidget {
 
                 // Content
                 SliverToBoxAdapter(
-                  child: Column(
-                    children: [
-                      SizedBox(height: 16.h),
+                  child: Padding(
+                    padding: EdgeInsets.symmetric(horizontal: 20.w),
+                    child: Column(
+                      children: [
+                        SizedBox(height: 32.h),
 
-                      // Create Post Section
-                      const CreatePostSection(),
+                        // Create Post Section
+                        const CreatePostSection(),
 
-                      SizedBox(height: 16.h),
+                        SizedBox(height: 20.h),
 
-                      // Feed Content
-                      BlocConsumer<FeedCubit, FeedState>(
-                        listener: (context, state) {
-                          if (state is PostCreateSuccess) {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(
-                                content: Text('Post created successfully!'),
-                                backgroundColor: AppColors.success,
-                              ),
-                            );
-                          } else if (state is PostCreateError) {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(
-                                content: Text(
-                                  'Failed to create post: ${state.message}',
+                        // Feed Content
+                        BlocConsumer<FeedCubit, FeedState>(
+                          listener: (context, state) {
+                            if (state is PostCreateSuccess) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(
+                                  content: Text('Post created successfully!'),
+                                  backgroundColor: AppColors.success,
                                 ),
-                                backgroundColor: AppColors.error,
-                              ),
-                            );
-                          }
-                        },
-                        builder: (context, state) {
-                          if (state is FeedLoading) {
-                            return _buildLoadingWidget();
-                          } else if (state is FeedError) {
-                            return _buildErrorWidget(state.message, context);
-                          } else if (state is FeedLoaded ||
-                              state is FeedRefreshing ||
-                              state is PostCreating ||
-                              state is PostCreateSuccess ||
-                              state is PostCreateError) {
-                            List<FeedPost> posts = [];
-                            bool isCreating = false;
-
-                            if (state is FeedLoaded) {
-                              posts = state.posts;
-                            } else if (state is FeedRefreshing) {
-                              posts = state.posts;
-                            } else if (state is PostCreating) {
-                              posts = state.posts;
-                              isCreating = true;
-                            } else if (state is PostCreateSuccess) {
-                              posts = state.posts;
+                              );
                             } else if (state is PostCreateError) {
-                              posts = state.posts;
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                  content: Text(
+                                    'Failed to create post: ${state.message}',
+                                  ),
+                                  backgroundColor: AppColors.error,
+                                ),
+                              );
+                            }
+                          },
+                          builder: (context, state) {
+                            if (state is FeedLoading) {
+                              return _buildLoadingWidget();
+                            } else if (state is FeedError) {
+                              return _buildErrorWidget(state.message, context);
+                            } else if (state is FeedLoaded ||
+                                state is FeedRefreshing ||
+                                state is PostCreating ||
+                                state is PostCreateSuccess ||
+                                state is PostCreateError) {
+                              List<FeedPost> posts = [];
+                              bool isCreating = false;
+
+                              if (state is FeedLoaded) {
+                                posts = state.posts;
+                              } else if (state is FeedRefreshing) {
+                                posts = state.posts;
+                              } else if (state is PostCreating) {
+                                posts = state.posts;
+                                isCreating = true;
+                              } else if (state is PostCreateSuccess) {
+                                posts = state.posts;
+                              } else if (state is PostCreateError) {
+                                posts = state.posts;
+                              }
+
+                              return _buildFeedContent(posts, isCreating);
                             }
 
-                            return _buildFeedContent(posts, isCreating);
-                          }
-
-                          return _buildEmptyWidget();
-                        },
-                      ),
-                    ],
+                            return _buildEmptyWidget();
+                          },
+                        ),
+                      ],
+                    ),
                   ),
                 ),
               ],
@@ -266,11 +269,11 @@ class HomePageView extends StatelessWidget {
         // Show creating indicator
         if (isCreating)
           Container(
-            margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-            padding: const EdgeInsets.all(16),
+            margin: EdgeInsets.only(bottom: 8.h),
+            padding: EdgeInsets.all(16.w),
             decoration: BoxDecoration(
               color: AppColors.info.withValues(alpha: 0.1),
-              borderRadius: BorderRadius.circular(12),
+              borderRadius: BorderRadius.circular(12.r),
               border: Border.all(color: AppColors.info.withValues(alpha: 0.3)),
             ),
             child: const Row(
@@ -296,10 +299,11 @@ class HomePageView extends StatelessWidget {
           ),
 
         // Posts list
-        ListView.builder(
+        ListView.separated(
           shrinkWrap: true,
           physics: const NeverScrollableScrollPhysics(),
           itemCount: posts.length,
+          separatorBuilder: (context, index) => SizedBox(height: 20.h),
           itemBuilder: (context, index) {
             return FeedPostCard(
               post: posts[index],
@@ -312,7 +316,7 @@ class HomePageView extends StatelessWidget {
         ),
 
         // Bottom spacing
-        const SizedBox(height: 24),
+        SizedBox(height: 32.h),
       ],
     );
   }
