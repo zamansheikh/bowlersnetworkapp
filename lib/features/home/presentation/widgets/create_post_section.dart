@@ -27,20 +27,20 @@ class CreatePostSection extends StatelessWidget {
         return Container(
           decoration: BoxDecoration(
             color: Colors.white,
-            borderRadius: BorderRadius.circular(20),
-            border: Border.all(color: const Color(0xFFEDEDED), width: 1),
+            borderRadius: BorderRadius.circular(20.r),
+            border: Border.all(color: const Color(0xFFEDEDED), width: 1.w),
           ),
-          padding: const EdgeInsets.all(12),
+          padding: EdgeInsets.all(12.w),
           child: Column(
             children: [
               // Main post input area
               Padding(
-                padding: const EdgeInsets.only(bottom: 21),
+                padding: EdgeInsets.only(bottom: 21.h),
                 child: Row(
                   children: [
                     // Profile picture
                     CircleAvatar(
-                      radius: 12,
+                      radius: 12.r,
                       backgroundImage:
                           userModel != null &&
                               userModel.profilePictureUrl.isNotEmpty
@@ -54,15 +54,15 @@ class CreatePostSection extends StatelessWidget {
                                   : authState.user.name.isNotEmpty
                                   ? authState.user.name[0].toUpperCase()
                                   : 'U',
-                              style: const TextStyle(
+                              style: TextStyle(
                                 color: Colors.white,
                                 fontWeight: FontWeight.bold,
-                                fontSize: 12,
+                                fontSize: 12.sp,
                               ),
                             )
                           : null,
                     ),
-                    const SizedBox(width: 8),
+                    SizedBox(width: 8.w),
                     // Text input
                     Expanded(
                       child: GestureDetector(
@@ -70,9 +70,9 @@ class CreatePostSection extends StatelessWidget {
                             _showCreatePostModal(context, PostType.text),
                         child: Text(
                           'What\'s on your mind ${userModel?.firstName ?? authState.user.name}?',
-                          style: const TextStyle(
+                          style: TextStyle(
                             color: Color(0xFF6D6D6D),
-                            fontSize: 12,
+                            fontSize: 12.sp,
                             fontFamily: 'Poppins',
                             fontWeight: FontWeight.w400,
                           ),
@@ -82,14 +82,14 @@ class CreatePostSection extends StatelessWidget {
                   ],
                 ),
               ),
-        
+
               // Divider line
               Container(
-                height: 1,
+                height: 1.h,
                 color: const Color(0xFFEDEDED),
-                margin: const EdgeInsets.only(bottom: 12),
+                margin: EdgeInsets.only(bottom: 12.h),
               ),
-        
+
               // Bottom row with icons and post button
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -102,13 +102,13 @@ class CreatePostSection extends StatelessWidget {
                         onTap: () =>
                             _showCreatePostModal(context, PostType.media),
                         child: Container(
-                          padding: const EdgeInsets.all(4),
+                          padding: EdgeInsets.all(4.w),
                           decoration: BoxDecoration(
                             border: Border.all(
                               color: const Color(0xFFEEEEEE),
-                              width: 1,
+                              width: 1.w,
                             ),
-                            borderRadius: BorderRadius.circular(50),
+                            borderRadius: BorderRadius.circular(50.r),
                           ),
                           child: SvgPicture.asset(
                             'assets/icons/camera.svg',
@@ -121,19 +121,19 @@ class CreatePostSection extends StatelessWidget {
                           ),
                         ),
                       ),
-                      const SizedBox(width: 12),
+                      SizedBox(width: 12.w),
                       // Poll icon
                       GestureDetector(
                         onTap: () =>
                             _showCreatePostModal(context, PostType.poll),
                         child: Container(
-                          padding: const EdgeInsets.all(4),
+                          padding: EdgeInsets.all(4.w),
                           decoration: BoxDecoration(
                             border: Border.all(
                               color: const Color(0xFFEEEEEE),
-                              width: 1,
+                              width: 1.w,
                             ),
-                            borderRadius: BorderRadius.circular(50),
+                            borderRadius: BorderRadius.circular(50.r),
                           ),
                           child: SvgPicture.asset(
                             'assets/icons/poll.svg',
@@ -142,42 +142,42 @@ class CreatePostSection extends StatelessWidget {
                           ),
                         ),
                       ),
-                      const SizedBox(width: 12),
+                      SizedBox(width: 12.w),
                       // Public dropdown
                       Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 4,
-                          vertical: 4,
+                        padding: EdgeInsets.symmetric(
+                          horizontal: 4.w,
+                          vertical: 4.h,
                         ),
                         decoration: BoxDecoration(
                           border: Border.all(
                             color: const Color(0xFFEFEDED),
-                            width: 1,
+                            width: 1.w,
                           ),
-                          borderRadius: BorderRadius.circular(50),
+                          borderRadius: BorderRadius.circular(50.r),
                         ),
                         child: Row(
                           mainAxisSize: MainAxisSize.min,
                           children: [
-                            const Icon(
+                            Icon(
                               Icons.public,
-                              size: 16,
+                              size: 16.sp,
                               color: Color(0xFF818181),
                             ),
-                            const SizedBox(width: 2),
-                            const Text(
+                            SizedBox(width: 2.w),
+                            Text(
                               'Public',
                               style: TextStyle(
                                 color: Color(0xFF949494),
-                                fontSize: 10,
+                                fontSize: 10.sp,
                                 fontFamily: 'Poppins',
                                 fontWeight: FontWeight.w500,
                               ),
                             ),
-                            const SizedBox(width: 4),
-                            const Icon(
+                            SizedBox(width: 4.w),
+                            Icon(
                               Icons.keyboard_arrow_down,
-                              size: 12,
+                              size: 12.sp,
                               color: Color(0xFF818181),
                             ),
                           ],
@@ -189,24 +189,24 @@ class CreatePostSection extends StatelessWidget {
                   Container(
                     decoration: BoxDecoration(
                       color: const Color(0xFFB8BBB4),
-                      borderRadius: BorderRadius.circular(8),
+                      borderRadius: BorderRadius.circular(8.r),
                     ),
                     child: TextButton(
                       onPressed: () =>
                           _showCreatePostModal(context, PostType.text),
                       style: TextButton.styleFrom(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 20,
-                          vertical: 5,
+                        padding: EdgeInsets.symmetric(
+                          horizontal: 20.w,
+                          vertical: 5.h,
                         ),
                         minimumSize: Size.zero,
                         tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                       ),
-                      child: const Text(
+                      child: Text(
                         'Post',
                         style: TextStyle(
                           color: Colors.white,
-                          fontSize: 10,
+                          fontSize: 10.sp,
                           fontFamily: 'Poppins',
                           fontWeight: FontWeight.w500,
                         ),
