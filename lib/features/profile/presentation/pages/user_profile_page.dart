@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:flutter_svg/svg.dart';
 import 'package:go_router/go_router.dart';
 import 'package:video_player/video_player.dart';
 import 'package:fl_chart/fl_chart.dart';
@@ -74,7 +75,7 @@ class _UserProfilePageState extends State<UserProfilePage> {
             if (state is Authenticated) {
               if (state.user is UserModel) {
                 final userModel = state.user as UserModel;
-                return _buildFigmaProfileView(userModel);
+                return _buildProfileView(userModel);
               } else {
                 return _buildIncompleteProfileMessage(context);
               }
@@ -146,7 +147,7 @@ class _UserProfilePageState extends State<UserProfilePage> {
     );
   }
 
-  Widget _buildFigmaProfileView(UserModel user) {
+  Widget _buildProfileView(UserModel user) {
     return Stack(
       children: [
         // Main scrollable content
@@ -279,38 +280,14 @@ class _UserProfilePageState extends State<UserProfilePage> {
       left: 0,
       right: 0,
       child: SizedBox(
-        height: 96, // Status bar + navigation height
         child: Column(
           children: [
             // Status bar
-            Container(
-              height: 48,
-              padding: const EdgeInsets.only(top: 16),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  const Padding(
-                    padding: EdgeInsets.only(left: 22),
-                    child: Text(
-                      '9:41',
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 17,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                  ),
-                  // Dynamic island spacer
-                  const SizedBox(width: 124, height: 10),
-                  // Battery and signal icons would go here
-                  const SizedBox(width: 95.67),
-                ],
-              ),
-            ),
+            SizedBox(height: 32.h),
 
             // Navigation bar
             Container(
-              height: 48,
+              height: 56.h,
               padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
               child: Row(
                 children: [
@@ -323,7 +300,11 @@ class _UserProfilePageState extends State<UserProfilePage> {
                       borderRadius: BorderRadius.circular(8),
                     ),
                     child: IconButton(
-                      icon: const Icon(Icons.arrow_back, size: 24),
+                      icon: SvgPicture.asset(
+                        'assets/icons/back_button.svg',
+                        height: 24.h,
+                        width: 24.h,
+                      ),
                       onPressed: () => Navigator.of(context).pop(),
                       padding: EdgeInsets.zero,
                     ),
@@ -345,7 +326,9 @@ class _UserProfilePageState extends State<UserProfilePage> {
 
                   // Edit button
                   IconButton(
-                    icon: const Icon(Icons.edit, color: Colors.white, size: 24),
+                    icon:  SvgPicture.asset( 'assets/icons/edit_button.svg',
+                        height: 24.h,
+                        width: 24.h,),
                     onPressed: () => context.push('/profile/edit'),
                     padding: EdgeInsets.zero,
                   ),
