@@ -256,68 +256,53 @@ class _MessageInputState extends State<MessageInput> {
               ),
 
             // Input area - Figma design
-            Container(
+            Padding(
               padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 16.h),
               child: Row(
                 children: [
-                  // Text input with attachment button
+                  // Text input with media picker icon inside
                   Expanded(
-                    child: Container(
-                      padding: EdgeInsets.all(12.w),
-                      decoration: BoxDecoration(
-                        border: Border.all(
-                          color: const Color(0xFFE8E9E6), // Figma border color
-                          width: 1,
+                    child: TextField(
+                      controller: _textController,
+                      decoration: InputDecoration(
+                        hintText: 'Type your message',
+                        hintStyle: TextStyle(
+                          fontFamily: 'Poppins',
+                          fontSize: 12.sp,
+                          fontWeight: FontWeight.w400,
+                          color: const Color(0xFFA0A49B), // Figma hint color
                         ),
-                        borderRadius: BorderRadius.circular(8.r),
-                      ),
-                      child: Row(
-                        children: [
-                          // Attachment button
-                          GestureDetector(
-                            onTap: widget.isLoading ? null : _pickMedia,
-                            child: Icon(
-                              Icons.attach_file,
-                              size: 24.sp,
-                              color: const Color(0xFF6D6D6D),
-                            ),
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(8.r),
+                          borderSide: const BorderSide(
+                            color: Color(0xFFE8E9E6), // Figma border color
+                            width: 1,
                           ),
-
-                          SizedBox(width: 10.w),
-
-                          // Text input
-                          Expanded(
-                            child: TextField(
-                              
-                              controller: _textController,
-                              decoration: InputDecoration(
-                                hintText: 'Type your message',
-                                hintStyle: TextStyle(
-                                  fontFamily: 'Poppins',
-                                  fontSize: 12.sp,
-                                  fontWeight: FontWeight.w400,
-                                  color: const Color(
-                                    0xFFA0A49B,
-                                  ), // Figma hint color
-                                ),
-                                border: InputBorder.none,
-                                contentPadding: EdgeInsets.zero,
-                              ),
-                              style: TextStyle(
-                                fontFamily: 'Poppins',
-                                fontSize: 12.sp,
-                                fontWeight: FontWeight.w400,
-                                color: const Color(0xFF111B05),
-                              ),
-                              maxLines: null,
-                              enabled: !widget.isLoading,
-                              onSubmitted: (_) {
-                                _sendMessage();
-                              },
-                            ),
+                        ),
+                        contentPadding: EdgeInsets.symmetric(
+                          horizontal: 12.w,
+                          vertical: 12.h,
+                        ),
+                        prefixIcon: GestureDetector(
+                          onTap: widget.isLoading ? null : _pickMedia,
+                          child: Icon(
+                            Icons.attach_file,
+                            size: 24.sp,
+                            color: const Color(0xFF6D6D6D),
                           ),
-                        ],
+                        ),
                       ),
+                      style: TextStyle(
+                        fontFamily: 'Poppins',
+                        fontSize: 12.sp,
+                        fontWeight: FontWeight.w400,
+                        color: const Color(0xFF111B05),
+                      ),
+                      maxLines: null,
+                      enabled: !widget.isLoading,
+                      onSubmitted: (_) {
+                        _sendMessage();
+                      },
                     ),
                   ),
 
