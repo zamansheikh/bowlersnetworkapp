@@ -213,7 +213,7 @@ class _UserProfilePageState extends State<UserProfilePage> {
 
   Widget _buildHeaderSection(UserModel user) {
     return SizedBox(
-      height: 240,
+      height: 240.h,
       child: Stack(
         fit: StackFit.expand,
         children: [
@@ -256,11 +256,11 @@ class _UserProfilePageState extends State<UserProfilePage> {
           if (user.isPro && user.introVideoUrl.isNotEmpty)
             Center(
               child: Container(
-                width: 32,
-                height: 32,
+                width: 32.w,
+                height: 32.w,
                 decoration: BoxDecoration(
                   color: Colors.white.withValues(alpha: 0.2),
-                  borderRadius: BorderRadius.circular(50),
+                  borderRadius: BorderRadius.circular(50.r),
                 ),
                 child: const Icon(
                   Icons.play_arrow,
@@ -293,11 +293,11 @@ class _UserProfilePageState extends State<UserProfilePage> {
                 children: [
                   // Back button
                   Container(
-                    width: 40,
-                    height: 40,
+                    width: 40.w,
+                    height: 40.w,
                     decoration: BoxDecoration(
                       color: Colors.white,
-                      borderRadius: BorderRadius.circular(8),
+                      borderRadius: BorderRadius.circular(8.r),
                     ),
                     child: IconButton(
                       icon: SvgPicture.asset(
@@ -311,13 +311,13 @@ class _UserProfilePageState extends State<UserProfilePage> {
                   ),
 
                   // Title
-                  const Expanded(
+                  Expanded(
                     child: Text(
                       'Profile',
                       textAlign: TextAlign.center,
                       style: TextStyle(
                         color: Colors.white,
-                        fontSize: 20,
+                        fontSize: 20.sp,
                         fontWeight: FontWeight.w600,
                         fontFamily: 'Poppins',
                       ),
@@ -348,14 +348,14 @@ class _UserProfilePageState extends State<UserProfilePage> {
       children: [
         // Profile picture
         Container(
-          width: 80,
-          height: 80,
+          width: 80.w,
+          height: 80.w,
           decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(40),
-            border: Border.all(color: Colors.white, width: 2),
+            borderRadius: BorderRadius.circular(40.r),
+            border: Border.all(color: Colors.white, width: 2.w),
           ),
           child: ClipRRect(
-            borderRadius: BorderRadius.circular(38),
+            borderRadius: BorderRadius.circular(38.r),
             child: user.profilePictureUrl.isNotEmpty
                 ? Image.network(
                     user.profilePictureUrl,
@@ -367,10 +367,10 @@ class _UserProfilePageState extends State<UserProfilePage> {
                           user.firstName.isNotEmpty
                               ? user.firstName[0].toUpperCase()
                               : user.name[0].toUpperCase(),
-                          style: const TextStyle(
-                            fontSize: 24,
+                          style: TextStyle(
+                            fontSize: 24.sp,
                             fontWeight: FontWeight.bold,
-                            color: Color(0xFF8BC342),
+                            color: const Color(0xFF8BC342),
                           ),
                         ),
                       ),
@@ -383,10 +383,10 @@ class _UserProfilePageState extends State<UserProfilePage> {
                         user.firstName.isNotEmpty
                             ? user.firstName[0].toUpperCase()
                             : user.name[0].toUpperCase(),
-                        style: const TextStyle(
-                          fontSize: 24,
+                        style: TextStyle(
+                          fontSize: 24.sp,
                           fontWeight: FontWeight.bold,
-                          color: Color(0xFF8BC342),
+                          color: const Color(0xFF8BC342),
                         ),
                       ),
                     ),
@@ -396,15 +396,15 @@ class _UserProfilePageState extends State<UserProfilePage> {
 
         // Level badge
         Container(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+          padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 8.h),
           decoration: BoxDecoration(
             color: const Color(0xFFE2F0CF), // Lime green 200
-            borderRadius: BorderRadius.circular(50),
+            borderRadius: BorderRadius.circular(50.r),
           ),
           child: Text(
             'Level 3',
-            style: const TextStyle(
-              fontSize: 12,
+            style: TextStyle(
+              fontSize: 12.sp,
               fontWeight: FontWeight.w500,
               color: Colors.black,
               fontFamily: 'Poppins',
@@ -418,7 +418,7 @@ class _UserProfilePageState extends State<UserProfilePage> {
   Widget _buildProfileDetails(UserModel user) {
     return Column(
       children: [
-        const SizedBox(height: 20),
+        SizedBox(height: 20.h),
 
         // User info and stats section
         Row(
@@ -432,24 +432,24 @@ class _UserProfilePageState extends State<UserProfilePage> {
                   children: [
                     Text(
                       user.name,
-                      style: const TextStyle(
-                        fontSize: 16,
+                      style: TextStyle(
+                        fontSize: 16.sp,
                         fontWeight: FontWeight.w500,
                         color: Colors.black,
                         fontFamily: 'Poppins',
                       ),
                     ),
-                    const SizedBox(width: 2),
+                    SizedBox(width: 2.w),
                     if (user.isPro)
-                      const Icon(Icons.verified, color: Colors.blue, size: 16),
+                      Icon(Icons.verified, color: Colors.blue, size: 16.sp),
                   ],
                 ),
-                const SizedBox(height: 2),
+                SizedBox(height: 2.h),
                 Text(
                   user.email,
-                  style: const TextStyle(
-                    fontSize: 12,
-                    color: Color(0xFF7D7D7D),
+                  style: TextStyle(
+                    fontSize: 12.sp,
+                    color: const Color(0xFF7D7D7D),
                     fontFamily: 'Poppins',
                   ),
                 ),
@@ -463,40 +463,40 @@ class _UserProfilePageState extends State<UserProfilePage> {
                   children: [
                     Text(
                       '1.5k', // You can replace with actual data
-                      style: const TextStyle(
-                        fontSize: 14,
+                      style: TextStyle(
+                        fontSize: 14.sp,
                         fontWeight: FontWeight.w600,
                         color: Colors.black,
                         fontFamily: 'Poppins',
                       ),
                     ),
-                    const Text(
+                    Text(
                       'Followers',
                       style: TextStyle(
-                        fontSize: 12,
-                        color: Color(0xFF7D7D7D),
+                        fontSize: 12.sp,
+                        color: const Color(0xFF7D7D7D),
                         fontFamily: 'Poppins',
                       ),
                     ),
                   ],
                 ),
-                const SizedBox(width: 16),
+                SizedBox(width: 16.w),
                 Column(
                   children: [
-                    const Text(
+                    Text(
                       '0',
                       style: TextStyle(
-                        fontSize: 14,
+                        fontSize: 14.sp,
                         fontWeight: FontWeight.w600,
                         color: Colors.black,
                         fontFamily: 'Poppins',
                       ),
                     ),
-                    const Text(
+                    Text(
                       'Following',
                       style: TextStyle(
-                        fontSize: 12,
-                        color: Color(0xFF7D7D7D),
+                        fontSize: 12.sp,
+                        color: const Color(0xFF7D7D7D),
                         fontFamily: 'Poppins',
                       ),
                     ),
@@ -525,7 +525,7 @@ class _UserProfilePageState extends State<UserProfilePage> {
                 label: 'XP',
               ),
             ),
-            const SizedBox(width: 11),
+            SizedBox(width: 11.w),
             Expanded(
               child: _buildStatCard(
                 icon: Icons.emoji_events,
@@ -537,7 +537,7 @@ class _UserProfilePageState extends State<UserProfilePage> {
             ),
           ],
         ),
-        const SizedBox(height: 12),
+        SizedBox(height: 12.h),
 
         // Second row of stats
         Row(
@@ -551,7 +551,7 @@ class _UserProfilePageState extends State<UserProfilePage> {
                 label: 'Average Score',
               ),
             ),
-            const SizedBox(width: 11),
+            SizedBox(width: 11.w),
             Expanded(
               child: _buildStatCard(
                 icon: Icons.trending_up,
@@ -575,12 +575,12 @@ class _UserProfilePageState extends State<UserProfilePage> {
     required String label,
   }) {
     return Container(
-      width: 162,
-      height: 120,
-      padding: const EdgeInsets.all(12),
+      width: 162.w,
+      height: 120.h,
+      padding: EdgeInsets.all(12.w),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(16.r),
       ),
       child: Column(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -588,13 +588,13 @@ class _UserProfilePageState extends State<UserProfilePage> {
         children: [
           // Icon container
           Container(
-            width: 32,
-            height: 32,
+            width: 32.w,
+            height: 32.w,
             decoration: BoxDecoration(
               color: iconBackground,
-              borderRadius: BorderRadius.circular(50),
+              borderRadius: BorderRadius.circular(50.r),
             ),
-            child: Icon(icon, color: iconColor, size: 16),
+            child: Icon(icon, color: iconColor, size: 16.sp),
           ),
 
           // Value and label
@@ -603,19 +603,19 @@ class _UserProfilePageState extends State<UserProfilePage> {
             children: [
               Text(
                 value,
-                style: const TextStyle(
-                  fontSize: 14,
+                style: TextStyle(
+                  fontSize: 14.sp,
                   fontWeight: FontWeight.w600,
                   color: Colors.black,
                   fontFamily: 'Poppins',
                 ),
               ),
-              const SizedBox(height: 4),
+              SizedBox(height: 4.h),
               Text(
                 label,
-                style: const TextStyle(
-                  fontSize: 12,
-                  color: Color(0xFF7D7D7D),
+                style: TextStyle(
+                  fontSize: 12.sp,
+                  color: const Color(0xFF7D7D7D),
                   fontFamily: 'Poppins',
                 ),
               ),
@@ -628,10 +628,10 @@ class _UserProfilePageState extends State<UserProfilePage> {
 
   Widget _buildBowlingStatisticsChart() {
     return Container(
-      padding: const EdgeInsets.all(12),
+      padding: EdgeInsets.all(12.w),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(16.r),
       ),
       child: Column(
         children: [
@@ -639,36 +639,36 @@ class _UserProfilePageState extends State<UserProfilePage> {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              const Text(
+              Text(
                 'Bowling Statists',
                 style: TextStyle(
-                  fontSize: 16,
+                  fontSize: 16.sp,
                   fontWeight: FontWeight.w500,
                   color: Colors.black,
                   fontFamily: 'Poppins',
                 ),
               ),
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 4.h),
                 decoration: BoxDecoration(
                   border: Border.all(color: const Color(0xFFEFEFEF)),
-                  borderRadius: BorderRadius.circular(4),
+                  borderRadius: BorderRadius.circular(4.r),
                 ),
-                child: const Row(
+                child: Row(
                   children: [
                     Text(
                       'Monthly',
                       style: TextStyle(
-                        fontSize: 12,
-                        color: Color(0xFF7B7878),
+                        fontSize: 12.sp,
+                        color: const Color(0xFF7B7878),
                         fontFamily: 'Poppins',
                       ),
                     ),
-                    SizedBox(width: 4),
+                    SizedBox(width: 4.w),
                     Icon(
                       Icons.keyboard_arrow_down,
-                      color: Color(0xFF7B7878),
-                      size: 16,
+                      color: const Color(0xFF7B7878),
+                      size: 16.sp,
                     ),
                   ],
                 ),
@@ -676,7 +676,7 @@ class _UserProfilePageState extends State<UserProfilePage> {
             ],
           ),
 
-          const SizedBox(height: 16),
+          SizedBox(height: 16.h),
 
           // Chart section
           Row(
@@ -687,27 +687,27 @@ class _UserProfilePageState extends State<UserProfilePage> {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   _buildYAxisLabel('30'),
-                  const SizedBox(height: 12),
+                  SizedBox(height: 12.h),
                   _buildYAxisLabel('25'),
-                  const SizedBox(height: 12),
+                  SizedBox(height: 12.h),
                   _buildYAxisLabel('20'),
-                  const SizedBox(height: 12),
+                  SizedBox(height: 12.h),
                   _buildYAxisLabel('15'),
-                  const SizedBox(height: 12),
+                  SizedBox(height: 12.h),
                   _buildYAxisLabel('10'),
-                  const SizedBox(height: 12),
+                  SizedBox(height: 12.h),
                   _buildYAxisLabel('5'),
-                  const SizedBox(height: 12),
+                  SizedBox(height: 12.h),
                   _buildYAxisLabel('0'),
                 ],
               ),
 
-              const SizedBox(width: 12),
+              SizedBox(width: 12.w),
 
               // Bar chart
               Expanded(
                 child: SizedBox(
-                  height: 179,
+                  height: 179.h,
                   child: BarChart(
                     BarChartData(
                       alignment: BarChartAlignment.spaceAround,
@@ -731,16 +731,16 @@ class _UserProfilePageState extends State<UserProfilePage> {
                               if (value.toInt() < months.length) {
                                 return Text(
                                   months[value.toInt()],
-                                  style: const TextStyle(
-                                    fontSize: 12,
-                                    color: Color(0xFF666666),
+                                  style: TextStyle(
+                                    fontSize: 12.sp,
+                                    color: const Color(0xFF666666),
                                     fontFamily: 'Poppins',
                                   ),
                                 );
                               }
                               return const Text('');
                             },
-                            reservedSize: 20,
+                            reservedSize: 20.h,
                           ),
                         ),
                         leftTitles: const AxisTitles(
@@ -778,10 +778,10 @@ class _UserProfilePageState extends State<UserProfilePage> {
   Widget _buildYAxisLabel(String label) {
     return Text(
       label,
-      style: const TextStyle(
-        fontSize: 12,
+      style: TextStyle(
+        fontSize: 12.sp,
         fontWeight: FontWeight.w500,
-        color: Color(0xFF666666),
+        color: const Color(0xFF666666),
         fontFamily: 'Poppins',
       ),
     );
@@ -806,7 +806,7 @@ class _UserProfilePageState extends State<UserProfilePage> {
 
   Widget _buildSocialEngagementCards(UserModel user) {
     return SizedBox(
-      height: 115,
+      height: 115.h,
       child: Row(
         children: [
           Expanded(
@@ -820,7 +820,7 @@ class _UserProfilePageState extends State<UserProfilePage> {
               label: 'Followers',
             ),
           ),
-          const SizedBox(width: 8),
+          SizedBox(width: 8.w),
           Expanded(
             child: _buildEngagementCard(
               icon: Icons.sports,
@@ -832,7 +832,7 @@ class _UserProfilePageState extends State<UserProfilePage> {
               label: 'Experience',
             ),
           ),
-          const SizedBox(width: 8),
+          SizedBox(width: 8.w),
           Expanded(
             child: _buildEngagementCard(
               icon: Icons.emoji_events,
@@ -855,11 +855,11 @@ class _UserProfilePageState extends State<UserProfilePage> {
     required String label,
   }) {
     return Container(
-      height: 115,
-      padding: const EdgeInsets.all(8),
+      height: 115.h,
+      padding: EdgeInsets.all(8.w),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(12.r),
       ),
       child: Column(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -867,13 +867,13 @@ class _UserProfilePageState extends State<UserProfilePage> {
         children: [
           // Icon container
           Container(
-            width: 32,
-            height: 32,
+            width: 32.w,
+            height: 32.h,
             decoration: BoxDecoration(
               color: iconBackground,
-              borderRadius: BorderRadius.circular(50),
+              borderRadius: BorderRadius.circular(50.r),
             ),
-            child: Icon(icon, color: iconColor, size: 16),
+            child: Icon(icon, color: iconColor, size: 16.sp),
           ),
 
           // Value and label
@@ -882,19 +882,19 @@ class _UserProfilePageState extends State<UserProfilePage> {
             children: [
               Text(
                 value,
-                style: const TextStyle(
-                  fontSize: 14,
+                style: TextStyle(
+                  fontSize: 14.sp,
                   fontWeight: FontWeight.w600,
                   color: Colors.black,
                   fontFamily: 'Poppins',
                 ),
               ),
-              const SizedBox(height: 4),
+              SizedBox(height: 4.h),
               Text(
                 label,
-                style: const TextStyle(
-                  fontSize: 12,
-                  color: Color(0xFF7D7D7D),
+                style: TextStyle(
+                  fontSize: 12.sp,
+                  color: const Color(0xFF7D7D7D),
                   fontFamily: 'Poppins',
                 ),
               ),
@@ -918,26 +918,26 @@ class _UserProfilePageState extends State<UserProfilePage> {
         children: [
           Text(
             sectionTitle,
-            style: const TextStyle(
-              fontSize: 16,
+            style: TextStyle(
+              fontSize: 16.sp,
               fontWeight: FontWeight.w500,
               color: Colors.black,
               fontFamily: 'Poppins',
             ),
           ),
-          const SizedBox(height: 12),
+          SizedBox(height: 12.h),
           Container(
-            height: 106,
-            padding: const EdgeInsets.all(16),
+            height: 106.h,
+            padding: EdgeInsets.all(16.w),
             decoration: BoxDecoration(
               color: Colors.grey[100],
-              borderRadius: BorderRadius.circular(12),
+              borderRadius: BorderRadius.circular(12.r),
             ),
             child: Center(
               child: Text(
                 user.isPro ? 'No sponsors yet' : 'No favorite brands yet',
                 style: TextStyle(
-                  fontSize: 14,
+                  fontSize: 14.sp,
                   color: Colors.grey[600],
                   fontFamily: 'Poppins',
                 ),
@@ -953,20 +953,20 @@ class _UserProfilePageState extends State<UserProfilePage> {
       children: [
         Text(
           sectionTitle,
-          style: const TextStyle(
-            fontSize: 16,
+          style: TextStyle(
+            fontSize: 16.sp,
             fontWeight: FontWeight.w500,
             color: Colors.black,
             fontFamily: 'Poppins',
           ),
         ),
-        const SizedBox(height: 12),
+        SizedBox(height: 12.h),
         SizedBox(
-          height: 106,
+          height: 106.h,
           child: ListView.separated(
             scrollDirection: Axis.horizontal,
             itemCount: brandsToShow.length,
-            separatorBuilder: (context, index) => const SizedBox(width: 8),
+            separatorBuilder: (context, index) => SizedBox(width: 8.w),
             itemBuilder: (context, index) {
               final brand = brandsToShow[index];
               return _buildSponsorCard(brand);
@@ -979,12 +979,12 @@ class _UserProfilePageState extends State<UserProfilePage> {
 
   Widget _buildSponsorCard(BrandModel brand) {
     return Container(
-      width: 106,
-      height: 106,
-      padding: const EdgeInsets.all(8),
+      width: 106.w,
+      height: 106.h,
+      padding: EdgeInsets.all(8.w),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(12.r),
       ),
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
@@ -993,10 +993,10 @@ class _UserProfilePageState extends State<UserProfilePage> {
           Expanded(
             child: Container(
               width: double.infinity,
-              decoration: BoxDecoration(borderRadius: BorderRadius.circular(8)),
+              decoration: BoxDecoration(borderRadius: BorderRadius.circular(8.r)),
               child: brand.logoUrl.isNotEmpty
                   ? ClipRRect(
-                      borderRadius: BorderRadius.circular(8),
+                      borderRadius: BorderRadius.circular(8.r),
                       child: Image.network(
                         brand.logoUrl,
                         fit: BoxFit.contain,
@@ -1004,12 +1004,12 @@ class _UserProfilePageState extends State<UserProfilePage> {
                           return Container(
                             decoration: BoxDecoration(
                               color: Colors.grey[200],
-                              borderRadius: BorderRadius.circular(8),
+                              borderRadius: BorderRadius.circular(8.r),
                             ),
-                            child: const Icon(
+                            child: Icon(
                               Icons.business,
                               color: Colors.grey,
-                              size: 24,
+                              size: 24.sp,
                             ),
                           );
                         },
@@ -1018,22 +1018,22 @@ class _UserProfilePageState extends State<UserProfilePage> {
                   : Container(
                       decoration: BoxDecoration(
                         color: Colors.grey[200],
-                        borderRadius: BorderRadius.circular(8),
+                        borderRadius: BorderRadius.circular(8.r),
                       ),
-                      child: const Icon(
+                      child: Icon(
                         Icons.business,
                         color: Colors.grey,
-                        size: 24,
+                        size: 24.sp,
                       ),
                     ),
             ),
           ),
-          const SizedBox(height: 8),
+          SizedBox(height: 8.h),
           // Brand name
           Text(
             brand.name,
-            style: const TextStyle(
-              fontSize: 12,
+            style: TextStyle(
+              fontSize: 12.sp,
               fontWeight: FontWeight.w500,
               color: Colors.black87,
               fontFamily: 'Poppins',
@@ -1053,7 +1053,7 @@ class _UserProfilePageState extends State<UserProfilePage> {
       child: Text(
         'Posts',
         style: TextStyle(
-          fontSize: 16,
+          fontSize: 16.sp,
           fontWeight: FontWeight.w500,
           color: Colors.black,
           fontFamily: 'Poppins',
@@ -1094,19 +1094,19 @@ class _UserProfilePageState extends State<UserProfilePage> {
     if (error != null) {
       return Center(
         child: Padding(
-          padding: const EdgeInsets.all(32.0),
+          padding: EdgeInsets.all(32.w),
           child: Column(
             children: [
-              Icon(Icons.error_outline, size: 64, color: Colors.grey[400]),
-              const SizedBox(height: 16),
+              Icon(Icons.error_outline, size: 64.sp, color: Colors.grey[400]),
+              SizedBox(height: 16.h),
               Text(
                 'Failed to load posts',
-                style: TextStyle(fontSize: 16, color: Colors.grey[600]),
+                style: TextStyle(fontSize: 16.sp, color: Colors.grey[600]),
               ),
-              const SizedBox(height: 8),
+              SizedBox(height: 8.h),
               Text(
                 error,
-                style: TextStyle(fontSize: 14, color: Colors.grey[500]),
+                style: TextStyle(fontSize: 14.sp, color: Colors.grey[500]),
               ),
             ],
           ),
@@ -1117,19 +1117,19 @@ class _UserProfilePageState extends State<UserProfilePage> {
     if (posts == null || posts.isEmpty) {
       return Center(
         child: Padding(
-          padding: const EdgeInsets.all(32.0),
+          padding: EdgeInsets.all(32.w),
           child: Column(
             children: [
-              Icon(Icons.post_add, size: 64, color: Colors.grey[400]),
-              const SizedBox(height: 16),
+              Icon(Icons.post_add, size: 64.sp, color: Colors.grey[400]),
+              SizedBox(height: 16.h),
               Text(
                 'No posts yet',
-                style: TextStyle(fontSize: 16, color: Colors.grey[600]),
+                style: TextStyle(fontSize: 16.sp, color: Colors.grey[600]),
               ),
-              const SizedBox(height: 8),
+              SizedBox(height: 8.h),
               Text(
                 'Your posts will appear here',
-                style: TextStyle(fontSize: 14, color: Colors.grey[500]),
+                style: TextStyle(fontSize: 14.sp, color: Colors.grey[500]),
               ),
             ],
           ),
@@ -1142,11 +1142,11 @@ class _UserProfilePageState extends State<UserProfilePage> {
         ListView.builder(
           shrinkWrap: true,
           physics: const NeverScrollableScrollPhysics(),
-          padding: const EdgeInsets.symmetric(horizontal: 20),
+          padding: EdgeInsets.symmetric(horizontal: 20.w),
           itemCount: posts.length,
           itemBuilder: (context, index) {
             return Padding(
-              padding: const EdgeInsets.only(bottom: 16.0),
+              padding: EdgeInsets.only(bottom: 16.h),
               child: FeedPostCard(
                 post: posts[index],
                 postIndex: index,
@@ -1190,8 +1190,8 @@ class _UserProfilePageState extends State<UserProfilePage> {
                 ),
                 // Play/Pause button
                 Positioned(
-                  bottom: 16,
-                  right: 16,
+                  bottom: 16.h,
+                  right: 16.w,
                   child: GestureDetector(
                     onTap: () {
                       setState(() {
@@ -1203,8 +1203,8 @@ class _UserProfilePageState extends State<UserProfilePage> {
                       });
                     },
                     child: Container(
-                      width: 48,
-                      height: 48,
+                      width: 48.w,
+                      height: 48.h,
                       decoration: BoxDecoration(
                         color: Colors.white.withValues(alpha: 0.2),
                         shape: BoxShape.circle,
@@ -1214,7 +1214,7 @@ class _UserProfilePageState extends State<UserProfilePage> {
                             ? Icons.pause
                             : Icons.play_arrow,
                         color: Colors.white,
-                        size: 24,
+                        size: 24.sp,
                       ),
                     ),
                   ),
@@ -1223,15 +1223,15 @@ class _UserProfilePageState extends State<UserProfilePage> {
             )
           : Container(
               color: Colors.black,
-              child: const Center(
+              child: Center(
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    CircularProgressIndicator(color: Colors.white),
-                    SizedBox(height: 16),
+                    const CircularProgressIndicator(color: Colors.white),
+                    SizedBox(height: 16.h),
                     Text(
                       'Loading Video...',
-                      style: TextStyle(color: Colors.white, fontSize: 16),
+                      style: TextStyle(color: Colors.white, fontSize: 16.sp),
                     ),
                   ],
                 ),
