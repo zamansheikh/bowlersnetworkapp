@@ -39,7 +39,8 @@ class _MessageInputState extends State<MessageInput> {
   }
 
   void _updateCanSend() {
-    final newCanSend = _textController.text.trim().isNotEmpty || _selectedFiles.isNotEmpty;
+    final newCanSend =
+        _textController.text.trim().isNotEmpty || _selectedFiles.isNotEmpty;
     if (newCanSend != _canSend) {
       setState(() {
         _canSend = newCanSend;
@@ -287,12 +288,14 @@ class _MessageInputState extends State<MessageInput> {
                           // Text input
                           Expanded(
                             child: TextField(
+                              
                               controller: _textController,
                               decoration: InputDecoration(
                                 hintText: 'Type your message',
                                 hintStyle: TextStyle(
                                   fontFamily: 'Poppins',
                                   fontSize: 12.sp,
+                                  fontWeight: FontWeight.w400,
                                   color: const Color(
                                     0xFFA0A49B,
                                   ), // Figma hint color
@@ -303,6 +306,7 @@ class _MessageInputState extends State<MessageInput> {
                               style: TextStyle(
                                 fontFamily: 'Poppins',
                                 fontSize: 12.sp,
+                                fontWeight: FontWeight.w400,
                                 color: const Color(0xFF111B05),
                               ),
                               maxLines: null,
@@ -326,9 +330,13 @@ class _MessageInputState extends State<MessageInput> {
                       padding: EdgeInsets.all(8.w),
                       decoration: BoxDecoration(
                         color: _canSend && !widget.isLoading
-                            ? const Color(0xFF8BC342) // Figma green when enabled
+                            ? const Color(
+                                0xFF8BC342,
+                              ) // Figma green when enabled
                             : const Color(0xFFE8E9E6), // Disabled color
-                        shape: BoxShape.circle,
+                        borderRadius: BorderRadius.circular(
+                          50.r,
+                        ), // More circular like Figma
                       ),
                       child: widget.isLoading
                           ? SizedBox(
@@ -341,12 +349,16 @@ class _MessageInputState extends State<MessageInput> {
                                 ),
                               ),
                             )
-                          : Icon(
-                              Icons.send,
-                              size: 20.sp,
-                              color: _canSend && !widget.isLoading
-                                  ? const Color(0xFF111B05)
-                                  : const Color(0xFF6D6D6D),
+                          : Transform.rotate(
+                              angle:
+                                  -0.785398, // -45 degrees in radians to match Figma
+                              child: Icon(
+                                Icons.send,
+                                size: 20.sp,
+                                color: _canSend && !widget.isLoading
+                                    ? Colors.white
+                                    : const Color(0xFF6D6D6D),
+                              ),
                             ),
                     ),
                   ),
