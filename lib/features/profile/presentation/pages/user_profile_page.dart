@@ -1023,7 +1023,7 @@ class _UserProfilePageState extends State<UserProfilePage> {
                               color: Colors.grey[200],
                               borderRadius: BorderRadius.circular(8),
                             ),
-                            child: const Icon(      
+                            child: const Icon(
                               Icons.business,
                               color: Colors.grey,
                               size: 24,
@@ -1165,7 +1165,7 @@ class _UserProfilePageState extends State<UserProfilePage> {
             return Padding(
               padding: const EdgeInsets.only(bottom: 16.0),
               child: FeedPostCard(
-                post: posts[index], 
+                post: posts[index],
                 postIndex: index,
                 isMyPost: true,
               ),
