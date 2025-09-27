@@ -104,14 +104,15 @@ class _EventsPageState extends State<EventsPage> {
 
     return Container(
       color: Colors.white,
+      height: double.infinity,
       child: Column(
         children: [
-          // Custom Header
+          // Custom Header (Fixed at top)
           _buildHeader(),
 
-          // Content
+          // Scrollable Content
           Expanded(
-            child: Padding(
+            child: SingleChildScrollView(
               padding: EdgeInsets.symmetric(horizontal: 20.w),
               child: Column(
                 children: [
@@ -135,12 +136,14 @@ class _EventsPageState extends State<EventsPage> {
                   // Events List
                   filteredEvents.isEmpty
                       ? _buildEmptyState(state)
-                      : ListView.separated(
-                          shrinkWrap: true,
-                          itemCount: filteredEvents.length,
-                          separatorBuilder: (_, __) => SizedBox(height: 16.h),
-                          itemBuilder: (context, index) =>
-                              _buildFigmaEventCard(filteredEvents[index]),
+                      : Column(
+                          children: [
+                            for (int i = 0; i < filteredEvents.length; i++) ...[
+                              _buildFigmaEventCard(filteredEvents[i]),
+                              if (i < filteredEvents.length - 1)
+                                SizedBox(height: 16.h),
+                            ],
+                          ],
                         ),
                   SizedBox(height: 32.h),
                 ],
