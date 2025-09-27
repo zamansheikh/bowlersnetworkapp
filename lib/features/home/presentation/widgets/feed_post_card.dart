@@ -13,12 +13,14 @@ class FeedPostCard extends StatefulWidget {
   final FeedPost post;
   final int postIndex;
   final VoidCallback? onPostUpdate;
+  final bool isMyPost;
 
   const FeedPostCard({
     super.key,
     required this.post,
     required this.postIndex,
     this.onPostUpdate,
+    this.isMyPost = false,
   });
 
   @override
@@ -549,7 +551,7 @@ class _FeedPostCardState extends State<FeedPostCard> {
                 ),
               ),
               // Right side - Follow button
-              if (!widget.post.author.viewerIsAuthor)
+              if (!widget.post.author.viewerIsAuthor && !widget.isMyPost)
                 GestureDetector(
                   onTap: _handleFollow,
                   child: Container(

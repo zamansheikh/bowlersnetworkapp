@@ -1164,7 +1164,11 @@ class _UserProfilePageState extends State<UserProfilePage> {
           itemBuilder: (context, index) {
             return Padding(
               padding: const EdgeInsets.only(bottom: 16.0),
-              child: FeedPostCard(post: posts[index], postIndex: index),
+              child: FeedPostCard(
+                post: posts[index], 
+                postIndex: index,
+                isMyPost: true,
+              ),
             );
           },
         ),
