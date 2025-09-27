@@ -23,11 +23,28 @@ class _MessageInputState extends State<MessageInput> {
   final TextEditingController _textController = TextEditingController();
   final List<File> _selectedFiles = [];
   final ImagePicker _picker = ImagePicker();
+  bool _canSend = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _textController.addListener(_updateCanSend);
+  }
 
   @override
   void dispose() {
+    _textController.removeListener(_updateCanSend);
     _textController.dispose();
     super.dispose();
+  }
+
+  void _updateCanSend() {
+    final newCanSend = _textController.text.trim().isNotEmpty || _selectedFiles.isNotEmpty;
+    if (newCanSend != _canSend) {
+      setState(() {
+        _canSend = newCanSend;
+      });
+    }
   }
 
   void _sendMessage() {
@@ -42,6 +59,7 @@ class _MessageInputState extends State<MessageInput> {
       widget.onSendMessage(text, List.from(_selectedFiles));
       _textController.clear();
       _selectedFiles.clear();
+      _updateCanSend();
       setState(() {});
     } else {
       print('Cannot send empty message without text or media');
@@ -92,6 +110,7 @@ class _MessageInputState extends State<MessageInput> {
     for (final image in images) {
       _selectedFiles.add(File(image.path));
     }
+    _updateCanSend();
     setState(() {});
   }
 
@@ -99,6 +118,7 @@ class _MessageInputState extends State<MessageInput> {
     final XFile? image = await _picker.pickImage(source: ImageSource.camera);
     if (image != null) {
       _selectedFiles.add(File(image.path));
+      _updateCanSend();
       setState(() {});
     }
   }
@@ -107,6 +127,7 @@ class _MessageInputState extends State<MessageInput> {
     final XFile? video = await _picker.pickVideo(source: ImageSource.gallery);
     if (video != null) {
       _selectedFiles.add(File(video.path));
+      _updateCanSend();
       setState(() {});
     }
   }
@@ -115,6 +136,7 @@ class _MessageInputState extends State<MessageInput> {
     setState(() {
       _selectedFiles.removeAt(index);
     });
+    _updateCanSend();
   }
 
   @override
@@ -298,19 +320,16 @@ class _MessageInputState extends State<MessageInput> {
                   SizedBox(width: 16.w),
 
                   // Send button
-                  Container(
-                    padding: EdgeInsets.all(8.w),
-                    decoration: BoxDecoration(
-                      color: const Color(0xFF8BC342), // Figma green
-                      shape: BoxShape.circle,
-                    ),
-                    child: GestureDetector(
-                      onTap:
-                          (_textController.text.trim().isNotEmpty ||
-                                  _selectedFiles.isNotEmpty) &&
-                              !widget.isLoading
-                          ? _sendMessage
-                          : null,
+                  GestureDetector(
+                    onTap: _canSend && !widget.isLoading ? _sendMessage : null,
+                    child: Container(
+                      padding: EdgeInsets.all(8.w),
+                      decoration: BoxDecoration(
+                        color: _canSend && !widget.isLoading
+                            ? const Color(0xFF8BC342) // Figma green when enabled
+                            : const Color(0xFFE8E9E6), // Disabled color
+                        shape: BoxShape.circle,
+                      ),
                       child: widget.isLoading
                           ? SizedBox(
                               width: 20.w,
@@ -325,7 +344,9 @@ class _MessageInputState extends State<MessageInput> {
                           : Icon(
                               Icons.send,
                               size: 20.sp,
-                              color: const Color(0xFF111B05),
+                              color: _canSend && !widget.isLoading
+                                  ? const Color(0xFF111B05)
+                                  : const Color(0xFF6D6D6D),
                             ),
                     ),
                   ),
