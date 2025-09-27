@@ -291,25 +291,6 @@ class _UserProfilePageState extends State<UserProfilePage> {
               padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
               child: Row(
                 children: [
-                  // Back button
-                  Container(
-                    width: 40.w,
-                    height: 40.w,
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(8.r),
-                    ),
-                    child: IconButton(
-                      icon: SvgPicture.asset(
-                        'assets/icons/back_button.svg',
-                        height: 24.h,
-                        width: 24.h,
-                      ),
-                      onPressed: () => Navigator.of(context).pop(),
-                      padding: EdgeInsets.zero,
-                    ),
-                  ),
-
                   // Title
                   Expanded(
                     child: Text(
@@ -326,9 +307,11 @@ class _UserProfilePageState extends State<UserProfilePage> {
 
                   // Edit button
                   IconButton(
-                    icon:  SvgPicture.asset( 'assets/icons/edit_button.svg',
-                        height: 24.h,
-                        width: 24.h,),
+                    icon: SvgPicture.asset(
+                      'assets/icons/edit_button.svg',
+                      height: 24.h,
+                      width: 24.h,
+                    ),
                     onPressed: () => context.push('/profile/edit'),
                     padding: EdgeInsets.zero,
                   ),
@@ -993,7 +976,9 @@ class _UserProfilePageState extends State<UserProfilePage> {
           Expanded(
             child: Container(
               width: double.infinity,
-              decoration: BoxDecoration(borderRadius: BorderRadius.circular(8.r)),
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(8.r),
+              ),
               child: brand.logoUrl.isNotEmpty
                   ? ClipRRect(
                       borderRadius: BorderRadius.circular(8.r),

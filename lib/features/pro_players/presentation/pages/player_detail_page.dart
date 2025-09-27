@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:video_player/video_player.dart';
 import '../../../../core/di/injection.dart';
 import '../../domain/entities/pro_player.dart';
@@ -170,18 +172,29 @@ class _PlayerDetailPageState extends State<PlayerDetailPage> {
             pinned: false,
             backgroundColor: Colors.transparent,
             elevation: 0,
-            leading: Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: Container(
-                decoration: BoxDecoration(
-                  color: Colors.black.withValues(alpha: 0.5),
-                  shape: BoxShape.circle,
+            leadingWidth: 60.w,
+            leading: Row(
+              children: [
+                SizedBox(width: 20.w),
+                Container(
+                  height: 40.w,
+                  width: 40.w,
+                  padding: EdgeInsets.all(8.r),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(8.r),
+                  ),
+                  child: IconButton(
+                    icon: SvgPicture.asset(
+                      'assets/icons/back_button.svg',
+                      height: 24.h,
+                      width: 24.h,
+                    ),
+                    onPressed: () => Navigator.pop(context),
+                    padding: EdgeInsets.zero,
+                  ),
                 ),
-                child: IconButton(
-                  icon: const Icon(Icons.arrow_back, color: Colors.white),
-                  onPressed: () => Navigator.pop(context),
-                ),
-              ),
+              ],
             ),
             flexibleSpace: FlexibleSpaceBar(
               background: Stack(
@@ -224,7 +237,7 @@ class _PlayerDetailPageState extends State<PlayerDetailPage> {
             child: Transform.translate(
               offset: const Offset(0, 10),
               child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 24),
+                padding: EdgeInsets.symmetric(horizontal: 24.w),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -234,11 +247,11 @@ class _PlayerDetailPageState extends State<PlayerDetailPage> {
                       children: [
                         // Profile Picture
                         Container(
-                          width: 120,
-                          height: 120,
+                          width: 120.w,
+                          height: 120.h,
                           decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(16),
-                            border: Border.all(color: Colors.white, width: 3),
+                            borderRadius: BorderRadius.circular(16.r),
+                            border: Border.all(color: Colors.white, width: 3.w),
                             boxShadow: [
                               BoxShadow(
                                 color: Colors.black.withValues(alpha: 0.2),
@@ -286,16 +299,15 @@ class _PlayerDetailPageState extends State<PlayerDetailPage> {
                               // Name and Pro Badge
                               Row(
                                 children: [
-                                  Expanded(
-                                    child: Text(
-                                      player.name,
-                                      style: const TextStyle(
-                                        fontSize: 24,
-                                        fontWeight: FontWeight.bold,
-                                        color: Colors.black87,
-                                      ),
+                                  Text(
+                                    player.name,
+                                    style: TextStyle(
+                                      fontSize: 20.sp,
+                                      fontWeight: FontWeight.w800,
+                                      color: Colors.black87,
                                     ),
                                   ),
+                                  if (player.isPro) SizedBox(width: 6.w),
                                   if (player.isPro)
                                     Container(
                                       padding: const EdgeInsets.symmetric(
@@ -304,12 +316,14 @@ class _PlayerDetailPageState extends State<PlayerDetailPage> {
                                       ),
                                       decoration: BoxDecoration(
                                         color: Colors.blue,
-                                        borderRadius: BorderRadius.circular(12),
+                                        borderRadius: BorderRadius.circular(
+                                          12.r,
+                                        ),
                                       ),
-                                      child: const Icon(
+                                      child: Icon(
                                         Icons.verified,
                                         color: Colors.white,
-                                        size: 16,
+                                        size: 16.sp,
                                       ),
                                     ),
                                 ],
@@ -320,12 +334,12 @@ class _PlayerDetailPageState extends State<PlayerDetailPage> {
                               Text(
                                 player.isPro ? 'Pro Player' : 'Amateur Player',
                                 style: TextStyle(
-                                  fontSize: 16,
+                                  fontSize: 16.sp,
                                   color: Colors.grey[600],
                                 ),
                               ),
 
-                              const SizedBox(height: 16),
+                              SizedBox(height: 8.h),
 
                               // Circular Stats (like web version)
                               Row(
@@ -335,13 +349,13 @@ class _PlayerDetailPageState extends State<PlayerDetailPage> {
                                     'Followers',
                                     Colors.blue,
                                   ),
-                                  const SizedBox(width: 16),
+                                  SizedBox(width: 16.w),
                                   _buildCircularStat(
                                     player.stats.highGame.toString(),
                                     'High Game',
                                     Colors.black,
                                   ),
-                                  const SizedBox(width: 16),
+                                  SizedBox(width: 16.w),
                                   _buildCircularStat(
                                     player.stats.highSeries.toString(),
                                     'High Series',
@@ -359,8 +373,10 @@ class _PlayerDetailPageState extends State<PlayerDetailPage> {
 
                     // Action Buttons
                     Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                       children: [
-                        Expanded(
+                        SizedBox(
+                          width: 120.w,
                           child: ElevatedButton(
                             onPressed: () =>
                                 _cubit.toggleFollowPlayer(player.userId),
@@ -383,23 +399,23 @@ class _PlayerDetailPageState extends State<PlayerDetailPage> {
                             ),
                           ),
                         ),
-                        const SizedBox(width: 12),
-                        Expanded(
+                        SizedBox(
+                          width: 120.w,
                           child: OutlinedButton(
                             onPressed: () {
                               // Handle get in touch
                             },
                             style: OutlinedButton.styleFrom(
-                              padding: const EdgeInsets.symmetric(vertical: 12),
+                              padding: EdgeInsets.symmetric(vertical: 12.h),
                               shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(25),
+                                borderRadius: BorderRadius.circular(25.r),
                               ),
                               side: BorderSide(color: Colors.grey[400]!),
                             ),
-                            child: const Text(
+                            child: Text(
                               'Get in Touch',
                               style: TextStyle(
-                                fontSize: 16,
+                                fontSize: 16.sp,
                                 fontWeight: FontWeight.w600,
                                 color: Colors.black87,
                               ),
@@ -414,6 +430,8 @@ class _PlayerDetailPageState extends State<PlayerDetailPage> {
             ),
           ),
 
+          SliverToBoxAdapter(child: SizedBox(height: 8.h)),
+
           // Sponsors Section (like web version)
           if (player.sponsors.isNotEmpty)
             SliverToBoxAdapter(
@@ -426,13 +444,6 @@ class _PlayerDetailPageState extends State<PlayerDetailPage> {
                 decoration: BoxDecoration(
                   color: Colors.white,
                   borderRadius: BorderRadius.circular(12),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withValues(alpha: 0.1),
-                      blurRadius: 8,
-                      offset: const Offset(0, 2),
-                    ),
-                  ],
                 ),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
@@ -487,12 +498,15 @@ class _PlayerDetailPageState extends State<PlayerDetailPage> {
                 ),
                 color: Colors.white,
               ),
-              child: const Text(
-                'Posts',
-                style: TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.w600,
-                  color: Colors.black87,
+              child: Padding(
+                padding: const EdgeInsets.only(left: 8.0, right: 8.0),
+                child: const Text(
+                  'Posts',
+                  style: TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.w600,
+                    color: Colors.black87,
+                  ),
                 ),
               ),
             ),
@@ -512,25 +526,25 @@ class _PlayerDetailPageState extends State<PlayerDetailPage> {
     return Column(
       children: [
         Container(
-          width: 48,
-          height: 48,
+          width: 40.r,
+          height: 40.r,
           decoration: BoxDecoration(shape: BoxShape.circle, color: color),
           child: Center(
             child: Text(
               value,
-              style: const TextStyle(
+              style: TextStyle(
                 color: Colors.white,
-                fontSize: 12,
+                fontSize: 12.sp,
                 fontWeight: FontWeight.bold,
               ),
             ),
           ),
         ),
-        const SizedBox(height: 4),
+        SizedBox(height: 4.h),
         Text(
           label,
           style: TextStyle(
-            fontSize: 10,
+            fontSize: 10.sp,
             color: Colors.grey[600],
             fontWeight: FontWeight.w500,
           ),
@@ -641,7 +655,10 @@ class _PlayerDetailPageState extends State<PlayerDetailPage> {
     return SliverList.builder(
       itemCount: posts.length,
       itemBuilder: (context, index) {
-        return FeedPostCard(post: posts[index], postIndex: index);
+        return Padding(
+          padding: const EdgeInsets.only(bottom: 16.0),
+          child: FeedPostCard(post: posts[index], postIndex: index),
+        );
       },
     );
   }
