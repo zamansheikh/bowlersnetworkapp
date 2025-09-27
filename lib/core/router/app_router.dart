@@ -103,14 +103,7 @@ class AppRouter {
             GoRoute(
               path: '/messages',
               name: 'messages',
-              builder: (context, state) {
-                final targetRoomId = state.uri.queryParameters['room_id'];
-                return MessagesPage(
-                  targetRoomId: targetRoomId != null
-                      ? int.tryParse(targetRoomId)
-                      : null,
-                );
-              },
+              builder: (context, state) => const MessagesPage(),
             ),
             GoRoute(
               path: '/events',

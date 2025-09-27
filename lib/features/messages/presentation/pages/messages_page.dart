@@ -1,52 +1,35 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
+import '../../data/models/conversation_model.dart';
 import '../cubit/messages_cubit.dart';
 import '../cubit/messages_state.dart';
-import '../widgets/conversation_list_item.dart';
-import '../widgets/message_bubble.dart';
-import '../widgets/message_input.dart';
 import '../widgets/new_message_modal.dart';
 import '../../data/models/available_member_model.dart';
+import 'conversation_detail_page.dart';
 import '../../../../core/constants/colors.dart';
-import '../../../../core/theme/app_spacing.dart';
-import '../../../../core/theme/app_text_styles.dart';
 
 class MessagesPage extends StatefulWidget {
-  final int? targetRoomId;
-
-  const MessagesPage({super.key, this.targetRoomId});
+  const MessagesPage({super.key});
 
   @override
   State<MessagesPage> createState() => _MessagesPageState();
 }
 
 class _MessagesPageState extends State<MessagesPage> {
-  final TextEditingController _searchController = TextEditingController();
-  final ScrollController _messagesScrollController = ScrollController();
-  String _selectedFilter = 'all';
+  String _selectedFilter = 'All';
   List<AvailableMemberModel> _availableMembers = [];
   bool _loadingMembers = false;
-  bool _showConversationsList = true; // For mobile navigation
 
   @override
   void initState() {
     super.initState();
-
     // Load conversations
     context.read<MessagesCubit>().loadConversations();
-
-    // If there's a target room ID, we'll handle it when conversations are loaded
-    if (widget.targetRoomId != null) {
-      setState(() {
-        _showConversationsList = false; // Jump directly to chat view on mobile
-      });
-    }
   }
 
   @override
   void dispose() {
-    _searchController.dispose();
-    _messagesScrollController.dispose();
     super.dispose();
   }
 
@@ -98,460 +81,345 @@ class _MessagesPageState extends State<MessagesPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.gray50,
-      appBar: AppBar(
-        elevation: 0,
-        backgroundColor: AppColors.white,
-        foregroundColor: AppColors.gray900,
-        automaticallyImplyLeading: false,
-        title: Text(
-          'Messages',
-          style: AppTextStyles.headlineMedium.copyWith(
-            color: AppColors.gray900,
-            fontWeight: FontWeight.w800,
-          ),
+      backgroundColor: Colors.white,
+      body: SafeArea(
+        child: BlocConsumer<MessagesCubit, MessagesState>(
+          listener: (context, state) {
+            if (state is MessagesError) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Text(state.message),
+                  backgroundColor: Colors.red,
+                ),
+              );
+            }
+          },
+          builder: (context, state) {
+            if (state is MessagesLoading) {
+              return const Center(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    CircularProgressIndicator(
+                      color: AppColors.primaryLimeGreen,
+                    ),
+                    SizedBox(height: 16),
+                    Text('Loading messages...'),
+                  ],
+                ),
+              );
+            }
+
+            if (state is MessagesError) {
+              return Center(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    const Icon(
+                      Icons.error_outline,
+                      size: 64,
+                      color: Colors.red,
+                    ),
+                    const SizedBox(height: 16),
+                    Text(
+                      'Error: ${state.message}',
+                      textAlign: TextAlign.center,
+                      style: const TextStyle(color: Colors.red),
+                    ),
+                    const SizedBox(height: 16),
+                    ElevatedButton(
+                      onPressed: () {
+                        context.read<MessagesCubit>().loadConversations();
+                      },
+                      child: const Text('Retry'),
+                    ),
+                  ],
+                ),
+              );
+            }
+
+            if (state is MessagesLoaded) {
+              return _buildFigmaMessagesContent(state);
+            }
+
+            return const Center(child: CircularProgressIndicator());
+          },
         ),
-        actions: [
-          Container(
-            margin: EdgeInsets.only(right: AppSpacing.md),
-            decoration: BoxDecoration(
-              color: AppColors.primaryLimeGreen.withValues(alpha: 0.1),
-              borderRadius: BorderRadius.circular(12),
-              border: Border.all(
-                color: AppColors.primaryLimeGreen.withValues(alpha: 0.3),
+      ),
+    );
+  }
+
+  Widget _buildFigmaMessagesContent(MessagesLoaded state) {
+    return Container(
+      color: Colors.white,
+      height: double.infinity,
+      child: Column(
+        children: [
+          // Custom Header
+          _buildFigmaHeader(),
+
+          // Content
+          Expanded(
+            child: SingleChildScrollView(
+              padding: EdgeInsets.symmetric(horizontal: 20.w),
+              child: Column(
+                children: [
+                  SizedBox(height: 16.h),
+
+                  // Filter Tabs
+                  _buildFigmaFilterTabs(),
+
+                  SizedBox(height: 12.h),
+
+                  // Conversations List
+                  Column(
+                    children: [
+                      for (
+                        int i = 0;
+                        i < state.filteredConversations.length;
+                        i++
+                      )
+                        _buildFigmaConversationItem(
+                          state.filteredConversations[i],
+                        ),
+                    ],
+                  ),
+
+                  SizedBox(height: 32.h),
+                ],
               ),
-            ),
-            child: IconButton(
-              icon: const Icon(Icons.add_rounded),
-              onPressed: _showNewMessageModalDialog,
-              color: AppColors.primaryLimeGreen,
-              iconSize: 20,
             ),
           ),
         ],
       ),
-      body: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: BlocConsumer<MessagesCubit, MessagesState>(
-            listener: (context, state) {
-              if (state is MessagesError) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(
-                    content: Text(state.message),
-                    backgroundColor: Colors.red,
-                  ),
-                );
-              }
-            },
-            builder: (context, state) {
-              if (state is MessagesLoading) {
-                return const Center(
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      CircularProgressIndicator(
-                        color: AppColors.primaryLimeGreen,
-                      ),
-                      SizedBox(height: 16),
-                      Text('Loading messages...'),
-                    ],
-                  ),
-                );
-              }
+    );
+  }
 
-              if (state is MessagesError) {
-                return Center(
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      const Icon(
-                        Icons.error_outline,
-                        size: 64,
-                        color: Colors.red,
-                      ),
-                      const SizedBox(height: 16),
-                      Text(
-                        'Error: ${state.message}',
-                        textAlign: TextAlign.center,
-                        style: const TextStyle(color: Colors.red),
-                      ),
-                      const SizedBox(height: 16),
-                      ElevatedButton(
-                        onPressed: () {
-                          context.read<MessagesCubit>().loadConversations();
-                        },
-                        child: const Text('Retry'),
-                      ),
-                    ],
-                  ),
-                );
-              }
-
-              if (state is MessagesLoaded) {
-                return LayoutBuilder(
-                  builder: (context, constraints) {
-                    // Check if we're on a small screen (mobile)
-                    final isSmallScreen = constraints.maxWidth < 800;
-
-                    if (isSmallScreen) {
-                      // Mobile layout: show either conversations list OR chat view
-                      if (_showConversationsList ||
-                          state.selectedConversation == null) {
-                        return _buildConversationsList(state);
-                      } else {
-                        return _buildChatView(state);
-                      }
-                    } else {
-                      // Desktop layout: show both side by side
-                      return Row(
-                        children: [
-                          // Conversations List - wider on desktop
-                          Container(
-                            width: constraints.maxWidth * 0.4,
-                            decoration: BoxDecoration(
-                              border: Border(
-                                right: BorderSide(color: Colors.grey[300]!),
-                              ),
-                            ),
-                            child: _buildConversationsList(state),
-                          ),
-
-                          // Chat Area
-                          Expanded(
-                            child: state.selectedConversation == null
-                                ? Center(
-                                    child: Column(
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.center,
-                                      children: [
-                                        const Icon(
-                                          Icons.forum_outlined,
-                                          size: 80,
-                                          color: Colors.grey,
-                                        ),
-                                        const SizedBox(height: 16),
-                                        Text(
-                                          'Select a conversation to start messaging',
-                                          style: TextStyle(
-                                            color: Colors.grey[600],
-                                            fontSize: 18,
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                  )
-                                : _buildChatView(state),
-                          ),
-                        ],
-                      );
-                    }
-                  },
-                );
-              }
-
-              return const Center(child: CircularProgressIndicator());
-            },
+  Widget _buildFigmaHeader() {
+    return Container(
+      height: 56.h,
+      width: 375.w,
+      padding: EdgeInsets.fromLTRB(20.w, 8.h, 20.w, 8.h),
+      child: Row(
+        children: [
+          Expanded(
+            child: Text(
+              'Messages',
+              style: TextStyle(
+                fontFamily: 'Poppins',
+                fontWeight: FontWeight.w600,
+                fontSize: 20.sp,
+                color: const Color(0xFF111B05),
+              ),
+            ),
           ),
+          Container(
+            width: 32.w,
+            height: 32.h,
+            decoration: const BoxDecoration(
+              color: Color(0xFF8BC342),
+              shape: BoxShape.circle,
+            ),
+            child: IconButton(
+              onPressed: _showNewMessageModalDialog,
+              icon: Icon(Icons.add, size: 16.sp, color: Colors.white),
+              padding: EdgeInsets.zero,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildFigmaFilterTabs() {
+    return Row(
+      children: [
+        Expanded(child: _buildFigmaFilterTab('All', _selectedFilter == 'All')),
+        SizedBox(width: 12.w),
+        Expanded(
+          child: _buildFigmaFilterTab('Group', _selectedFilter == 'Group'),
+        ),
+        SizedBox(width: 12.w),
+        Expanded(
+          child: _buildFigmaFilterTab('Private', _selectedFilter == 'Private'),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildFigmaFilterTab(String label, bool isSelected) {
+    return GestureDetector(
+      onTap: () {
+        setState(() {
+          _selectedFilter = label;
+        });
+        context.read<MessagesCubit>().updateFilterType(label.toLowerCase());
+      },
+      child: Container(
+        padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 10.h),
+        decoration: isSelected
+            ? BoxDecoration(
+                color: const Color(0xFF8BC342),
+                borderRadius: BorderRadius.circular(40.r),
+              )
+            : BoxDecoration(
+                border: Border.all(color: const Color(0xFFE8E8E8)),
+                borderRadius: BorderRadius.circular(40.r),
+              ),
+        child: Text(
+          label,
+          style: TextStyle(
+            fontFamily: 'Poppins',
+            fontSize: 14.sp,
+            color: isSelected ? const Color(0xFF101010) : Colors.grey,
+            fontWeight: FontWeight.w400,
+          ),
+          textAlign: TextAlign.center,
         ),
       ),
     );
   }
 
-  Widget _buildConversationsList(MessagesLoaded state) {
-    return Column(
-      children: [
-        // Header with search and filters
-        Container(
-          padding: const EdgeInsets.all(16),
-          decoration: BoxDecoration(
-            color: Colors.grey[50],
-            border: Border(bottom: BorderSide(color: Colors.grey[300]!)),
+  Widget _buildFigmaConversationItem(ConversationModel conversation) {
+    // Extract unread count logic - for now, we'll simulate some conversations having unread messages
+    final hasUnreadMessages =
+        conversation.roomId % 3 == 0; // Simulate some unread messages
+    final unreadCount = hasUnreadMessages ? (conversation.roomId % 5) + 1 : 0;
+
+    return GestureDetector(
+      behavior: HitTestBehavior.opaque,
+      onTap: () {
+        // Navigate to conversation detail page
+        Navigator.of(context).push(
+          MaterialPageRoute(
+            builder: (context) =>
+                ConversationDetailPage(conversation: conversation),
           ),
-          child: Column(
-            children: [
-              // Title and new message button
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        );
+      },
+      child: Container(
+        padding: EdgeInsets.symmetric(vertical: 8.h),
+        child: Row(
+          children: [
+            // Avatar
+            Container(
+              width: 48.w,
+              height: 48.h,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: Colors.grey[300],
+              ),
+              child: conversation.displayImageUrl?.isNotEmpty == true
+                  ? ClipRRect(
+                      borderRadius: BorderRadius.circular(24.r),
+                      child: Image.network(
+                        conversation.displayImageUrl!,
+                        width: 48.w,
+                        height: 48.h,
+                        fit: BoxFit.cover,
+                        errorBuilder: (context, error, stackTrace) {
+                          return _buildFallbackAvatar(conversation.displayName);
+                        },
+                      ),
+                    )
+                  : _buildFallbackAvatar(conversation.displayName),
+            ),
+
+            SizedBox(width: 8.w),
+
+            // Name and Last Message
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Row(
-                    children: [
-                      Icon(
-                        Icons.message,
-                        color: AppColors.primaryLimeGreen,
-                        size: 20,
-                      ),
-                      SizedBox(width: 8),
-                      Text(
-                        'Messages',
-                        style: TextStyle(
-                          fontSize: 20,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ],
-                  ),
-                  IconButton(
-                    onPressed: _showNewMessageModalDialog,
-                    icon: const Icon(Icons.add),
-                    style: IconButton.styleFrom(
-                      backgroundColor: AppColors.primaryLimeGreen,
-                      foregroundColor: Colors.white,
-                      fixedSize: const Size(36, 36),
+                  Text(
+                    conversation.displayName,
+                    style: TextStyle(
+                      fontFamily: 'Poppins',
+                      fontWeight: FontWeight.w600,
+                      fontSize: 16.sp,
+                      color: const Color(0xFF404040), // neutral-700
                     ),
+                  ),
+                  SizedBox(height: 6.h),
+                  Text(
+                    conversation.lastMessage?.message.text ?? 'No messages yet',
+                    style: TextStyle(
+                      fontFamily: 'Poppins',
+                      fontSize: 12.sp,
+                      color: const Color(0xFF6D6D6D),
+                    ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
                   ),
                 ],
               ),
+            ),
 
-              const SizedBox(height: 16),
+            SizedBox(width: 8.w),
 
-              // Search bar
-              TextField(
-                controller: _searchController,
-                decoration: InputDecoration(
-                  hintText: 'Search messages...',
-                  prefixIcon: const Icon(Icons.search, size: 20),
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(25),
-                    borderSide: BorderSide(color: Colors.grey[300]!),
-                  ),
-                  focusedBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(25),
-                    borderSide: const BorderSide(
-                      color: AppColors.primaryLimeGreen,
-                    ),
-                  ),
-                  contentPadding: const EdgeInsets.symmetric(
-                    horizontal: 20,
-                    vertical: 12,
+            // Time and Unread Count
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.end,
+              children: [
+                Text(
+                  conversation.lastActivity ?? 'Unknown',
+                  style: TextStyle(
+                    fontFamily: 'Poppins',
+                    fontWeight: FontWeight.w500,
+                    fontSize: 14.sp,
+                    color: const Color(0xFF616161),
                   ),
                 ),
-                onChanged: (value) {
-                  context.read<MessagesCubit>().updateSearchQuery(value);
-                },
-              ),
-
-              const SizedBox(height: 16),
-
-              // Filter chips
-              Row(
-                children: ['all', 'private', 'group'].map((filter) {
-                  final isSelected = _selectedFilter == filter;
-                  return Padding(
-                    padding: const EdgeInsets.only(right: 8),
-                    child: ChoiceChip(
-                      label: Text(
-                        filter.capitalize(),
+                if (hasUnreadMessages) ...[
+                  SizedBox(height: 6.h),
+                  Container(
+                    width: 20.w,
+                    height: 20.h,
+                    decoration: const BoxDecoration(
+                      color: Color(0xFF8BC342),
+                      shape: BoxShape.circle,
+                    ),
+                    child: Center(
+                      child: Text(
+                        unreadCount.toString(),
                         style: TextStyle(
-                          fontSize: 13,
-                          fontWeight: FontWeight.w500,
-                          color: isSelected ? Colors.white : Colors.grey[600],
+                          fontFamily: 'Poppins',
+                          fontWeight: FontWeight.w600,
+                          fontSize: 12.sp,
+                          color: const Color(0xFF111B05),
                         ),
                       ),
-                      selected: isSelected,
-                      onSelected: (selected) {
-                        setState(() {
-                          _selectedFilter = filter;
-                        });
-                        context.read<MessagesCubit>().updateFilterType(filter);
-                      },
-                      selectedColor: AppColors.primaryLimeGreen,
-                      backgroundColor: Colors.grey[100],
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 12,
-                        vertical: 4,
-                      ),
                     ),
-                  );
-                }).toList(),
-              ),
-            ],
-          ),
-        ),
-
-        // Conversations list
-        Expanded(
-          child: state.filteredConversations.isEmpty
-              ? const Center(
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Icon(
-                        Icons.message_outlined,
-                        size: 64,
-                        color: Colors.grey,
-                      ),
-                      SizedBox(height: 16),
-                      Text(
-                        'No conversations found',
-                        style: TextStyle(color: Colors.grey, fontSize: 16),
-                      ),
-                    ],
                   ),
-                )
-              : ListView.builder(
-                  itemCount: state.filteredConversations.length,
-                  itemBuilder: (context, index) {
-                    final conversation = state.filteredConversations[index];
-                    return ConversationListItem(
-                      conversation: conversation,
-                      isSelected:
-                          state.selectedConversation?.roomId ==
-                          conversation.roomId,
-                      onTap: () {
-                        context.read<MessagesCubit>().selectConversation(
-                          conversation,
-                        );
-                        setState(() {
-                          _showConversationsList =
-                              false; // Switch to chat view on mobile
-                        });
-                      },
-                    );
-                  },
-                ),
+                ],
+              ],
+            ),
+          ],
         ),
-      ],
+      ),
     );
   }
 
-  Widget _buildChatView(MessagesLoaded state) {
-    return Column(
-      children: [
-        // Chat header with back button
-        Container(
-          padding: const EdgeInsets.all(16),
-          decoration: BoxDecoration(
-            color: Colors.grey[50],
-            border: Border(bottom: BorderSide(color: Colors.grey[300]!)),
-          ),
-          child: Row(
-            children: [
-              // Only show back button on mobile
-              if (MediaQuery.of(context).size.width < 800)
-                IconButton(
-                  onPressed: () {
-                    setState(() {
-                      _showConversationsList =
-                          true; // Go back to conversations list
-                    });
-                  },
-                  icon: const Icon(Icons.arrow_back),
-                  padding: EdgeInsets.zero,
-                  constraints: const BoxConstraints(),
-                ),
-              if (MediaQuery.of(context).size.width < 800)
-                const SizedBox(width: 8),
-              CircleAvatar(
-                radius: 20,
-                backgroundImage:
-                    (state.selectedConversation?.displayImageUrl?.isNotEmpty ==
-                        true)
-                    ? NetworkImage(state.selectedConversation!.displayImageUrl!)
-                    : null,
-                backgroundColor: Colors.grey[300],
-                onBackgroundImageError: (_, __) {
-                  print(
-                    'Failed to load chat header image: ${state.selectedConversation!.displayImageUrl}',
-                  );
-                },
-                child:
-                    (state.selectedConversation?.displayImageUrl?.isEmpty !=
-                        false)
-                    ? Text(
-                        state.selectedConversation!.displayName.isNotEmpty
-                            ? state.selectedConversation!.displayName[0]
-                                  .toUpperCase()
-                            : '?',
-                        style: const TextStyle(
-                          fontWeight: FontWeight.bold,
-                          color: Colors.white,
-                        ),
-                      )
-                    : null,
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      state.selectedConversation!.displayName,
-                      style: const TextStyle(
-                        fontWeight: FontWeight.w600,
-                        fontSize: 16,
-                      ),
-                    ),
-                    Text(
-                      state.selectedConversation!.type == 'group'
-                          ? 'Group conversation'
-                          : 'Private conversation',
-                      style: TextStyle(color: Colors.grey[600], fontSize: 12),
-                    ),
-                  ],
-                ),
-              ),
-              IconButton(
-                onPressed: () {
-                  // TODO: Show conversation options
-                },
-                icon: const Icon(Icons.more_vert),
-              ),
-            ],
+  Widget _buildFallbackAvatar(String displayName) {
+    return Container(
+      width: 48.w,
+      height: 48.h,
+      decoration: BoxDecoration(
+        shape: BoxShape.circle,
+        color: Colors.grey[300],
+      ),
+      child: Center(
+        child: Text(
+          displayName.isNotEmpty ? displayName[0].toUpperCase() : '?',
+          style: TextStyle(
+            fontFamily: 'Poppins',
+            fontWeight: FontWeight.w600,
+            fontSize: 18.sp,
+            color: Colors.white,
           ),
         ),
-
-        // Messages
-        Expanded(
-          child: state.messages.isEmpty
-              ? const Center(
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Icon(
-                        Icons.message_outlined,
-                        size: 64,
-                        color: Colors.grey,
-                      ),
-                      SizedBox(height: 16),
-                      Text(
-                        'No messages yet',
-                        style: TextStyle(fontSize: 16, color: Colors.grey),
-                      ),
-                      Text(
-                        'Start the conversation!',
-                        style: TextStyle(fontSize: 14, color: Colors.grey),
-                      ),
-                    ],
-                  ),
-                )
-              : ListView.builder(
-                  controller: _messagesScrollController,
-                  padding: const EdgeInsets.symmetric(vertical: 16),
-                  itemCount: state.messages.length,
-                  itemBuilder: (context, index) {
-                    final message = state.messages[index];
-                    return MessageBubble(
-                      message: message,
-                      showGroupInfo:
-                          state.selectedConversation!.type == 'group',
-                    );
-                  },
-                ),
-        ),
-
-        // Message input
-        MessageInput(
-          conversationName: state.selectedConversation!.displayName,
-          isLoading: state is MessagesSending,
-          onSendMessage: (text, mediaFiles) {
-            context.read<MessagesCubit>().sendMessage(
-              text,
-              mediaFiles: mediaFiles,
-            );
-          },
-        ),
-      ],
+      ),
     );
   }
 }

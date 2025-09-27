@@ -1,7 +1,7 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:image_picker/image_picker.dart';
-import '../../../../core/constants/colors.dart';
 
 class MessageInput extends StatefulWidget {
   final Function(String text, List<File> mediaFiles) onSendMessage;
@@ -232,45 +232,62 @@ class _MessageInputState extends State<MessageInput> {
                 ),
               ),
 
-            // Input area
-            Padding(
-              padding: const EdgeInsets.all(16),
+            // Input area - Figma design
+            Container(
+              padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 16.h),
               child: Row(
                 children: [
-                  // Attachment button
-                  IconButton(
-                    onPressed: widget.isLoading ? null : _pickMedia,
-                    icon: const Icon(Icons.attach_file),
-                    style: IconButton.styleFrom(
-                      foregroundColor: Colors.grey[600],
-                    ),
-                  ),
-
-                  // Text input
+                  // Text input with attachment button
                   Expanded(
                     child: Container(
+                      padding: EdgeInsets.all(12.w),
                       decoration: BoxDecoration(
-                        border: Border.all(color: Colors.grey[300]!),
-                        borderRadius: BorderRadius.circular(24),
+                        border: Border.all(
+                          color: const Color(0xFFE8E9E6), // Figma border color
+                          width: 1,
+                        ),
+                        borderRadius: BorderRadius.circular(8.r),
                       ),
                       child: Row(
                         children: [
+                          // Attachment button
+                          GestureDetector(
+                            onTap: widget.isLoading ? null : _pickMedia,
+                            child: Icon(
+                              Icons.attach_file,
+                              size: 24.sp,
+                              color: const Color(0xFF6D6D6D),
+                            ),
+                          ),
+
+                          SizedBox(width: 10.w),
+
+                          // Text input
                           Expanded(
                             child: TextField(
                               controller: _textController,
                               decoration: InputDecoration(
-                                hintText: widget.conversationName != null
-                                    ? 'Type a message to ${widget.conversationName}...'
-                                    : 'Type a message...',
-                                border: InputBorder.none,
-                                contentPadding: const EdgeInsets.symmetric(
-                                  horizontal: 16,
-                                  vertical: 12,
+                                hintText: 'Type your message',
+                                hintStyle: TextStyle(
+                                  fontFamily: 'Poppins',
+                                  fontSize: 12.sp,
+                                  color: const Color(
+                                    0xFFA0A49B,
+                                  ), // Figma hint color
                                 ),
+                                border: InputBorder.none,
+                                contentPadding: EdgeInsets.zero,
+                              ),
+                              style: TextStyle(
+                                fontFamily: 'Poppins',
+                                fontSize: 12.sp,
+                                color: const Color(0xFF111B05),
                               ),
                               maxLines: null,
                               enabled: !widget.isLoading,
-                              onSubmitted: (_) => _sendMessage(),
+                              onSubmitted: (_) {
+                                _sendMessage();
+                              },
                             ),
                           ),
                         ],
@@ -278,41 +295,38 @@ class _MessageInputState extends State<MessageInput> {
                     ),
                   ),
 
-                  const SizedBox(width: 8),
+                  SizedBox(width: 16.w),
 
                   // Send button
                   Container(
+                    padding: EdgeInsets.all(8.w),
                     decoration: BoxDecoration(
-                      color:
-                          (_textController.text.trim().isNotEmpty ||
-                                  _selectedFiles.isNotEmpty) &&
-                              !widget.isLoading
-                          ? AppColors.primaryLimeGreen
-                          : Colors.grey[300],
+                      color: const Color(0xFF8BC342), // Figma green
                       shape: BoxShape.circle,
                     ),
-                    child: IconButton(
-                      onPressed:
+                    child: GestureDetector(
+                      onTap:
                           (_textController.text.trim().isNotEmpty ||
                                   _selectedFiles.isNotEmpty) &&
                               !widget.isLoading
                           ? _sendMessage
                           : null,
-                      icon: widget.isLoading
-                          ? const SizedBox(
-                              width: 20,
-                              height: 20,
-                              child: CircularProgressIndicator(
+                      child: widget.isLoading
+                          ? SizedBox(
+                              width: 20.w,
+                              height: 20.h,
+                              child: const CircularProgressIndicator(
                                 strokeWidth: 2,
                                 valueColor: AlwaysStoppedAnimation<Color>(
                                   Colors.white,
                                 ),
                               ),
                             )
-                          : const Icon(Icons.send),
-                      style: IconButton.styleFrom(
-                        foregroundColor: Colors.white,
-                      ),
+                          : Icon(
+                              Icons.send,
+                              size: 20.sp,
+                              color: const Color(0xFF111B05),
+                            ),
                     ),
                   ),
                 ],
