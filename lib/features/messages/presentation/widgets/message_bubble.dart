@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../../data/models/message_model.dart';
-import '../../../../core/constants/colors.dart';
 
 class MessageBubble extends StatelessWidget {
   final MessageModel message;
@@ -14,39 +14,39 @@ class MessageBubble extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 16),
+    return Container(
+      width: double.infinity,
+      margin: EdgeInsets.symmetric(vertical: 4.h, horizontal: 20.w),
       child: Row(
         mainAxisAlignment: message.sentByMe
             ? MainAxisAlignment.end
             : MainAxisAlignment.start,
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          if (!message.sentByMe) ...[
-            CircleAvatar(
-              radius: 16,
-              backgroundImage: message.sender.profilePictureUrl.isNotEmpty
-                  ? NetworkImage(message.sender.profilePictureUrl)
-                  : null,
-              backgroundColor: Colors.grey[300],
-              onBackgroundImageError: (_, __) {
-                print(
-                  'Failed to load profile picture: ${message.sender.profilePictureUrl}',
-                );
-              },
-              child: message.sender.profilePictureUrl.isEmpty
-                  ? Text(
-                      message.sender.name.isNotEmpty
-                          ? message.sender.name[0].toUpperCase()
-                          : '?',
-                      style: const TextStyle(
-                        fontSize: 12,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.white,
+          if (!message.sentByMe && showGroupInfo) ...[
+            Container(
+              width: 32.w,
+              height: 32.h,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: Colors.grey[300],
+              ),
+              child: message.sender.profilePictureUrl.isNotEmpty
+                  ? ClipRRect(
+                      borderRadius: BorderRadius.circular(16.r),
+                      child: Image.network(
+                        message.sender.profilePictureUrl,
+                        width: 32.w,
+                        height: 32.h,
+                        fit: BoxFit.cover,
+                        errorBuilder: (context, error, stackTrace) {
+                          return _buildFallbackAvatar();
+                        },
                       ),
                     )
-                  : null,
+                  : _buildFallbackAvatar(),
             ),
-            const SizedBox(width: 8),
+            SizedBox(width: 8.w),
           ],
           Flexible(
             child: Column(
@@ -56,29 +56,30 @@ class MessageBubble extends StatelessWidget {
               children: [
                 if (showGroupInfo && !message.sentByMe)
                   Padding(
-                    padding: const EdgeInsets.only(bottom: 4),
+                    padding: EdgeInsets.only(bottom: 4.h),
                     child: Text(
                       message.sender.name,
                       style: TextStyle(
-                        fontSize: 12,
-                        color: Colors.grey[600],
+                        fontFamily: 'Poppins',
+                        fontSize: 12.sp,
+                        color: const Color(0xFF6D6D6D),
                         fontWeight: FontWeight.w500,
                       ),
                     ),
                   ),
                 Container(
                   constraints: BoxConstraints(
-                    maxWidth: MediaQuery.of(context).size.width * 0.7,
+                    maxWidth: MediaQuery.of(context).size.width * 0.75,
                   ),
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 16,
-                    vertical: 10,
+                  padding: EdgeInsets.symmetric(
+                    horizontal: 10.w,
+                    vertical: 8.h,
                   ),
                   decoration: BoxDecoration(
                     color: message.sentByMe
-                        ? AppColors.primaryLimeGreen
-                        : Colors.grey[100],
-                    borderRadius: BorderRadius.circular(18),
+                        ? const Color(0xFF8BC342) // Figma lime green
+                        : const Color(0xFFF4F9ED), // Figma light green
+                    borderRadius: _getBorderRadius(),
                   ),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -87,15 +88,17 @@ class MessageBubble extends StatelessWidget {
                         Text(
                           message.message.text,
                           style: TextStyle(
+                            fontFamily: 'Poppins',
                             color: message.sentByMe
-                                ? Colors.white
-                                : Colors.black87,
-                            fontSize: 14,
+                                ? const Color(0xFF111B05)
+                                : const Color(0xFF6D6D6D),
+                            fontSize: 12.sp,
+                            height: 1.33,
                           ),
                         ),
                       if (message.message.media.isNotEmpty) ...[
                         if (message.message.text.isNotEmpty)
-                          const SizedBox(height: 8),
+                          SizedBox(height: 8.h),
                         _buildMediaPreview(),
                       ],
                     ],
@@ -220,5 +223,49 @@ class MessageBubble extends StatelessWidget {
   bool _isVideoFile(String url) {
     final extensions = ['.mp4', '.webm', '.ogg', '.mov', '.avi'];
     return extensions.any((ext) => url.toLowerCase().endsWith(ext));
+  }
+
+  Widget _buildFallbackAvatar() {
+    return Container(
+      width: 32.w,
+      height: 32.h,
+      decoration: BoxDecoration(
+        shape: BoxShape.circle,
+        color: Colors.grey[400],
+      ),
+      child: Center(
+        child: Text(
+          message.sender.name.isNotEmpty
+              ? message.sender.name[0].toUpperCase()
+              : '?',
+          style: TextStyle(
+            fontFamily: 'Poppins',
+            fontSize: 14.sp,
+            fontWeight: FontWeight.w600,
+            color: Colors.white,
+          ),
+        ),
+      ),
+    );
+  }
+
+  BorderRadius _getBorderRadius() {
+    if (message.sentByMe) {
+      // Outgoing message (right side) - rounded on left, square on bottom right
+      return BorderRadius.only(
+        topLeft: Radius.circular(20.r),
+        topRight: Radius.circular(8.r),
+        bottomLeft: Radius.circular(20.r),
+        bottomRight: Radius.circular(8.r),
+      );
+    } else {
+      // Incoming message (left side) - rounded on right, square on bottom left
+      return BorderRadius.only(
+        topLeft: Radius.circular(8.r),
+        topRight: Radius.circular(20.r),
+        bottomLeft: Radius.circular(8.r),
+        bottomRight: Radius.circular(20.r),
+      );
+    }
   }
 }
