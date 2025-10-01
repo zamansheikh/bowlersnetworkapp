@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bowlers Network - Amateur Player Platform</title>
+    <meta name="description" content="Connect, compete, and improve your bowling game with the ultimate amateur bowling platform. Join tournaments, find teammates, track progress, and connect with pro players.">
+    
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://bowlersnetwork.com/">
+    <meta property="og:title" content="Bowlers Network - Amateur Player Platform">
+    <meta property="og:description" content="Connect, compete, and improve your bowling game with the ultimate amateur bowling platform">
+    <meta property="og:image" content="https://bowlersnetwork.com/images/bowlers-network-og.jpg">
+
+    <!-- Twitter -->
+    <meta property="twitter:card" content="summary_large_image">
+    <meta property="twitter:url" content="https://bowlersnetwork.com/">
+    <meta property="twitter:title" content="Bowlers Network - Amateur Player Platform">
+    <meta property="twitter:description" content="Connect, compete, and improve your bowling game with the ultimate amateur bowling platform">
+    <meta property="twitter:image" content="https://bowlersnetwork.com/images/bowlers-network-twitter.jpg">
+
+    <!-- SEO -->
+    <meta name="keywords" content="bowling, amateur bowling, tournaments, bowling network, bowling app, bowling community, bowling stats, bowling tracker">
+    <meta name="author" content="BowlersNetwork.com">
+    <meta name="robots" content="index, follow">
+    <link rel="canonical" href="https://bowlersnetwork.com/">
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background-color: #f8f9fa;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        header {
+            background: linear-gradient(135deg, #8BC342, #6fa332);
+            color: white;
+            padding: 2rem 0;
+            text-align: center;
+        }
+
+        .logo {
+            font-size: 2.5rem;
+            font-weight: bold;
+            margin-bottom: 0.5rem;
+        }
+
+        .tagline {
+            font-size: 1.2rem;
+            opacity: 0.9;
+        }
+
+        .hero {
+            background: white;
+            padding: 4rem 0;
+            text-align: center;
+        }
+
+        .hero h1 {
+            font-size: 3rem;
+            color: #2c3e50;
+            margin-bottom: 1rem;
+        }
+
+        .hero p {
+            font-size: 1.3rem;
+            color: #7f8c8d;
+            margin-bottom: 2rem;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .cta-buttons {
+            margin-top: 2rem;
+        }
+
+        .btn {
+            display: inline-block;
+            padding: 15px 30px;
+            margin: 10px;
+            border-radius: 50px;
+            text-decoration: none;
+            font-weight: bold;
+            transition: all 0.3s ease;
+        }
+
+        .btn-primary {
+            background: #8BC342;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #6fa332;
+            transform: translateY(-2px);
+        }
+
+        .btn-secondary {
+            background: transparent;
+            color: #8BC342;
+            border: 2px solid #8BC342;
+        }
+
+        .btn-secondary:hover {
+            background: #8BC342;
+            color: white;
+        }
+
+        .features {
+            padding: 4rem 0;
+            background: #f8f9fa;
+        }
+
+        .features h2 {
+            text-align: center;
+            font-size: 2.5rem;
+            color: #2c3e50;
+            margin-bottom: 3rem;
+        }
+
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            margin-top: 2rem;
+        }
+
+        .feature-card {
+            background: white;
+            padding: 2rem;
+            border-radius: 15px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            text-align: center;
+            transition: transform 0.3s ease;
+        }
+
+        .feature-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .feature-icon {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+        }
+
+        .feature-card h3 {
+            color: #2c3e50;
+            margin-bottom: 1rem;
+        }
+
+        .stats {
+            background: linear-gradient(135deg, #2c3e50, #34495e);
+            color: white;
+            padding: 4rem 0;
+            text-align: center;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 2rem;
+        }
+
+        .stat-item h3 {
+            font-size: 3rem;
+            color: #8BC342;
+            margin-bottom: 0.5rem;
+        }
+
+        .download-section {
+            background: white;
+            padding: 4rem 0;
+            text-align: center;
+        }
+
+        .download-section h2 {
+            font-size: 2.5rem;
+            color: #2c3e50;
+            margin-bottom: 2rem;
+        }
+
+        .app-badges {
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
+            margin-top: 2rem;
+        }
+
+        .app-badge {
+            height: 60px;
+        }
+
+        footer {
+            background: #2c3e50;
+            color: white;
+            padding: 2rem 0;
+            text-align: center;
+        }
+
+        .footer-links {
+            margin-bottom: 1rem;
+        }
+
+        .footer-links a {
+            color: #8BC342;
+            text-decoration: none;
+            margin: 0 1rem;
+        }
+
+        .footer-links a:hover {
+            text-decoration: underline;
+        }
+
+        @media (max-width: 768px) {
+            .hero h1 {
+                font-size: 2rem;
+            }
+            
+            .hero p {
+                font-size: 1.1rem;
+            }
+            
+            .features-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .app-badges {
+                flex-direction: column;
+                align-items: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="container">
+            <div class="logo">🎳 Bowlers Network</div>
+            <div class="tagline">The Ultimate Amateur Bowling Platform</div>
+        </div>
+    </header>
+
+    <section class="hero">
+        <div class="container">
+            <h1>Connect. Compete. Improve.</h1>
+            <p>Join the premier platform for amateur bowling players. Track your progress, participate in tournaments, connect with teammates, and learn from professional players.</p>
+            
+            <div class="cta-buttons">
+                <a href="#download" class="btn btn-primary">Download App</a>
+                <a href="#features" class="btn btn-secondary">Learn More</a>
+            </div>
+        </div>
+    </section>
+
+    <section class="stats">
+        <div class="container">
+            <div class="stats-grid">
+                <div class="stat-item">
+                    <h3>10K+</h3>
+                    <p>Active Players</p>
+                </div>
+                <div class="stat-item">
+                    <h3>500+</h3>
+                    <p>Tournaments</p>
+                </div>
+                <div class="stat-item">
+                    <h3>1K+</h3>
+                    <p>Teams Formed</p>
+                </div>
+                <div class="stat-item">
+                    <h3>50+</h3>
+                    <p>Pro Players</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="features" id="features">
+        <div class="container">
+            <h2>Everything You Need to Excel</h2>
+            
+            <div class="features-grid">
+                <div class="feature-card">
+                    <div class="feature-icon">🏆</div>
+                    <h3>Tournaments</h3>
+                    <p>Join competitive tournaments, track your rankings, and compete with players at your skill level across various formats.</p>
+                </div>
+                
+                <div class="feature-card">
+                    <div class="feature-icon">👥</div>
+                    <h3>Team Building</h3>
+                    <p>Find teammates, create teams, and participate in doubles and team tournaments. Build lasting bowling partnerships.</p>
+                </div>
+                
+                <div class="feature-card">
+                    <div class="feature-icon">📊</div>
+                    <h3>Performance Analytics</h3>
+                    <p>Track your bowling statistics, analyze your performance trends, and identify areas for improvement with detailed analytics.</p>
+                </div>
+                
+                <div class="feature-card">
+                    <div class="feature-icon">🎯</div>
+                    <h3>Pro Player Connections</h3>
+                    <p>Follow professional bowlers, learn from their techniques, and get insights from the best in the sport.</p>
+                </div>
+                
+                <div class="feature-card">
+                    <div class="feature-icon">💬</div>
+                    <h3>Community Chat</h3>
+                    <p>Connect with fellow bowlers, share tips, discuss strategies, and build friendships within the bowling community.</p>
+                </div>
+                
+                <div class="feature-card">
+                    <div class="feature-icon">🛒</div>
+                    <h3>Equipment Exchange</h3>
+                    <p>Buy, sell, and trade bowling equipment. Find the perfect gear and connect with other equipment enthusiasts.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="download-section" id="download">
+        <div class="container">
+            <h2>Download Bowlers Network Today</h2>
+            <p>Available on all platforms. Start your bowling journey now!</p>
+            
+            <div class="app-badges">
+                <img src="https://upload.wikimedia.org/wikipedia/commons/7/78/Google_Play_Store_badge_EN.svg" alt="Get it on Google Play" class="app-badge">
+                <img src="https://upload.wikimedia.org/wikipedia/commons/3/3c/Download_on_the_App_Store_Badge.svg" alt="Download on the App Store" class="app-badge">
+            </div>
+        </div>
+    </section>
+
+    <footer>
+        <div class="container">
+            <div class="footer-links">
+                <a href="privacy-policy.html">Privacy Policy</a>
+                <a href="mailto:support@bowlersnetwork.com">Contact</a>
+                <a href="#about">About</a>
+            </div>
+            <p>&copy; 2025 BowlersNetwork.com. All rights reserved.</p>
+        </div>
+    </footer>
+</body>
+</html>
