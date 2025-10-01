@@ -1,0 +1,32 @@
+package_rename_config:
+  android:
+    app_name: "Bowlers Network"
+    package_name: "com.bowlersnetwork.bowlersnetworkapp"
+    override_old_package: "com.example.bowlersnetworkapp"
+    lang: "kotlin"
+
+  ios:
+    app_name: "Bowlers Network"
+    bundle_name: "Bowlers Network"
+    package_name: "com.bowlersnetwork.bowlersnetworkapp"
+
+  linux:
+    app_name: "Bowlers Network"
+    package_name: "com.bowlersnetwork.bowlersnetworkapp"
+    exe_name: "bowlers_network"
+
+  macos:
+    app_name: "Bowlers Network"
+    package_name: "com.bowlersnetwork.bowlersnetworkapp"
+    copyright_notice: "Copyright © 2025 BowlersNetwork.com. All rights reserved."
+
+  web:
+    app_name: "Bowlers Network - Amateur Player Platform"
+    short_app_name: "Bowlers Network"
+    description: "Connect, compete, and improve your bowling game with the ultimate amateur bowling platform"
+
+  windows:
+    app_name: "Bowlers Network"
+    organization: "BowlersNetwork.com"
+    copyright_notice: "Copyright © 2025 BowlersNetwork.com. All rights reserved."
+    exe_name: "BowlersNetwork"

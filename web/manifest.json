@@ -1,11 +1,11 @@
 {
-    "name": "bowlersnetworkapp",
-    "short_name": "bowlersnetworkapp",
+    "name": "Bowlers Network - Amateur Player Platform",
+    "short_name": "Bowlers Network",
     "start_url": ".",
     "display": "standalone",
-    "background_color": "#0175C2",
-    "theme_color": "#0175C2",
-    "description": "A new Flutter project.",
+    "background_color": "#8BC342",
+    "theme_color": "#8BC342",
+    "description": "Connect, compete, and improve your bowling game with the ultimate amateur bowling platform",
     "orientation": "portrait-primary",
     "prefer_related_applications": false,
     "icons": [

@@ -89,13 +89,13 @@ BEGIN
     BEGIN
         BLOCK "040904e4"
         BEGIN
-            VALUE "CompanyName", "com.programmernexus" "\0"
-            VALUE "FileDescription", "bowlersnetworkapp" "\0"
+            VALUE "CompanyName", "BowlersNetwork.com" "\0"
+            VALUE "FileDescription", "Bowlers Network" "\0"
             VALUE "FileVersion", VERSION_AS_STRING "\0"
-            VALUE "InternalName", "bowlersnetworkapp" "\0"
-            VALUE "LegalCopyright", "Copyright (C) 2025 com.programmernexus. All rights reserved." "\0"
-            VALUE "OriginalFilename", "bowlersnetworkapp.exe" "\0"
-            VALUE "ProductName", "bowlersnetworkapp" "\0"
+            VALUE "InternalName", "Bowlers Network" "\0"
+            VALUE "LegalCopyright", "Copyright © 2025 BowlersNetwork.com. All rights reserved." "\0"
+            VALUE "OriginalFilename", "BowlersNetwork.exe" "\0"
+            VALUE "ProductName", "Bowlers Network" "\0"
             VALUE "ProductVersion", VERSION_AS_STRING "\0"
         END
     END
