@@ -261,6 +261,22 @@ class _TeamsPageState extends State<TeamsPage> {
       ),
       child: Row(
         children: [
+          GestureDetector(
+            onTap: () => context.pop(),
+            child: Container(
+              padding: const EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                color: AppColors.gray100,
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: const Icon(
+                Icons.arrow_back_ios_rounded,
+                size: 20,
+                color: AppColors.gray700,
+              ),
+            ),
+          ),
+          SizedBox(width: AppSpacing.md),
           Expanded(
             child: Text(
               'My Teams',

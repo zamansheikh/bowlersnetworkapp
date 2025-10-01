@@ -116,16 +116,6 @@ class AppRouter {
               builder: (context, state) => const EventsPage(),
             ),
             GoRoute(
-              path: '/tournaments',
-              name: 'tournaments',
-              builder: (context, state) => const TournamentsPage(),
-            ),
-            GoRoute(
-              path: '/teams',
-              name: 'teams',
-              builder: (context, state) => const TeamsPage(),
-            ),
-            GoRoute(
               path: '/profile',
               name: 'profile',
               builder: (context, state) => const UserProfilePage(),
@@ -186,6 +176,16 @@ class AppRouter {
           path: '/pro-players',
           name: 'pro-players',
           builder: (context, state) => const ProPlayersPage(),
+        ),
+        GoRoute(
+          path: '/tournaments',
+          name: 'tournaments',
+          builder: (context, state) => const TournamentsPage(),
+        ),
+        GoRoute(
+          path: '/teams',
+          name: 'teams',
+          builder: (context, state) => const TeamsPage(),
         ),
         GoRoute(
           path: '/player/:userId',
