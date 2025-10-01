@@ -94,6 +94,18 @@ import 'package:bowlersnetworkapp/features/pro_players/presentation/cubit/pro_pl
     as _i565;
 import 'package:bowlersnetworkapp/features/profile/presentation/cubit/profile_cubit.dart'
     as _i341;
+import 'package:bowlersnetworkapp/features/teams/data/datasources/teams_remote_data_source.dart'
+    as _i391;
+import 'package:bowlersnetworkapp/features/teams/data/datasources/teams_remote_data_source_impl.dart'
+    as _i628;
+import 'package:bowlersnetworkapp/features/teams/data/repositories/teams_repository_impl.dart'
+    as _i861;
+import 'package:bowlersnetworkapp/features/teams/domain/repositories/teams_repository.dart'
+    as _i200;
+import 'package:bowlersnetworkapp/features/teams/domain/usecases/teams_usecases.dart'
+    as _i746;
+import 'package:bowlersnetworkapp/features/teams/presentation/cubit/teams_cubit.dart'
+    as _i317;
 import 'package:bowlersnetworkapp/features/tournaments/data/datasources/tournament_remote_data_source.dart'
     as _i829;
 import 'package:bowlersnetworkapp/features/tournaments/data/datasources/tournament_remote_data_source_impl.dart'
@@ -165,6 +177,12 @@ extension GetItInjectableX on _i174.GetIt {
         remoteDataSource: gh<_i528.UserRemoteDataSource>(),
       ),
     );
+    gh.factory<_i391.TeamsRemoteDataSource>(
+      () => _i628.TeamsRemoteDataSourceImpl(
+        gh<_i361.Dio>(),
+        gh<_i460.SharedPreferences>(),
+      ),
+    );
     gh.lazySingleton<_i1062.ProPlayersRepository>(
       () => _i290.ProPlayersRepositoryImpl(
         gh<_i607.ProPlayersRemoteDataSource>(),
@@ -182,6 +200,11 @@ extension GetItInjectableX on _i174.GetIt {
     gh.lazySingleton<_i924.EventsRepository>(
       () => _i686.EventsRepositoryImpl(
         remoteDataSource: gh<_i421.EventsRemoteDataSource>(),
+      ),
+    );
+    gh.factory<_i200.TeamsRepository>(
+      () => _i861.TeamsRepositoryImpl(
+        remoteDataSource: gh<_i391.TeamsRemoteDataSource>(),
       ),
     );
     gh.factory<_i334.TournamentRepository>(
@@ -308,6 +331,49 @@ extension GetItInjectableX on _i174.GetIt {
     gh.factory<_i116.GetTournaments>(
       () => _i116.GetTournaments(gh<_i924.EventsRepository>()),
     );
+    gh.factory<_i746.GetUserTeamsUseCase>(
+      () => _i746.GetUserTeamsUseCase(repository: gh<_i200.TeamsRepository>()),
+    );
+    gh.factory<_i746.CreateTeamUseCase>(
+      () => _i746.CreateTeamUseCase(repository: gh<_i200.TeamsRepository>()),
+    );
+    gh.factory<_i746.DeleteTeamUseCase>(
+      () => _i746.DeleteTeamUseCase(repository: gh<_i200.TeamsRepository>()),
+    );
+    gh.factory<_i746.GetTeamDetailsUseCase>(
+      () =>
+          _i746.GetTeamDetailsUseCase(repository: gh<_i200.TeamsRepository>()),
+    );
+    gh.factory<_i746.GetAvailableMembersUseCase>(
+      () => _i746.GetAvailableMembersUseCase(
+        repository: gh<_i200.TeamsRepository>(),
+      ),
+    );
+    gh.factory<_i746.InviteUserToTeamUseCase>(
+      () => _i746.InviteUserToTeamUseCase(
+        repository: gh<_i200.TeamsRepository>(),
+      ),
+    );
+    gh.factory<_i746.GetTeamInvitationsUseCase>(
+      () => _i746.GetTeamInvitationsUseCase(
+        repository: gh<_i200.TeamsRepository>(),
+      ),
+    );
+    gh.factory<_i746.RespondToInvitationUseCase>(
+      () => _i746.RespondToInvitationUseCase(
+        repository: gh<_i200.TeamsRepository>(),
+      ),
+    );
+    gh.factory<_i746.WithdrawInvitationUseCase>(
+      () => _i746.WithdrawInvitationUseCase(
+        repository: gh<_i200.TeamsRepository>(),
+      ),
+    );
+    gh.factory<_i746.RemoveMemberFromTeamUseCase>(
+      () => _i746.RemoveMemberFromTeamUseCase(
+        repository: gh<_i200.TeamsRepository>(),
+      ),
+    );
     gh.factory<_i415.EventsCubit>(
       () => _i415.EventsCubit(
         getTournaments: gh<_i116.GetTournaments>(),
@@ -321,6 +387,20 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i74.FollowPlayer>(),
         gh<_i74.UnfollowPlayer>(),
         gh<_i607.ProPlayersRemoteDataSource>(),
+      ),
+    );
+    gh.factory<_i317.TeamsCubit>(
+      () => _i317.TeamsCubit(
+        gh<_i746.GetUserTeamsUseCase>(),
+        gh<_i746.CreateTeamUseCase>(),
+        gh<_i746.DeleteTeamUseCase>(),
+        gh<_i746.GetTeamDetailsUseCase>(),
+        gh<_i746.GetAvailableMembersUseCase>(),
+        gh<_i746.InviteUserToTeamUseCase>(),
+        gh<_i746.GetTeamInvitationsUseCase>(),
+        gh<_i746.RespondToInvitationUseCase>(),
+        gh<_i746.WithdrawInvitationUseCase>(),
+        gh<_i746.RemoveMemberFromTeamUseCase>(),
       ),
     );
     return this;

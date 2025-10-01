@@ -285,7 +285,9 @@ class _CreateTournamentBottomSheetState
                         return 'Percentage is required for Scratch tournaments';
                       }
                       final percentage = double.tryParse(value!);
-                      if (percentage == null || percentage < 0 || percentage > 100) {
+                      if (percentage == null ||
+                          percentage < 0 ||
+                          percentage > 100) {
                         return 'Enter a valid percentage (0-100)';
                       }
                     }
@@ -583,11 +585,13 @@ class _CreateTournamentBottomSheetState
         participantsCount: _participantsCount,
         accessType: _selectedAccessType,
         tournamentType: _selectedTournamentType,
-        average: _averageController.text.isNotEmpty 
-            ? double.tryParse(_averageController.text) 
+        average: _averageController.text.isNotEmpty
+            ? double.tryParse(_averageController.text)
             : null,
-        percentage: _selectedTournamentType == 'Scratch' && _percentageController.text.isNotEmpty 
-            ? double.tryParse(_percentageController.text) 
+        percentage:
+            _selectedTournamentType == 'Scratch' &&
+                _percentageController.text.isNotEmpty
+            ? double.tryParse(_percentageController.text)
             : null,
       );
 
@@ -626,12 +630,18 @@ class _CreateTournamentBottomSheetState
           child: GestureDetector(
             onTap: () => _selectTournamentType(type),
             child: Container(
-              margin: EdgeInsets.only(right: type == _tournamentTypes.last ? 0 : 8.w),
+              margin: EdgeInsets.only(
+                right: type == _tournamentTypes.last ? 0 : 8.w,
+              ),
               padding: EdgeInsets.all(AppSpacing.sm),
               decoration: BoxDecoration(
-                color: isSelected ? AppColors.primaryLimeGreen.withOpacity(0.1) : AppColors.gray50,
+                color: isSelected
+                    ? AppColors.primaryLimeGreen.withOpacity(0.1)
+                    : AppColors.gray50,
                 border: Border.all(
-                  color: isSelected ? AppColors.primaryLimeGreen : AppColors.gray200,
+                  color: isSelected
+                      ? AppColors.primaryLimeGreen
+                      : AppColors.gray200,
                   width: 1.5,
                 ),
                 borderRadius: BorderRadius.circular(12),
@@ -643,7 +653,9 @@ class _CreateTournamentBottomSheetState
                     type,
                     style: AppTextStyles.labelMedium.copyWith(
                       fontWeight: FontWeight.w600,
-                      color: isSelected ? AppColors.primaryLimeGreen : AppColors.gray700,
+                      color: isSelected
+                          ? AppColors.primaryLimeGreen
+                          : AppColors.gray700,
                     ),
                   ),
                   SizedBox(height: 4.h),

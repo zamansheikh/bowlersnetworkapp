@@ -50,8 +50,12 @@ class TournamentModel extends Tournament {
       participantsCount: json['participants_count'] as int?,
       description: json['description'] as String?,
       status: json['status'] as String?,
-      average: json['average'] != null ? (json['average'] as num).toDouble() : null,
-      percentage: json['percentage'] != null ? (json['percentage'] as num).toDouble() : null,
+      average: json['average'] != null
+          ? (json['average'] as num).toDouble()
+          : null,
+      percentage: json['percentage'] != null
+          ? (json['percentage'] as num).toDouble()
+          : null,
     );
   }
 

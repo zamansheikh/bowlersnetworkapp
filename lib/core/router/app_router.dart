@@ -19,6 +19,8 @@ import '../../features/events/presentation/pages/events_page.dart';
 import '../../features/tournaments/presentation/pages/tournaments_page.dart';
 import '../../features/tournaments/presentation/pages/tournament_detail_page.dart';
 import '../../features/tournaments/domain/entities/tournament.dart';
+import '../../features/teams/presentation/pages/teams_page.dart';
+import '../../features/teams/presentation/pages/team_details_page.dart';
 import '../widgets/main_shell.dart';
 
 class AppRouter {
@@ -119,6 +121,11 @@ class AppRouter {
               builder: (context, state) => const TournamentsPage(),
             ),
             GoRoute(
+              path: '/teams',
+              name: 'teams',
+              builder: (context, state) => const TeamsPage(),
+            ),
+            GoRoute(
               path: '/profile',
               name: 'profile',
               builder: (context, state) => const UserProfilePage(),
@@ -202,6 +209,14 @@ class AppRouter {
               tournamentId: tournamentId,
               tournament: tournament,
             );
+          },
+        ),
+        GoRoute(
+          path: '/teams/:id',
+          name: 'team-detail',
+          builder: (context, state) {
+            final teamId = state.pathParameters['id']!;
+            return TeamDetailsPage(teamId: teamId);
           },
         ),
       ],
