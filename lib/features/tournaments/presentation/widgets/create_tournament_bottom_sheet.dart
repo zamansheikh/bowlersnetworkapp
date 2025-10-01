@@ -11,15 +11,17 @@ class CreateTournamentBottomSheet extends StatefulWidget {
   const CreateTournamentBottomSheet({super.key});
 
   @override
-  State<CreateTournamentBottomSheet> createState() => _CreateTournamentBottomSheetState();
+  State<CreateTournamentBottomSheet> createState() =>
+      _CreateTournamentBottomSheetState();
 }
 
-class _CreateTournamentBottomSheetState extends State<CreateTournamentBottomSheet> {
+class _CreateTournamentBottomSheetState
+    extends State<CreateTournamentBottomSheet> {
   final _formKey = GlobalKey<FormState>();
   final _nameController = TextEditingController();
   final _addressController = TextEditingController();
   final _regFeeController = TextEditingController();
-  
+
   DateTime? _startDate;
   DateTime? _regDeadline;
   String _selectedFormat = 'Singles';
@@ -178,7 +180,9 @@ class _CreateTournamentBottomSheetState extends State<CreateTournamentBottomShee
               SizedBox(height: AppSpacing.xs),
               TextFormField(
                 controller: _regFeeController,
-                keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                keyboardType: const TextInputType.numberWithOptions(
+                  decimal: true,
+                ),
                 decoration: _buildInputDecoration('0.00'),
                 validator: (value) {
                   if (value?.isEmpty ?? true) {
@@ -248,7 +252,9 @@ class _CreateTournamentBottomSheetState extends State<CreateTournamentBottomShee
                           height: 20,
                           child: CircularProgressIndicator(
                             strokeWidth: 2,
-                            valueColor: AlwaysStoppedAnimation<Color>(AppColors.white),
+                            valueColor: AlwaysStoppedAnimation<Color>(
+                              AppColors.white,
+                            ),
                           ),
                         )
                       : Text(
@@ -298,7 +304,7 @@ class _CreateTournamentBottomSheetState extends State<CreateTournamentBottomShee
     return Row(
       children: _formats.map((format) {
         final isSelected = _selectedFormat == format;
-        
+
         return Expanded(
           child: GestureDetector(
             onTap: () => _selectFormat(format),
@@ -306,13 +312,13 @@ class _CreateTournamentBottomSheetState extends State<CreateTournamentBottomShee
               margin: const EdgeInsets.only(right: 8),
               padding: const EdgeInsets.symmetric(vertical: 12),
               decoration: BoxDecoration(
-                color: isSelected 
-                    ? AppColors.primaryLimeGreen 
+                color: isSelected
+                    ? AppColors.primaryLimeGreen
                     : Colors.transparent,
                 borderRadius: BorderRadius.circular(8),
                 border: Border.all(
-                  color: isSelected 
-                      ? AppColors.primaryLimeGreen 
+                  color: isSelected
+                      ? AppColors.primaryLimeGreen
                       : AppColors.gray300,
                 ),
               ),
@@ -329,7 +335,9 @@ class _CreateTournamentBottomSheetState extends State<CreateTournamentBottomShee
                   Text(
                     _getFormatDescription(format),
                     style: AppTextStyles.bodySmall.copyWith(
-                      color: isSelected ? AppColors.white.withValues(alpha: 0.8) : AppColors.gray500,
+                      color: isSelected
+                          ? AppColors.white.withValues(alpha: 0.8)
+                          : AppColors.gray500,
                       fontSize: 10.sp,
                     ),
                     textAlign: TextAlign.center,
@@ -364,9 +372,7 @@ class _CreateTournamentBottomSheetState extends State<CreateTournamentBottomShee
           children: [
             Expanded(
               child: Text(
-                value != null 
-                    ? DateFormat('MMM dd, yyyy').format(value) 
-                    : hint,
+                value != null ? DateFormat('MMM dd, yyyy').format(value) : hint,
                 style: AppTextStyles.bodyMedium.copyWith(
                   color: value != null ? AppColors.gray900 : AppColors.gray500,
                 ),
@@ -388,10 +394,7 @@ class _CreateTournamentBottomSheetState extends State<CreateTournamentBottomShee
       value: _selectedAccessType,
       decoration: _buildInputDecoration('Select access type'),
       items: _accessTypes.map((type) {
-        return DropdownMenuItem(
-          value: type,
-          child: Text(type),
-        );
+        return DropdownMenuItem(value: type, child: Text(type));
       }).toList(),
       onChanged: (value) {
         if (value != null) {
@@ -419,7 +422,7 @@ class _CreateTournamentBottomSheetState extends State<CreateTournamentBottomShee
   void _selectFormat(String format) {
     setState(() {
       _selectedFormat = format;
-      
+
       // Update participants count based on format
       switch (format) {
         case 'Singles':
@@ -444,9 +447,9 @@ class _CreateTournamentBottomSheetState extends State<CreateTournamentBottomShee
       builder: (context, child) {
         return Theme(
           data: Theme.of(context).copyWith(
-            colorScheme: Theme.of(context).colorScheme.copyWith(
-              primary: AppColors.primaryLimeGreen,
-            ),
+            colorScheme: Theme.of(
+              context,
+            ).colorScheme.copyWith(primary: AppColors.primaryLimeGreen),
           ),
           child: child!,
         );

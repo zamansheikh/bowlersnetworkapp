@@ -80,10 +80,12 @@ class TournamentCard extends StatelessWidget {
               // Tournament details
               _buildDetailRow(
                 Icons.location_on_outlined,
-                tournament.address.isEmpty ? 'Location TBD' : tournament.address,
+                tournament.address.isEmpty
+                    ? 'Location TBD'
+                    : tournament.address,
                 AppColors.error,
               ),
-              
+
               SizedBox(height: AppSpacing.xs),
 
               _buildDetailRow(
@@ -91,7 +93,7 @@ class TournamentCard extends StatelessWidget {
                 DateFormat('MMM dd, yyyy').format(tournament.startDateTime),
                 AppColors.info,
               ),
-              
+
               SizedBox(height: AppSpacing.xs),
 
               _buildDetailRow(
@@ -99,7 +101,7 @@ class TournamentCard extends StatelessWidget {
                 '\$${tournament.regFee.toStringAsFixed(0)}',
                 AppColors.warning,
               ),
-              
+
               SizedBox(height: AppSpacing.xs),
 
               _buildDetailRow(
@@ -107,7 +109,7 @@ class TournamentCard extends StatelessWidget {
                 tournament.format,
                 AppColors.primaryLimeGreen,
               ),
-              
+
               SizedBox(height: AppSpacing.xs),
 
               _buildDetailRow(
@@ -146,20 +148,20 @@ class TournamentCard extends StatelessWidget {
                       ),
                     ),
                   ),
-                  
+
                   SizedBox(width: AppSpacing.sm),
 
                   Expanded(
                     child: Container(
                       height: 40.h,
                       decoration: BoxDecoration(
-                        color: tournament.isRegistered 
-                            ? Colors.transparent 
+                        color: tournament.isRegistered
+                            ? Colors.transparent
                             : Colors.transparent,
                         borderRadius: BorderRadius.circular(8),
                         border: Border.all(
-                          color: tournament.isRegistered 
-                              ? AppColors.error 
+                          color: tournament.isRegistered
+                              ? AppColors.error
                               : AppColors.primaryLimeGreen,
                           width: 2,
                         ),
@@ -170,26 +172,26 @@ class TournamentCard extends StatelessWidget {
                           borderRadius: BorderRadius.circular(8),
                           onTap: isRegistering ? null : onRegister,
                           child: Center(
-                            child: isRegistering 
+                            child: isRegistering
                                 ? SizedBox(
                                     width: 20,
                                     height: 20,
                                     child: CircularProgressIndicator(
                                       strokeWidth: 2,
                                       valueColor: AlwaysStoppedAnimation<Color>(
-                                        tournament.isRegistered 
-                                            ? AppColors.error 
+                                        tournament.isRegistered
+                                            ? AppColors.error
                                             : AppColors.primaryLimeGreen,
                                       ),
                                     ),
                                   )
                                 : Text(
-                                    tournament.isRegistered 
-                                        ? 'Unregister' 
+                                    tournament.isRegistered
+                                        ? 'Unregister'
                                         : 'Register',
                                     style: AppTextStyles.labelMedium.copyWith(
-                                      color: tournament.isRegistered 
-                                          ? AppColors.error 
+                                      color: tournament.isRegistered
+                                          ? AppColors.error
                                           : AppColors.primaryLimeGreen,
                                       fontWeight: FontWeight.w600,
                                     ),
@@ -211,11 +213,7 @@ class TournamentCard extends StatelessWidget {
   Widget _buildDetailRow(IconData icon, String text, Color color) {
     return Row(
       children: [
-        Icon(
-          icon,
-          size: 16,
-          color: color,
-        ),
+        Icon(icon, size: 16, color: color),
         SizedBox(width: 8.w),
         Expanded(
           child: Text(

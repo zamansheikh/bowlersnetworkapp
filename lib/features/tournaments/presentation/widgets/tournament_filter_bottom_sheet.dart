@@ -10,10 +10,7 @@ import '../bloc/tournament_state.dart';
 class TournamentFilterBottomSheet extends StatelessWidget {
   final TournamentLoaded state;
 
-  const TournamentFilterBottomSheet({
-    super.key,
-    required this.state,
-  });
+  const TournamentFilterBottomSheet({super.key, required this.state});
 
   @override
   Widget build(BuildContext context) {
@@ -130,25 +127,26 @@ class TournamentFilterBottomSheet extends StatelessWidget {
 
   Widget _buildFormatFilters(BuildContext context, TournamentLoaded state) {
     final formats = ['Singles', 'Doubles', 'Teams'];
-    
+
     return Wrap(
       spacing: 8,
       runSpacing: 8,
       children: formats.map((format) {
         final isSelected = state.selectedFormats.contains(format);
-        
+
         return GestureDetector(
-          onTap: () => context.read<TournamentCubit>().toggleFormatFilter(format),
+          onTap: () =>
+              context.read<TournamentCubit>().toggleFormatFilter(format),
           child: Container(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
             decoration: BoxDecoration(
-              color: isSelected 
-                  ? AppColors.primaryLimeGreen 
+              color: isSelected
+                  ? AppColors.primaryLimeGreen
                   : Colors.transparent,
               borderRadius: BorderRadius.circular(25),
               border: Border.all(
-                color: isSelected 
-                    ? AppColors.primaryLimeGreen 
+                color: isSelected
+                    ? AppColors.primaryLimeGreen
                     : AppColors.gray400,
                 width: 2,
               ),
@@ -177,27 +175,31 @@ class TournamentFilterBottomSheet extends StatelessWidget {
     );
   }
 
-  Widget _buildAccessLevelFilters(BuildContext context, TournamentLoaded state) {
+  Widget _buildAccessLevelFilters(
+    BuildContext context,
+    TournamentLoaded state,
+  ) {
     final accessLevels = ['Under \$50'];
-    
+
     return Column(
       children: accessLevels.map((level) {
         final isSelected = state.selectedAccessLevels.contains(level);
-        
+
         return GestureDetector(
-          onTap: () => context.read<TournamentCubit>().toggleAccessLevelFilter(level),
+          onTap: () =>
+              context.read<TournamentCubit>().toggleAccessLevelFilter(level),
           child: Container(
             width: double.infinity,
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
             margin: const EdgeInsets.only(bottom: 8),
             decoration: BoxDecoration(
-              color: isSelected 
+              color: isSelected
                   ? AppColors.primaryLimeGreen.withValues(alpha: 0.15)
                   : AppColors.gray50,
               borderRadius: BorderRadius.circular(12),
               border: Border.all(
-                color: isSelected 
-                    ? AppColors.primaryLimeGreen 
+                color: isSelected
+                    ? AppColors.primaryLimeGreen
                     : AppColors.gray200,
                 width: 1,
               ),
@@ -207,14 +209,18 @@ class TournamentFilterBottomSheet extends StatelessWidget {
                 Icon(
                   Icons.attach_money,
                   size: 20,
-                  color: isSelected ? AppColors.primaryLimeGreen : AppColors.gray600,
+                  color: isSelected
+                      ? AppColors.primaryLimeGreen
+                      : AppColors.gray600,
                 ),
                 SizedBox(width: 12),
                 Expanded(
                   child: Text(
                     level,
                     style: AppTextStyles.bodyMedium.copyWith(
-                      color: isSelected ? AppColors.primaryLimeGreen : AppColors.gray700,
+                      color: isSelected
+                          ? AppColors.primaryLimeGreen
+                          : AppColors.gray700,
                       fontWeight: FontWeight.w500,
                     ),
                   ),

@@ -3,7 +3,6 @@ import '../entities/tournament.dart';
 import '../repositories/tournament_repository.dart';
 
 @injectable
-
 class GetTournamentsUseCase {
   final TournamentRepository repository;
 

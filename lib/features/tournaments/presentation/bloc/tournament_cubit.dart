@@ -5,7 +5,6 @@ import '../../domain/usecases/tournament_usecases.dart';
 import 'tournament_state.dart';
 
 @injectable
-
 class TournamentCubit extends Cubit<TournamentState> {
   final GetTournamentsUseCase getTournaments;
   final GetTournamentByIdUseCase getTournamentById;
@@ -79,7 +78,9 @@ class TournamentCubit extends Cubit<TournamentState> {
   void toggleAccessLevelFilter(String accessLevel) {
     final currentState = state;
     if (currentState is TournamentLoaded) {
-      final currentLevels = List<String>.from(currentState.selectedAccessLevels);
+      final currentLevels = List<String>.from(
+        currentState.selectedAccessLevels,
+      );
       if (currentLevels.contains(accessLevel)) {
         currentLevels.remove(accessLevel);
       } else {
@@ -92,11 +93,13 @@ class TournamentCubit extends Cubit<TournamentState> {
   void resetFilters() {
     final currentState = state;
     if (currentState is TournamentLoaded) {
-      emit(currentState.copyWith(
-        searchTerm: '',
-        selectedFormats: [],
-        selectedAccessLevels: [],
-      ));
+      emit(
+        currentState.copyWith(
+          searchTerm: '',
+          selectedFormats: [],
+          selectedAccessLevels: [],
+        ),
+      );
     }
   }
 
@@ -107,7 +110,7 @@ class TournamentCubit extends Cubit<TournamentState> {
       if (tournament.isRegistered) {
         // Unregister
         await unregisterFromTournament(tournament.id);
-        
+
         // Update the tournament in the list
         final currentState = state;
         if (currentState is TournamentLoaded) {
@@ -119,15 +122,17 @@ class TournamentCubit extends Cubit<TournamentState> {
           }).toList();
 
           emit(currentState.copyWith(tournaments: updatedTournaments));
-          emit(TournamentRegistrationSuccess(
-            tournament: tournament.copyWith(alreadyEnrolled: 0),
-            wasRegistered: false,
-          ));
+          emit(
+            TournamentRegistrationSuccess(
+              tournament: tournament.copyWith(alreadyEnrolled: 0),
+              wasRegistered: false,
+            ),
+          );
         }
       } else {
         // Register
         await registerForTournament(tournament.id);
-        
+
         // Update the tournament in the list
         final currentState = state;
         if (currentState is TournamentLoaded) {
@@ -139,17 +144,18 @@ class TournamentCubit extends Cubit<TournamentState> {
           }).toList();
 
           emit(currentState.copyWith(tournaments: updatedTournaments));
-          emit(TournamentRegistrationSuccess(
-            tournament: tournament.copyWith(alreadyEnrolled: 1),
-            wasRegistered: true,
-          ));
+          emit(
+            TournamentRegistrationSuccess(
+              tournament: tournament.copyWith(alreadyEnrolled: 1),
+              wasRegistered: true,
+            ),
+          );
         }
       }
 
       // Return to loaded state after a brief delay
       await Future.delayed(const Duration(milliseconds: 500));
       await refreshTournaments();
-      
     } catch (e) {
       emit(TournamentError(message: e.toString()));
       await Future.delayed(const Duration(seconds: 2));
@@ -169,7 +175,7 @@ class TournamentCubit extends Cubit<TournamentState> {
   }) async {
     try {
       emit(TournamentLoading());
-      
+
       await createTournament(
         name: name,
         startDate: startDate,
@@ -180,7 +186,7 @@ class TournamentCubit extends Cubit<TournamentState> {
         participantsCount: participantsCount,
         accessType: accessType,
       );
-      
+
       // Refresh the tournaments list after creation
       await loadTournaments();
     } catch (e) {

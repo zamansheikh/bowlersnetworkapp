@@ -47,7 +47,8 @@ class _TournamentsPageState extends State<TournamentsPage> {
             _buildHeader(),
             Expanded(
               child: RefreshIndicator(
-                onRefresh: () => context.read<TournamentCubit>().refreshTournaments(),
+                onRefresh: () =>
+                    context.read<TournamentCubit>().refreshTournaments(),
                 color: AppColors.primaryLimeGreen,
                 child: BlocConsumer<TournamentCubit, TournamentState>(
                   listener: (context, state) {
@@ -109,9 +110,7 @@ class _TournamentsPageState extends State<TournamentsPage> {
       padding: EdgeInsets.fromLTRB(20.w, 16.h, 20.w, 16.h),
       decoration: const BoxDecoration(
         color: AppColors.white,
-        border: Border(
-          bottom: BorderSide(color: AppColors.gray200, width: 1),
-        ),
+        border: Border(bottom: BorderSide(color: AppColors.gray200, width: 1)),
       ),
       child: Row(
         children: [
@@ -150,7 +149,7 @@ class _TournamentsPageState extends State<TournamentsPage> {
       children: [
         // Search and Filter Section
         _buildSearchAndFilter(state),
-        
+
         // Tabs Section
         _buildTabs(state),
 
@@ -198,7 +197,9 @@ class _TournamentsPageState extends State<TournamentsPage> {
                     ),
                     focusedBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(12),
-                      borderSide: const BorderSide(color: AppColors.primaryLimeGreen),
+                      borderSide: const BorderSide(
+                        color: AppColors.primaryLimeGreen,
+                      ),
                     ),
                     contentPadding: EdgeInsets.symmetric(
                       horizontal: AppSpacing.md,
@@ -225,7 +226,8 @@ class _TournamentsPageState extends State<TournamentsPage> {
               ),
             ],
           ),
-          if (state.selectedFormats.isNotEmpty || state.selectedAccessLevels.isNotEmpty) ...[
+          if (state.selectedFormats.isNotEmpty ||
+              state.selectedAccessLevels.isNotEmpty) ...[
             SizedBox(height: AppSpacing.sm),
             _buildActiveFilters(state),
           ],
@@ -320,7 +322,9 @@ class _TournamentsPageState extends State<TournamentsPage> {
         scrollDirection: Axis.horizontal,
         padding: EdgeInsets.symmetric(horizontal: AppSpacing.lg),
         child: Row(
-          children: _tabs.map((tab) => _buildTabItem(tab, state.activeTab)).toList(),
+          children: _tabs
+              .map((tab) => _buildTabItem(tab, state.activeTab))
+              .toList(),
         ),
       ),
     );
@@ -328,7 +332,7 @@ class _TournamentsPageState extends State<TournamentsPage> {
 
   Widget _buildTabItem(String tab, String activeTab) {
     final isActive = tab == activeTab;
-    
+
     return GestureDetector(
       onTap: () => context.read<TournamentCubit>().setActiveTab(tab),
       child: Container(
@@ -359,7 +363,7 @@ class _TournamentsPageState extends State<TournamentsPage> {
       itemCount: state.filteredTournaments.length,
       itemBuilder: (context, index) {
         final tournament = state.filteredTournaments[index];
-        
+
         return Padding(
           padding: EdgeInsets.only(bottom: AppSpacing.md),
           child: TournamentCard(
@@ -395,9 +399,9 @@ class _TournamentsPageState extends State<TournamentsPage> {
             ),
             SizedBox(height: AppSpacing.lg),
             Text(
-              state.searchTerm.isNotEmpty || 
-              state.selectedFormats.isNotEmpty || 
-              state.selectedAccessLevels.isNotEmpty
+              state.searchTerm.isNotEmpty ||
+                      state.selectedFormats.isNotEmpty ||
+                      state.selectedAccessLevels.isNotEmpty
                   ? 'No tournaments match your filters'
                   : state.activeTab == 'Registered'
                   ? 'No registered tournaments'
@@ -411,9 +415,9 @@ class _TournamentsPageState extends State<TournamentsPage> {
             ),
             SizedBox(height: AppSpacing.sm),
             Text(
-              state.searchTerm.isNotEmpty || 
-              state.selectedFormats.isNotEmpty || 
-              state.selectedAccessLevels.isNotEmpty
+              state.searchTerm.isNotEmpty ||
+                      state.selectedFormats.isNotEmpty ||
+                      state.selectedAccessLevels.isNotEmpty
                   ? 'Try adjusting your filters'
                   : 'Check back later for new tournaments',
               style: AppTextStyles.bodyMedium.copyWith(
@@ -434,11 +438,7 @@ class _TournamentsPageState extends State<TournamentsPage> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            const Icon(
-              Icons.error_outline,
-              size: 64,
-              color: AppColors.error,
-            ),
+            const Icon(Icons.error_outline, size: 64, color: AppColors.error),
             SizedBox(height: AppSpacing.lg),
             Text(
               'Something went wrong',
@@ -458,7 +458,8 @@ class _TournamentsPageState extends State<TournamentsPage> {
             SizedBox(height: AppSpacing.lg),
             CustomButton(
               text: 'Retry',
-              onPressed: () => context.read<TournamentCubit>().loadTournaments(),
+              onPressed: () =>
+                  context.read<TournamentCubit>().loadTournaments(),
             ),
           ],
         ),

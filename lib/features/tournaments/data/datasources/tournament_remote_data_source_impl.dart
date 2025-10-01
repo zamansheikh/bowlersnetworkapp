@@ -7,7 +7,6 @@ import '../../domain/entities/tournament.dart';
 import 'tournament_remote_data_source.dart';
 
 @Injectable(as: TournamentRemoteDataSource)
-
 class TournamentRemoteDataSourceImpl implements TournamentRemoteDataSource {
   final Dio _dio;
   final SharedPreferences _prefs;
@@ -17,7 +16,9 @@ class TournamentRemoteDataSourceImpl implements TournamentRemoteDataSource {
   @override
   Future<List<Tournament>> getTournaments() async {
     try {
-      print('🏆 TournamentDataSource: Fetching tournaments from /api/tournaments');
+      print(
+        '🏆 TournamentDataSource: Fetching tournaments from /api/tournaments',
+      );
 
       final response = await _dio.get(
         '/api/tournaments',
@@ -30,9 +31,11 @@ class TournamentRemoteDataSourceImpl implements TournamentRemoteDataSource {
       if (response.statusCode == 200) {
         final List<dynamic> data = response.data as List<dynamic>;
         final tournaments = data
-            .map((json) => TournamentModel.fromJson(json as Map<String, dynamic>))
+            .map(
+              (json) => TournamentModel.fromJson(json as Map<String, dynamic>),
+            )
             .toList();
-        
+
         return tournaments.map((model) => model.toEntity()).toList();
       } else {
         throw Exception('Failed to load tournaments: ${response.statusCode}');
@@ -75,14 +78,18 @@ class TournamentRemoteDataSourceImpl implements TournamentRemoteDataSource {
   @override
   Future<void> registerForTournament(int tournamentId) async {
     try {
-      print('🏆 TournamentDataSource: Registering for tournament $tournamentId');
+      print(
+        '🏆 TournamentDataSource: Registering for tournament $tournamentId',
+      );
 
       final response = await _dio.post(
         '/api/tournaments/$tournamentId/register',
         options: _getOptionsWithAuth(),
       );
 
-      print('🏆 TournamentDataSource: Registration response: ${response.statusCode}');
+      print(
+        '🏆 TournamentDataSource: Registration response: ${response.statusCode}',
+      );
 
       if (response.statusCode != 200 && response.statusCode != 201) {
         throw Exception('Failed to register: ${response.statusCode}');
@@ -101,14 +108,18 @@ class TournamentRemoteDataSourceImpl implements TournamentRemoteDataSource {
   @override
   Future<void> unregisterFromTournament(int tournamentId) async {
     try {
-      print('🏆 TournamentDataSource: Unregistering from tournament $tournamentId');
+      print(
+        '🏆 TournamentDataSource: Unregistering from tournament $tournamentId',
+      );
 
       final response = await _dio.delete(
         '/api/tournaments/$tournamentId/register',
         options: _getOptionsWithAuth(),
       );
 
-      print('🏆 TournamentDataSource: Unregistration response: ${response.statusCode}');
+      print(
+        '🏆 TournamentDataSource: Unregistration response: ${response.statusCode}',
+      );
 
       if (response.statusCode != 200 && response.statusCode != 204) {
         throw Exception('Failed to unregister: ${response.statusCode}');
@@ -150,7 +161,7 @@ class TournamentRemoteDataSourceImpl implements TournamentRemoteDataSource {
       };
 
       final response = await _dio.post(
-        '/api/tournaments', 
+        '/api/tournaments',
         data: data,
         options: _getOptionsWithAuth(),
       );
@@ -158,7 +169,9 @@ class TournamentRemoteDataSourceImpl implements TournamentRemoteDataSource {
       print('🏆 TournamentDataSource: Create response: ${response.statusCode}');
 
       if (response.statusCode == 200 || response.statusCode == 201) {
-        final tournamentModel = TournamentModel.fromJson(response.data as Map<String, dynamic>);
+        final tournamentModel = TournamentModel.fromJson(
+          response.data as Map<String, dynamic>,
+        );
         return tournamentModel.toEntity();
       } else {
         throw Exception('Failed to create tournament: ${response.statusCode}');
@@ -178,9 +191,13 @@ class TournamentRemoteDataSourceImpl implements TournamentRemoteDataSource {
   Future<List<Tournament>> getUserRegisteredTournaments() async {
     try {
       final allTournaments = await getTournaments();
-      return allTournaments.where((tournament) => tournament.isRegistered).toList();
+      return allTournaments
+          .where((tournament) => tournament.isRegistered)
+          .toList();
     } catch (e) {
-      print('🏆 TournamentDataSource: Error fetching registered tournaments: $e');
+      print(
+        '🏆 TournamentDataSource: Error fetching registered tournaments: $e',
+      );
       rethrow;
     }
   }
@@ -189,9 +206,13 @@ class TournamentRemoteDataSourceImpl implements TournamentRemoteDataSource {
   Future<List<Tournament>> getAvailableTournaments() async {
     try {
       final allTournaments = await getTournaments();
-      return allTournaments.where((tournament) => !tournament.isRegistered).toList();
+      return allTournaments
+          .where((tournament) => !tournament.isRegistered)
+          .toList();
     } catch (e) {
-      print('🏆 TournamentDataSource: Error fetching available tournaments: $e');
+      print(
+        '🏆 TournamentDataSource: Error fetching available tournaments: $e',
+      );
       rethrow;
     }
   }
@@ -204,14 +225,16 @@ class TournamentRemoteDataSourceImpl implements TournamentRemoteDataSource {
   Options _getOptionsWithAuth() {
     final options = Options();
     final token = _getAuthToken();
-    
-    print('🏆 TournamentDataSource: Token retrieved: ${token != null ? 'Token exists (${token.length} chars)' : 'No token found'}');
-    
+
+    print(
+      '🏆 TournamentDataSource: Token retrieved: ${token != null ? 'Token exists (${token.length} chars)' : 'No token found'}',
+    );
+
     if (token != null) {
       options.headers = {'Authorization': 'Bearer $token'};
       print('🏆 TournamentDataSource: Added Authorization header');
     }
-    
+
     return options;
   }
 }

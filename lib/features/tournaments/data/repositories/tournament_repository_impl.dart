@@ -4,7 +4,6 @@ import '../../domain/repositories/tournament_repository.dart';
 import '../datasources/tournament_remote_data_source.dart';
 
 @Injectable(as: TournamentRepository)
-
 class TournamentRepositoryImpl implements TournamentRepository {
   final TournamentRemoteDataSource remoteDataSource;
 

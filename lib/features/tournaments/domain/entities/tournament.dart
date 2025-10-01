@@ -63,22 +63,22 @@ class Tournament extends Equatable {
 
   DateTime get startDateTime => DateTime.parse(startDate);
   DateTime get regDeadlineDateTime => DateTime.parse(regDeadline);
-  
+
   bool get isRegistrationOpen => DateTime.now().isBefore(regDeadlineDateTime);
 
   @override
   List<Object?> get props => [
-        id,
-        name,
-        startDate,
-        regDeadline,
-        address,
-        regFee,
-        accessType,
-        format,
-        alreadyEnrolled,
-        participantsCount,
-        description,
-        status,
-      ];
+    id,
+    name,
+    startDate,
+    regDeadline,
+    address,
+    regFee,
+    accessType,
+    format,
+    alreadyEnrolled,
+    participantsCount,
+    description,
+    status,
+  ];
 }

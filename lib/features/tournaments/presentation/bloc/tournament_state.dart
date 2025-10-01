@@ -16,7 +16,8 @@ class TournamentLoaded extends TournamentState {
   final List<Tournament> tournaments;
   final String activeTab; // 'All Tournament', 'Registered', 'Available'
   final String searchTerm;
-  final List<String> selectedFormats; // Filter by format (Singles, Doubles, Teams)
+  final List<String>
+  selectedFormats; // Filter by format (Singles, Doubles, Teams)
   final List<String> selectedAccessLevels; // Filter by access level/price
 
   const TournamentLoaded({
@@ -61,8 +62,10 @@ class TournamentLoaded extends TournamentState {
     // Filter by search term
     if (searchTerm.isNotEmpty) {
       filtered = filtered.where((tournament) {
-        return tournament.name.toLowerCase().contains(searchTerm.toLowerCase()) ||
-               tournament.address.toLowerCase().contains(searchTerm.toLowerCase());
+        return tournament.name.toLowerCase().contains(
+              searchTerm.toLowerCase(),
+            ) ||
+            tournament.address.toLowerCase().contains(searchTerm.toLowerCase());
       }).toList();
     }
 
@@ -75,7 +78,9 @@ class TournamentLoaded extends TournamentState {
 
     // Filter by access level (registration fee)
     if (selectedAccessLevels.contains('Under \$50')) {
-      filtered = filtered.where((tournament) => tournament.regFee < 50).toList();
+      filtered = filtered
+          .where((tournament) => tournament.regFee < 50)
+          .toList();
     }
 
     return filtered;
@@ -83,12 +88,12 @@ class TournamentLoaded extends TournamentState {
 
   @override
   List<Object?> get props => [
-        tournaments,
-        activeTab,
-        searchTerm,
-        selectedFormats,
-        selectedAccessLevels,
-      ];
+    tournaments,
+    activeTab,
+    searchTerm,
+    selectedFormats,
+    selectedAccessLevels,
+  ];
 }
 
 class TournamentError extends TournamentState {
@@ -111,7 +116,8 @@ class TournamentRegistering extends TournamentState {
 
 class TournamentRegistrationSuccess extends TournamentState {
   final Tournament tournament;
-  final bool wasRegistered; // true if just registered, false if just unregistered
+  final bool
+  wasRegistered; // true if just registered, false if just unregistered
 
   const TournamentRegistrationSuccess({
     required this.tournament,

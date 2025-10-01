@@ -31,7 +31,7 @@ class _TournamentDetailPageState extends State<TournamentDetailPage> {
   void initState() {
     super.initState();
     _currentTournament = widget.tournament;
-    
+
     // If we don't have tournament data, we could load it here
     // For now, we'll assume it's passed from the list
     if (_currentTournament == null) {
@@ -71,7 +71,7 @@ class _TournamentDetailPageState extends State<TournamentDetailPage> {
         },
         builder: (context, state) {
           final tournament = _currentTournament;
-          
+
           if (tournament == null) {
             return const Center(
               child: CircularProgressIndicator(
@@ -83,9 +83,7 @@ class _TournamentDetailPageState extends State<TournamentDetailPage> {
           return CustomScrollView(
             slivers: [
               _buildSliverAppBar(tournament),
-              SliverToBoxAdapter(
-                child: _buildContent(tournament, state),
-              ),
+              SliverToBoxAdapter(child: _buildContent(tournament, state)),
             ],
           );
         },
@@ -183,7 +181,7 @@ class _TournamentDetailPageState extends State<TournamentDetailPage> {
         children: [
           // Tournament Info Card
           _buildInfoCard(tournament),
-          
+
           SizedBox(height: AppSpacing.lg),
 
           // Registration Card
@@ -192,7 +190,8 @@ class _TournamentDetailPageState extends State<TournamentDetailPage> {
           SizedBox(height: AppSpacing.lg),
 
           // Description Card (if available)
-          if (tournament.description != null && tournament.description!.isNotEmpty)
+          if (tournament.description != null &&
+              tournament.description!.isNotEmpty)
             _buildDescriptionCard(tournament),
         ],
       ),
@@ -226,7 +225,7 @@ class _TournamentDetailPageState extends State<TournamentDetailPage> {
               ),
             ),
             SizedBox(height: AppSpacing.md),
-            
+
             // Information Grid
             Row(
               children: [
@@ -236,7 +235,9 @@ class _TournamentDetailPageState extends State<TournamentDetailPage> {
                       _buildInfoItem(
                         Icons.calendar_today,
                         'Start Date',
-                        DateFormat('MMM dd, yyyy • h:mm a').format(tournament.startDateTime),
+                        DateFormat(
+                          'MMM dd, yyyy • h:mm a',
+                        ).format(tournament.startDateTime),
                         AppColors.info,
                       ),
                       SizedBox(height: AppSpacing.md),
@@ -263,7 +264,9 @@ class _TournamentDetailPageState extends State<TournamentDetailPage> {
                       _buildInfoItem(
                         Icons.access_time,
                         'Registration Deadline',
-                        DateFormat('MMM dd, yyyy • h:mm a').format(tournament.regDeadlineDateTime),
+                        DateFormat(
+                          'MMM dd, yyyy • h:mm a',
+                        ).format(tournament.regDeadlineDateTime),
                         AppColors.error,
                       ),
                       SizedBox(height: AppSpacing.md),
@@ -277,7 +280,9 @@ class _TournamentDetailPageState extends State<TournamentDetailPage> {
                       _buildInfoItem(
                         Icons.location_on,
                         'Location',
-                        tournament.address.isEmpty ? 'Location TBD' : tournament.address,
+                        tournament.address.isEmpty
+                            ? 'Location TBD'
+                            : tournament.address,
                         AppColors.error,
                       ),
                     ],
@@ -291,7 +296,12 @@ class _TournamentDetailPageState extends State<TournamentDetailPage> {
     );
   }
 
-  Widget _buildInfoItem(IconData icon, String label, String value, Color color) {
+  Widget _buildInfoItem(
+    IconData icon,
+    String label,
+    String value,
+    Color color,
+  ) {
     return Column(
       children: [
         Container(
@@ -301,11 +311,7 @@ class _TournamentDetailPageState extends State<TournamentDetailPage> {
             color: color.withValues(alpha: 0.15),
             borderRadius: BorderRadius.circular(20),
           ),
-          child: Icon(
-            icon,
-            color: color,
-            size: 20,
-          ),
+          child: Icon(icon, color: color, size: 20),
         ),
         SizedBox(height: AppSpacing.xs),
         Text(
@@ -330,9 +336,9 @@ class _TournamentDetailPageState extends State<TournamentDetailPage> {
   }
 
   Widget _buildRegistrationCard(Tournament tournament, TournamentState state) {
-    final isRegistering = state is TournamentRegistering && 
-                         state.tournamentId == tournament.id;
-    
+    final isRegistering =
+        state is TournamentRegistering && state.tournamentId == tournament.id;
+
     return Container(
       decoration: BoxDecoration(
         color: AppColors.white,
@@ -359,7 +365,7 @@ class _TournamentDetailPageState extends State<TournamentDetailPage> {
               ),
             ),
             SizedBox(height: AppSpacing.md),
-            
+
             // Registration Details
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -411,8 +417,8 @@ class _TournamentDetailPageState extends State<TournamentDetailPage> {
                 Text(
                   tournament.isRegistered ? 'Registered' : 'Open',
                   style: AppTextStyles.labelMedium.copyWith(
-                    color: tournament.isRegistered 
-                        ? AppColors.success 
+                    color: tournament.isRegistered
+                        ? AppColors.success
                         : AppColors.info,
                     fontWeight: FontWeight.w600,
                   ),
@@ -427,15 +433,15 @@ class _TournamentDetailPageState extends State<TournamentDetailPage> {
               width: double.infinity,
               height: 48.h,
               child: ElevatedButton(
-                onPressed: isRegistering 
-                    ? null 
+                onPressed: isRegistering
+                    ? null
                     : () => _handleRegistration(tournament),
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: tournament.isRegistered 
-                      ? Colors.transparent 
+                  backgroundColor: tournament.isRegistered
+                      ? Colors.transparent
                       : AppColors.primaryLimeGreen,
-                  side: tournament.isRegistered 
-                      ? const BorderSide(color: AppColors.error, width: 2) 
+                  side: tournament.isRegistered
+                      ? const BorderSide(color: AppColors.error, width: 2)
                       : null,
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(12),
@@ -448,19 +454,19 @@ class _TournamentDetailPageState extends State<TournamentDetailPage> {
                         child: CircularProgressIndicator(
                           strokeWidth: 2,
                           valueColor: AlwaysStoppedAnimation<Color>(
-                            tournament.isRegistered 
-                                ? AppColors.error 
+                            tournament.isRegistered
+                                ? AppColors.error
                                 : AppColors.white,
                           ),
                         ),
                       )
                     : Text(
-                        tournament.isRegistered 
-                            ? 'Unregister from Tournament' 
+                        tournament.isRegistered
+                            ? 'Unregister from Tournament'
                             : 'Register for Tournament',
                         style: AppTextStyles.labelMedium.copyWith(
-                          color: tournament.isRegistered 
-                              ? AppColors.error 
+                          color: tournament.isRegistered
+                              ? AppColors.error
                               : AppColors.white,
                           fontWeight: FontWeight.w600,
                         ),
@@ -479,11 +485,7 @@ class _TournamentDetailPageState extends State<TournamentDetailPage> {
               ),
               child: Row(
                 children: [
-                  Icon(
-                    Icons.info_outline,
-                    size: 16,
-                    color: AppColors.info,
-                  ),
+                  Icon(Icons.info_outline, size: 16, color: AppColors.info),
                   SizedBox(width: 8),
                   Expanded(
                     child: Text(
