@@ -127,6 +127,12 @@ class AppDrawer extends StatelessWidget {
                     selected: currentPath.startsWith('/overview'),
                     onTap: () => _go(context, '/overview'),
                   ),
+                  _NavItem(
+                    icon: Icons.emoji_events,
+                    label: 'Tournaments',
+                    selected: currentPath.startsWith('/tournaments'),
+                    onTap: () => _go(context, '/tournaments'),
+                  ),
                   const SizedBox(height: 24),
                 ],
               ),

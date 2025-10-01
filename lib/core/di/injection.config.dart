@@ -94,6 +94,18 @@ import 'package:bowlersnetworkapp/features/pro_players/presentation/cubit/pro_pl
     as _i565;
 import 'package:bowlersnetworkapp/features/profile/presentation/cubit/profile_cubit.dart'
     as _i341;
+import 'package:bowlersnetworkapp/features/tournaments/data/datasources/tournament_remote_data_source.dart'
+    as _i829;
+import 'package:bowlersnetworkapp/features/tournaments/data/datasources/tournament_remote_data_source_impl.dart'
+    as _i333;
+import 'package:bowlersnetworkapp/features/tournaments/data/repositories/tournament_repository_impl.dart'
+    as _i937;
+import 'package:bowlersnetworkapp/features/tournaments/domain/repositories/tournament_repository.dart'
+    as _i334;
+import 'package:bowlersnetworkapp/features/tournaments/domain/usecases/tournament_usecases.dart'
+    as _i13;
+import 'package:bowlersnetworkapp/features/tournaments/presentation/bloc/tournament_cubit.dart'
+    as _i849;
 import 'package:dio/dio.dart' as _i361;
 import 'package:get_it/get_it.dart' as _i174;
 import 'package:injectable/injectable.dart' as _i526;
@@ -161,13 +173,59 @@ extension GetItInjectableX on _i174.GetIt {
     gh.lazySingleton<_i599.MessagesRepository>(
       () => _i528.MessagesRepositoryImpl(gh<_i154.MessagesRemoteDataSource>()),
     );
+    gh.factory<_i829.TournamentRemoteDataSource>(
+      () => _i333.TournamentRemoteDataSourceImpl(
+        gh<_i361.Dio>(),
+        gh<_i460.SharedPreferences>(),
+      ),
+    );
     gh.lazySingleton<_i924.EventsRepository>(
       () => _i686.EventsRepositoryImpl(
         remoteDataSource: gh<_i421.EventsRemoteDataSource>(),
       ),
     );
+    gh.factory<_i334.TournamentRepository>(
+      () => _i937.TournamentRepositoryImpl(
+        remoteDataSource: gh<_i829.TournamentRemoteDataSource>(),
+      ),
+    );
     gh.factory<_i450.GetUsers>(
       () => _i450.GetUsers(gh<_i637.UserRepository>()),
+    );
+    gh.factory<_i13.GetTournamentsUseCase>(
+      () => _i13.GetTournamentsUseCase(
+        repository: gh<_i334.TournamentRepository>(),
+      ),
+    );
+    gh.factory<_i13.GetTournamentByIdUseCase>(
+      () => _i13.GetTournamentByIdUseCase(
+        repository: gh<_i334.TournamentRepository>(),
+      ),
+    );
+    gh.factory<_i13.RegisterForTournamentUseCase>(
+      () => _i13.RegisterForTournamentUseCase(
+        repository: gh<_i334.TournamentRepository>(),
+      ),
+    );
+    gh.factory<_i13.UnregisterFromTournamentUseCase>(
+      () => _i13.UnregisterFromTournamentUseCase(
+        repository: gh<_i334.TournamentRepository>(),
+      ),
+    );
+    gh.factory<_i13.CreateTournamentUseCase>(
+      () => _i13.CreateTournamentUseCase(
+        repository: gh<_i334.TournamentRepository>(),
+      ),
+    );
+    gh.factory<_i13.GetUserRegisteredTournamentsUseCase>(
+      () => _i13.GetUserRegisteredTournamentsUseCase(
+        repository: gh<_i334.TournamentRepository>(),
+      ),
+    );
+    gh.factory<_i13.GetAvailableTournamentsUseCase>(
+      () => _i13.GetAvailableTournamentsUseCase(
+        repository: gh<_i334.TournamentRepository>(),
+      ),
     );
     gh.factory<_i547.OverviewCubit>(
       () => _i547.OverviewCubit(gh<_i659.OverviewRepository>()),
@@ -221,6 +279,18 @@ extension GetItInjectableX on _i174.GetIt {
     );
     gh.factory<_i74.UnfollowPlayer>(
       () => _i74.UnfollowPlayer(gh<_i1062.ProPlayersRepository>()),
+    );
+    gh.factory<_i849.TournamentCubit>(
+      () => _i849.TournamentCubit(
+        getTournaments: gh<_i13.GetTournamentsUseCase>(),
+        getTournamentById: gh<_i13.GetTournamentByIdUseCase>(),
+        registerForTournament: gh<_i13.RegisterForTournamentUseCase>(),
+        unregisterFromTournament: gh<_i13.UnregisterFromTournamentUseCase>(),
+        createTournament: gh<_i13.CreateTournamentUseCase>(),
+        getUserRegisteredTournaments:
+            gh<_i13.GetUserRegisteredTournamentsUseCase>(),
+        getAvailableTournaments: gh<_i13.GetAvailableTournamentsUseCase>(),
+      ),
     );
     gh.factory<_i384.SignupCubit>(
       () => _i384.SignupCubit(

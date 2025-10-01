@@ -16,6 +16,9 @@ import '../../features/pro_players/presentation/pages/player_detail_page.dart';
 import '../../features/overview/presentation/pages/overview_page.dart';
 import '../../features/messages/presentation/pages/messages_page.dart';
 import '../../features/events/presentation/pages/events_page.dart';
+import '../../features/tournaments/presentation/pages/tournaments_page.dart';
+import '../../features/tournaments/presentation/pages/tournament_detail_page.dart';
+import '../../features/tournaments/domain/entities/tournament.dart';
 import '../widgets/main_shell.dart';
 
 class AppRouter {
@@ -111,6 +114,11 @@ class AppRouter {
               builder: (context, state) => const EventsPage(),
             ),
             GoRoute(
+              path: '/tournaments',
+              name: 'tournaments',
+              builder: (context, state) => const TournamentsPage(),
+            ),
+            GoRoute(
               path: '/profile',
               name: 'profile',
               builder: (context, state) => const UserProfilePage(),
@@ -182,6 +190,18 @@ class AppRouter {
                 ? extra['userId']!
                 : userId;
             return PlayerDetailPage(userName: userId, userId: userIdParam);
+          },
+        ),
+        GoRoute(
+          path: '/tournaments/:id',
+          name: 'tournament-detail',
+          builder: (context, state) {
+            final tournamentId = int.parse(state.pathParameters['id']!);
+            final tournament = state.extra as Tournament?;
+            return TournamentDetailPage(
+              tournamentId: tournamentId,
+              tournament: tournament,
+            );
           },
         ),
       ],
