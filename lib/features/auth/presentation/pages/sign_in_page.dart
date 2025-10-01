@@ -34,7 +34,10 @@ class _SignInPageState extends State<SignInPage> {
       body: SafeArea(
         child: Center(
           child: SingleChildScrollView(
-            padding: EdgeInsets.symmetric(horizontal: AppSpacing.screenMargin),
+            padding: EdgeInsets.symmetric(
+              horizontal: 20.0,
+              vertical: AppSpacing.lg,
+            ),
             child: BlocConsumer<AuthCubit, AuthState>(
               listener: (context, state) {
                 if (state is Authenticated) {
@@ -50,15 +53,15 @@ class _SignInPageState extends State<SignInPage> {
                     mainAxisAlignment: MainAxisAlignment.center,
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
-                      SizedBox(height: AppSpacing.md),
+                      SizedBox(height: AppSpacing.lg),
 
                       // Logo and Welcome
                       Column(
                         children: [
                           // App Logo
                           Container(
-                            width: 100.w,
-                            height: 100.w,
+                            width: 80.0,
+                            height: 80.0,
                             decoration: BoxDecoration(
                               borderRadius: BorderRadius.circular(
                                 AppSpacing.radiusLG,
@@ -78,13 +81,13 @@ class _SignInPageState extends State<SignInPage> {
                               ),
                               child: Image.asset(
                                 'assets/icon/icon.png',
-                                width: 80.w,
-                                height: 80.w,
+                                width: 80.0,
+                                height: 80.0,
                                 fit: BoxFit.contain,
                               ),
                             ),
                           ),
-                          SizedBox(height: AppSpacing.lg),
+                          SizedBox(height: 16.0),
                           Text(
                             'Welcome Back!',
                             style: AppTextStyles.displaySmall.copyWith(
@@ -93,7 +96,7 @@ class _SignInPageState extends State<SignInPage> {
                             ),
                             textAlign: TextAlign.center,
                           ),
-                          SizedBox(height: AppSpacing.xs),
+                          SizedBox(height: 8.0),
                           Text(
                             'Sign in to continue your bowling journey',
                             style: AppTextStyles.bodyLarge.copyWith(
@@ -104,7 +107,7 @@ class _SignInPageState extends State<SignInPage> {
                         ],
                       ),
 
-                      SizedBox(height: AppSpacing.md),
+                      SizedBox(height: 24.0),
 
                       // Username Field
                       _buildTextField(
@@ -142,7 +145,7 @@ class _SignInPageState extends State<SignInPage> {
                         },
                       ),
 
-                      SizedBox(height: AppSpacing.md),
+                      SizedBox(height: 24.0),
 
                       // Sign In Button
                       if (state is AuthLoading)
@@ -206,7 +209,7 @@ class _SignInPageState extends State<SignInPage> {
                           ),
                         ),
 
-                      SizedBox(height: AppSpacing.lg),
+                      SizedBox(height: 32.0),
 
                       // Error Message
                       if (state is AuthError)
@@ -289,7 +292,7 @@ class _SignInPageState extends State<SignInPage> {
     String? Function(String?)? validator,
   }) {
     return Container(
-      margin: EdgeInsets.only(bottom: AppSpacing.sm),
+      margin: EdgeInsets.only(bottom: 16.0),
       child: TextFormField(
         controller: controller,
         keyboardType: keyboardType,
