@@ -11,9 +11,12 @@ class TournamentModel extends Tournament {
     required String accessType,
     required String format,
     required int alreadyEnrolled,
+    required String tournamentType,
     int? participantsCount,
     String? description,
     String? status,
+    double? average,
+    double? percentage,
   }) : super(
          id: id,
          name: name,
@@ -27,6 +30,9 @@ class TournamentModel extends Tournament {
          participantsCount: participantsCount,
          description: description,
          status: status,
+         tournamentType: tournamentType,
+         average: average,
+         percentage: percentage,
        );
 
   factory TournamentModel.fromJson(Map<String, dynamic> json) {
@@ -40,9 +46,12 @@ class TournamentModel extends Tournament {
       accessType: json['access_type'] as String,
       format: json['format'] as String,
       alreadyEnrolled: json['already_enrolled'] as int? ?? 0,
+      tournamentType: json['tournament_type'] as String? ?? 'Handicap',
       participantsCount: json['participants_count'] as int?,
       description: json['description'] as String?,
       status: json['status'] as String?,
+      average: json['average'] != null ? (json['average'] as num).toDouble() : null,
+      percentage: json['percentage'] != null ? (json['percentage'] as num).toDouble() : null,
     );
   }
 
@@ -60,6 +69,9 @@ class TournamentModel extends Tournament {
       'participants_count': participantsCount,
       'description': description,
       'status': status,
+      'tournament_type': tournamentType,
+      'average': average,
+      'percentage': percentage,
     };
   }
 
@@ -76,5 +88,8 @@ class TournamentModel extends Tournament {
     participantsCount: participantsCount,
     description: description,
     status: status,
+    tournamentType: tournamentType,
+    average: average,
+    percentage: percentage,
   );
 }

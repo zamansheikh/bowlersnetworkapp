@@ -55,6 +55,9 @@ class TournamentRepositoryImpl implements TournamentRepository {
     required String format,
     required int participantsCount,
     required String accessType,
+    required String tournamentType,
+    double? average,
+    double? percentage,
   }) async {
     try {
       return await remoteDataSource.createTournament(
@@ -66,6 +69,9 @@ class TournamentRepositoryImpl implements TournamentRepository {
         format: format,
         participantsCount: participantsCount,
         accessType: accessType,
+        tournamentType: tournamentType,
+        average: average,
+        percentage: percentage,
       );
     } catch (e) {
       throw Exception('Failed to create tournament: $e');

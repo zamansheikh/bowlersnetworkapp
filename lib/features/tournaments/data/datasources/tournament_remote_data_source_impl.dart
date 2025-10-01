@@ -145,6 +145,9 @@ class TournamentRemoteDataSourceImpl implements TournamentRemoteDataSource {
     required String format,
     required int participantsCount,
     required String accessType,
+    required String tournamentType,
+    double? average,
+    double? percentage,
   }) async {
     try {
       print('🏆 TournamentDataSource: Creating tournament: $name');
@@ -158,6 +161,9 @@ class TournamentRemoteDataSourceImpl implements TournamentRemoteDataSource {
         'format': format,
         'participants_count': participantsCount,
         'access_type': accessType,
+        'tournament_type': tournamentType,
+        if (average != null) 'average': average,
+        if (percentage != null) 'percentage': percentage,
       };
 
       final response = await _dio.post(

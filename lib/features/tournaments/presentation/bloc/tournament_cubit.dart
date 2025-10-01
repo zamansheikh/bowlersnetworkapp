@@ -172,6 +172,9 @@ class TournamentCubit extends Cubit<TournamentState> {
     required String format,
     required int participantsCount,
     required String accessType,
+    required String tournamentType,
+    double? average,
+    double? percentage,
   }) async {
     try {
       emit(TournamentLoading());
@@ -185,6 +188,9 @@ class TournamentCubit extends Cubit<TournamentState> {
         format: format,
         participantsCount: participantsCount,
         accessType: accessType,
+        tournamentType: tournamentType,
+        average: average,
+        percentage: percentage,
       );
 
       // Refresh the tournaments list after creation

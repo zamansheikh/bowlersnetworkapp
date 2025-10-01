@@ -7,12 +7,15 @@ class Tournament extends Equatable {
   final String regDeadline;
   final String address;
   final double regFee;
-  final String accessType;
+  final String accessType; // 'Open', 'Invitational'
   final String format; // 'Singles', 'Doubles', 'Teams'
   final int alreadyEnrolled; // 0 = not enrolled, 1 = enrolled
   final int? participantsCount;
   final String? description;
   final String? status; // 'active', 'premium', 'cancelled'
+  final String tournamentType; // 'Handicap', 'Scratch'
+  final double? average; // Required for both types
+  final double? percentage; // Only required for Scratch type
 
   const Tournament({
     required this.id,
@@ -24,9 +27,12 @@ class Tournament extends Equatable {
     required this.accessType,
     required this.format,
     required this.alreadyEnrolled,
+    required this.tournamentType,
     this.participantsCount,
     this.description,
     this.status,
+    this.average,
+    this.percentage,
   });
 
   Tournament copyWith({
@@ -42,6 +48,9 @@ class Tournament extends Equatable {
     int? participantsCount,
     String? description,
     String? status,
+    String? tournamentType,
+    double? average,
+    double? percentage,
   }) {
     return Tournament(
       id: id ?? this.id,
@@ -56,6 +65,9 @@ class Tournament extends Equatable {
       participantsCount: participantsCount ?? this.participantsCount,
       description: description ?? this.description,
       status: status ?? this.status,
+      tournamentType: tournamentType ?? this.tournamentType,
+      average: average ?? this.average,
+      percentage: percentage ?? this.percentage,
     );
   }
 
@@ -80,5 +92,8 @@ class Tournament extends Equatable {
     participantsCount,
     description,
     status,
+    tournamentType,
+    average,
+    percentage,
   ];
 }

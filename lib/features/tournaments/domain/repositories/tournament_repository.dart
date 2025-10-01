@@ -14,6 +14,9 @@ abstract class TournamentRepository {
     required String format,
     required int participantsCount,
     required String accessType,
+    required String tournamentType,
+    double? average,
+    double? percentage,
   });
   Future<List<Tournament>> getUserRegisteredTournaments();
   Future<List<Tournament>> getAvailableTournaments();

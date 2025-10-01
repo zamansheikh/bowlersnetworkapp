@@ -21,22 +21,28 @@ class _CreateTournamentBottomSheetState
   final _nameController = TextEditingController();
   final _addressController = TextEditingController();
   final _regFeeController = TextEditingController();
+  final _averageController = TextEditingController();
+  final _percentageController = TextEditingController();
 
   DateTime? _startDate;
   DateTime? _regDeadline;
   String _selectedFormat = 'Singles';
   String _selectedAccessType = 'Open';
+  String _selectedTournamentType = 'Handicap';
   int _participantsCount = 1;
   bool _isCreating = false;
 
   final List<String> _formats = ['Singles', 'Doubles', 'Teams'];
-  final List<String> _accessTypes = ['Open', 'Invite Only', 'Premium'];
+  final List<String> _accessTypes = ['Open', 'Invitational'];
+  final List<String> _tournamentTypes = ['Handicap', 'Scratch'];
 
   @override
   void dispose() {
     _nameController.dispose();
     _addressController.dispose();
     _regFeeController.dispose();
+    _averageController.dispose();
+    _percentageController.dispose();
     super.dispose();
   }
 
@@ -220,9 +226,79 @@ class _CreateTournamentBottomSheetState
 
               SizedBox(height: AppSpacing.md),
 
+              // Tournament Type
+              Text(
+                'Tournament Type *',
+                style: AppTextStyles.labelMedium.copyWith(
+                  fontWeight: FontWeight.w600,
+                  color: AppColors.gray800,
+                ),
+              ),
+              SizedBox(height: AppSpacing.xs),
+              _buildTournamentTypeSelection(),
+
+              SizedBox(height: AppSpacing.md),
+
+              // Average Field (for both types)
+              Text(
+                'Average *',
+                style: AppTextStyles.labelMedium.copyWith(
+                  fontWeight: FontWeight.w600,
+                  color: AppColors.gray800,
+                ),
+              ),
+              SizedBox(height: AppSpacing.xs),
+              TextFormField(
+                controller: _averageController,
+                keyboardType: TextInputType.number,
+                decoration: _buildInputDecoration('Enter average score'),
+                validator: (value) {
+                  if (value?.isEmpty ?? true) {
+                    return 'Average is required';
+                  }
+                  final average = double.tryParse(value!);
+                  if (average == null || average < 0 || average > 300) {
+                    return 'Enter a valid average (0-300)';
+                  }
+                  return null;
+                },
+              ),
+
+              // Percentage Field (only for Scratch)
+              if (_selectedTournamentType == 'Scratch') ...[
+                SizedBox(height: AppSpacing.md),
+                Text(
+                  'Percentage *',
+                  style: AppTextStyles.labelMedium.copyWith(
+                    fontWeight: FontWeight.w600,
+                    color: AppColors.gray800,
+                  ),
+                ),
+                SizedBox(height: AppSpacing.xs),
+                TextFormField(
+                  controller: _percentageController,
+                  keyboardType: TextInputType.number,
+                  decoration: _buildInputDecoration('Enter percentage'),
+                  validator: (value) {
+                    if (_selectedTournamentType == 'Scratch') {
+                      if (value?.isEmpty ?? true) {
+                        return 'Percentage is required for Scratch tournaments';
+                      }
+                      final percentage = double.tryParse(value!);
+                      if (percentage == null || percentage < 0 || percentage > 100) {
+                        return 'Enter a valid percentage (0-100)';
+                      }
+                    }
+                    return null;
+                  },
+                ),
+              ],
+
+              SizedBox(height: AppSpacing.md),
+
               // Access Type
               Text(
-                'Access Type',
+                'Access Type *',
                 style: AppTextStyles.labelMedium.copyWith(
                   fontWeight: FontWeight.w600,
                   color: AppColors.gray800,
@@ -506,6 +582,13 @@ class _CreateTournamentBottomSheetState
         format: _selectedFormat,
         participantsCount: _participantsCount,
         accessType: _selectedAccessType,
+        tournamentType: _selectedTournamentType,
+        average: _averageController.text.isNotEmpty 
+            ? double.tryParse(_averageController.text) 
+            : null,
+        percentage: _selectedTournamentType == 'Scratch' && _percentageController.text.isNotEmpty 
+            ? double.tryParse(_percentageController.text) 
+            : null,
       );
 
       if (mounted) {
@@ -533,5 +616,70 @@ class _CreateTournamentBottomSheetState
         });
       }
     }
+  }
+
+  Widget _buildTournamentTypeSelection() {
+    return Row(
+      children: _tournamentTypes.map((type) {
+        final isSelected = _selectedTournamentType == type;
+        return Expanded(
+          child: GestureDetector(
+            onTap: () => _selectTournamentType(type),
+            child: Container(
+              margin: EdgeInsets.only(right: type == _tournamentTypes.last ? 0 : 8.w),
+              padding: EdgeInsets.all(AppSpacing.sm),
+              decoration: BoxDecoration(
+                color: isSelected ? AppColors.primaryLimeGreen.withOpacity(0.1) : AppColors.gray50,
+                border: Border.all(
+                  color: isSelected ? AppColors.primaryLimeGreen : AppColors.gray200,
+                  width: 1.5,
+                ),
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    type,
+                    style: AppTextStyles.labelMedium.copyWith(
+                      fontWeight: FontWeight.w600,
+                      color: isSelected ? AppColors.primaryLimeGreen : AppColors.gray700,
+                    ),
+                  ),
+                  SizedBox(height: 4.h),
+                  Text(
+                    _getTournamentTypeDescription(type),
+                    style: AppTextStyles.bodySmall.copyWith(
+                      color: AppColors.gray600,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        );
+      }).toList(),
+    );
+  }
+
+  String _getTournamentTypeDescription(String type) {
+    switch (type) {
+      case 'Handicap':
+        return 'Uses average and handicap system';
+      case 'Scratch':
+        return 'Uses average and percentage system';
+      default:
+        return '';
+    }
+  }
+
+  void _selectTournamentType(String type) {
+    setState(() {
+      _selectedTournamentType = type;
+      // Clear percentage when switching from Scratch to Handicap
+      if (type == 'Handicap') {
+        _percentageController.clear();
+      }
+    });
   }
 }

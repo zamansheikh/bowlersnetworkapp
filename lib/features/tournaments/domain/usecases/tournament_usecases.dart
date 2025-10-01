@@ -61,6 +61,9 @@ class CreateTournamentUseCase {
     required String format,
     required int participantsCount,
     required String accessType,
+    required String tournamentType,
+    double? average,
+    double? percentage,
   }) async {
     return await repository.createTournament(
       name: name,
@@ -71,6 +74,9 @@ class CreateTournamentUseCase {
       format: format,
       participantsCount: participantsCount,
       accessType: accessType,
+      tournamentType: tournamentType,
+      average: average,
+      percentage: percentage,
     );
   }
 }
