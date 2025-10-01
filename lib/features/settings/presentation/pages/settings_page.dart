@@ -17,7 +17,7 @@ class SettingsPage extends StatelessWidget {
     return BlocBuilder<AuthCubit, AuthState>(
       builder: (context, state) {
         final isDeleting = state is AuthLoading;
-        
+
         return Stack(
           children: [
             Scaffold(
@@ -73,7 +73,8 @@ class SettingsPage extends StatelessWidget {
                           _buildSettingsItem(
                             icon: Icons.delete_forever_outlined,
                             title: 'Delete Account',
-                            subtitle: 'Permanently delete your account and all data',
+                            subtitle:
+                                'Permanently delete your account and all data',
                             onTap: () => _showDeleteAccountDialog(context),
                             iconColor: AppColors.error,
                             titleColor: AppColors.error,
@@ -89,7 +90,9 @@ class SettingsPage extends StatelessWidget {
                         padding: EdgeInsets.all(AppSpacing.md),
                         decoration: BoxDecoration(
                           color: AppColors.surface,
-                          borderRadius: BorderRadius.circular(AppSpacing.radiusSM),
+                          borderRadius: BorderRadius.circular(
+                            AppSpacing.radiusSM,
+                          ),
                           border: Border.all(color: AppColors.border),
                         ),
                         child: Row(
@@ -271,7 +274,9 @@ class SettingsPage extends StatelessWidget {
   }
 
   Future<void> _launchPrivacyPolicy() async {
-    final Uri url = Uri.parse('https://zamansheikh.github.io/bowlersnetworkapp/privacy-policy.html');
+    final Uri url = Uri.parse(
+      'https://zamansheikh.github.io/bowlersnetworkapp/privacy-policy.html',
+    );
     if (!await launchUrl(url, mode: LaunchMode.externalApplication)) {
       debugPrint('Could not launch privacy policy URL');
     }
@@ -305,11 +310,7 @@ class SettingsPage extends StatelessWidget {
               ),
               title: Row(
                 children: [
-                  Icon(
-                    Icons.lock_outline,
-                    color: AppColors.error,
-                    size: 28,
-                  ),
+                  Icon(Icons.lock_outline, color: AppColors.error, size: 28),
                   SizedBox(width: AppSpacing.sm),
                   Text(
                     'Confirm Password',
@@ -336,10 +337,15 @@ class SettingsPage extends StatelessWidget {
                     obscureText: obscurePassword,
                     decoration: InputDecoration(
                       hintText: 'Enter your password',
-                      prefixIcon: Icon(Icons.lock_outline, color: AppColors.gray500),
+                      prefixIcon: Icon(
+                        Icons.lock_outline,
+                        color: AppColors.gray500,
+                      ),
                       suffixIcon: IconButton(
                         icon: Icon(
-                          obscurePassword ? Icons.visibility_off : Icons.visibility,
+                          obscurePassword
+                              ? Icons.visibility_off
+                              : Icons.visibility,
                           color: AppColors.gray500,
                         ),
                         onPressed: () {
@@ -349,12 +355,18 @@ class SettingsPage extends StatelessWidget {
                         },
                       ),
                       border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(AppSpacing.radiusSM),
+                        borderRadius: BorderRadius.circular(
+                          AppSpacing.radiusSM,
+                        ),
                         borderSide: BorderSide(color: AppColors.border),
                       ),
                       focusedBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(AppSpacing.radiusSM),
-                        borderSide: BorderSide(color: AppColors.primaryLimeGreen),
+                        borderRadius: BorderRadius.circular(
+                          AppSpacing.radiusSM,
+                        ),
+                        borderSide: BorderSide(
+                          color: AppColors.primaryLimeGreen,
+                        ),
                       ),
                     ),
                   ),
@@ -382,7 +394,10 @@ class SettingsPage extends StatelessWidget {
                       return;
                     }
                     Navigator.of(dialogContext).pop();
-                    _showFinalDeleteAccountDialog(context, passwordController.text);
+                    _showFinalDeleteAccountDialog(
+                      context,
+                      passwordController.text,
+                    );
                   },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: AppColors.error,
