@@ -18,7 +18,7 @@ package_rename_config:
   macos:
     app_name: "Bowlers Network"
     package_name: "com.bowlersnetwork.bowlersnetworkapp"
-    copyright_notice: "Copyright © 2025 BowlersNetwork.com. All rights reserved."
+    copyright_notice: "Copyright © 2025 BowlersNetwork Incorporated. All rights reserved."
 
   web:
     app_name: "Bowlers Network - Amateur Player Platform"
@@ -27,6 +27,6 @@ package_rename_config:
 
   windows:
     app_name: "Bowlers Network"
-    organization: "BowlersNetwork.com"
-    copyright_notice: "Copyright © 2025 BowlersNetwork.com. All rights reserved."
+    organization: "BowlersNetwork Incorporated"
+    copyright_notice: "Copyright © 2025 BowlersNetwork Incorporated. All rights reserved."
     exe_name: "BowlersNetwork"

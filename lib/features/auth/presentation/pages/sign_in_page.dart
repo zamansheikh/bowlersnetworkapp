@@ -66,14 +66,6 @@ class _SignInPageState extends State<SignInPage> {
                               borderRadius: BorderRadius.circular(
                                 AppSpacing.radiusLG,
                               ),
-                              color: AppColors.white,
-                              boxShadow: [
-                                BoxShadow(
-                                  color: AppColors.shadow,
-                                  blurRadius: AppSpacing.elevationSM,
-                                  offset: Offset(0, 2.h),
-                                ),
-                              ],
                             ),
                             child: ClipRRect(
                               borderRadius: BorderRadius.circular(
@@ -90,19 +82,26 @@ class _SignInPageState extends State<SignInPage> {
                           SizedBox(height: 16.0),
                           Text(
                             'Welcome Back!',
-                            style: AppTextStyles.displaySmall.copyWith(
-                              color: AppColors.gray900,
-                              fontWeight: FontWeight.w700,
-                            ),
                             textAlign: TextAlign.center,
+                            style: TextStyle(
+                              color: Colors.black,
+                              fontSize: 24,
+                              fontFamily: 'Poppins',
+                              fontWeight: FontWeight.w600,
+                              height: 1.38,
+                              letterSpacing: 0.72,
+                            ),
                           ),
                           SizedBox(height: 8.0),
                           Text(
                             'Sign in to continue your bowling journey',
-                            style: AppTextStyles.bodyLarge.copyWith(
-                              color: AppColors.gray600,
-                            ),
                             textAlign: TextAlign.center,
+                            style: TextStyle(
+                              color: const Color(0xFF596050) /* Black-700 */,
+                              fontSize: 16,
+                              fontFamily: 'Poppins',
+                              fontWeight: FontWeight.w400,
+                            ),
                           ),
                         ],
                       ),
