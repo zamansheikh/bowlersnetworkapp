@@ -24,12 +24,15 @@ class TeamMemberCard extends StatelessWidget {
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(12.r),
-        border: member.isCreator 
-            ? Border.all(color: AppColors.primaryLimeGreen.withOpacity(0.3), width: 1)
+        border: member.isCreator
+            ? Border.all(
+                color: AppColors.primaryLimeGreen.withValues(alpha: 0.3),
+                width: 1,
+              )
             : null,
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.03),
+            color: Colors.black.withValues(alpha: 0.03),
             blurRadius: 6.r,
             offset: Offset(0, 1.h),
           ),
@@ -51,12 +54,11 @@ class TeamMemberCard extends StatelessWidget {
                   decoration: BoxDecoration(
                     shape: BoxShape.circle,
                     color: AppColors.gray100,
-                    border: Border.all(
-                      color: AppColors.gray200,
-                      width: 1,
-                    ),
+                    border: Border.all(color: AppColors.gray200, width: 1),
                   ),
-                  child: member.member.profilePictureUrl != null && member.member.profilePictureUrl!.isNotEmpty
+                  child:
+                      member.member.profilePictureUrl != null &&
+                          member.member.profilePictureUrl!.isNotEmpty
                       ? ClipOval(
                           child: Image.network(
                             member.member.profilePictureUrl!,
@@ -70,7 +72,7 @@ class TeamMemberCard extends StatelessWidget {
                       : _buildDefaultAvatar(),
                 ),
                 SizedBox(width: 12.w),
-                
+
                 // Member Info
                 Expanded(
                   child: Column(
@@ -95,7 +97,9 @@ class TeamMemberCard extends StatelessWidget {
                                 vertical: 2.h,
                               ),
                               decoration: BoxDecoration(
-                                color: AppColors.primaryLimeGreen.withOpacity(0.1),
+                                color: AppColors.primaryLimeGreen.withValues(
+                                  alpha: 0.1,
+                                ),
                                 borderRadius: BorderRadius.circular(8.r),
                               ),
                               child: Text(
@@ -162,7 +166,7 @@ class TeamMemberCard extends StatelessWidget {
                     ],
                   ),
                 ),
-                
+
                 // Action Button
                 if (showRemoveAction && !member.isCreator)
                   IconButton(
@@ -194,7 +198,7 @@ class TeamMemberCard extends StatelessWidget {
         shape: BoxShape.circle,
         gradient: LinearGradient(
           colors: [
-            AppColors.primaryLimeGreen.withOpacity(0.8),
+            AppColors.primaryLimeGreen.withValues(alpha: 0.8),
             AppColors.primaryLimeGreen,
           ],
           begin: Alignment.topLeft,

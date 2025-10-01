@@ -33,4 +33,7 @@ abstract class AuthRepository {
   Future<Either<Failure, CreateUserResponse>> createUser(
     CreateUserRequest request,
   );
+
+  // Account deletion
+  Future<Either<Failure, void>> deleteAccount();
 }

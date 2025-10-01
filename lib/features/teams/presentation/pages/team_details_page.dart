@@ -245,7 +245,7 @@ class _TeamDetailsPageState extends State<TeamDetailsPage>
                 decoration: BoxDecoration(
                   gradient: LinearGradient(
                     colors: [
-                      AppColors.primaryLimeGreen.withOpacity(0.1),
+                      AppColors.primaryLimeGreen.withValues(alpha: 0.1),
                       AppColors.white,
                     ],
                     begin: Alignment.topCenter,
@@ -262,9 +262,13 @@ class _TeamDetailsPageState extends State<TeamDetailsPage>
                       height: 80.w,
                       decoration: BoxDecoration(
                         shape: BoxShape.circle,
-                        color: AppColors.primaryLimeGreen.withOpacity(0.1),
+                        color: AppColors.primaryLimeGreen.withValues(
+                          alpha: 0.1,
+                        ),
                         border: Border.all(
-                          color: AppColors.primaryLimeGreen.withOpacity(0.3),
+                          color: AppColors.primaryLimeGreen.withValues(
+                            alpha: 0.3,
+                          ),
                           width: 2,
                         ),
                       ),
@@ -379,7 +383,7 @@ class _TeamDetailsPageState extends State<TeamDetailsPage>
         shape: BoxShape.circle,
         gradient: LinearGradient(
           colors: [
-            AppColors.primaryLimeGreen.withOpacity(0.8),
+            AppColors.primaryLimeGreen.withValues(alpha: 0.8),
             AppColors.primaryLimeGreen,
           ],
           begin: Alignment.topLeft,

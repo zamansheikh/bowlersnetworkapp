@@ -21,6 +21,7 @@ import '../../features/tournaments/presentation/pages/tournament_detail_page.dar
 import '../../features/tournaments/domain/entities/tournament.dart';
 import '../../features/teams/presentation/pages/teams_page.dart';
 import '../../features/teams/presentation/pages/team_details_page.dart';
+import '../../features/settings/presentation/pages/settings_page.dart';
 import '../widgets/main_shell.dart';
 
 class AppRouter {
@@ -218,6 +219,11 @@ class AppRouter {
             final teamId = state.pathParameters['id']!;
             return TeamDetailsPage(teamId: teamId);
           },
+        ),
+        GoRoute(
+          path: '/settings',
+          name: 'settings',
+          builder: (context, state) => const SettingsPage(),
         ),
       ],
       errorBuilder: (context, state) => const ErrorPage(),

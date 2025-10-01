@@ -45,6 +45,7 @@ dependencies:
   
   # Utils
   equatable: ^2.0.7
+  url_launcher: ^6.3.2
   
   # Charts
   fl_chart: ^1.1.1

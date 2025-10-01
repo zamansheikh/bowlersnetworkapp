@@ -636,7 +636,7 @@ class _CreateTournamentBottomSheetState
               padding: EdgeInsets.all(AppSpacing.sm),
               decoration: BoxDecoration(
                 color: isSelected
-                    ? AppColors.primaryLimeGreen.withOpacity(0.1)
+                    ? AppColors.primaryLimeGreen.withValues(alpha: 0.1)
                     : AppColors.gray50,
                 border: Border.all(
                   color: isSelected

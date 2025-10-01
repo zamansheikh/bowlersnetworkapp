@@ -29,3 +29,5 @@ class AuthenticatedIncompleteProfile extends AuthState {
 }
 
 class Unauthenticated extends AuthState {}
+
+class AccountDeleted extends AuthState {}

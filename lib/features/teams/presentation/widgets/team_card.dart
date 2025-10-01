@@ -56,9 +56,13 @@ class TeamCard extends StatelessWidget {
                       height: 50.w,
                       decoration: BoxDecoration(
                         shape: BoxShape.circle,
-                        color: AppColors.primaryLimeGreen.withOpacity(0.1),
+                        color: AppColors.primaryLimeGreen.withValues(
+                          alpha: 0.1,
+                        ),
                         border: Border.all(
-                          color: AppColors.primaryLimeGreen.withOpacity(0.2),
+                          color: AppColors.primaryLimeGreen.withValues(
+                            alpha: 0.2,
+                          ),
                           width: 1.5,
                         ),
                       ),
@@ -179,7 +183,9 @@ class TeamCard extends StatelessWidget {
                           vertical: 4.h,
                         ),
                         decoration: BoxDecoration(
-                          color: AppColors.primaryLimeGreen.withOpacity(0.1),
+                          color: AppColors.primaryLimeGreen.withValues(
+                            alpha: 0.1,
+                          ),
                           borderRadius: BorderRadius.circular(12.r),
                         ),
                         child: Row(
@@ -231,7 +237,7 @@ class TeamCard extends StatelessWidget {
         shape: BoxShape.circle,
         gradient: LinearGradient(
           colors: [
-            AppColors.primaryLimeGreen.withOpacity(0.8),
+            AppColors.primaryLimeGreen.withValues(alpha: 0.8),
             AppColors.primaryLimeGreen,
           ],
           begin: Alignment.topLeft,

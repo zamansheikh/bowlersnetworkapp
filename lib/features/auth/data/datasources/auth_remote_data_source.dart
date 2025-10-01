@@ -1,5 +1,6 @@
 import 'package:dio/dio.dart';
 import 'package:injectable/injectable.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../../../../core/constants/constants.dart';
 import '../../../home/data/models/user_model.dart';
 import '../models/auth_token_model.dart';
@@ -23,6 +24,7 @@ abstract class AuthRemoteDataSource {
   );
   Future<VerifyEmailResponse> verifyEmail(VerifyEmailRequest request);
   Future<CreateUserResponse> createUser(CreateUserRequest request);
+  Future<void> deleteAccount(String accessToken);
 }
 
 @LazySingleton(as: AuthRemoteDataSource)
@@ -91,5 +93,18 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
       data: request.toJson(),
     );
     return CreateUserResponse.fromJson(response.data as Map<String, dynamic>);
+  }
+
+  @override
+  Future<void> deleteAccount(String accessToken) async {
+    // Get the stored username
+    final prefs = await SharedPreferences.getInstance();
+    final username = prefs.getString('username') ?? '';
+
+    await dio.delete(
+      '/delete-account',
+      options: Options(headers: {'Authorization': 'Bearer $accessToken'}),
+      data: {'username': username},
+    );
   }
 }

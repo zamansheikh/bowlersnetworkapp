@@ -114,4 +114,24 @@ class AuthRepositoryImpl implements AuthRepository {
       return Left(ServerFailure(e.toString()));
     }
   }
+
+  @override
+  Future<Either<Failure, void>> deleteAccount() async {
+    try {
+      final token = prefs.getString(AppConstants.tokenKey);
+      if (token == null || token.isEmpty) {
+        return Left(NetworkFailure('Missing token'));
+      }
+
+      await remote.deleteAccount(token);
+
+      // Clear all stored data
+      await prefs.remove(AppConstants.tokenKey);
+      await prefs.remove(AppConstants.userKey);
+
+      return const Right(null);
+    } catch (e) {
+      return Left(ServerFailure(e.toString()));
+    }
+  }
 }
