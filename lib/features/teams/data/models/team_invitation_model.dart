@@ -7,16 +7,14 @@ class TeamInvitationModel extends TeamInvitation {
     required int invitationId,
     required TeamMemberInfoModel invitedUser,
     required TeamModel team,
-  }) : super(
-         invitationId: invitationId,
-         invitedUser: invitedUser,
-         team: team,
-       );
+  }) : super(invitationId: invitationId, invitedUser: invitedUser, team: team);
 
   factory TeamInvitationModel.fromJson(Map<String, dynamic> json) {
     return TeamInvitationModel(
       invitationId: json['invitation_id'] as int,
-      invitedUser: TeamMemberInfoModel.fromJson(json['invited_user'] as Map<String, dynamic>),
+      invitedUser: TeamMemberInfoModel.fromJson(
+        json['invited_user'] as Map<String, dynamic>,
+      ),
       team: TeamModel.fromJson(json['team'] as Map<String, dynamic>),
     );
   }
@@ -40,21 +38,26 @@ class TeamInvitationsModel extends TeamInvitations {
   const TeamInvitationsModel({
     required List<TeamInvitationModel> received,
     required List<TeamInvitationModel> sent,
-  }) : super(
-         received: received,
-         sent: sent,
-       );
+  }) : super(received: received, sent: sent);
 
   factory TeamInvitationsModel.fromJson(Map<String, dynamic> json) {
     final receivedList = json['received'] as List<dynamic>? ?? [];
     final sentList = json['sent'] as List<dynamic>? ?? [];
-    
+
     return TeamInvitationsModel(
       received: receivedList
-          .map((invitation) => TeamInvitationModel.fromJson(invitation as Map<String, dynamic>))
+          .map(
+            (invitation) => TeamInvitationModel.fromJson(
+              invitation as Map<String, dynamic>,
+            ),
+          )
           .toList(),
       sent: sentList
-          .map((invitation) => TeamInvitationModel.fromJson(invitation as Map<String, dynamic>))
+          .map(
+            (invitation) => TeamInvitationModel.fromJson(
+              invitation as Map<String, dynamic>,
+            ),
+          )
           .toList(),
     );
   }
@@ -70,10 +73,7 @@ class TeamInvitationsModel extends TeamInvitations {
     };
   }
 
-  TeamInvitations toEntity() => TeamInvitations(
-    received: received,
-    sent: sent,
-  );
+  TeamInvitations toEntity() => TeamInvitations(received: received, sent: sent);
 }
 
 class AvailableMemberModel extends AvailableMember {

@@ -44,20 +44,20 @@ class Team extends Equatable {
 
   bool get hasChatRoom => teamChatRoomId != null && teamChatRoomId! > 0;
 
-  String get displayMemberCount => memberCount != null 
+  String get displayMemberCount => memberCount != null
       ? '$memberCount ${memberCount == 1 ? 'Member' : 'Members'}'
       : '0 Members';
 
   @override
   List<Object?> get props => [
-        teamId,
-        name,
-        logoUrl,
-        createdBy,
-        createdAt,
-        teamChatRoomId,
-        memberCount,
-      ];
+    teamId,
+    name,
+    logoUrl,
+    createdBy,
+    createdAt,
+    teamChatRoomId,
+    memberCount,
+  ];
 }
 
 class TeamCreator extends Equatable {
@@ -91,23 +91,23 @@ class TeamCreator extends Equatable {
 
   String get fullName => '$firstName $lastName';
 
-  String get initials => 
+  String get initials =>
       '${firstName.isNotEmpty ? firstName[0] : ''}${lastName.isNotEmpty ? lastName[0] : ''}'
-      .toUpperCase();
+          .toUpperCase();
 
   @override
   List<Object?> get props => [
-        userId,
-        username,
-        name,
-        firstName,
-        lastName,
-        email,
-        profilePictureUrl,
-        introVideoUrl,
-        coverPhotoUrl,
-        xp,
-        level,
-        cardTheme,
-      ];
+    userId,
+    username,
+    name,
+    firstName,
+    lastName,
+    email,
+    profilePictureUrl,
+    introVideoUrl,
+    coverPhotoUrl,
+    xp,
+    level,
+    cardTheme,
+  ];
 }

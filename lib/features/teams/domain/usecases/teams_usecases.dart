@@ -65,10 +65,7 @@ class InviteUserToTeamUseCase {
 
   InviteUserToTeamUseCase({required this.repository});
 
-  Future<void> call({
-    required int teamId,
-    required int invitedUserId,
-  }) async {
+  Future<void> call({required int teamId, required int invitedUserId}) async {
     return await repository.inviteUserToTeam(
       teamId: teamId,
       invitedUserId: invitedUserId,
@@ -121,10 +118,7 @@ class RemoveMemberFromTeamUseCase {
 
   RemoveMemberFromTeamUseCase({required this.repository});
 
-  Future<void> call({
-    required int teamId,
-    required int memberId,
-  }) async {
+  Future<void> call({required int teamId, required int memberId}) async {
     return await repository.removeMemberFromTeam(
       teamId: teamId,
       memberId: memberId,

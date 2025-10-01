@@ -60,25 +60,25 @@ class TeamMemberInfo extends Equatable {
 
   String get fullName => '$firstName $lastName';
 
-  String get initials => 
+  String get initials =>
       '${firstName.isNotEmpty ? firstName[0] : ''}${lastName.isNotEmpty ? lastName[0] : ''}'
-      .toUpperCase();
+          .toUpperCase();
 
   @override
   List<Object?> get props => [
-        userId,
-        username,
-        name,
-        firstName,
-        lastName,
-        email,
-        profilePictureUrl,
-        introVideoUrl,
-        coverPhotoUrl,
-        xp,
-        level,
-        cardTheme,
-      ];
+    userId,
+    username,
+    name,
+    firstName,
+    lastName,
+    email,
+    profilePictureUrl,
+    introVideoUrl,
+    coverPhotoUrl,
+    xp,
+    level,
+    cardTheme,
+  ];
 }
 
 class TeamDetails extends Equatable {
@@ -104,24 +104,21 @@ class TeamDetails extends Equatable {
 
   @override
   List<Object?> get props => [
-        teamId,
-        name,
-        logoUrl,
-        createdBy,
-        createdAt,
-        teamChatRoomId,
-        members,
-      ];
+    teamId,
+    name,
+    logoUrl,
+    createdBy,
+    createdAt,
+    teamChatRoomId,
+    members,
+  ];
 }
 
 class TeamMembersData extends Equatable {
   final int memberCount;
   final List<TeamMember> members;
 
-  const TeamMembersData({
-    required this.memberCount,
-    required this.members,
-  });
+  const TeamMembersData({required this.memberCount, required this.members});
 
   @override
   List<Object?> get props => [memberCount, members];

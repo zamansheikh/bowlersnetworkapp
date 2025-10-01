@@ -76,7 +76,7 @@ class TeamCard extends StatelessWidget {
                           : _buildDefaultLogo(),
                     ),
                     SizedBox(width: 12.w),
-                    
+
                     // Team Info
                     Expanded(
                       child: Column(
@@ -107,7 +107,7 @@ class TeamCard extends StatelessWidget {
                         ],
                       ),
                     ),
-                    
+
                     // Action Menu
                     if (showActions)
                       PopupMenuButton<String>(
@@ -131,7 +131,11 @@ class TeamCard extends StatelessWidget {
                             value: 'edit',
                             child: Row(
                               children: [
-                                Icon(Icons.edit, size: 16.sp, color: Colors.blue),
+                                Icon(
+                                  Icons.edit,
+                                  size: 16.sp,
+                                  color: Colors.blue,
+                                ),
                                 SizedBox(width: 8.w),
                                 Text(
                                   'Edit Team',
@@ -144,7 +148,11 @@ class TeamCard extends StatelessWidget {
                             value: 'delete',
                             child: Row(
                               children: [
-                                Icon(Icons.delete, size: 16.sp, color: Colors.red),
+                                Icon(
+                                  Icons.delete,
+                                  size: 16.sp,
+                                  color: Colors.red,
+                                ),
                                 SizedBox(width: 8.w),
                                 Text(
                                   'Delete Team',
@@ -157,9 +165,9 @@ class TeamCard extends StatelessWidget {
                       ),
                   ],
                 ),
-                
+
                 SizedBox(height: 12.h),
-                
+
                 // Team Stats Row
                 Row(
                   children: [
@@ -195,7 +203,7 @@ class TeamCard extends StatelessWidget {
                       ),
                       SizedBox(width: 8.w),
                     ],
-                    
+
                     // Created Date
                     Expanded(
                       child: Text(
@@ -242,6 +250,4 @@ class TeamCard extends StatelessWidget {
       ),
     );
   }
-
-
 }

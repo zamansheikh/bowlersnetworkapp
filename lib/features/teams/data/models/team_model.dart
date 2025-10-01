@@ -23,7 +23,9 @@ class TeamModel extends Team {
     return TeamModel(
       teamId: json['team_id'] as int,
       name: json['name'] as String,
-      createdBy: TeamCreatorModel.fromJson(json['created_by'] as Map<String, dynamic>),
+      createdBy: TeamCreatorModel.fromJson(
+        json['created_by'] as Map<String, dynamic>,
+      ),
       createdAt: json['created_at'] as String,
       logoUrl: json['logo_url'] as String?,
       teamChatRoomId: json['team_chat_room_id'] as int?,

@@ -48,184 +48,199 @@ class _TeamsPageState extends State<TeamsPage> {
                 child: Column(
                   children: [
                     // Search Bar
-            Container(
-              color: Colors.white,
-              padding: EdgeInsets.fromLTRB(16.w, 0, 16.w, 16.h),
-              child: TextField(
-                controller: _searchController,
-                decoration: InputDecoration(
-                  hintText: 'Search teams...',
-                  hintStyle: TextStyle(
-                    fontSize: 14.sp,
-                    color: AppColors.gray400,
-                  ),
-                  prefixIcon: Icon(
-                    Icons.search,
-                    color: AppColors.gray400,
-                    size: 20.sp,
-                  ),
-                  filled: true,
-                  fillColor: AppColors.gray50,
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12.r),
-                    borderSide: BorderSide.none,
-                  ),
-                  contentPadding: EdgeInsets.symmetric(
-                    horizontal: 16.w,
-                    vertical: 12.h,
-                  ),
-                ),
-                onChanged: (value) {
-                  // Implement search filtering if needed
-                },
-              ),
-            ),
-            
+                    Container(
+                      color: Colors.white,
+                      padding: EdgeInsets.fromLTRB(16.w, 0, 16.w, 16.h),
+                      child: TextField(
+                        controller: _searchController,
+                        decoration: InputDecoration(
+                          hintText: 'Search teams...',
+                          hintStyle: TextStyle(
+                            fontSize: 14.sp,
+                            color: AppColors.gray400,
+                          ),
+                          prefixIcon: Icon(
+                            Icons.search,
+                            color: AppColors.gray400,
+                            size: 20.sp,
+                          ),
+                          filled: true,
+                          fillColor: AppColors.gray50,
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12.r),
+                            borderSide: BorderSide.none,
+                          ),
+                          contentPadding: EdgeInsets.symmetric(
+                            horizontal: 16.w,
+                            vertical: 12.h,
+                          ),
+                        ),
+                        onChanged: (value) {
+                          // Implement search filtering if needed
+                        },
+                      ),
+                    ),
+
                     // Teams List
                     Expanded(
                       child: BlocConsumer<TeamsCubit, TeamsState>(
-                listener: (context, state) {
-                  if (state is TeamsActionSuccess) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(
-                        content: Text(state.message),
-                        backgroundColor: AppColors.success,
-                        behavior: SnackBarBehavior.floating,
-                      ),
-                    );
-                  } else if (state is TeamsActionError) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(
-                        content: Text(state.message),
-                        backgroundColor: AppColors.error,
-                        behavior: SnackBarBehavior.floating,
-                      ),
-                    );
-                  }
-                },
-                builder: (context, state) {
-                  if (state is TeamsLoading) {
-                    return Center(
-                      child: CircularProgressIndicator(
-                        color: AppColors.primaryLimeGreen,
-                      ),
-                    );
-                  }
-                  
-                  if (state is TeamsError) {
-                    return Center(
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Icon(
-                            Icons.error_outline,
-                            size: 48.sp,
-                            color: AppColors.error,
-                          ),
-                          SizedBox(height: 16.h),
-                          Text(
-                            state.message,
-                            style: TextStyle(
-                              fontSize: 16.sp,
-                              color: AppColors.gray600,
-                            ),
-                            textAlign: TextAlign.center,
-                          ),
-                          SizedBox(height: 16.h),
-                          ElevatedButton(
-                            onPressed: () => _teamsCubit.getUserTeams(),
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: AppColors.primaryLimeGreen,
-                              foregroundColor: Colors.white,
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(8.r),
+                        listener: (context, state) {
+                          if (state is TeamsActionSuccess) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(
+                                content: Text(state.message),
+                                backgroundColor: AppColors.success,
+                                behavior: SnackBarBehavior.floating,
                               ),
-                            ),
-                            child: Text('Retry'),
-                          ),
-                        ],
-                      ),
-                    );
-                  }
-                  
-                  if (state is TeamsLoaded) {
-                    if (state.teams.isEmpty) {
-                      return Center(
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Icon(
-                              Icons.group_outlined,
-                              size: 64.sp,
-                              color: AppColors.gray300,
-                            ),
-                            SizedBox(height: 16.h),
-                            Text(
-                              'No Teams Yet',
-                              style: TextStyle(
-                                fontSize: 18.sp,
-                                fontWeight: FontWeight.w600,
-                                color: AppColors.gray600,
+                            );
+                          } else if (state is TeamsActionError) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(
+                                content: Text(state.message),
+                                backgroundColor: AppColors.error,
+                                behavior: SnackBarBehavior.floating,
                               ),
-                            ),
-                            SizedBox(height: 8.h),
-                            Text(
-                              'Create your first team to start\ncollaborating with other players',
-                              style: TextStyle(
-                                fontSize: 14.sp,
-                                color: AppColors.gray500,
+                            );
+                          }
+                        },
+                        builder: (context, state) {
+                          if (state is TeamsLoading) {
+                            return Center(
+                              child: CircularProgressIndicator(
+                                color: AppColors.primaryLimeGreen,
                               ),
-                              textAlign: TextAlign.center,
-                            ),
-                            SizedBox(height: 24.h),
-                            ElevatedButton.icon(
-                              onPressed: () => _showCreateTeamDialog(context),
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: AppColors.primaryLimeGreen,
-                                foregroundColor: Colors.white,
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(12.r),
+                            );
+                          }
+
+                          if (state is TeamsError) {
+                            return Center(
+                              child: Column(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Icon(
+                                    Icons.error_outline,
+                                    size: 48.sp,
+                                    color: AppColors.error,
+                                  ),
+                                  SizedBox(height: 16.h),
+                                  Text(
+                                    state.message,
+                                    style: TextStyle(
+                                      fontSize: 16.sp,
+                                      color: AppColors.gray600,
+                                    ),
+                                    textAlign: TextAlign.center,
+                                  ),
+                                  SizedBox(height: 16.h),
+                                  ElevatedButton(
+                                    onPressed: () => _teamsCubit.getUserTeams(),
+                                    style: ElevatedButton.styleFrom(
+                                      backgroundColor:
+                                          AppColors.primaryLimeGreen,
+                                      foregroundColor: Colors.white,
+                                      shape: RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.circular(
+                                          8.r,
+                                        ),
+                                      ),
+                                    ),
+                                    child: Text('Retry'),
+                                  ),
+                                ],
+                              ),
+                            );
+                          }
+
+                          if (state is TeamsLoaded) {
+                            if (state.teams.isEmpty) {
+                              return Center(
+                                child: Column(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    Icon(
+                                      Icons.group_outlined,
+                                      size: 64.sp,
+                                      color: AppColors.gray300,
+                                    ),
+                                    SizedBox(height: 16.h),
+                                    Text(
+                                      'No Teams Yet',
+                                      style: TextStyle(
+                                        fontSize: 18.sp,
+                                        fontWeight: FontWeight.w600,
+                                        color: AppColors.gray600,
+                                      ),
+                                    ),
+                                    SizedBox(height: 8.h),
+                                    Text(
+                                      'Create your first team to start\ncollaborating with other players',
+                                      style: TextStyle(
+                                        fontSize: 14.sp,
+                                        color: AppColors.gray500,
+                                      ),
+                                      textAlign: TextAlign.center,
+                                    ),
+                                    SizedBox(height: 24.h),
+                                    ElevatedButton.icon(
+                                      onPressed: () =>
+                                          _showCreateTeamDialog(context),
+                                      style: ElevatedButton.styleFrom(
+                                        backgroundColor:
+                                            AppColors.primaryLimeGreen,
+                                        foregroundColor: Colors.white,
+                                        shape: RoundedRectangleBorder(
+                                          borderRadius: BorderRadius.circular(
+                                            12.r,
+                                          ),
+                                        ),
+                                        padding: EdgeInsets.symmetric(
+                                          horizontal: 24.w,
+                                          vertical: 12.h,
+                                        ),
+                                      ),
+                                      icon: Icon(Icons.add, size: 18.sp),
+                                      label: Text(
+                                        'Create Team',
+                                        style: TextStyle(fontSize: 14.sp),
+                                      ),
+                                    ),
+                                  ],
                                 ),
-                                padding: EdgeInsets.symmetric(
-                                  horizontal: 24.w,
-                                  vertical: 12.h,
-                                ),
+                              );
+                            }
+
+                            return RefreshIndicator(
+                              onRefresh: () async => _teamsCubit.getUserTeams(),
+                              color: AppColors.primaryLimeGreen,
+                              child: ListView.builder(
+                                padding: EdgeInsets.symmetric(vertical: 8.h),
+                                itemCount: state.teams.length,
+                                itemBuilder: (context, index) {
+                                  final team = state.teams[index];
+                                  return TeamCard(
+                                    team: team,
+                                    onTap: () {
+                                      context.push('/teams/${team.teamId}');
+                                    },
+                                    onEdit: () => _showEditTeamDialog(
+                                      context,
+                                      team.name,
+                                      team.teamId,
+                                    ),
+                                    onDelete: () => _showDeleteTeamDialog(
+                                      context,
+                                      team.teamId,
+                                      team.name,
+                                    ),
+                                  );
+                                },
                               ),
-                              icon: Icon(Icons.add, size: 18.sp),
-                              label: Text(
-                                'Create Team',
-                                style: TextStyle(fontSize: 14.sp),
-                              ),
-                            ),
-                          ],
-                        ),
-                      );
-                    }
-                    
-                    return RefreshIndicator(
-                      onRefresh: () async => _teamsCubit.getUserTeams(),
-                      color: AppColors.primaryLimeGreen,
-                      child: ListView.builder(
-                        padding: EdgeInsets.symmetric(vertical: 8.h),
-                        itemCount: state.teams.length,
-                        itemBuilder: (context, index) {
-                          final team = state.teams[index];
-                          return TeamCard(
-                            team: team,
-                            onTap: () {
-                              context.push('/teams/${team.teamId}');
-                            },
-                            onEdit: () => _showEditTeamDialog(context, team.name, team.teamId),
-                            onDelete: () => _showDeleteTeamDialog(context, team.teamId, team.name),
-                          );
+                            );
+                          }
+
+                          return const SizedBox.shrink();
                         },
                       ),
-                    );
-                  }
-                  
-                  return const SizedBox.shrink();
-                },
-              ),
                     ),
                   ],
                 ),
@@ -271,15 +286,13 @@ class _TeamsPageState extends State<TeamsPage> {
 
   void _showCreateTeamDialog(BuildContext context) {
     final TextEditingController nameController = TextEditingController();
-    
+
     showDialog(
       context: context,
       builder: (dialogContext) => AlertDialog(
         title: Text(
           'Create Team',
-          style: AppTextStyles.titleMedium.copyWith(
-            color: AppColors.onSurface,
-          ),
+          style: AppTextStyles.titleMedium.copyWith(color: AppColors.onSurface),
         ),
         content: Column(
           mainAxisSize: MainAxisSize.min,
@@ -305,10 +318,7 @@ class _TeamsPageState extends State<TeamsPage> {
             onPressed: () => Navigator.of(dialogContext).pop(),
             child: Text(
               'Cancel',
-              style: TextStyle(
-                color: AppColors.gray600,
-                fontSize: 14.sp,
-              ),
+              style: TextStyle(color: AppColors.gray600, fontSize: 14.sp),
             ),
           ),
           BlocProvider.value(
@@ -319,7 +329,9 @@ class _TeamsPageState extends State<TeamsPage> {
                   Navigator.of(dialogContext).pop();
                   ScaffoldMessenger.of(context).showSnackBar(
                     SnackBar(
-                      content: Text('Team "${state.createdTeam.name}" created successfully!'),
+                      content: Text(
+                        'Team "${state.createdTeam.name}" created successfully!',
+                      ),
                       backgroundColor: AppColors.success,
                       behavior: SnackBarBehavior.floating,
                     ),
@@ -335,38 +347,35 @@ class _TeamsPageState extends State<TeamsPage> {
                 }
               },
               builder: (blocContext, state) {
-              final isLoading = state is TeamCreationLoading;
-              return ElevatedButton(
-                onPressed: isLoading
-                    ? null
-                    : () {
-                        final teamName = nameController.text.trim();
-                        if (teamName.isNotEmpty) {
-                          _teamsCubit.createTeam(name: teamName);
-                        }
-                      },
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: AppColors.primaryLimeGreen,
-                  foregroundColor: AppColors.white,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
+                final isLoading = state is TeamCreationLoading;
+                return ElevatedButton(
+                  onPressed: isLoading
+                      ? null
+                      : () {
+                          final teamName = nameController.text.trim();
+                          if (teamName.isNotEmpty) {
+                            _teamsCubit.createTeam(name: teamName);
+                          }
+                        },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppColors.primaryLimeGreen,
+                    foregroundColor: AppColors.white,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
                   ),
-                ),
-                child: isLoading
-                    ? SizedBox(
-                        width: 16.w,
-                        height: 16.w,
-                        child: CircularProgressIndicator(
-                          strokeWidth: 2,
-                          color: Colors.white,
-                        ),
-                      )
-                    : Text(
-                        'Create',
-                        style: TextStyle(fontSize: 14.sp),
-                      ),
-              );
-            },
+                  child: isLoading
+                      ? SizedBox(
+                          width: 16.w,
+                          height: 16.w,
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2,
+                            color: Colors.white,
+                          ),
+                        )
+                      : Text('Create', style: TextStyle(fontSize: 14.sp)),
+                );
+              },
             ),
           ),
         ],
@@ -374,18 +383,21 @@ class _TeamsPageState extends State<TeamsPage> {
     );
   }
 
-  void _showEditTeamDialog(BuildContext context, String currentName, int teamId) {
-    final TextEditingController nameController = TextEditingController(text: currentName);
-    
+  void _showEditTeamDialog(
+    BuildContext context,
+    String currentName,
+    int teamId,
+  ) {
+    final TextEditingController nameController = TextEditingController(
+      text: currentName,
+    );
+
     showDialog(
       context: context,
       builder: (dialogContext) => AlertDialog(
         title: Text(
           'Edit Team',
-          style: TextStyle(
-            fontSize: 18.sp,
-            fontWeight: FontWeight.w600,
-          ),
+          style: TextStyle(fontSize: 18.sp, fontWeight: FontWeight.w600),
         ),
         content: Column(
           mainAxisSize: MainAxisSize.min,
@@ -411,10 +423,7 @@ class _TeamsPageState extends State<TeamsPage> {
             onPressed: () => Navigator.of(dialogContext).pop(),
             child: Text(
               'Cancel',
-              style: TextStyle(
-                color: AppColors.gray600,
-                fontSize: 14.sp,
-              ),
+              style: TextStyle(color: AppColors.gray600, fontSize: 14.sp),
             ),
           ),
           ElevatedButton(
@@ -425,7 +434,9 @@ class _TeamsPageState extends State<TeamsPage> {
                 Navigator.of(dialogContext).pop();
                 ScaffoldMessenger.of(context).showSnackBar(
                   const SnackBar(
-                    content: Text('Team edit functionality will be implemented'),
+                    content: Text(
+                      'Team edit functionality will be implemented',
+                    ),
                   ),
                 );
               } else {
@@ -439,17 +450,18 @@ class _TeamsPageState extends State<TeamsPage> {
                 borderRadius: BorderRadius.circular(8.r),
               ),
             ),
-            child: Text(
-              'Update',
-              style: TextStyle(fontSize: 14.sp),
-            ),
+            child: Text('Update', style: TextStyle(fontSize: 14.sp)),
           ),
         ],
       ),
     );
   }
 
-  void _showDeleteTeamDialog(BuildContext context, int teamId, String teamName) {
+  void _showDeleteTeamDialog(
+    BuildContext context,
+    int teamId,
+    String teamName,
+  ) {
     showDialog(
       context: context,
       builder: (dialogContext) => AlertDialog(
@@ -470,10 +482,7 @@ class _TeamsPageState extends State<TeamsPage> {
             onPressed: () => Navigator.of(dialogContext).pop(),
             child: Text(
               'Cancel',
-              style: TextStyle(
-                color: AppColors.gray600,
-                fontSize: 14.sp,
-              ),
+              style: TextStyle(color: AppColors.gray600, fontSize: 14.sp),
             ),
           ),
           BlocConsumer<TeamsCubit, TeamsState>(
@@ -506,10 +515,7 @@ class _TeamsPageState extends State<TeamsPage> {
                           color: Colors.white,
                         ),
                       )
-                    : Text(
-                        'Delete',
-                        style: TextStyle(fontSize: 14.sp),
-                      ),
+                    : Text('Delete', style: TextStyle(fontSize: 14.sp)),
               );
             },
           ),

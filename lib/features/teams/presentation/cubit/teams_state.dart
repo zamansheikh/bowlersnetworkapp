@@ -40,10 +40,7 @@ class TeamDetailsLoaded extends TeamsState {
   final Team team;
   final List<TeamMember> members;
 
-  const TeamDetailsLoaded({
-    required this.team,
-    required this.members,
-  });
+  const TeamDetailsLoaded({required this.team, required this.members});
 
   @override
   List<Object> get props => [team, members];

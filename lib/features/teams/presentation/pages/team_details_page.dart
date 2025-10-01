@@ -16,10 +16,7 @@ import '../../../../core/di/injection.dart';
 class TeamDetailsPage extends StatefulWidget {
   final String teamId;
 
-  const TeamDetailsPage({
-    super.key,
-    required this.teamId,
-  });
+  const TeamDetailsPage({super.key, required this.teamId});
 
   @override
   State<TeamDetailsPage> createState() => _TeamDetailsPageState();
@@ -78,10 +75,7 @@ class _TeamDetailsPageState extends State<TeamDetailsPage>
                   elevation: 0,
                   leading: IconButton(
                     onPressed: () => context.pop(),
-                    icon: Icon(
-                      Icons.arrow_back,
-                      color: Colors.black87,
-                    ),
+                    icon: Icon(Icons.arrow_back, color: Colors.black87),
                   ),
                 ),
                 body: Center(
@@ -99,10 +93,7 @@ class _TeamDetailsPageState extends State<TeamDetailsPage>
                   elevation: 0,
                   leading: IconButton(
                     onPressed: () => context.pop(),
-                    icon: Icon(
-                      Icons.arrow_back,
-                      color: Colors.black87,
-                    ),
+                    icon: Icon(Icons.arrow_back, color: Colors.black87),
                   ),
                   title: Text(
                     'Team Details',
@@ -133,7 +124,9 @@ class _TeamDetailsPageState extends State<TeamDetailsPage>
                       ),
                       SizedBox(height: 16.h),
                       ElevatedButton(
-                        onPressed: () => _teamsCubit.getTeamDetails(int.parse(widget.teamId)),
+                        onPressed: () => _teamsCubit.getTeamDetails(
+                          int.parse(widget.teamId),
+                        ),
                         style: ElevatedButton.styleFrom(
                           backgroundColor: AppColors.primaryLimeGreen,
                           foregroundColor: Colors.white,
@@ -159,15 +152,10 @@ class _TeamDetailsPageState extends State<TeamDetailsPage>
                 elevation: 0,
                 leading: IconButton(
                   onPressed: () => context.pop(),
-                  icon: Icon(
-                    Icons.arrow_back,
-                    color: Colors.black87,
-                  ),
+                  icon: Icon(Icons.arrow_back, color: Colors.black87),
                 ),
               ),
-              body: Center(
-                child: Text('Loading team details...'),
-              ),
+              body: Center(child: Text('Loading team details...')),
             );
           },
         ),
@@ -175,7 +163,11 @@ class _TeamDetailsPageState extends State<TeamDetailsPage>
     );
   }
 
-  Widget _buildTeamDetails(BuildContext context, Team team, List<TeamMember> members) {
+  Widget _buildTeamDetails(
+    BuildContext context,
+    Team team,
+    List<TeamMember> members,
+  ) {
     return NestedScrollView(
       headerSliverBuilder: (context, innerBoxIsScrolled) {
         return [
@@ -186,10 +178,7 @@ class _TeamDetailsPageState extends State<TeamDetailsPage>
             expandedHeight: 200.h,
             leading: IconButton(
               onPressed: () => context.pop(),
-              icon: Icon(
-                Icons.arrow_back,
-                color: AppColors.onSurface,
-              ),
+              icon: Icon(Icons.arrow_back, color: AppColors.onSurface),
             ),
             actions: [
               PopupMenuButton<String>(
@@ -221,9 +210,16 @@ class _TeamDetailsPageState extends State<TeamDetailsPage>
                     value: 'invite',
                     child: Row(
                       children: [
-                        Icon(Icons.person_add, size: 16.sp, color: AppColors.primaryLimeGreen),
+                        Icon(
+                          Icons.person_add,
+                          size: 16.sp,
+                          color: AppColors.primaryLimeGreen,
+                        ),
                         SizedBox(width: 8.w),
-                        Text('Invite Member', style: TextStyle(fontSize: 14.sp)),
+                        Text(
+                          'Invite Member',
+                          style: TextStyle(fontSize: 14.sp),
+                        ),
                       ],
                     ),
                   ),
@@ -231,7 +227,11 @@ class _TeamDetailsPageState extends State<TeamDetailsPage>
                     value: 'leave',
                     child: Row(
                       children: [
-                        Icon(Icons.exit_to_app, size: 16.sp, color: AppColors.error),
+                        Icon(
+                          Icons.exit_to_app,
+                          size: 16.sp,
+                          color: AppColors.error,
+                        ),
                         SizedBox(width: 8.w),
                         Text('Leave Team', style: TextStyle(fontSize: 14.sp)),
                       ],
@@ -314,10 +314,7 @@ class _TeamDetailsPageState extends State<TeamDetailsPage>
       },
       body: TabBarView(
         controller: _tabController,
-        children: [
-          _buildMembersTab(members),
-          _buildActivityTab(),
-        ],
+        children: [_buildMembersTab(members), _buildActivityTab()],
       ),
     );
   }
@@ -335,7 +332,9 @@ class _TeamDetailsPageState extends State<TeamDetailsPage>
             // Navigate to member profile
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
-                content: Text('Navigate to ${member.member.fullName}\'s profile'),
+                content: Text(
+                  'Navigate to ${member.member.fullName}\'s profile',
+                ),
                 behavior: SnackBarBehavior.floating,
               ),
             );
@@ -351,11 +350,7 @@ class _TeamDetailsPageState extends State<TeamDetailsPage>
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(
-            Icons.timeline,
-            size: 48.sp,
-            color: AppColors.gray300,
-          ),
+          Icon(Icons.timeline, size: 48.sp, color: AppColors.gray300),
           SizedBox(height: 16.h),
           Text(
             'Team Activity',
@@ -368,10 +363,7 @@ class _TeamDetailsPageState extends State<TeamDetailsPage>
           SizedBox(height: 8.h),
           Text(
             'Activity feed will show team events,\nmember actions, and updates',
-            style: TextStyle(
-              fontSize: 14.sp,
-              color: AppColors.gray500,
-            ),
+            style: TextStyle(fontSize: 14.sp, color: AppColors.gray500),
             textAlign: TextAlign.center,
           ),
         ],
@@ -446,10 +438,7 @@ class _TeamDetailsPageState extends State<TeamDetailsPage>
             onPressed: () => Navigator.of(dialogContext).pop(),
             child: Text(
               'Cancel',
-              style: TextStyle(
-                color: AppColors.gray600,
-                fontSize: 14.sp,
-              ),
+              style: TextStyle(color: AppColors.gray600, fontSize: 14.sp),
             ),
           ),
           ElevatedButton(
@@ -469,10 +458,7 @@ class _TeamDetailsPageState extends State<TeamDetailsPage>
                 borderRadius: BorderRadius.circular(8.r),
               ),
             ),
-            child: Text(
-              'Leave',
-              style: TextStyle(fontSize: 14.sp),
-            ),
+            child: Text('Leave', style: TextStyle(fontSize: 14.sp)),
           ),
         ],
       ),
@@ -500,10 +486,7 @@ class _TeamDetailsPageState extends State<TeamDetailsPage>
             onPressed: () => Navigator.of(dialogContext).pop(),
             child: Text(
               'Cancel',
-              style: TextStyle(
-                color: AppColors.gray600,
-                fontSize: 14.sp,
-              ),
+              style: TextStyle(color: AppColors.gray600, fontSize: 14.sp),
             ),
           ),
           BlocConsumer<TeamsCubit, TeamsState>(
@@ -539,10 +522,7 @@ class _TeamDetailsPageState extends State<TeamDetailsPage>
                           color: Colors.white,
                         ),
                       )
-                    : Text(
-                        'Remove',
-                        style: TextStyle(fontSize: 14.sp),
-                      ),
+                    : Text('Remove', style: TextStyle(fontSize: 14.sp)),
               );
             },
           ),

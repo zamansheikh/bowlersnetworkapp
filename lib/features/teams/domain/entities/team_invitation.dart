@@ -33,10 +33,7 @@ class TeamInvitations extends Equatable {
   final List<TeamInvitation> received;
   final List<TeamInvitation> sent;
 
-  const TeamInvitations({
-    required this.received,
-    required this.sent,
-  });
+  const TeamInvitations({required this.received, required this.sent});
 
   TeamInvitations copyWith({
     List<TeamInvitation>? received,
@@ -73,18 +70,18 @@ class AvailableMember extends Equatable {
 
   String get fullName => '$firstName $lastName';
 
-  String get initials => 
+  String get initials =>
       '${firstName.isNotEmpty ? firstName[0] : ''}${lastName.isNotEmpty ? lastName[0] : ''}'
-      .toUpperCase();
+          .toUpperCase();
 
   @override
   List<Object?> get props => [
-        userId,
-        username,
-        name,
-        firstName,
-        lastName,
-        email,
-        profilePictureUrl,
-      ];
+    userId,
+    username,
+    name,
+    firstName,
+    lastName,
+    email,
+    profilePictureUrl,
+  ];
 }

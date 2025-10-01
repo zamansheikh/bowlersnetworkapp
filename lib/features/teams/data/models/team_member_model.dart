@@ -5,16 +5,14 @@ class TeamMemberModel extends TeamMember {
     required int memberId,
     required TeamMemberInfoModel member,
     required bool isCreator,
-  }) : super(
-         memberId: memberId,
-         member: member,
-         isCreator: isCreator,
-       );
+  }) : super(memberId: memberId, member: member, isCreator: isCreator);
 
   factory TeamMemberModel.fromJson(Map<String, dynamic> json) {
     return TeamMemberModel(
       memberId: json['member_id'] as int,
-      member: TeamMemberInfoModel.fromJson(json['member'] as Map<String, dynamic>),
+      member: TeamMemberInfoModel.fromJson(
+        json['member'] as Map<String, dynamic>,
+      ),
       isCreator: json['is_creator'] as bool,
     );
   }
@@ -27,11 +25,8 @@ class TeamMemberModel extends TeamMember {
     };
   }
 
-  TeamMember toEntity() => TeamMember(
-    memberId: memberId,
-    member: member,
-    isCreator: isCreator,
-  );
+  TeamMember toEntity() =>
+      TeamMember(memberId: memberId, member: member, isCreator: isCreator);
 }
 
 class TeamMemberInfoModel extends TeamMemberInfo {
@@ -136,9 +131,13 @@ class TeamDetailsModel extends TeamDetails {
     return TeamDetailsModel(
       teamId: json['team_id'] as int,
       name: json['name'] as String,
-      createdBy: TeamMemberInfoModel.fromJson(json['created_by'] as Map<String, dynamic>),
+      createdBy: TeamMemberInfoModel.fromJson(
+        json['created_by'] as Map<String, dynamic>,
+      ),
       createdAt: json['created_at'] as String,
-      members: TeamMembersDataModel.fromJson(json['members'] as Map<String, dynamic>),
+      members: TeamMembersDataModel.fromJson(
+        json['members'] as Map<String, dynamic>,
+      ),
       logoUrl: json['logo_url'] as String?,
       teamChatRoomId: json['team_chat_room_id'] as int?,
     );
@@ -171,17 +170,17 @@ class TeamMembersDataModel extends TeamMembersData {
   const TeamMembersDataModel({
     required int memberCount,
     required List<TeamMemberModel> members,
-  }) : super(
-         memberCount: memberCount,
-         members: members,
-       );
+  }) : super(memberCount: memberCount, members: members);
 
   factory TeamMembersDataModel.fromJson(Map<String, dynamic> json) {
     final membersList = json['members'] as List<dynamic>;
     return TeamMembersDataModel(
       memberCount: json['member_count'] as int,
       members: membersList
-          .map((member) => TeamMemberModel.fromJson(member as Map<String, dynamic>))
+          .map(
+            (member) =>
+                TeamMemberModel.fromJson(member as Map<String, dynamic>),
+          )
           .toList(),
     );
   }
@@ -195,8 +194,6 @@ class TeamMembersDataModel extends TeamMembersData {
     };
   }
 
-  TeamMembersData toEntity() => TeamMembersData(
-    memberCount: memberCount,
-    members: members,
-  );
+  TeamMembersData toEntity() =>
+      TeamMembersData(memberCount: memberCount, members: members);
 }

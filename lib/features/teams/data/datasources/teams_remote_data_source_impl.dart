@@ -33,20 +33,22 @@ class TeamsRemoteDataSourceImpl implements TeamsRemoteDataSource {
       if (response.statusCode == 200) {
         final data = response.data as Map<String, dynamic>;
         final myTeams = data['my_teams'] as List<dynamic>;
-        
+
         // Fetch member count for each team
         final List<Team> teamsWithMembers = [];
         for (final teamJson in myTeams) {
           try {
-            final teamModel = TeamModel.fromJson(teamJson as Map<String, dynamic>);
+            final teamModel = TeamModel.fromJson(
+              teamJson as Map<String, dynamic>,
+            );
             final team = teamModel.toEntity();
-            
+
             // Fetch member count
             final membersResponse = await _dio.get(
               '/api/user/teams/${team.teamId}/members',
               options: _getOptionsWithAuth(),
             );
-            
+
             if (membersResponse.statusCode == 200) {
               final membersData = membersResponse.data as Map<String, dynamic>;
               final memberCount = membersData['members']?['member_count'] ?? 0;
@@ -59,7 +61,7 @@ class TeamsRemoteDataSourceImpl implements TeamsRemoteDataSource {
             continue;
           }
         }
-        
+
         return teamsWithMembers;
       } else {
         throw Exception('Failed to load teams: ${response.statusCode}');
@@ -95,7 +97,9 @@ class TeamsRemoteDataSourceImpl implements TeamsRemoteDataSource {
       print('🏆 TeamsDataSource: Create response: ${response.statusCode}');
 
       if (response.statusCode == 200 || response.statusCode == 201) {
-        final teamModel = TeamModel.fromJson(response.data as Map<String, dynamic>);
+        final teamModel = TeamModel.fromJson(
+          response.data as Map<String, dynamic>,
+        );
         return teamModel.toEntity();
       } else {
         throw Exception('Failed to create team: ${response.statusCode}');
@@ -147,7 +151,9 @@ class TeamsRemoteDataSourceImpl implements TeamsRemoteDataSource {
         options: _getOptionsWithAuth(),
       );
 
-      print('🏆 TeamsDataSource: Team details response: ${response.statusCode}');
+      print(
+        '🏆 TeamsDataSource: Team details response: ${response.statusCode}',
+      );
 
       if (response.statusCode == 200) {
         final teamDetailsModel = TeamDetailsModel.fromJson(
@@ -178,17 +184,24 @@ class TeamsRemoteDataSourceImpl implements TeamsRemoteDataSource {
         options: _getOptionsWithAuth(),
       );
 
-      print('🏆 TeamsDataSource: Available members response: ${response.statusCode}');
+      print(
+        '🏆 TeamsDataSource: Available members response: ${response.statusCode}',
+      );
 
       if (response.statusCode == 200) {
         final List<dynamic> data = response.data as List<dynamic>;
         final members = data
-            .map((json) => AvailableMemberModel.fromJson(json as Map<String, dynamic>))
+            .map(
+              (json) =>
+                  AvailableMemberModel.fromJson(json as Map<String, dynamic>),
+            )
             .toList();
-        
+
         return members.map((model) => model.toEntity()).toList();
       } else {
-        throw Exception('Failed to load available members: ${response.statusCode}');
+        throw Exception(
+          'Failed to load available members: ${response.statusCode}',
+        );
       }
     } on DioException catch (e) {
       print('🏆 TeamsDataSource: Available members error: ${e.message}');
@@ -209,10 +222,7 @@ class TeamsRemoteDataSourceImpl implements TeamsRemoteDataSource {
     try {
       print('🏆 TeamsDataSource: Inviting user $invitedUserId to team $teamId');
 
-      final data = {
-        'team_id': teamId,
-        'invited_user_id': invitedUserId,
-      };
+      final data = {'team_id': teamId, 'invited_user_id': invitedUserId};
 
       final response = await _dio.post(
         '/api/user/teams/invite',
@@ -273,12 +283,11 @@ class TeamsRemoteDataSourceImpl implements TeamsRemoteDataSource {
     required bool isAccepted,
   }) async {
     try {
-      print('🏆 TeamsDataSource: Responding to invitation $invitationId: $isAccepted');
+      print(
+        '🏆 TeamsDataSource: Responding to invitation $invitationId: $isAccepted',
+      );
 
-      final data = {
-        'invitation_id': invitationId,
-        'is_accepted': isAccepted,
-      };
+      final data = {'invitation_id': invitationId, 'is_accepted': isAccepted};
 
       final response = await _dio.post(
         '/api/user/teams/invitations',
@@ -289,7 +298,9 @@ class TeamsRemoteDataSourceImpl implements TeamsRemoteDataSource {
       print('🏆 TeamsDataSource: Respond response: ${response.statusCode}');
 
       if (response.statusCode != 200 && response.statusCode != 201) {
-        throw Exception('Failed to respond to invitation: ${response.statusCode}');
+        throw Exception(
+          'Failed to respond to invitation: ${response.statusCode}',
+        );
       }
     } on DioException catch (e) {
       print('🏆 TeamsDataSource: Respond error: ${e.message}');
@@ -318,7 +329,9 @@ class TeamsRemoteDataSourceImpl implements TeamsRemoteDataSource {
       print('🏆 TeamsDataSource: Withdraw response: ${response.statusCode}');
 
       if (response.statusCode != 200 && response.statusCode != 204) {
-        throw Exception('Failed to withdraw invitation: ${response.statusCode}');
+        throw Exception(
+          'Failed to withdraw invitation: ${response.statusCode}',
+        );
       }
     } on DioException catch (e) {
       print('🏆 TeamsDataSource: Withdraw error: ${e.message}');
@@ -344,7 +357,9 @@ class TeamsRemoteDataSourceImpl implements TeamsRemoteDataSource {
         options: _getOptionsWithAuth(),
       );
 
-      print('🏆 TeamsDataSource: Remove member response: ${response.statusCode}');
+      print(
+        '🏆 TeamsDataSource: Remove member response: ${response.statusCode}',
+      );
 
       if (response.statusCode != 200 && response.statusCode != 204) {
         throw Exception('Failed to remove member: ${response.statusCode}');
@@ -368,14 +383,16 @@ class TeamsRemoteDataSourceImpl implements TeamsRemoteDataSource {
   Options _getOptionsWithAuth() {
     final options = Options();
     final token = _getAuthToken();
-    
-    print('🏆 TeamsDataSource: Token retrieved: ${token != null ? 'Token exists (${token.length} chars)' : 'No token found'}');
-    
+
+    print(
+      '🏆 TeamsDataSource: Token retrieved: ${token != null ? 'Token exists (${token.length} chars)' : 'No token found'}',
+    );
+
     if (token != null) {
       options.headers = {'Authorization': 'Bearer $token'};
       print('🏆 TeamsDataSource: Added Authorization header');
     }
-    
+
     return options;
   }
 }

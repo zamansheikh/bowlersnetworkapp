@@ -95,10 +95,7 @@ class TeamsCubit extends Cubit<TeamsState> {
         teamChatRoomId: teamDetails.teamChatRoomId,
         memberCount: teamDetails.members.memberCount,
       );
-      emit(TeamDetailsLoaded(
-        team: team,
-        members: teamDetails.members.members,
-      ));
+      emit(TeamDetailsLoaded(team: team, members: teamDetails.members.members));
     } catch (e) {
       emit(TeamDetailsError(message: 'Failed to load team details: $e'));
     }
@@ -113,7 +110,9 @@ class TeamsCubit extends Cubit<TeamsState> {
       // For now, we'll create dummy models - this needs to be fixed when we implement proper mapping
       emit(const AvailableMembersLoaded(availableMembers: []));
     } catch (e) {
-      emit(AvailableMembersError(message: 'Failed to load available members: $e'));
+      emit(
+        AvailableMembersError(message: 'Failed to load available members: $e'),
+      );
     }
   }
 
@@ -124,10 +123,7 @@ class TeamsCubit extends Cubit<TeamsState> {
   }) async {
     try {
       emit(TeamsActionLoading());
-      await _inviteUserToTeam(
-        teamId: teamId,
-        invitedUserId: userId,
-      );
+      await _inviteUserToTeam(teamId: teamId, invitedUserId: userId);
       emit(const TeamsActionSuccess(message: 'Invitation sent successfully'));
     } catch (e) {
       emit(TeamsActionError(message: 'Failed to send invitation: $e'));
@@ -158,8 +154,8 @@ class TeamsCubit extends Cubit<TeamsState> {
         invitationId: invitationId,
         isAccepted: accept,
       );
-      final message = accept 
-          ? 'Invitation accepted successfully' 
+      final message = accept
+          ? 'Invitation accepted successfully'
           : 'Invitation declined';
       emit(TeamsActionSuccess(message: message));
       // Refresh invitations and teams
@@ -175,7 +171,9 @@ class TeamsCubit extends Cubit<TeamsState> {
     try {
       emit(TeamsActionLoading());
       await _withdrawInvitation(invitationId);
-      emit(const TeamsActionSuccess(message: 'Invitation withdrawn successfully'));
+      emit(
+        const TeamsActionSuccess(message: 'Invitation withdrawn successfully'),
+      );
       getTeamInvitations();
     } catch (e) {
       emit(TeamsActionError(message: 'Failed to withdraw invitation: $e'));
@@ -189,10 +187,7 @@ class TeamsCubit extends Cubit<TeamsState> {
   }) async {
     try {
       emit(TeamsActionLoading());
-      await _removeMemberFromTeam(
-        teamId: teamId,
-        memberId: userId,
-      );
+      await _removeMemberFromTeam(teamId: teamId, memberId: userId);
       emit(const TeamsActionSuccess(message: 'Member removed successfully'));
       // Refresh team details if currently viewing a team
       if (state is TeamDetailsLoaded) {
@@ -211,8 +206,8 @@ class TeamsCubit extends Cubit<TeamsState> {
 
   /// Clear error state
   void clearError() {
-    if (state is TeamsError || 
-        state is TeamDetailsError || 
+    if (state is TeamsError ||
+        state is TeamDetailsError ||
         state is TeamCreationError ||
         state is TeamInvitationsError ||
         state is AvailableMembersError ||
