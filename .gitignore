@@ -39,9 +39,30 @@ app.*.symbols
 # Obfuscation related
 app.*.map.json
 
-# Android Studio will place build artifacts here
-/android/app/debug
-/android/app/profile
-/android/app/release
-.vscode/launch.json
+# Android signing configuration
+android/app/*.jks
+android/app/*.keystore
+android/app/bowlersnetworkapp.jks
+android/keystore.properties
+android/key.properties
+**/upload-keystore.jks
+
+# Local configuration files
+local.properties
+
+# Environment variables
 .env
+.env.local
+.env.production
+.env.staging
+
+# Google Services
+android/app/google-services.json
+ios/Runner/GoogleService-Info.plist
+
+# API keys and secrets
+**/secrets/**
+**/*key*
+**/*secret*
+**/config/keys/**
+android/gradle.properties
