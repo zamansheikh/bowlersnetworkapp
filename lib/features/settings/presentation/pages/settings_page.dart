@@ -305,7 +305,139 @@ class SettingsPage extends StatelessWidget {
   }
 
   void _showDeleteAccountDialog(BuildContext context) {
-    _showPasswordConfirmationDialog(context);
+    _showWarningDialog(context);
+  }
+
+  void _showWarningDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (BuildContext dialogContext) {
+        return AlertDialog(
+          backgroundColor: AppColors.white,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(AppSpacing.radiusLG),
+          ),
+          title: Row(
+            children: [
+              Icon(
+                Icons.warning_amber_outlined,
+                color: AppColors.error,
+                size: 28,
+              ),
+              SizedBox(width: AppSpacing.sm),
+              Text(
+                'Delete Account',
+                style: AppTextStyles.headlineSmall.copyWith(
+                  color: AppColors.error,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ],
+          ),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                'Are you sure you want to delete your account?',
+                style: AppTextStyles.bodyLarge.copyWith(
+                  color: AppColors.gray900,
+                ),
+              ),
+              SizedBox(height: AppSpacing.sm),
+              Container(
+                padding: EdgeInsets.all(AppSpacing.md),
+                decoration: BoxDecoration(
+                  color: AppColors.error.withValues(alpha: 0.1),
+                  borderRadius: BorderRadius.circular(AppSpacing.radiusSM),
+                  border: Border.all(
+                    color: AppColors.error.withValues(alpha: 0.3),
+                  ),
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'This action cannot be undone. This will permanently:',
+                      style: AppTextStyles.bodyMedium.copyWith(
+                        color: AppColors.error,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                    SizedBox(height: AppSpacing.xs),
+                    ...([
+                      'Delete your profile and all personal information',
+                      'Remove all your posts, comments, and interactions',
+                      'Delete all your bowling statistics and game history',
+                      'Cancel your team memberships and tournament registrations',
+                      'Remove all your photos, videos, and media content',
+                      'Delete all your messages and conversation history',
+                      'Remove all notifications and preferences',
+                    ]).map(
+                      (item) => Padding(
+                        padding: EdgeInsets.only(top: 4),
+                        child: Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              '• ',
+                              style: AppTextStyles.bodySmall.copyWith(
+                                color: AppColors.error,
+                              ),
+                            ),
+                            Expanded(
+                              child: Text(
+                                item,
+                                style: AppTextStyles.bodySmall.copyWith(
+                                  color: AppColors.error,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(dialogContext).pop(),
+              child: Text(
+                'Cancel',
+                style: AppTextStyles.button.copyWith(
+                  color: AppColors.gray600,
+                ),
+              ),
+            ),
+            ElevatedButton(
+              onPressed: () {
+                Navigator.of(dialogContext).pop();
+                _showPasswordConfirmationDialog(context);
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: AppColors.error,
+                foregroundColor: AppColors.white,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(
+                    AppSpacing.buttonRadius,
+                  ),
+                ),
+              ),
+              child: Text(
+                'Continue',
+                style: AppTextStyles.button.copyWith(
+                  color: AppColors.white,
+                ),
+              ),
+            ),
+          ],
+        );
+      },
+    );
   }
 
   void _showPasswordConfirmationDialog(BuildContext context) {
@@ -439,6 +571,9 @@ class SettingsPage extends StatelessWidget {
   }
 
   void _showFinalDeleteAccountDialog(BuildContext context, String password) {
+    // Trigger account deletion immediately
+    context.read<AuthCubit>().deleteAccount();
+
     showDialog(
       context: context,
       barrierDismissible: false,
@@ -480,13 +615,13 @@ class SettingsPage extends StatelessWidget {
               title: Row(
                 children: [
                   Icon(
-                    Icons.warning_amber_outlined,
+                    Icons.delete_forever,
                     color: AppColors.error,
                     size: 28,
                   ),
                   SizedBox(width: AppSpacing.sm),
                   Text(
-                    'Delete Account',
+                    'Deleting Account',
                     style: AppTextStyles.headlineSmall.copyWith(
                       color: AppColors.error,
                       fontWeight: FontWeight.w600,
@@ -499,113 +634,41 @@ class SettingsPage extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    'Are you sure you want to delete your account?',
+                    'Account deletion in progress...',
                     style: AppTextStyles.bodyLarge.copyWith(
                       color: AppColors.gray900,
                     ),
                   ),
                   SizedBox(height: AppSpacing.sm),
-                  Container(
-                    padding: EdgeInsets.all(AppSpacing.md),
-                    decoration: BoxDecoration(
-                      color: AppColors.error.withValues(alpha: 0.1),
-                      borderRadius: BorderRadius.circular(AppSpacing.radiusSM),
-                      border: Border.all(
-                        color: AppColors.error.withValues(alpha: 0.3),
-                      ),
-                    ),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          'This action cannot be undone. This will permanently:',
-                          style: AppTextStyles.bodyMedium.copyWith(
-                            color: AppColors.error,
-                            fontWeight: FontWeight.w500,
-                          ),
-                        ),
-                        SizedBox(height: AppSpacing.xs),
-                        ...([
-                          'Delete your profile and all personal information',
-                          'Remove all your posts, comments, and interactions',
-                          'Delete all your bowling statistics and game history',
-                          'Cancel your team memberships and tournament registrations',
-                          'Remove all your photos, videos, and media content',
-                          'Delete all your messages and conversation history',
-                          'Remove all notifications and preferences',
-                        ]).map(
-                          (item) => Padding(
-                            padding: EdgeInsets.only(top: 4),
-                            child: Row(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  '• ',
-                                  style: AppTextStyles.bodySmall.copyWith(
-                                    color: AppColors.error,
-                                  ),
-                                ),
-                                Expanded(
-                                  child: Text(
-                                    item,
-                                    style: AppTextStyles.bodySmall.copyWith(
-                                      color: AppColors.error,
-                                    ),
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
-              ),
-              actions: [
-                TextButton(
-                  onPressed: isLoading
-                      ? null
-                      : () => Navigator.of(dialogContext).pop(),
-                  child: Text(
-                    'Cancel',
-                    style: AppTextStyles.button.copyWith(
+                  Text(
+                    'Please wait while we securely delete your account and all associated data.',
+                    style: AppTextStyles.bodyMedium.copyWith(
                       color: AppColors.gray600,
                     ),
                   ),
-                ),
-                ElevatedButton(
-                  onPressed: isLoading
-                      ? null
-                      : () {
-                          context.read<AuthCubit>().deleteAccount();
-                        },
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: AppColors.error,
-                    foregroundColor: AppColors.white,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(
-                        AppSpacing.buttonRadius,
+                  if (isLoading) ...[
+                    SizedBox(height: AppSpacing.md),
+                    Center(
+                      child: CircularProgressIndicator(
+                        color: AppColors.error,
                       ),
                     ),
-                  ),
-                  child: isLoading
-                      ? SizedBox(
-                          width: 16,
-                          height: 16,
-                          child: CircularProgressIndicator(
-                            color: AppColors.white,
-                            strokeWidth: 2,
-                          ),
-                        )
-                      : Text(
-                          'Delete Account',
+                  ],
+                ],
+              ),
+              actions: isLoading
+                  ? null
+                  : [
+                      TextButton(
+                        onPressed: () => Navigator.of(dialogContext).pop(),
+                        child: Text(
+                          'Cancel',
                           style: AppTextStyles.button.copyWith(
-                            color: AppColors.white,
+                            color: AppColors.gray600,
                           ),
                         ),
-                ),
-              ],
+                      ),
+                    ],
             );
           },
         );
