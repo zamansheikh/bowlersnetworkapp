@@ -36,6 +36,7 @@ dependencies:
   # Network
   dio: ^5.9.0
   retrofit: ^4.7.3
+  http: ^1.1.0
   
   # Local Storage
   shared_preferences: ^2.5.3

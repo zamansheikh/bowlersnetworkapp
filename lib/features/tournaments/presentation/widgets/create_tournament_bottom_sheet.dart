@@ -1,7 +1,11 @@
+import 'package:bowlersnetworkapp/core/constants/constants.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:intl/intl.dart';
+import 'dart:async';
+import 'dart:convert';
+import 'package:http/http.dart' as http;
 import '../../../../core/constants/colors.dart';
 import '../../../../core/theme/app_text_styles.dart';
 import '../../../../core/theme/app_spacing.dart';
@@ -38,6 +42,11 @@ class _CreateTournamentBottomSheetState
   String? _selectedLat;
   String? _selectedLong;
   final _addressFocusNode = FocusNode();
+  Timer? _debounceTimer;
+  bool _isSearching = false;
+  
+  // Mapbox configuration
+  static  final String _mapboxToken = AppConstants.mapboxAccessToken;
 
   final List<String> _formats = ['Singles', 'Doubles', 'Teams'];
   final List<String> _accessTypes = ['Open', 'Invitational'];
@@ -51,6 +60,7 @@ class _CreateTournamentBottomSheetState
     _averageController.dispose();
     _percentageController.dispose();
     _addressFocusNode.dispose();
+    _debounceTimer?.cancel();
     super.dispose();
   }
 
@@ -237,7 +247,7 @@ class _CreateTournamentBottomSheetState
                       return null;
                     },
                   ),
-                  if (_showSuggestions && _addressSuggestions.isNotEmpty)
+                  if (_showSuggestions)
                     Container(
                       margin: EdgeInsets.only(top: 4),
                       decoration: BoxDecoration(
@@ -252,27 +262,65 @@ class _CreateTournamentBottomSheetState
                           ),
                         ],
                       ),
-                      child: ListView.builder(
-                        shrinkWrap: true,
-                        physics: NeverScrollableScrollPhysics(),
-                        itemCount: _addressSuggestions.length,
-                        itemBuilder: (context, index) {
-                          final suggestion = _addressSuggestions[index];
-                          return ListTile(
-                            dense: true,
-                            leading: Icon(
-                              Icons.location_on,
-                              color: AppColors.gray500,
-                              size: 16,
-                            ),
-                            title: Text(
-                              suggestion['description'] ?? '',
-                              style: AppTextStyles.bodySmall,
-                            ),
-                            onTap: () => _selectAddress(suggestion),
-                          );
-                        },
-                      ),
+                      child: _isSearching
+                          ? SizedBox(
+                              height: 60,
+                              child: Center(
+                                child: Row(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    SizedBox(
+                                      width: 16,
+                                      height: 16,
+                                      child: CircularProgressIndicator(
+                                        strokeWidth: 2,
+                                        valueColor: AlwaysStoppedAnimation<Color>(
+                                          AppColors.primaryLimeGreen,
+                                        ),
+                                      ),
+                                    ),
+                                    SizedBox(width: 8),
+                                    Text(
+                                      'Searching addresses...',
+                                      style: AppTextStyles.bodySmall,
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            )
+                          : _addressSuggestions.isEmpty
+                              ? SizedBox(
+                                  height: 60,
+                                  child: Center(
+                                    child: Text(
+                                      'No addresses found',
+                                      style: AppTextStyles.bodySmall.copyWith(
+                                        color: AppColors.gray500,
+                                      ),
+                                    ),
+                                  ),
+                                )
+                              : ListView.builder(
+                                  shrinkWrap: true,
+                                  physics: NeverScrollableScrollPhysics(),
+                                  itemCount: _addressSuggestions.length,
+                                  itemBuilder: (context, index) {
+                                    final suggestion = _addressSuggestions[index];
+                                    return ListTile(
+                                      dense: true,
+                                      leading: Icon(
+                                        Icons.location_on,
+                                        color: AppColors.gray500,
+                                        size: 16,
+                                      ),
+                                      title: Text(
+                                        suggestion['place_name'] ?? '',
+                                        style: AppTextStyles.bodySmall,
+                                      ),
+                                      onTap: () => _selectAddress(suggestion),
+                                    );
+                                  },
+                                ),
                     ),
                 ],
               ),
@@ -772,55 +820,83 @@ class _CreateTournamentBottomSheetState
       setState(() {
         _showSuggestions = false;
         _addressSuggestions.clear();
+        _isSearching = false;
       });
+      _debounceTimer?.cancel();
       return;
     }
 
-    // Simulate address suggestions (replace with actual API call)
+    // Cancel previous timer
+    _debounceTimer?.cancel();
+    
+    // Show loading state immediately
     setState(() {
       _showSuggestions = true;
-      _addressSuggestions =
-          [
-                {
-                  'description': 'New York, NY, USA',
-                  'lat': '40.7128',
-                  'long': '-74.0060',
-                },
-                {
-                  'description': 'Los Angeles, CA, USA',
-                  'lat': '34.0522',
-                  'long': '-118.2437',
-                },
-                {
-                  'description': 'Chicago, IL, USA',
-                  'lat': '41.8781',
-                  'long': '-87.6298',
-                },
-                {
-                  'description': 'Houston, TX, USA',
-                  'lat': '29.7604',
-                  'long': '-95.3698',
-                },
-                {
-                  'description': 'Phoenix, AZ, USA',
-                  'lat': '33.4484',
-                  'long': '-112.0740',
-                },
-              ]
-              .where(
-                (suggestion) => suggestion['description']!
-                    .toLowerCase()
-                    .contains(query.toLowerCase()),
-              )
-              .toList();
+      _isSearching = true;
     });
+
+    // Debounce the search to avoid too many API calls
+    _debounceTimer = Timer(const Duration(milliseconds: 500), () {
+      _searchAddresses(query);
+    });
+  }
+
+  Future<void> _searchAddresses(String query) async {
+    if (query.trim().isEmpty) return;
+
+    try {
+      setState(() {
+        _isSearching = true;
+      });
+
+      // Mapbox Geocoding API endpoint
+      final String url = 
+          'https://api.mapbox.com/geocoding/v5/mapbox.places/${Uri.encodeComponent(query)}.json'
+          '?access_token=$_mapboxToken'
+          '&limit=5'
+          '&types=address,poi,place';
+
+      final response = await http.get(Uri.parse(url));
+
+      if (response.statusCode == 200) {
+        final Map<String, dynamic> data = json.decode(response.body);
+        final List<dynamic> features = data['features'] ?? [];
+
+        setState(() {
+          _addressSuggestions = features.map((feature) {
+            final List<double> coordinates = 
+                List<double>.from(feature['center'] ?? [0.0, 0.0]);
+            return {
+              'place_name': feature['place_name'] ?? '',
+              'lat': coordinates.length > 1 ? coordinates[1].toString() : '0',
+              'long': coordinates.isNotEmpty ? coordinates[0].toString() : '0',
+            };
+          }).toList();
+          _isSearching = false;
+        });
+      } else {
+        setState(() {
+          _addressSuggestions.clear();
+          _isSearching = false;
+        });
+        // Log API error (consider using proper logging package in production)
+        debugPrint('Mapbox API error: ${response.statusCode}');
+      }
+    } catch (e) {
+      setState(() {
+        _addressSuggestions.clear();
+        _isSearching = false;
+      });
+      // Log search error (consider using proper logging package in production)
+      debugPrint('Address search error: $e');
+    }
   }
 
   void _selectAddress(Map<String, dynamic> suggestion) {
     setState(() {
-      _addressController.text = suggestion['description'] ?? '';
-      _selectedLat = suggestion['lat'];
-      _selectedLong = suggestion['long'];
+      _addressController.text = suggestion['place_name'] ?? '';
+      _selectedLat = suggestion['lat'] ?? '0';
+      _selectedLong = suggestion['long'] ?? '0';
       _showSuggestions = false;
       _addressSuggestions.clear();
     });
