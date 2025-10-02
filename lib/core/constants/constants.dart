@@ -1,3 +1,5 @@
+import 'package:flutter_dotenv/flutter_dotenv.dart';
+
 class AppConstants {
   // API
   static const String baseUrl = 'https://test.bowlersnetwork.com';
@@ -20,4 +22,7 @@ class AppConstants {
   static const Duration shortAnimation = Duration(milliseconds: 200);
   static const Duration mediumAnimation = Duration(milliseconds: 300);
   static const Duration longAnimation = Duration(milliseconds: 500);
+
+  // Mapbox
+  static  String mapboxAccessToken = dotenv.get('ACCESS_TOKEN', fallback: 'pk.your_mapbox_access_token');
 }
