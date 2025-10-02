@@ -13,7 +13,6 @@ abstract class TournamentRemoteDataSource {
     required String address,
     String? lat,
     String? long,
-    required String format,
     required int participantsCount,
     required String accessType,
     required String tournamentType,

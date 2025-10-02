@@ -706,7 +706,6 @@ class _CreateTournamentBottomSheetState
         lat: _selectedLat, // Use selected coordinates from address autocomplete
         long:
             _selectedLong, // Use selected coordinates from address autocomplete
-        format: _selectedFormat,
         participantsCount: _participantsCount,
         accessType: _selectedAccessType,
         tournamentType: _selectedTournamentType,
