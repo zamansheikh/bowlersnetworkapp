@@ -125,7 +125,7 @@ class TournamentLoaded extends TournamentState {
             selectedLng!,
             tournamentLat,
             tournamentLng,
-            10.0, // 10 miles radius
+            50.0, // 50 miles radius
           );
         }
         return false; // Exclude tournaments without valid coordinates
