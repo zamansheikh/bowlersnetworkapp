@@ -21,4 +21,6 @@ abstract class TournamentRemoteDataSource {
   });
   Future<List<Tournament>> getUserRegisteredTournaments();
   Future<List<Tournament>> getAvailableTournaments();
+  Future<void> registerSinglesForTournament(int tournamentId, int playerId);
+  Future<void> registerTeamForTournament(int tournamentId, int teamId);
 }

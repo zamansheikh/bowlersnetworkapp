@@ -157,7 +157,7 @@ class TournamentRemoteDataSourceImpl implements TournamentRemoteDataSource {
         'name': name,
         'start_date': startDate,
         'reg_deadline': regDeadline,
-        'reg_fee': regFee,
+        'reg_fee': double.tryParse(regFee) ?? 0.0, // Convert string to double
         'address': address,
         if (lat != null) 'lat': lat,
         if (long != null) 'long': long,
@@ -244,5 +244,74 @@ class TournamentRemoteDataSourceImpl implements TournamentRemoteDataSource {
     }
 
     return options;
+  }
+
+  @override
+  Future<void> registerSinglesForTournament(
+    int tournamentId,
+    int playerId,
+  ) async {
+    try {
+      print(
+        '🏆 TournamentDataSource: Registering player $playerId for singles tournament $tournamentId',
+      );
+
+      final response = await _dio.post(
+        '/api/tournament/$tournamentId/add-singles-member/$playerId',
+        options: _getOptionsWithAuth(),
+      );
+
+      print(
+        '🏆 TournamentDataSource: Singles registration response: ${response.statusCode}',
+      );
+
+      if (response.statusCode != 200 && response.statusCode != 201) {
+        throw Exception(
+          'Failed to register for singles tournament: ${response.statusCode}',
+        );
+      }
+    } on DioException catch (e) {
+      print(
+        '🏆 TournamentDataSource: Singles registration error: ${e.message}',
+      );
+      if (e.response != null) {
+        throw Exception(
+          'Singles registration failed: ${e.response?.statusCode} - ${e.response?.data}',
+        );
+      }
+      throw Exception('Network error: ${e.message}');
+    }
+  }
+
+  @override
+  Future<void> registerTeamForTournament(int tournamentId, int teamId) async {
+    try {
+      print(
+        '🏆 TournamentDataSource: Registering team $teamId for tournament $tournamentId',
+      );
+
+      final response = await _dio.post(
+        '/api/tournament/$tournamentId/add-teams-member/$teamId',
+        options: _getOptionsWithAuth(),
+      );
+
+      print(
+        '🏆 TournamentDataSource: Team registration response: ${response.statusCode}',
+      );
+
+      if (response.statusCode != 200 && response.statusCode != 201) {
+        throw Exception(
+          'Failed to register team for tournament: ${response.statusCode}',
+        );
+      }
+    } on DioException catch (e) {
+      print('🏆 TournamentDataSource: Team registration error: ${e.message}');
+      if (e.response != null) {
+        throw Exception(
+          'Team registration failed: ${e.response?.statusCode} - ${e.response?.data}',
+        );
+      }
+      throw Exception('Network error: ${e.message}');
+    }
   }
 }

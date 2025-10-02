@@ -97,4 +97,31 @@ class TournamentRepositoryImpl implements TournamentRepository {
       throw Exception('Failed to fetch available tournaments: $e');
     }
   }
+
+  @override
+  Future<void> registerSinglesForTournament(
+    int tournamentId,
+    int playerId,
+  ) async {
+    try {
+      return await remoteDataSource.registerSinglesForTournament(
+        tournamentId,
+        playerId,
+      );
+    } catch (e) {
+      throw Exception('Failed to register for singles tournament: $e');
+    }
+  }
+
+  @override
+  Future<void> registerTeamForTournament(int tournamentId, int teamId) async {
+    try {
+      return await remoteDataSource.registerTeamForTournament(
+        tournamentId,
+        teamId,
+      );
+    } catch (e) {
+      throw Exception('Failed to register team for tournament: $e');
+    }
+  }
 }

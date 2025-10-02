@@ -649,6 +649,7 @@ class _CreateTournamentBottomSheetState
 
   Future<void> _createTournament() async {
     if (!_formKey.currentState!.validate()) {
+      print('Form is not valid');
       return;
     }
 
@@ -662,6 +663,7 @@ class _CreateTournamentBottomSheetState
       return;
     }
 
+        print('Creating tournament...');
     if (_regDeadline!.isAfter(_startDate!)) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(

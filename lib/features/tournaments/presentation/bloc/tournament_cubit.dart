@@ -10,6 +10,8 @@ class TournamentCubit extends Cubit<TournamentState> {
   final GetTournamentByIdUseCase getTournamentById;
   final RegisterForTournamentUseCase registerForTournament;
   final UnregisterFromTournamentUseCase unregisterFromTournament;
+  final RegisterSinglesForTournamentUseCase registerSinglesForTournament;
+  final RegisterTeamForTournamentUseCase registerTeamForTournament;
   final CreateTournamentUseCase createTournament;
   final GetUserRegisteredTournamentsUseCase getUserRegisteredTournaments;
   final GetAvailableTournamentsUseCase getAvailableTournaments;
@@ -19,6 +21,8 @@ class TournamentCubit extends Cubit<TournamentState> {
     required this.getTournamentById,
     required this.registerForTournament,
     required this.unregisterFromTournament,
+    required this.registerSinglesForTournament,
+    required this.registerTeamForTournament,
     required this.createTournament,
     required this.getUserRegisteredTournaments,
     required this.getAvailableTournaments,
@@ -274,6 +278,79 @@ class TournamentCubit extends Cubit<TournamentState> {
       await loadTournaments();
     } catch (e) {
       emit(TournamentError(message: e.toString()));
+    }
+  }
+
+  Future<void> handleSinglesRegistration(
+    Tournament tournament,
+    int userId,
+  ) async {
+    try {
+      emit(TournamentRegistering(tournamentId: tournament.id));
+
+      await registerSinglesForTournament(tournament.id, userId);
+
+      // Update the tournament in the list
+      final currentState = state;
+      if (currentState is TournamentLoaded) {
+        final updatedTournaments = currentState.tournaments.map((t) {
+          if (t.id == tournament.id) {
+            return t.copyWith(alreadyEnrolled: 1);
+          }
+          return t;
+        }).toList();
+
+        emit(currentState.copyWith(tournaments: updatedTournaments));
+        emit(
+          TournamentRegistrationSuccess(
+            tournament: tournament.copyWith(alreadyEnrolled: 1),
+            wasRegistered: true,
+          ),
+        );
+      }
+
+      // Return to loaded state after a brief delay
+      await Future.delayed(const Duration(milliseconds: 500));
+      await refreshTournaments();
+    } catch (e) {
+      emit(TournamentError(message: e.toString()));
+      await Future.delayed(const Duration(seconds: 2));
+      await refreshTournaments();
+    }
+  }
+
+  Future<void> handleTeamRegistration(Tournament tournament, int teamId) async {
+    try {
+      emit(TournamentRegistering(tournamentId: tournament.id));
+
+      await registerTeamForTournament(tournament.id, teamId);
+
+      // Update the tournament in the list
+      final currentState = state;
+      if (currentState is TournamentLoaded) {
+        final updatedTournaments = currentState.tournaments.map((t) {
+          if (t.id == tournament.id) {
+            return t.copyWith(alreadyEnrolled: 1);
+          }
+          return t;
+        }).toList();
+
+        emit(currentState.copyWith(tournaments: updatedTournaments));
+        emit(
+          TournamentRegistrationSuccess(
+            tournament: tournament.copyWith(alreadyEnrolled: 1),
+            wasRegistered: true,
+          ),
+        );
+      }
+
+      // Return to loaded state after a brief delay
+      await Future.delayed(const Duration(milliseconds: 500));
+      await refreshTournaments();
+    } catch (e) {
+      emit(TournamentError(message: e.toString()));
+      await Future.delayed(const Duration(seconds: 2));
+      await refreshTournaments();
     }
   }
 }

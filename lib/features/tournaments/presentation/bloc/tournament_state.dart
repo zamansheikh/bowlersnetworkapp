@@ -96,7 +96,7 @@ class TournamentLoaded extends TournamentState {
                 selectedLng!,
                 tournamentLat,
                 tournamentLng,
-                10.0, // 10 miles radius
+                50.0, // 50 miles radius
               );
 
               // Also check if address matches search term for additional filtering

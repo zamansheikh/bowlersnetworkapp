@@ -1,5 +1,5 @@
-// dart format width=80
 // GENERATED CODE - DO NOT MODIFY BY HAND
+// dart format width=80
 
 // **************************************************************************
 // InjectableConfigGenerator
@@ -250,6 +250,16 @@ extension GetItInjectableX on _i174.GetIt {
         repository: gh<_i334.TournamentRepository>(),
       ),
     );
+    gh.factory<_i13.RegisterSinglesForTournamentUseCase>(
+      () => _i13.RegisterSinglesForTournamentUseCase(
+        repository: gh<_i334.TournamentRepository>(),
+      ),
+    );
+    gh.factory<_i13.RegisterTeamForTournamentUseCase>(
+      () => _i13.RegisterTeamForTournamentUseCase(
+        repository: gh<_i334.TournamentRepository>(),
+      ),
+    );
     gh.factory<_i547.OverviewCubit>(
       () => _i547.OverviewCubit(gh<_i659.OverviewRepository>()),
     );
@@ -261,6 +271,21 @@ extension GetItInjectableX on _i174.GetIt {
     );
     gh.factory<_i146.MessagesCubit>(
       () => _i146.MessagesCubit(gh<_i599.MessagesRepository>()),
+    );
+    gh.factory<_i849.TournamentCubit>(
+      () => _i849.TournamentCubit(
+        getTournaments: gh<_i13.GetTournamentsUseCase>(),
+        getTournamentById: gh<_i13.GetTournamentByIdUseCase>(),
+        registerForTournament: gh<_i13.RegisterForTournamentUseCase>(),
+        unregisterFromTournament: gh<_i13.UnregisterFromTournamentUseCase>(),
+        registerSinglesForTournament:
+            gh<_i13.RegisterSinglesForTournamentUseCase>(),
+        registerTeamForTournament: gh<_i13.RegisterTeamForTournamentUseCase>(),
+        createTournament: gh<_i13.CreateTournamentUseCase>(),
+        getUserRegisteredTournaments:
+            gh<_i13.GetUserRegisteredTournamentsUseCase>(),
+        getAvailableTournaments: gh<_i13.GetAvailableTournamentsUseCase>(),
+      ),
     );
     gh.factory<_i762.CreateUser>(
       () => _i762.CreateUser(gh<_i994.AuthRepository>()),
@@ -302,18 +327,6 @@ extension GetItInjectableX on _i174.GetIt {
     );
     gh.factory<_i74.UnfollowPlayer>(
       () => _i74.UnfollowPlayer(gh<_i1062.ProPlayersRepository>()),
-    );
-    gh.factory<_i849.TournamentCubit>(
-      () => _i849.TournamentCubit(
-        getTournaments: gh<_i13.GetTournamentsUseCase>(),
-        getTournamentById: gh<_i13.GetTournamentByIdUseCase>(),
-        registerForTournament: gh<_i13.RegisterForTournamentUseCase>(),
-        unregisterFromTournament: gh<_i13.UnregisterFromTournamentUseCase>(),
-        createTournament: gh<_i13.CreateTournamentUseCase>(),
-        getUserRegisteredTournaments:
-            gh<_i13.GetUserRegisteredTournamentsUseCase>(),
-        getAvailableTournaments: gh<_i13.GetAvailableTournamentsUseCase>(),
-      ),
     );
     gh.factory<_i384.SignupCubit>(
       () => _i384.SignupCubit(

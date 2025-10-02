@@ -41,28 +41,48 @@ class TournamentModel extends Tournament {
 
   factory TournamentModel.fromJson(Map<String, dynamic> json) {
     return TournamentModel(
-      id: json['id'] as int,
+      id: _parseInt(json['id']) ?? 0,
       name: json['name'] as String,
       startDate: json['start_date'] as String,
       regDeadline: json['reg_deadline'] as String,
       address: json['address'] as String? ?? '',
       lat: json['lat'] as String?,
       long: json['long'] as String?,
-      regFee: (json['reg_fee'] as num).toDouble(),
+      regFee: _parseDouble(json['reg_fee']),
       accessType: json['access_type'] as String,
       format: json['format'] as String,
-      alreadyEnrolled: json['already_enrolled'] as int? ?? 0,
+      alreadyEnrolled: _parseInt(json['already_enrolled']) ?? 0,
       tournamentType: json['tournament_type'] as String? ?? 'Handicap',
-      participantsCount: json['participants_count'] as int?,
+      participantsCount: _parseInt(json['participants_count']),
       description: json['description'] as String?,
       status: json['status'] as String?,
-      average: json['average'] != null
-          ? (json['average'] as num).toDouble()
-          : null,
+      average: json['average'] != null ? _parseDouble(json['average']) : null,
       percentage: json['percentage'] != null
-          ? (json['percentage'] as num).toDouble()
+          ? _parseDouble(json['percentage'])
           : null,
     );
+  }
+
+  // Helper method to safely parse double from various types
+  static double _parseDouble(dynamic value) {
+    if (value == null) return 0.0;
+    if (value is double) return value;
+    if (value is int) return value.toDouble();
+    if (value is String) {
+      return double.tryParse(value) ?? 0.0;
+    }
+    return 0.0;
+  }
+
+  // Helper method to safely parse int from various types
+  static int? _parseInt(dynamic value) {
+    if (value == null) return null;
+    if (value is int) return value;
+    if (value is double) return value.toInt();
+    if (value is String) {
+      return int.tryParse(value);
+    }
+    return null;
   }
 
   Map<String, dynamic> toJson() {

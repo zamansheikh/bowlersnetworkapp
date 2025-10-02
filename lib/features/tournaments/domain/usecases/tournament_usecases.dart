@@ -104,3 +104,28 @@ class GetAvailableTournamentsUseCase {
     return await repository.getAvailableTournaments();
   }
 }
+
+@injectable
+class RegisterSinglesForTournamentUseCase {
+  final TournamentRepository repository;
+
+  RegisterSinglesForTournamentUseCase({required this.repository});
+
+  Future<void> call(int tournamentId, int playerId) async {
+    return await repository.registerSinglesForTournament(
+      tournamentId,
+      playerId,
+    );
+  }
+}
+
+@injectable
+class RegisterTeamForTournamentUseCase {
+  final TournamentRepository repository;
+
+  RegisterTeamForTournamentUseCase({required this.repository});
+
+  Future<void> call(int tournamentId, int teamId) async {
+    return await repository.registerTeamForTournament(tournamentId, teamId);
+  }
+}
