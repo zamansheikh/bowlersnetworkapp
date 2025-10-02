@@ -119,7 +119,9 @@ class TournamentCubit extends Cubit<TournamentState> {
     final lowerQuery = query.toLowerCase();
     final suggestions = <String>[];
     final source = currentState.searchMode == TournamentSearchMode.location
-        ? currentState.tournaments.map((t) => t.address)
+        ? currentState.tournaments.map(
+            (t) => t.address.isNotEmpty ? t.address : 'Location not specified',
+          )
         : currentState.tournaments.map((t) => t.name);
 
     for (final item in source) {
@@ -203,6 +205,8 @@ class TournamentCubit extends Cubit<TournamentState> {
     required String regDeadline,
     required String regFee,
     required String address,
+    String? lat,
+    String? long,
     required String format,
     required int participantsCount,
     required String accessType,
@@ -219,6 +223,8 @@ class TournamentCubit extends Cubit<TournamentState> {
         regDeadline: regDeadline,
         regFee: regFee,
         address: address,
+        lat: lat,
+        long: long,
         format: format,
         participantsCount: participantsCount,
         accessType: accessType,

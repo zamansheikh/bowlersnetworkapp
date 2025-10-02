@@ -6,6 +6,8 @@ class Tournament extends Equatable {
   final String startDate;
   final String regDeadline;
   final String address;
+  final String? lat; // Optional latitude
+  final String? long; // Optional longitude
   final double regFee;
   final String accessType; // 'Open', 'Invitational'
   final String format; // 'Singles', 'Doubles', 'Teams'
@@ -15,7 +17,7 @@ class Tournament extends Equatable {
   final String? status; // 'active', 'premium', 'cancelled'
   final String tournamentType; // 'Handicap', 'Scratch'
   final double? average; // Required for both types
-  final double? percentage; // Only required for Scratch type
+  final double? percentage; // Only required for Handicap type
 
   const Tournament({
     required this.id,
@@ -23,6 +25,8 @@ class Tournament extends Equatable {
     required this.startDate,
     required this.regDeadline,
     required this.address,
+    this.lat,
+    this.long,
     required this.regFee,
     required this.accessType,
     required this.format,
@@ -41,6 +45,8 @@ class Tournament extends Equatable {
     String? startDate,
     String? regDeadline,
     String? address,
+    String? lat,
+    String? long,
     double? regFee,
     String? accessType,
     String? format,
@@ -58,6 +64,8 @@ class Tournament extends Equatable {
       startDate: startDate ?? this.startDate,
       regDeadline: regDeadline ?? this.regDeadline,
       address: address ?? this.address,
+      lat: lat ?? this.lat,
+      long: long ?? this.long,
       regFee: regFee ?? this.regFee,
       accessType: accessType ?? this.accessType,
       format: format ?? this.format,
@@ -78,6 +86,13 @@ class Tournament extends Equatable {
 
   bool get isRegistrationOpen => DateTime.now().isBefore(regDeadlineDateTime);
 
+  // Default coordinates for New York when lat/long are null
+  static const String _defaultLat = '40.7128';
+  static const String _defaultLong = '-74.0060';
+
+  String get effectiveLat => lat?.isNotEmpty == true ? lat! : _defaultLat;
+  String get effectiveLong => long?.isNotEmpty == true ? long! : _defaultLong;
+
   @override
   List<Object?> get props => [
     id,
@@ -85,6 +100,8 @@ class Tournament extends Equatable {
     startDate,
     regDeadline,
     address,
+    lat,
+    long,
     regFee,
     accessType,
     format,

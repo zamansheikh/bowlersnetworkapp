@@ -11,6 +11,8 @@ abstract class TournamentRemoteDataSource {
     required String regDeadline,
     required String regFee,
     required String address,
+    String? lat,
+    String? long,
     required String format,
     required int participantsCount,
     required String accessType,

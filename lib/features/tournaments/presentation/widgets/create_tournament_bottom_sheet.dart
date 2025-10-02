@@ -264,8 +264,8 @@ class _CreateTournamentBottomSheetState
                 },
               ),
 
-              // Percentage Field (only for Scratch)
-              if (_selectedTournamentType == 'Scratch') ...[
+              // Percentage Field (only for Handicap)
+              if (_selectedTournamentType == 'Handicap') ...[
                 SizedBox(height: AppSpacing.md),
                 Text(
                   'Percentage *',
@@ -280,9 +280,9 @@ class _CreateTournamentBottomSheetState
                   keyboardType: TextInputType.number,
                   decoration: _buildInputDecoration('Enter percentage'),
                   validator: (value) {
-                    if (_selectedTournamentType == 'Scratch') {
+                    if (_selectedTournamentType == 'Handicap') {
                       if (value?.isEmpty ?? true) {
-                        return 'Percentage is required for Scratch tournaments';
+                        return 'Percentage is required for Handicap tournaments';
                       }
                       final percentage = double.tryParse(value!);
                       if (percentage == null ||
@@ -581,6 +581,8 @@ class _CreateTournamentBottomSheetState
         regDeadline: _regDeadline!.toIso8601String(),
         regFee: _regFeeController.text.trim(),
         address: _addressController.text.trim(),
+        lat: null, // Optional - will use default New York coordinates
+        long: null, // Optional - will use default New York coordinates
         format: _selectedFormat,
         participantsCount: _participantsCount,
         accessType: _selectedAccessType,
@@ -589,7 +591,7 @@ class _CreateTournamentBottomSheetState
             ? double.tryParse(_averageController.text)
             : null,
         percentage:
-            _selectedTournamentType == 'Scratch' &&
+            _selectedTournamentType == 'Handicap' &&
                 _percentageController.text.isNotEmpty
             ? double.tryParse(_percentageController.text)
             : null,
@@ -677,9 +679,9 @@ class _CreateTournamentBottomSheetState
   String _getTournamentTypeDescription(String type) {
     switch (type) {
       case 'Handicap':
-        return 'Uses average and handicap system';
+        return 'Uses average and handicap system with percentage';
       case 'Scratch':
-        return 'Uses average and percentage system';
+        return 'Uses average system only';
       default:
         return '';
     }
@@ -688,8 +690,8 @@ class _CreateTournamentBottomSheetState
   void _selectTournamentType(String type) {
     setState(() {
       _selectedTournamentType = type;
-      // Clear percentage when switching from Scratch to Handicap
-      if (type == 'Handicap') {
+      // Clear percentage when switching from Handicap to Scratch
+      if (type == 'Scratch') {
         _percentageController.clear();
       }
     });
