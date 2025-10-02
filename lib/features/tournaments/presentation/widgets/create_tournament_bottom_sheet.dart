@@ -32,6 +32,13 @@ class _CreateTournamentBottomSheetState
   int _participantsCount = 1;
   bool _isCreating = false;
 
+  // Address autocomplete
+  List<Map<String, dynamic>> _addressSuggestions = [];
+  bool _showSuggestions = false;
+  String? _selectedLat;
+  String? _selectedLong;
+  final _addressFocusNode = FocusNode();
+
   final List<String> _formats = ['Singles', 'Doubles', 'Teams'];
   final List<String> _accessTypes = ['Open', 'Invitational'];
   final List<String> _tournamentTypes = ['Handicap', 'Scratch'];
@@ -43,6 +50,7 @@ class _CreateTournamentBottomSheetState
     _regFeeController.dispose();
     _averageController.dispose();
     _percentageController.dispose();
+    _addressFocusNode.dispose();
     super.dispose();
   }
 
@@ -203,7 +211,7 @@ class _CreateTournamentBottomSheetState
 
               SizedBox(height: AppSpacing.md),
 
-              // Address
+              // Address with Autocomplete
               Text(
                 'Address *',
                 style: AppTextStyles.labelMedium.copyWith(
@@ -212,16 +220,61 @@ class _CreateTournamentBottomSheetState
                 ),
               ),
               SizedBox(height: AppSpacing.xs),
-              TextFormField(
-                controller: _addressController,
-                maxLines: 2,
-                decoration: _buildInputDecoration('Enter tournament address'),
-                validator: (value) {
-                  if (value?.isEmpty ?? true) {
-                    return 'Address is required';
-                  }
-                  return null;
-                },
+              Column(
+                children: [
+                  TextFormField(
+                    controller: _addressController,
+                    focusNode: _addressFocusNode,
+                    maxLines: 2,
+                    decoration: _buildInputDecoration(
+                      'Enter tournament address',
+                    ),
+                    onChanged: _onAddressChanged,
+                    validator: (value) {
+                      if (value?.isEmpty ?? true) {
+                        return 'Address is required';
+                      }
+                      return null;
+                    },
+                  ),
+                  if (_showSuggestions && _addressSuggestions.isNotEmpty)
+                    Container(
+                      margin: EdgeInsets.only(top: 4),
+                      decoration: BoxDecoration(
+                        color: AppColors.white,
+                        borderRadius: BorderRadius.circular(8),
+                        border: Border.all(color: AppColors.gray300),
+                        boxShadow: [
+                          BoxShadow(
+                            color: AppColors.shadow,
+                            blurRadius: 8,
+                            offset: Offset(0, 2),
+                          ),
+                        ],
+                      ),
+                      child: ListView.builder(
+                        shrinkWrap: true,
+                        physics: NeverScrollableScrollPhysics(),
+                        itemCount: _addressSuggestions.length,
+                        itemBuilder: (context, index) {
+                          final suggestion = _addressSuggestions[index];
+                          return ListTile(
+                            dense: true,
+                            leading: Icon(
+                              Icons.location_on,
+                              color: AppColors.gray500,
+                              size: 16,
+                            ),
+                            title: Text(
+                              suggestion['description'] ?? '',
+                              style: AppTextStyles.bodySmall,
+                            ),
+                            onTap: () => _selectAddress(suggestion),
+                          );
+                        },
+                      ),
+                    ),
+                ],
               ),
 
               SizedBox(height: AppSpacing.md),
@@ -239,36 +292,10 @@ class _CreateTournamentBottomSheetState
 
               SizedBox(height: AppSpacing.md),
 
-              // Average Field (for both types)
-              Text(
-                'Average *',
-                style: AppTextStyles.labelMedium.copyWith(
-                  fontWeight: FontWeight.w600,
-                  color: AppColors.gray800,
-                ),
-              ),
-              SizedBox(height: AppSpacing.xs),
-              TextFormField(
-                controller: _averageController,
-                keyboardType: TextInputType.number,
-                decoration: _buildInputDecoration('Enter average score'),
-                validator: (value) {
-                  if (value?.isEmpty ?? true) {
-                    return 'Average is required';
-                  }
-                  final average = double.tryParse(value!);
-                  if (average == null || average < 0 || average > 300) {
-                    return 'Enter a valid average (0-300)';
-                  }
-                  return null;
-                },
-              ),
-
-              // Percentage Field (only for Handicap)
+              // Average Field (only for Handicap)
               if (_selectedTournamentType == 'Handicap') ...[
-                SizedBox(height: AppSpacing.md),
                 Text(
-                  'Percentage *',
+                  'Average *',
                   style: AppTextStyles.labelMedium.copyWith(
                     fontWeight: FontWeight.w600,
                     color: AppColors.gray800,
@@ -276,25 +303,51 @@ class _CreateTournamentBottomSheetState
                 ),
                 SizedBox(height: AppSpacing.xs),
                 TextFormField(
-                  controller: _percentageController,
+                  controller: _averageController,
                   keyboardType: TextInputType.number,
-                  decoration: _buildInputDecoration('Enter percentage'),
+                  decoration: _buildInputDecoration('Enter average score'),
                   validator: (value) {
                     if (_selectedTournamentType == 'Handicap') {
                       if (value?.isEmpty ?? true) {
-                        return 'Percentage is required for Handicap tournaments';
+                        return 'Average is required for Handicap tournaments';
                       }
-                      final percentage = double.tryParse(value!);
-                      if (percentage == null ||
-                          percentage < 0 ||
-                          percentage > 100) {
-                        return 'Enter a valid percentage (0-100)';
+                      final average = double.tryParse(value!);
+                      if (average == null || average < 0 || average > 300) {
+                        return 'Enter a valid average (0-300)';
                       }
                     }
                     return null;
                   },
                 ),
+                SizedBox(height: AppSpacing.md),
               ],
+
+              // Percentage Field (for both Handicap and Scratch)
+              Text(
+                'Percentage *',
+                style: AppTextStyles.labelMedium.copyWith(
+                  fontWeight: FontWeight.w600,
+                  color: AppColors.gray800,
+                ),
+              ),
+              SizedBox(height: AppSpacing.xs),
+              TextFormField(
+                controller: _percentageController,
+                keyboardType: TextInputType.number,
+                decoration: _buildInputDecoration('Enter percentage'),
+                validator: (value) {
+                  if (value?.isEmpty ?? true) {
+                    return 'Percentage is required';
+                  }
+                  final percentage = double.tryParse(value!);
+                  if (percentage == null ||
+                      percentage < 0 ||
+                      percentage > 100) {
+                    return 'Enter a valid percentage (0-100)';
+                  }
+                  return null;
+                },
+              ),
 
               SizedBox(height: AppSpacing.md),
 
@@ -469,7 +522,7 @@ class _CreateTournamentBottomSheetState
 
   Widget _buildAccessTypeDropdown() {
     return DropdownButtonFormField<String>(
-      value: _selectedAccessType,
+      initialValue: _selectedAccessType,
       decoration: _buildInputDecoration('Select access type'),
       items: _accessTypes.map((type) {
         return DropdownMenuItem(value: type, child: Text(type));
@@ -575,26 +628,41 @@ class _CreateTournamentBottomSheetState
     });
 
     try {
+      // Prepare average and percentage based on tournament type
+      double? average;
+      double? percentage;
+
+      if (_selectedTournamentType == 'Handicap') {
+        // Handicap: both average and percentage are required
+        average = _averageController.text.isNotEmpty
+            ? double.tryParse(_averageController.text)
+            : null;
+        percentage = _percentageController.text.isNotEmpty
+            ? double.tryParse(_percentageController.text)
+            : null;
+      } else {
+        // Scratch: only percentage is required
+        average = null;
+        percentage = _percentageController.text.isNotEmpty
+            ? double.tryParse(_percentageController.text)
+            : null;
+      }
+
       await context.read<TournamentCubit>().createNewTournament(
         name: _nameController.text.trim(),
         startDate: _startDate!.toIso8601String(),
         regDeadline: _regDeadline!.toIso8601String(),
         regFee: _regFeeController.text.trim(),
         address: _addressController.text.trim(),
-        lat: null, // Optional - will use default New York coordinates
-        long: null, // Optional - will use default New York coordinates
+        lat: _selectedLat, // Use selected coordinates from address autocomplete
+        long:
+            _selectedLong, // Use selected coordinates from address autocomplete
         format: _selectedFormat,
         participantsCount: _participantsCount,
         accessType: _selectedAccessType,
         tournamentType: _selectedTournamentType,
-        average: _averageController.text.isNotEmpty
-            ? double.tryParse(_averageController.text)
-            : null,
-        percentage:
-            _selectedTournamentType == 'Handicap' &&
-                _percentageController.text.isNotEmpty
-            ? double.tryParse(_percentageController.text)
-            : null,
+        average: average,
+        percentage: percentage,
       );
 
       if (mounted) {
@@ -690,10 +758,72 @@ class _CreateTournamentBottomSheetState
   void _selectTournamentType(String type) {
     setState(() {
       _selectedTournamentType = type;
-      // Clear percentage when switching from Handicap to Scratch
+      // Clear fields when switching tournament types
       if (type == 'Scratch') {
-        _percentageController.clear();
+        _averageController.clear(); // Clear average for Scratch
+      } else {
+        // Handicap - keep both fields
       }
     });
+  }
+
+  void _onAddressChanged(String query) {
+    if (query.isEmpty) {
+      setState(() {
+        _showSuggestions = false;
+        _addressSuggestions.clear();
+      });
+      return;
+    }
+
+    // Simulate address suggestions (replace with actual API call)
+    setState(() {
+      _showSuggestions = true;
+      _addressSuggestions =
+          [
+                {
+                  'description': 'New York, NY, USA',
+                  'lat': '40.7128',
+                  'long': '-74.0060',
+                },
+                {
+                  'description': 'Los Angeles, CA, USA',
+                  'lat': '34.0522',
+                  'long': '-118.2437',
+                },
+                {
+                  'description': 'Chicago, IL, USA',
+                  'lat': '41.8781',
+                  'long': '-87.6298',
+                },
+                {
+                  'description': 'Houston, TX, USA',
+                  'lat': '29.7604',
+                  'long': '-95.3698',
+                },
+                {
+                  'description': 'Phoenix, AZ, USA',
+                  'lat': '33.4484',
+                  'long': '-112.0740',
+                },
+              ]
+              .where(
+                (suggestion) => suggestion['description']!
+                    .toLowerCase()
+                    .contains(query.toLowerCase()),
+              )
+              .toList();
+    });
+  }
+
+  void _selectAddress(Map<String, dynamic> suggestion) {
+    setState(() {
+      _addressController.text = suggestion['description'] ?? '';
+      _selectedLat = suggestion['lat'];
+      _selectedLong = suggestion['long'];
+      _showSuggestions = false;
+      _addressSuggestions.clear();
+    });
+    _addressFocusNode.unfocus();
   }
 }
