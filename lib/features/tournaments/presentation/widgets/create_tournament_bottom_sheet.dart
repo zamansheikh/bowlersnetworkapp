@@ -44,9 +44,9 @@ class _CreateTournamentBottomSheetState
   final _addressFocusNode = FocusNode();
   Timer? _debounceTimer;
   bool _isSearching = false;
-  
+
   // Mapbox configuration
-  static  final String _mapboxToken = AppConstants.mapboxAccessToken;
+  static final String _mapboxToken = AppConstants.mapboxAccessToken;
 
   final List<String> _formats = ['Singles', 'Doubles', 'Teams'];
   final List<String> _accessTypes = ['Open', 'Invitational'];
@@ -274,9 +274,10 @@ class _CreateTournamentBottomSheetState
                                       height: 16,
                                       child: CircularProgressIndicator(
                                         strokeWidth: 2,
-                                        valueColor: AlwaysStoppedAnimation<Color>(
-                                          AppColors.primaryLimeGreen,
-                                        ),
+                                        valueColor:
+                                            AlwaysStoppedAnimation<Color>(
+                                              AppColors.primaryLimeGreen,
+                                            ),
                                       ),
                                     ),
                                     SizedBox(width: 8),
@@ -289,38 +290,38 @@ class _CreateTournamentBottomSheetState
                               ),
                             )
                           : _addressSuggestions.isEmpty
-                              ? SizedBox(
-                                  height: 60,
-                                  child: Center(
-                                    child: Text(
-                                      'No addresses found',
-                                      style: AppTextStyles.bodySmall.copyWith(
-                                        color: AppColors.gray500,
-                                      ),
-                                    ),
+                          ? SizedBox(
+                              height: 60,
+                              child: Center(
+                                child: Text(
+                                  'No addresses found',
+                                  style: AppTextStyles.bodySmall.copyWith(
+                                    color: AppColors.gray500,
                                   ),
-                                )
-                              : ListView.builder(
-                                  shrinkWrap: true,
-                                  physics: NeverScrollableScrollPhysics(),
-                                  itemCount: _addressSuggestions.length,
-                                  itemBuilder: (context, index) {
-                                    final suggestion = _addressSuggestions[index];
-                                    return ListTile(
-                                      dense: true,
-                                      leading: Icon(
-                                        Icons.location_on,
-                                        color: AppColors.gray500,
-                                        size: 16,
-                                      ),
-                                      title: Text(
-                                        suggestion['place_name'] ?? '',
-                                        style: AppTextStyles.bodySmall,
-                                      ),
-                                      onTap: () => _selectAddress(suggestion),
-                                    );
-                                  },
                                 ),
+                              ),
+                            )
+                          : ListView.builder(
+                              shrinkWrap: true,
+                              physics: NeverScrollableScrollPhysics(),
+                              itemCount: _addressSuggestions.length,
+                              itemBuilder: (context, index) {
+                                final suggestion = _addressSuggestions[index];
+                                return ListTile(
+                                  dense: true,
+                                  leading: Icon(
+                                    Icons.location_on,
+                                    color: AppColors.gray500,
+                                    size: 16,
+                                  ),
+                                  title: Text(
+                                    suggestion['place_name'] ?? '',
+                                    style: AppTextStyles.bodySmall,
+                                  ),
+                                  onTap: () => _selectAddress(suggestion),
+                                );
+                              },
+                            ),
                     ),
                 ],
               ),
@@ -828,7 +829,7 @@ class _CreateTournamentBottomSheetState
 
     // Cancel previous timer
     _debounceTimer?.cancel();
-    
+
     // Show loading state immediately
     setState(() {
       _showSuggestions = true;
@@ -850,7 +851,7 @@ class _CreateTournamentBottomSheetState
       });
 
       // Mapbox Geocoding API endpoint
-      final String url = 
+      final String url =
           'https://api.mapbox.com/geocoding/v5/mapbox.places/${Uri.encodeComponent(query)}.json'
           '?access_token=$_mapboxToken'
           '&limit=5'
@@ -864,8 +865,9 @@ class _CreateTournamentBottomSheetState
 
         setState(() {
           _addressSuggestions = features.map((feature) {
-            final List<double> coordinates = 
-                List<double>.from(feature['center'] ?? [0.0, 0.0]);
+            final List<double> coordinates = List<double>.from(
+              feature['center'] ?? [0.0, 0.0],
+            );
             return {
               'place_name': feature['place_name'] ?? '',
               'lat': coordinates.length > 1 ? coordinates[1].toString() : '0',
