@@ -6,12 +6,14 @@ import '../../../../core/constants/colors.dart';
 import '../../../../core/theme/app_text_styles.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/widgets/custom_button.dart';
+import '../../../../core/utils/location_utils.dart';
 import '../../domain/entities/tournament.dart';
 import '../bloc/tournament_cubit.dart';
 import '../bloc/tournament_state.dart';
 import '../widgets/tournament_card.dart';
 import '../widgets/tournament_filter_bottom_sheet.dart';
 import '../widgets/create_tournament_bottom_sheet.dart';
+import '../widgets/location_search_widget.dart';
 
 class TournamentsPage extends StatefulWidget {
   const TournamentsPage({super.key});
@@ -22,6 +24,7 @@ class TournamentsPage extends StatefulWidget {
 
 class _TournamentsPageState extends State<TournamentsPage> {
   final TextEditingController _searchController = TextEditingController();
+  final TextEditingController _locationController = TextEditingController();
   final List<String> _tabs = ['All Tournament', 'Registered', 'Available'];
 
   @override
@@ -33,6 +36,7 @@ class _TournamentsPageState extends State<TournamentsPage> {
   @override
   void dispose() {
     _searchController.dispose();
+    _locationController.dispose();
     super.dispose();
   }
 
@@ -186,41 +190,61 @@ class _TournamentsPageState extends State<TournamentsPage> {
           Row(
             children: [
               Expanded(
-                child: TextField(
-                  controller: _searchController,
-                  onChanged: (value) {
-                    tournamentCubit.updateSearchTerm(value);
-                  },
-                  style: AppTextStyles.bodyMedium,
-                  decoration: InputDecoration(
-                    hintText: hintText,
-                    hintStyle: AppTextStyles.bodyMedium.copyWith(
-                      color: AppColors.gray500,
-                    ),
-                    prefixIcon: const Icon(
-                      Icons.search,
-                      color: AppColors.gray500,
-                    ),
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12),
-                      borderSide: const BorderSide(color: AppColors.gray300),
-                    ),
-                    enabledBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12),
-                      borderSide: const BorderSide(color: AppColors.gray300),
-                    ),
-                    focusedBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12),
-                      borderSide: const BorderSide(
-                        color: AppColors.primaryLimeGreen,
+                child: state.searchMode == TournamentSearchMode.location
+                    ? LocationSearchWidget(
+                        controller: _locationController,
+                        hintText: hintText,
+                        showDistanceFilter: true,
+                        onLocationSelected: (lat, lng, locationName) {
+                          tournamentCubit.updateSelectedLocation(
+                            lat: lat,
+                            lng: lng,
+                            locationName: locationName,
+                          );
+                        },
+                        onClearLocation: () {
+                          tournamentCubit.clearSelectedLocation();
+                        },
+                      )
+                    : TextField(
+                        controller: _searchController,
+                        onChanged: (value) {
+                          tournamentCubit.updateSearchTerm(value);
+                        },
+                        style: AppTextStyles.bodyMedium,
+                        decoration: InputDecoration(
+                          hintText: hintText,
+                          hintStyle: AppTextStyles.bodyMedium.copyWith(
+                            color: AppColors.gray500,
+                          ),
+                          prefixIcon: const Icon(
+                            Icons.search,
+                            color: AppColors.gray500,
+                          ),
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12),
+                            borderSide: const BorderSide(
+                              color: AppColors.gray300,
+                            ),
+                          ),
+                          enabledBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12),
+                            borderSide: const BorderSide(
+                              color: AppColors.gray300,
+                            ),
+                          ),
+                          focusedBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12),
+                            borderSide: const BorderSide(
+                              color: AppColors.primaryLimeGreen,
+                            ),
+                          ),
+                          contentPadding: EdgeInsets.symmetric(
+                            horizontal: AppSpacing.md,
+                            vertical: AppSpacing.sm,
+                          ),
+                        ),
                       ),
-                    ),
-                    contentPadding: EdgeInsets.symmetric(
-                      horizontal: AppSpacing.md,
-                      vertical: AppSpacing.sm,
-                    ),
-                  ),
-                ),
               ),
               SizedBox(width: AppSpacing.sm),
               Container(
@@ -235,6 +259,7 @@ class _TournamentsPageState extends State<TournamentsPage> {
                     if (value is TournamentSearchMode) {
                       tournamentCubit.updateSearchMode(value);
                       _searchController.clear();
+                      _locationController.clear();
                       FocusScope.of(context).unfocus();
                     } else if (value == 'advanced-filters') {
                       _showFilterBottomSheet(state);
@@ -300,6 +325,53 @@ class _TournamentsPageState extends State<TournamentsPage> {
               ),
             ],
           ),
+
+          // Show selected location and filter info
+          if (state.searchMode == TournamentSearchMode.location &&
+              state.selectedLocationName != null) ...[
+            SizedBox(height: AppSpacing.sm),
+            Container(
+              padding: EdgeInsets.all(AppSpacing.sm),
+              decoration: BoxDecoration(
+                color: AppColors.primaryLimeGreen.withValues(alpha: 0.1),
+                borderRadius: BorderRadius.circular(8),
+                border: Border.all(
+                  color: AppColors.primaryLimeGreen.withValues(alpha: 0.3),
+                ),
+              ),
+              child: Row(
+                children: [
+                  Icon(
+                    Icons.location_on,
+                    color: AppColors.primaryLimeGreen,
+                    size: 16,
+                  ),
+                  SizedBox(width: AppSpacing.xs),
+                  Expanded(
+                    child: Text(
+                      'Tournaments within 10 miles of ${state.selectedLocationName}',
+                      style: AppTextStyles.bodySmall.copyWith(
+                        color: AppColors.primaryLimeGreen,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ),
+                  GestureDetector(
+                    onTap: () {
+                      context.read<TournamentCubit>().clearSelectedLocation();
+                      _locationController.clear();
+                    },
+                    child: Icon(
+                      Icons.close,
+                      color: AppColors.primaryLimeGreen,
+                      size: 16,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+
           if (state.searchTerm.isNotEmpty && suggestions.isNotEmpty) ...[
             SizedBox(height: AppSpacing.sm),
             Container(
@@ -521,10 +593,30 @@ class _TournamentsPageState extends State<TournamentsPage> {
       itemBuilder: (context, index) {
         final tournament = state.filteredTournaments[index];
 
+        // Calculate distance if location filtering is active
+        String? distance;
+        if (state.searchMode == TournamentSearchMode.location &&
+            state.selectedLat != null &&
+            state.selectedLng != null) {
+          final tournamentLat = double.tryParse(tournament.lat ?? '0');
+          final tournamentLng = double.tryParse(tournament.long ?? '0');
+
+          if (tournamentLat != null && tournamentLng != null) {
+            final distanceInMiles = LocationUtils.calculateDistance(
+              state.selectedLat!,
+              state.selectedLng!,
+              tournamentLat,
+              tournamentLng,
+            );
+            distance = LocationUtils.formatDistance(distanceInMiles);
+          }
+        }
+
         return Padding(
           padding: EdgeInsets.only(bottom: AppSpacing.md),
           child: TournamentCard(
             tournament: tournament,
+            distance: distance,
             onTap: () => _navigateToTournamentDetail(tournament),
             onRegister: () => _handleRegistration(tournament),
             isRegistering: false, // We'll handle this in the cubit

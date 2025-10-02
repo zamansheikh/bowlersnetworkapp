@@ -65,7 +65,46 @@ class TournamentCubit extends Cubit<TournamentState> {
   void updateSearchMode(TournamentSearchMode mode) {
     final currentState = state;
     if (currentState is TournamentLoaded) {
-      emit(currentState.copyWith(searchMode: mode, searchTerm: ''));
+      emit(
+        currentState.copyWith(
+          searchMode: mode,
+          searchTerm: '',
+          selectedLat: null,
+          selectedLng: null,
+          selectedLocationName: null,
+        ),
+      );
+    }
+  }
+
+  void updateSelectedLocation({
+    required double lat,
+    required double lng,
+    required String locationName,
+  }) {
+    final currentState = state;
+    if (currentState is TournamentLoaded) {
+      emit(
+        currentState.copyWith(
+          selectedLat: lat,
+          selectedLng: lng,
+          selectedLocationName: locationName,
+        ),
+      );
+    }
+  }
+
+  void clearSelectedLocation() {
+    final currentState = state;
+    if (currentState is TournamentLoaded) {
+      emit(
+        currentState.copyWith(
+          selectedLat: null,
+          selectedLng: null,
+          selectedLocationName: null,
+          searchTerm: '',
+        ),
+      );
     }
   }
 

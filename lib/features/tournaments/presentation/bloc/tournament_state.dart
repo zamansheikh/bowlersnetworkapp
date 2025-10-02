@@ -1,5 +1,6 @@
 import 'package:equatable/equatable.dart';
 import '../../domain/entities/tournament.dart';
+import '../../../../core/utils/location_utils.dart';
 
 enum TournamentSearchMode { name, location }
 
@@ -22,6 +23,9 @@ class TournamentLoaded extends TournamentState {
   selectedFormats; // Filter by format (Singles, Doubles, Teams)
   final List<String> selectedAccessLevels; // Filter by access level/price
   final TournamentSearchMode searchMode;
+  final double? selectedLat; // Selected location latitude for filtering
+  final double? selectedLng; // Selected location longitude for filtering
+  final String? selectedLocationName; // Name of selected location for display
 
   const TournamentLoaded({
     required this.tournaments,
@@ -30,6 +34,9 @@ class TournamentLoaded extends TournamentState {
     this.selectedFormats = const [],
     this.selectedAccessLevels = const [],
     this.searchMode = TournamentSearchMode.name,
+    this.selectedLat,
+    this.selectedLng,
+    this.selectedLocationName,
   });
 
   TournamentLoaded copyWith({
@@ -39,6 +46,9 @@ class TournamentLoaded extends TournamentState {
     List<String>? selectedFormats,
     List<String>? selectedAccessLevels,
     TournamentSearchMode? searchMode,
+    double? selectedLat,
+    double? selectedLng,
+    String? selectedLocationName,
   }) {
     return TournamentLoaded(
       tournaments: tournaments ?? this.tournaments,
@@ -47,6 +57,9 @@ class TournamentLoaded extends TournamentState {
       selectedFormats: selectedFormats ?? this.selectedFormats,
       selectedAccessLevels: selectedAccessLevels ?? this.selectedAccessLevels,
       searchMode: searchMode ?? this.searchMode,
+      selectedLat: selectedLat ?? this.selectedLat,
+      selectedLng: selectedLng ?? this.selectedLng,
+      selectedLocationName: selectedLocationName ?? this.selectedLocationName,
     );
   }
 
@@ -70,9 +83,52 @@ class TournamentLoaded extends TournamentState {
       final lowerQuery = searchTerm.toLowerCase();
       filtered = filtered.where((tournament) {
         if (searchMode == TournamentSearchMode.location) {
+          // If we have selected coordinates, filter by distance
+          if (selectedLat != null && selectedLng != null) {
+            // Parse tournament coordinates
+            final tournamentLat = double.tryParse(tournament.lat ?? '0');
+            final tournamentLng = double.tryParse(tournament.long ?? '0');
+
+            if (tournamentLat != null && tournamentLng != null) {
+              // Check if tournament is within 10 miles
+              final isWithin10Miles = LocationUtils.isWithinRadius(
+                selectedLat!,
+                selectedLng!,
+                tournamentLat,
+                tournamentLng,
+                10.0, // 10 miles radius
+              );
+
+              // Also check if address matches search term for additional filtering
+              final addressMatches = tournament.address.toLowerCase().contains(
+                lowerQuery,
+              );
+              return isWithin10Miles && (lowerQuery.isEmpty || addressMatches);
+            }
+          }
+          // Fallback to address search if no coordinates
           return tournament.address.toLowerCase().contains(lowerQuery);
         }
         return tournament.name.toLowerCase().contains(lowerQuery);
+      }).toList();
+    } else if (searchMode == TournamentSearchMode.location &&
+        selectedLat != null &&
+        selectedLng != null) {
+      // If no search term but location is selected, show all tournaments within 10 miles
+      filtered = filtered.where((tournament) {
+        final tournamentLat = double.tryParse(tournament.lat ?? '0');
+        final tournamentLng = double.tryParse(tournament.long ?? '0');
+
+        if (tournamentLat != null && tournamentLng != null) {
+          return LocationUtils.isWithinRadius(
+            selectedLat!,
+            selectedLng!,
+            tournamentLat,
+            tournamentLng,
+            10.0, // 10 miles radius
+          );
+        }
+        return false; // Exclude tournaments without valid coordinates
       }).toList();
     }
 
@@ -101,6 +157,9 @@ class TournamentLoaded extends TournamentState {
     selectedFormats,
     selectedAccessLevels,
     searchMode,
+    selectedLat,
+    selectedLng,
+    selectedLocationName,
   ];
 }
 

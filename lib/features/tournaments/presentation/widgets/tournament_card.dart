@@ -11,6 +11,7 @@ class TournamentCard extends StatelessWidget {
   final VoidCallback onTap;
   final VoidCallback onRegister;
   final bool isRegistering;
+  final String? distance; // Distance from selected location
 
   const TournamentCard({
     super.key,
@@ -18,6 +19,7 @@ class TournamentCard extends StatelessWidget {
     required this.onTap,
     required this.onRegister,
     this.isRegistering = false,
+    this.distance,
   });
 
   @override
@@ -82,6 +84,8 @@ class TournamentCard extends StatelessWidget {
                 Icons.location_on_outlined,
                 tournament.address.isEmpty
                     ? 'Location TBD'
+                    : distance != null
+                    ? '${tournament.address} • $distance'
                     : tournament.address,
                 AppColors.error,
               ),
