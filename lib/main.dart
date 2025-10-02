@@ -3,10 +3,12 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
+import 'package:mapbox_maps_flutter/mapbox_maps_flutter.dart' as mapbox;
 import 'core/di/injection.dart';
 import 'core/router/app_router.dart';
 import 'core/theme/app_theme.dart';
 import 'core/constants/strings.dart';
+import 'core/constants/constants.dart';
 import 'features/home/presentation/bloc/home_bloc.dart';
 import 'features/auth/presentation/bloc/auth_cubit.dart';
 import 'features/auth/presentation/bloc/signup_cubit.dart';
@@ -19,6 +21,7 @@ import 'features/tournaments/presentation/bloc/tournament_cubit.dart';
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await dotenv.load(fileName: ".env");
+  mapbox.MapboxOptions.setAccessToken(AppConstants.mapboxAccessToken);
   await configureDependencies();
   runApp(const MyApp());
 }

@@ -62,6 +62,13 @@ class TournamentCubit extends Cubit<TournamentState> {
     }
   }
 
+  void updateSearchMode(TournamentSearchMode mode) {
+    final currentState = state;
+    if (currentState is TournamentLoaded) {
+      emit(currentState.copyWith(searchMode: mode, searchTerm: ''));
+    }
+  }
+
   void toggleFormatFilter(String format) {
     final currentState = state;
     if (currentState is TournamentLoaded) {
@@ -101,6 +108,33 @@ class TournamentCubit extends Cubit<TournamentState> {
         ),
       );
     }
+  }
+
+  List<String> getSearchSuggestions(String query) {
+    final currentState = state;
+    if (currentState is! TournamentLoaded || query.isEmpty) {
+      return const [];
+    }
+
+    final lowerQuery = query.toLowerCase();
+    final suggestions = <String>[];
+    final source = currentState.searchMode == TournamentSearchMode.location
+        ? currentState.tournaments.map((t) => t.address)
+        : currentState.tournaments.map((t) => t.name);
+
+    for (final item in source) {
+      final normalized = item.trim();
+      if (normalized.isEmpty) continue;
+      final alreadyAdded = suggestions.any(
+        (existing) => existing.toLowerCase() == normalized.toLowerCase(),
+      );
+      if (!alreadyAdded && normalized.toLowerCase().contains(lowerQuery)) {
+        suggestions.add(normalized);
+      }
+      if (suggestions.length >= 6) break;
+    }
+
+    return suggestions;
   }
 
   Future<void> handleTournamentRegistration(Tournament tournament) async {

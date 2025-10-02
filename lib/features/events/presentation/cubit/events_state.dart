@@ -2,6 +2,8 @@ import 'package:equatable/equatable.dart';
 import '../../domain/entities/calendar_event.dart';
 import '../../domain/entities/tournament.dart';
 
+enum EventSearchMode { eventName, location }
+
 abstract class EventsState extends Equatable {
   const EventsState();
 
@@ -20,6 +22,7 @@ class EventsLoaded extends EventsState {
   final DateTime? selectedDate;
   final String searchTerm;
   final EventType? filterType;
+  final EventSearchMode searchMode;
 
   const EventsLoaded({
     required this.tournaments,
@@ -28,6 +31,7 @@ class EventsLoaded extends EventsState {
     this.selectedDate,
     this.searchTerm = '',
     this.filterType,
+    this.searchMode = EventSearchMode.eventName,
   });
 
   EventsLoaded copyWith({
@@ -39,6 +43,7 @@ class EventsLoaded extends EventsState {
     EventType? filterType,
     bool clearSelectedDate = false,
     bool clearFilterType = false,
+    EventSearchMode? searchMode,
   }) {
     return EventsLoaded(
       tournaments: tournaments ?? this.tournaments,
@@ -49,6 +54,7 @@ class EventsLoaded extends EventsState {
           : (selectedDate ?? this.selectedDate),
       searchTerm: searchTerm ?? this.searchTerm,
       filterType: clearFilterType ? null : (filterType ?? this.filterType),
+      searchMode: searchMode ?? this.searchMode,
     );
   }
 
@@ -60,6 +66,7 @@ class EventsLoaded extends EventsState {
     selectedDate,
     searchTerm,
     filterType,
+    searchMode,
   ];
 }
 

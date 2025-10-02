@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
-import 'package:intl/intl.dart';
 import '../../../../core/constants/colors.dart';
 import '../../../../core/theme/app_text_styles.dart';
 import '../../../../core/theme/app_spacing.dart';
@@ -164,6 +163,21 @@ class _TournamentsPageState extends State<TournamentsPage> {
   }
 
   Widget _buildSearchAndFilter(TournamentLoaded state) {
+    if (_searchController.text != state.searchTerm) {
+      _searchController.value = TextEditingValue(
+        text: state.searchTerm,
+        selection: TextSelection.collapsed(offset: state.searchTerm.length),
+      );
+    }
+
+    final tournamentCubit = context.read<TournamentCubit>();
+    final suggestions = state.searchTerm.isEmpty
+        ? const <String>[]
+        : tournamentCubit.getSearchSuggestions(state.searchTerm);
+    final hintText = state.searchMode == TournamentSearchMode.name
+        ? 'Search tournaments by name...'
+        : 'Search tournaments by location...';
+
     return Container(
       padding: EdgeInsets.all(AppSpacing.lg),
       color: AppColors.white,
@@ -175,11 +189,11 @@ class _TournamentsPageState extends State<TournamentsPage> {
                 child: TextField(
                   controller: _searchController,
                   onChanged: (value) {
-                    context.read<TournamentCubit>().updateSearchTerm(value);
+                    tournamentCubit.updateSearchTerm(value);
                   },
                   style: AppTextStyles.bodyMedium,
                   decoration: InputDecoration(
-                    hintText: 'Search tournaments...',
+                    hintText: hintText,
                     hintStyle: AppTextStyles.bodyMedium.copyWith(
                       color: AppColors.gray500,
                     ),
@@ -209,23 +223,128 @@ class _TournamentsPageState extends State<TournamentsPage> {
                 ),
               ),
               SizedBox(width: AppSpacing.sm),
-              GestureDetector(
-                onTap: () => _showFilterBottomSheet(state),
-                child: Container(
-                  padding: const EdgeInsets.all(12),
-                  decoration: BoxDecoration(
-                    color: AppColors.primaryLimeGreen,
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: const Icon(
-                    Icons.tune,
-                    color: AppColors.white,
-                    size: 24,
+              Container(
+                decoration: BoxDecoration(
+                  color: AppColors.primaryLimeGreen,
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: PopupMenuButton<Object?>(
+                  tooltip: 'Search & filter',
+                  offset: const Offset(0, 48),
+                  onSelected: (value) {
+                    if (value is TournamentSearchMode) {
+                      tournamentCubit.updateSearchMode(value);
+                      _searchController.clear();
+                      FocusScope.of(context).unfocus();
+                    } else if (value == 'advanced-filters') {
+                      _showFilterBottomSheet(state);
+                    }
+                  },
+                  itemBuilder: (context) => [
+                    PopupMenuItem<Object?>(
+                      enabled: false,
+                      child: Text(
+                        'Search mode',
+                        style: AppTextStyles.bodySmall.copyWith(
+                          color: AppColors.gray500,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ),
+                    PopupMenuItem<Object?>(
+                      value: TournamentSearchMode.name,
+                      child: _buildFilterMenuOption(
+                        label: 'Event name',
+                        selected: state.searchMode == TournamentSearchMode.name,
+                        icon: Icons.emoji_events,
+                      ),
+                    ),
+                    PopupMenuItem<Object?>(
+                      value: TournamentSearchMode.location,
+                      child: _buildFilterMenuOption(
+                        label: 'Location',
+                        selected:
+                            state.searchMode == TournamentSearchMode.location,
+                        icon: Icons.location_on,
+                      ),
+                    ),
+                    const PopupMenuDivider(),
+                    PopupMenuItem<Object?>(
+                      value: 'advanced-filters',
+                      child: Row(
+                        children: [
+                          const Icon(
+                            Icons.tune,
+                            size: 18,
+                            color: AppColors.gray600,
+                          ),
+                          SizedBox(width: AppSpacing.sm),
+                          Expanded(
+                            child: Text(
+                              'Open filters',
+                              style: AppTextStyles.bodyMedium.copyWith(
+                                color: AppColors.gray700,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                  child: const Padding(
+                    padding: EdgeInsets.all(12),
+                    child: Icon(Icons.tune, color: AppColors.white, size: 24),
                   ),
                 ),
               ),
             ],
           ),
+          if (state.searchTerm.isNotEmpty && suggestions.isNotEmpty) ...[
+            SizedBox(height: AppSpacing.sm),
+            Container(
+              decoration: BoxDecoration(
+                color: AppColors.white,
+                borderRadius: BorderRadius.circular(12),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withValues(alpha: 0.05),
+                    blurRadius: 20,
+                    offset: const Offset(0, 8),
+                  ),
+                ],
+              ),
+              child: Column(
+                children: suggestions
+                    .map(
+                      (suggestion) => ListTile(
+                        dense: true,
+                        visualDensity: VisualDensity.compact,
+                        contentPadding: EdgeInsets.symmetric(
+                          horizontal: AppSpacing.md,
+                          vertical: AppSpacing.xs,
+                        ),
+                        leading: Icon(
+                          state.searchMode == TournamentSearchMode.location
+                              ? Icons.location_on
+                              : Icons.emoji_events,
+                          color: AppColors.primaryLimeGreen,
+                        ),
+                        title: Text(
+                          suggestion,
+                          style: AppTextStyles.bodyMedium.copyWith(
+                            fontWeight: FontWeight.w500,
+                            color: AppColors.gray800,
+                          ),
+                        ),
+                        onTap: () =>
+                            _onTournamentSuggestionSelected(suggestion),
+                      ),
+                    )
+                    .toList(),
+              ),
+            ),
+          ],
           if (state.selectedFormats.isNotEmpty ||
               state.selectedAccessLevels.isNotEmpty) ...[
             SizedBox(height: AppSpacing.sm),
@@ -272,6 +391,44 @@ class _TournamentsPageState extends State<TournamentsPage> {
         ),
       ],
     );
+  }
+
+  Widget _buildFilterMenuOption({
+    required String label,
+    required bool selected,
+    required IconData icon,
+  }) {
+    return Row(
+      children: [
+        Icon(
+          Icons.check,
+          size: 16,
+          color: selected ? AppColors.primaryLimeGreen : Colors.transparent,
+        ),
+        SizedBox(width: AppSpacing.xs),
+        Icon(icon, size: 18, color: AppColors.gray600),
+        SizedBox(width: AppSpacing.sm),
+        Expanded(
+          child: Text(
+            label,
+            style: AppTextStyles.bodyMedium.copyWith(
+              color: selected ? AppColors.primaryLimeGreen : AppColors.gray700,
+              fontWeight: selected ? FontWeight.w600 : FontWeight.w500,
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  void _onTournamentSuggestionSelected(String suggestion) {
+    final tournamentCubit = context.read<TournamentCubit>();
+    tournamentCubit.updateSearchTerm(suggestion);
+    _searchController.value = TextEditingValue(
+      text: suggestion,
+      selection: TextSelection.collapsed(offset: suggestion.length),
+    );
+    FocusScope.of(context).unfocus();
   }
 
   Widget _buildFilterChip(String filter) {

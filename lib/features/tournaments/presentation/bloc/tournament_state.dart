@@ -1,6 +1,8 @@
 import 'package:equatable/equatable.dart';
 import '../../domain/entities/tournament.dart';
 
+enum TournamentSearchMode { name, location }
+
 abstract class TournamentState extends Equatable {
   const TournamentState();
 
@@ -19,6 +21,7 @@ class TournamentLoaded extends TournamentState {
   final List<String>
   selectedFormats; // Filter by format (Singles, Doubles, Teams)
   final List<String> selectedAccessLevels; // Filter by access level/price
+  final TournamentSearchMode searchMode;
 
   const TournamentLoaded({
     required this.tournaments,
@@ -26,6 +29,7 @@ class TournamentLoaded extends TournamentState {
     this.searchTerm = '',
     this.selectedFormats = const [],
     this.selectedAccessLevels = const [],
+    this.searchMode = TournamentSearchMode.name,
   });
 
   TournamentLoaded copyWith({
@@ -34,6 +38,7 @@ class TournamentLoaded extends TournamentState {
     String? searchTerm,
     List<String>? selectedFormats,
     List<String>? selectedAccessLevels,
+    TournamentSearchMode? searchMode,
   }) {
     return TournamentLoaded(
       tournaments: tournaments ?? this.tournaments,
@@ -41,6 +46,7 @@ class TournamentLoaded extends TournamentState {
       searchTerm: searchTerm ?? this.searchTerm,
       selectedFormats: selectedFormats ?? this.selectedFormats,
       selectedAccessLevels: selectedAccessLevels ?? this.selectedAccessLevels,
+      searchMode: searchMode ?? this.searchMode,
     );
   }
 
@@ -61,11 +67,12 @@ class TournamentLoaded extends TournamentState {
 
     // Filter by search term
     if (searchTerm.isNotEmpty) {
+      final lowerQuery = searchTerm.toLowerCase();
       filtered = filtered.where((tournament) {
-        return tournament.name.toLowerCase().contains(
-              searchTerm.toLowerCase(),
-            ) ||
-            tournament.address.toLowerCase().contains(searchTerm.toLowerCase());
+        if (searchMode == TournamentSearchMode.location) {
+          return tournament.address.toLowerCase().contains(lowerQuery);
+        }
+        return tournament.name.toLowerCase().contains(lowerQuery);
       }).toList();
     }
 
@@ -93,6 +100,7 @@ class TournamentLoaded extends TournamentState {
     searchTerm,
     selectedFormats,
     selectedAccessLevels,
+    searchMode,
   ];
 }
 

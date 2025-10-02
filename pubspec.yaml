@@ -57,6 +57,10 @@ dependencies:
   # Responsive design
   flutter_screenutil: ^5.9.3
 
+  # Maps
+  mapbox_maps_flutter: ^2.11.0
+  flutter_dotenv: ^6.0.0
+
 dev_dependencies:
   flutter_test:
     sdk: flutter
@@ -92,6 +96,7 @@ flutter:
     - assets/icons/
     - assets/splash/
     - assets/navbar/
+    - .env
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/to/resolution-aware-images

@@ -24,5 +24,5 @@ class AppConstants {
   static const Duration longAnimation = Duration(milliseconds: 500);
 
   // Mapbox
-  static  String mapboxAccessToken = dotenv.get('ACCESS_TOKEN', fallback: 'pk.your_mapbox_access_token');
+  static String mapboxAccessToken = dotenv.get('ACCESS_TOKEN', fallback: 'pk.your_mapbox_access_token');
 }

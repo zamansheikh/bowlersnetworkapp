@@ -27,9 +27,24 @@ class SettingsPage extends StatelessWidget {
                 elevation: 0,
                 scrolledUnderElevation: 1,
                 surfaceTintColor: AppColors.white,
-                leading: IconButton(
-                  icon: const Icon(Icons.arrow_back, color: AppColors.black),
-                  onPressed: () => context.pop(),
+                leadingWidth: 72,
+                leading: Padding(
+                  padding: EdgeInsets.only(left: AppSpacing.md),
+                  child: GestureDetector(
+                    onTap: () => context.pop(),
+                    child: Container(
+                      padding: const EdgeInsets.all(8),
+                      decoration: BoxDecoration(
+                        color: AppColors.gray100,
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: const Icon(
+                        Icons.arrow_back_ios_rounded,
+                        size: 20,
+                        color: AppColors.gray700,
+                      ),
+                    ),
+                  ),
                 ),
                 title: Text(
                   'Settings',

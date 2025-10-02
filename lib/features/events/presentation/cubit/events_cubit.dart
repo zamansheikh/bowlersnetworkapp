@@ -30,6 +30,7 @@ class EventsCubit extends Cubit<EventsState> {
           tournaments: tournaments,
           events: events,
           currentDate: DateTime.now(),
+          searchMode: EventSearchMode.eventName,
         ),
       );
     } catch (e) {
@@ -75,6 +76,13 @@ class EventsCubit extends Cubit<EventsState> {
     if (state is EventsLoaded) {
       final current = state as EventsLoaded;
       emit(current.copyWith(searchTerm: searchTerm));
+    }
+  }
+
+  void updateSearchMode(EventSearchMode mode) {
+    if (state is EventsLoaded) {
+      final current = state as EventsLoaded;
+      emit(current.copyWith(searchMode: mode, searchTerm: ''));
     }
   }
 
@@ -125,18 +133,51 @@ class EventsCubit extends Cubit<EventsState> {
       // Filter by search term
       if (current.searchTerm.isNotEmpty) {
         final searchLower = current.searchTerm.toLowerCase();
-        filteredEvents = filteredEvents
-            .where(
-              (event) =>
-                  event.title.toLowerCase().contains(searchLower) ||
-                  event.description.toLowerCase().contains(searchLower),
-            )
-            .toList();
+        if (current.searchMode == EventSearchMode.eventName) {
+          filteredEvents = filteredEvents
+              .where(
+                (event) =>
+                    event.title.toLowerCase().contains(searchLower) ||
+                    event.description.toLowerCase().contains(searchLower),
+              )
+              .toList();
+        } else {
+          filteredEvents = filteredEvents
+              .where(
+                (event) => event.location.toLowerCase().contains(searchLower),
+              )
+              .toList();
+        }
       }
 
       return filteredEvents;
     }
     return [];
+  }
+
+  List<String> getSearchSuggestions(String query) {
+    if (state is! EventsLoaded || query.isEmpty) return const [];
+
+    final current = state as EventsLoaded;
+    final lowerQuery = query.toLowerCase();
+    final suggestions = <String>[];
+    final source = current.searchMode == EventSearchMode.location
+        ? current.events.map((event) => event.location)
+        : current.events.map((event) => event.title);
+
+    for (final item in source) {
+      final normalized = item.trim();
+      if (normalized.isEmpty) continue;
+      final alreadyAdded = suggestions.any(
+        (existing) => existing.toLowerCase() == normalized.toLowerCase(),
+      );
+      if (!alreadyAdded && normalized.toLowerCase().contains(lowerQuery)) {
+        suggestions.add(normalized);
+      }
+      if (suggestions.length >= 6) break;
+    }
+
+    return suggestions;
   }
 
   int getEventCountForMonth(DateTime date) {

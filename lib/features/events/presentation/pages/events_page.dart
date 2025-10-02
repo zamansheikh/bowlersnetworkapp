@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:mapbox_maps_flutter/mapbox_maps_flutter.dart' as mapbox;
 import 'package:table_calendar/table_calendar.dart';
 import '../../../../core/constants/colors.dart';
+import '../../../../core/constants/constants.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/theme/app_text_styles.dart';
 import '../../domain/entities/calendar_event.dart';
@@ -19,12 +21,37 @@ class EventsPage extends StatefulWidget {
 class _EventsPageState extends State<EventsPage> {
   DateTime _focusedDay = DateTime.now();
   DateTime? _selectedDay;
+  final TextEditingController _searchController = TextEditingController();
+  EventsLoaded? _latestLoadedState;
+  mapbox.MapboxMap? _mapboxMap;
+  mapbox.PointAnnotationManager? _pointAnnotationManager;
+
+  static const List<double> _defaultCoordinates = [39.0997, -94.5786];
+  static const Map<String, List<double>> _fallbackLocationCoordinates = {
+    'new york': [40.7128, -74.0060],
+    'los angeles': [34.0522, -118.2437],
+    'chicago': [41.8781, -87.6298],
+    'seattle': [47.6062, -122.3321],
+    'houston': [29.7604, -95.3698],
+    'miami': [25.7617, -80.1918],
+    'atlanta': [33.7490, -84.3880],
+    'dallas': [32.7767, -96.7970],
+    'las vegas': [36.1699, -115.1398],
+    'orlando': [28.5384, -81.3789],
+  };
 
   @override
   void initState() {
     super.initState();
     // Load events when page initializes
     context.read<EventsCubit>().loadEvents();
+  }
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    _pointAnnotationManager = null;
+    super.dispose();
   }
 
   @override
@@ -98,9 +125,15 @@ class _EventsPageState extends State<EventsPage> {
   }
 
   Widget _buildEventsContent(BuildContext context, EventsLoaded state) {
-    final filteredEvents = context.read<EventsCubit>().getFilteredEvents(
-      state.selectedDate,
-    );
+    final eventsCubit = context.read<EventsCubit>();
+    final filteredEvents = eventsCubit.getFilteredEvents(state.selectedDate);
+
+    _latestLoadedState = state;
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted || _mapboxMap == null) return;
+      _refreshMapAnnotations(state, filteredEvents);
+    });
 
     return Container(
       color: Colors.white,
@@ -120,6 +153,9 @@ class _EventsPageState extends State<EventsPage> {
 
                   // Search and Filter Row
                   _buildSearchAndFilter(state),
+
+                  if (state.events.isNotEmpty)
+                    _buildMapSection(state, filteredEvents),
 
                   SizedBox(height: 24.h),
 
@@ -405,77 +441,421 @@ class _EventsPageState extends State<EventsPage> {
   }
 
   Widget _buildSearchAndFilter(EventsLoaded state) {
-    return Row(
+    final eventsCubit = context.read<EventsCubit>();
+    final suggestions = state.searchTerm.isEmpty
+        ? const <String>[]
+        : eventsCubit.getSearchSuggestions(state.searchTerm);
+
+    if (_searchController.text != state.searchTerm) {
+      _searchController.value = TextEditingValue(
+        text: state.searchTerm,
+        selection: TextSelection.collapsed(offset: state.searchTerm.length),
+      );
+    }
+
+    final hintText = state.searchMode == EventSearchMode.eventName
+        ? 'Search events by name'
+        : 'Search events by location';
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        // Search Field
-        Expanded(
-          child: TextField(
-            onChanged: (v) => context.read<EventsCubit>().updateSearch(v),
-            style: TextStyle(
-              fontFamily: 'Poppins',
-              fontSize: 12.sp,
-              color: Colors.black,
-            ),
-            decoration: InputDecoration(
-              hintText: 'Search Events',
-              hintStyle: TextStyle(
-                fontFamily: 'Poppins',
-                fontSize: 12.sp,
-                color: const Color(0xFFA0A49B),
-              ),
-              prefixIcon: Icon(
-                Icons.search,
-                size: 24.sp,
-                color: const Color(0xFFA0A49B),
-              ),
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(8.r),
-                borderSide: const BorderSide(color: Color(0xFFE8E9E6)),
-              ),
-              enabledBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(8.r),
-                borderSide: const BorderSide(color: Color(0xFFE8E9E6)),
-              ),
-              focusedBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(8.r),
-                borderSide: const BorderSide(color: Color(0xFF8BC342)),
-              ),
-              contentPadding: EdgeInsets.symmetric(vertical: 16.h),
-            ),
-          ),
-        ),
-
-        SizedBox(width: 12.w),
-
-        // Filter Button
-        Container(
-          height: 48.h,
-          width: 48.w,
-          decoration: BoxDecoration(
-            color: const Color(0xFF8BC342),
-            borderRadius: BorderRadius.circular(8.r),
-          ),
-          child: PopupMenuButton<EventType?>(
-            initialValue: state.filterType,
-            onSelected: (val) => context.read<EventsCubit>().updateFilter(val),
-            itemBuilder: (context) => <PopupMenuEntry<EventType?>>[
-              const PopupMenuItem<EventType?>(
-                value: null,
-                child: Text('All types'),
-              ),
-              ...EventType.values.map(
-                (t) => PopupMenuItem<EventType?>(
-                  value: t,
-                  child: Text(_getEventTypeLabel(t)),
+        Row(
+          children: [
+            Expanded(
+              child: TextField(
+                controller: _searchController,
+                onChanged: eventsCubit.updateSearch,
+                style: TextStyle(
+                  fontFamily: 'Poppins',
+                  fontSize: 12.sp,
+                  color: Colors.black,
+                ),
+                decoration: InputDecoration(
+                  hintText: hintText,
+                  hintStyle: TextStyle(
+                    fontFamily: 'Poppins',
+                    fontSize: 12.sp,
+                    color: const Color(0xFFA0A49B),
+                  ),
+                  prefixIcon: Icon(
+                    Icons.search,
+                    size: 24.sp,
+                    color: const Color(0xFFA0A49B),
+                  ),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(8.r),
+                    borderSide: const BorderSide(color: Color(0xFFE8E9E6)),
+                  ),
+                  enabledBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(8.r),
+                    borderSide: const BorderSide(color: Color(0xFFE8E9E6)),
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(8.r),
+                    borderSide: const BorderSide(color: Color(0xFF8BC342)),
+                  ),
+                  contentPadding: EdgeInsets.symmetric(vertical: 16.h),
                 ),
               ),
-            ],
-            child: Icon(Icons.tune, size: 24.sp, color: Colors.white),
+            ),
+            SizedBox(width: 12.w),
+            Container(
+              height: 48.h,
+              width: 48.w,
+              decoration: BoxDecoration(
+                color: const Color(0xFF8BC342),
+                borderRadius: BorderRadius.circular(8.r),
+              ),
+              child: PopupMenuButton<Object?>(
+                tooltip: 'Search & filter',
+                onSelected: (value) {
+                  if (value is EventSearchMode) {
+                    eventsCubit.updateSearchMode(value);
+                    _searchController.clear();
+                    FocusScope.of(context).unfocus();
+                  } else if (value == null) {
+                    eventsCubit.clearFilter();
+                  } else if (value is EventType) {
+                    eventsCubit.updateFilter(value);
+                  }
+                },
+                itemBuilder: (context) {
+                  return [
+                    PopupMenuItem<Object?>(
+                      enabled: false,
+                      child: Text(
+                        'Search mode',
+                        style: AppTextStyles.bodySmall.copyWith(
+                          color: AppColors.gray500,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ),
+                    PopupMenuItem<Object?>(
+                      value: EventSearchMode.eventName,
+                      child: _buildPopupOption(
+                        label: 'Event name',
+                        selected: state.searchMode == EventSearchMode.eventName,
+                        icon: Icons.event,
+                      ),
+                    ),
+                    PopupMenuItem<Object?>(
+                      value: EventSearchMode.location,
+                      child: _buildPopupOption(
+                        label: 'Location',
+                        selected: state.searchMode == EventSearchMode.location,
+                        icon: Icons.location_on,
+                      ),
+                    ),
+                    const PopupMenuDivider(),
+                    PopupMenuItem<Object?>(
+                      enabled: false,
+                      child: Text(
+                        'Event type',
+                        style: AppTextStyles.bodySmall.copyWith(
+                          color: AppColors.gray500,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ),
+                    PopupMenuItem<Object?>(
+                      value: null,
+                      child: _buildPopupOption(
+                        label: 'All types',
+                        selected: state.filterType == null,
+                        icon: Icons.all_inclusive,
+                      ),
+                    ),
+                    ...EventType.values.map(
+                      (t) => PopupMenuItem<Object?>(
+                        value: t,
+                        child: _buildPopupOption(
+                          label: _getEventTypeLabel(t),
+                          selected: state.filterType == t,
+                          icon: Icons.emoji_events,
+                        ),
+                      ),
+                    ),
+                  ];
+                },
+                child: Icon(Icons.tune, size: 24.sp, color: Colors.white),
+              ),
+            ),
+          ],
+        ),
+        if (state.searchTerm.isNotEmpty && suggestions.isNotEmpty)
+          Container(
+            margin: EdgeInsets.only(top: 8.h),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(12.r),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withValues(alpha: 0.05),
+                  blurRadius: 20,
+                  offset: const Offset(0, 8),
+                ),
+              ],
+            ),
+            child: Column(
+              children: suggestions
+                  .map(
+                    (suggestion) => ListTile(
+                      dense: true,
+                      visualDensity: VisualDensity.compact,
+                      contentPadding: EdgeInsets.symmetric(
+                        horizontal: 16.w,
+                        vertical: 4.h,
+                      ),
+                      leading: Icon(
+                        state.searchMode == EventSearchMode.location
+                            ? Icons.location_on
+                            : Icons.event,
+                        color: AppColors.primaryLimeGreen,
+                      ),
+                      title: Text(
+                        suggestion,
+                        style: AppTextStyles.bodyMedium.copyWith(
+                          color: AppColors.gray800,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                      onTap: () => _onSuggestionSelected(suggestion),
+                    ),
+                  )
+                  .toList(),
+            ),
+          ),
+      ],
+    );
+  }
+
+  Widget _buildPopupOption({
+    required String label,
+    required bool selected,
+    IconData? icon,
+  }) {
+    return Row(
+      children: [
+        Icon(
+          Icons.check,
+          size: 16.sp,
+          color: selected ? AppColors.primaryLimeGreen : Colors.transparent,
+        ),
+        SizedBox(width: 8.w),
+        if (icon != null) ...[
+          Icon(icon, size: 16.sp, color: AppColors.gray600),
+          SizedBox(width: 8.w),
+        ],
+        Expanded(
+          child: Text(
+            label,
+            style: AppTextStyles.bodyMedium.copyWith(
+              color: selected ? AppColors.primaryLimeGreen : AppColors.gray700,
+              fontWeight: selected ? FontWeight.w600 : FontWeight.w500,
+            ),
           ),
         ),
       ],
     );
   }
+
+  void _onSuggestionSelected(String suggestion) {
+    final eventsCubit = context.read<EventsCubit>();
+    eventsCubit.updateSearch(suggestion);
+    _searchController.value = TextEditingValue(
+      text: suggestion,
+      selection: TextSelection.collapsed(offset: suggestion.length),
+    );
+    FocusScope.of(context).unfocus();
+
+    final currentState = eventsCubit.state;
+    if (currentState is EventsLoaded) {
+      final filteredEvents = eventsCubit.getFilteredEvents(
+        currentState.selectedDate,
+      );
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (!mounted) return;
+        _refreshMapAnnotations(currentState, filteredEvents);
+      });
+    }
+  }
+
+  Widget _buildMapSection(
+    EventsLoaded state,
+    List<CalendarEvent> filteredEvents,
+  ) {
+    final eventsToDisplay = filteredEvents.isNotEmpty
+        ? filteredEvents
+        : state.events;
+
+    if (eventsToDisplay.isEmpty) {
+      return const SizedBox.shrink();
+    }
+
+    final initialPoint = _resolveLocationToPoint(
+      eventsToDisplay.first.location,
+    );
+    final hasValidToken = _hasValidMapboxToken;
+
+    return Container(
+      margin: EdgeInsets.only(top: 16.h),
+      width: double.infinity,
+      height: 220.h,
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(16.r),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.08),
+            blurRadius: 24,
+            offset: const Offset(0, 12),
+          ),
+        ],
+      ),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(16.r),
+        child: hasValidToken
+            ? mapbox.MapWidget(
+                key: const ValueKey('events-map-widget'),
+                styleUri: mapbox.MapboxStyles.MAPBOX_STREETS,
+                cameraOptions: mapbox.CameraOptions(
+                  center: initialPoint,
+                  zoom: 9,
+                ),
+                onMapCreated: _onMapCreated,
+              )
+            : _buildMapPlaceholder(),
+      ),
+    );
+  }
+
+  void _onMapCreated(mapbox.MapboxMap mapboxMap) {
+    if (!_hasValidMapboxToken) {
+      return;
+    }
+    _mapboxMap = mapboxMap;
+    mapboxMap.annotations
+        .createPointAnnotationManager()
+        .then((manager) async {
+          _pointAnnotationManager = manager;
+          if (!mounted || _latestLoadedState == null) return;
+          final eventsCubit = context.read<EventsCubit>();
+          final filteredEvents = eventsCubit.getFilteredEvents(
+            _latestLoadedState!.selectedDate,
+          );
+          await _refreshMapAnnotations(_latestLoadedState!, filteredEvents);
+        })
+        .catchError((error) {
+          debugPrint('Failed to create annotation manager: $error');
+        });
+  }
+
+  Future<void> _refreshMapAnnotations(
+    EventsLoaded state,
+    List<CalendarEvent> filteredEvents,
+  ) async {
+    final map = _mapboxMap;
+    if (map == null || !_hasValidMapboxToken) return;
+
+    _pointAnnotationManager ??= await map.annotations
+        .createPointAnnotationManager();
+    final manager = _pointAnnotationManager;
+    if (manager == null) return;
+
+    await manager.deleteAll();
+
+    final eventsToDisplay = filteredEvents.isNotEmpty
+        ? filteredEvents
+        : state.events;
+    if (eventsToDisplay.isEmpty) return;
+
+    final annotations = eventsToDisplay.map((event) {
+      final point = _resolveLocationToPoint(event.location);
+      return mapbox.PointAnnotationOptions(
+        geometry: point,
+        iconImage: 'marker-15',
+        iconSize: 1.2,
+        textField: event.title,
+        textOffset: const [0, 1.2],
+        textColor: 0xFF212121,
+      );
+    }).toList();
+
+    if (annotations.isNotEmpty) {
+      await manager.createMulti(annotations);
+      final firstPoint = _resolveLocationToPoint(
+        eventsToDisplay.first.location,
+      );
+      await map.setCamera(mapbox.CameraOptions(center: firstPoint, zoom: 9));
+    }
+  }
+
+  mapbox.Point _resolveLocationToPoint(String location) {
+    final parsed = _tryParseExplicitCoordinates(location);
+    if (parsed != null) {
+      return parsed;
+    }
+
+    final normalized = location.toLowerCase();
+    for (final entry in _fallbackLocationCoordinates.entries) {
+      if (normalized.contains(entry.key)) {
+        final coords = entry.value;
+        return mapbox.Point(coordinates: mapbox.Position(coords[1], coords[0]));
+      }
+    }
+
+    final coords = _defaultCoordinates;
+    return mapbox.Point(coordinates: mapbox.Position(coords[1], coords[0]));
+  }
+
+  mapbox.Point? _tryParseExplicitCoordinates(String location) {
+    final regex = RegExp(r'(-?\d{1,3}(?:\.\d+)?)\s*,\s*(-?\d{1,3}(?:\.\d+)?)');
+    final match = regex.firstMatch(location);
+    if (match == null) {
+      return null;
+    }
+
+    final lat = double.tryParse(match.group(1)!);
+    final lng = double.tryParse(match.group(2)!);
+    if (lat == null || lng == null) {
+      return null;
+    }
+
+    if (lat.abs() > 90 || lng.abs() > 180) {
+      return null;
+    }
+
+    return mapbox.Point(coordinates: mapbox.Position(lng, lat));
+  }
+
+  Widget _buildMapPlaceholder() {
+    return Container(
+      color: AppColors.gray100,
+      alignment: Alignment.center,
+      child: Padding(
+        padding: EdgeInsets.symmetric(horizontal: 24.w),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(Icons.map_outlined, size: 36.sp, color: AppColors.gray400),
+            SizedBox(height: 12.h),
+            Text(
+              'Add your Mapbox access token to enable the interactive map.',
+              textAlign: TextAlign.center,
+              style: AppTextStyles.bodyMedium.copyWith(
+                color: AppColors.gray600,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  bool get _hasValidMapboxToken =>
+      AppConstants.mapboxAccessToken.isNotEmpty &&
+      !AppConstants.mapboxAccessToken.contains('your_mapbox_access_token');
 
   Widget _buildFigmaFilterTabs(EventsLoaded state) {
     return SingleChildScrollView(
