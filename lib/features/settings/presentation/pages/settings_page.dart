@@ -408,9 +408,7 @@ class SettingsPage extends StatelessWidget {
               onPressed: () => Navigator.of(dialogContext).pop(),
               child: Text(
                 'Cancel',
-                style: AppTextStyles.button.copyWith(
-                  color: AppColors.gray600,
-                ),
+                style: AppTextStyles.button.copyWith(color: AppColors.gray600),
               ),
             ),
             ElevatedButton(
@@ -422,16 +420,12 @@ class SettingsPage extends StatelessWidget {
                 backgroundColor: AppColors.error,
                 foregroundColor: AppColors.white,
                 shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(
-                    AppSpacing.buttonRadius,
-                  ),
+                  borderRadius: BorderRadius.circular(AppSpacing.buttonRadius),
                 ),
               ),
               child: Text(
                 'Continue',
-                style: AppTextStyles.button.copyWith(
-                  color: AppColors.white,
-                ),
+                style: AppTextStyles.button.copyWith(color: AppColors.white),
               ),
             ),
           ],
@@ -614,11 +608,7 @@ class SettingsPage extends StatelessWidget {
               ),
               title: Row(
                 children: [
-                  Icon(
-                    Icons.delete_forever,
-                    color: AppColors.error,
-                    size: 28,
-                  ),
+                  Icon(Icons.delete_forever, color: AppColors.error, size: 28),
                   SizedBox(width: AppSpacing.sm),
                   Text(
                     'Deleting Account',
@@ -649,9 +639,7 @@ class SettingsPage extends StatelessWidget {
                   if (isLoading) ...[
                     SizedBox(height: AppSpacing.md),
                     Center(
-                      child: CircularProgressIndicator(
-                        color: AppColors.error,
-                      ),
+                      child: CircularProgressIndicator(color: AppColors.error),
                     ),
                   ],
                 ],
