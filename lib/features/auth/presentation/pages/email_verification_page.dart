@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
+import 'package:pinput/pinput.dart';
 import '../../../../core/constants/colors.dart';
 import '../bloc/signup_cubit.dart';
 
@@ -19,8 +20,8 @@ class EmailVerificationPage extends StatefulWidget {
 }
 
 class _EmailVerificationPageState extends State<EmailVerificationPage> {
-  final _codeControllers = List.generate(6, (index) => TextEditingController());
-  final _focusNodes = List.generate(6, (index) => FocusNode());
+  final _pinController = TextEditingController();
+  final _focusNode = FocusNode();
   bool _isCodeSent = false;
 
   @override
@@ -34,12 +35,8 @@ class _EmailVerificationPageState extends State<EmailVerificationPage> {
 
   @override
   void dispose() {
-    for (final controller in _codeControllers) {
-      controller.dispose();
-    }
-    for (final focusNode in _focusNodes) {
-      focusNode.dispose();
-    }
+    _pinController.dispose();
+    _focusNode.dispose();
     super.dispose();
   }
 
@@ -48,7 +45,7 @@ class _EmailVerificationPageState extends State<EmailVerificationPage> {
   }
 
   void _verifyCode() {
-    final code = _codeControllers.map((controller) => controller.text).join();
+    final code = _pinController.text;
     if (code.length == 6) {
       context.read<SignupCubit>().verifyEmailCode(
         email: widget.email,
@@ -84,17 +81,6 @@ class _EmailVerificationPageState extends State<EmailVerificationPage> {
           ),
         ),
       );
-    }
-  }
-
-  void _onCodeChanged(String value, int index) {
-    if (value.isNotEmpty) {
-      if (index < 5) {
-        _focusNodes[index + 1].requestFocus();
-      } else {
-        _focusNodes[index].unfocus();
-        _verifyCode();
-      }
     }
   }
 
@@ -272,78 +258,113 @@ class _EmailVerificationPageState extends State<EmailVerificationPage> {
 
                       const SizedBox(height: 48),
 
-                      // OTP Input Fields
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                        children: List.generate(6, (index) {
-                          return Container(
-                            width: 50,
-                            height: 60,
-                            decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(12),
-                              boxShadow: [
-                                BoxShadow(
-                                  color: AppColors.shadow,
-                                  blurRadius: 8,
-                                  offset: const Offset(0, 4),
-                                ),
-                              ],
+                      // OTP Input with Pinput
+                      Pinput(
+                        controller: _pinController,
+                        focusNode: _focusNode,
+                        length: 6,
+                        defaultPinTheme: PinTheme(
+                          width: 50,
+                          height: 60,
+                          textStyle: const TextStyle(
+                            fontSize: 24,
+                            fontWeight: FontWeight.bold,
+                            color: AppColors.gray900,
+                          ),
+                          decoration: BoxDecoration(
+                            color: AppColors.white,
+                            borderRadius: BorderRadius.circular(12),
+                            border: Border.all(
+                              color: AppColors.border,
+                              width: 1,
                             ),
-                            child: TextFormField(
-                              controller: _codeControllers[index],
-                              focusNode: _focusNodes[index],
-                              textAlign: TextAlign.center,
-                              keyboardType: TextInputType.number,
-                              maxLength: 1,
-                              style: const TextStyle(
-                                fontSize: 24,
-                                fontWeight: FontWeight.bold,
-                                color: AppColors
-                                    .gray900, // Darker color for better visibility
+                            boxShadow: [
+                              BoxShadow(
+                                color: AppColors.shadow,
+                                blurRadius: 8,
+                                offset: const Offset(0, 4),
                               ),
-                              decoration: InputDecoration(
-                                counterText: '',
-                                fillColor: AppColors.white,
-                                filled: true,
-                                border: OutlineInputBorder(
-                                  borderRadius: BorderRadius.circular(12),
-                                  borderSide: const BorderSide(
-                                    color: AppColors.border,
-                                    width: 1,
-                                  ),
-                                ),
-                                enabledBorder: OutlineInputBorder(
-                                  borderRadius: BorderRadius.circular(12),
-                                  borderSide: const BorderSide(
-                                    color: AppColors.border,
-                                    width: 1,
-                                  ),
-                                ),
-                                focusedBorder: OutlineInputBorder(
-                                  borderRadius: BorderRadius.circular(12),
-                                  borderSide: const BorderSide(
-                                    color: AppColors.primaryLimeGreen,
-                                    width: 2,
-                                  ),
-                                ),
-                                errorBorder: OutlineInputBorder(
-                                  borderRadius: BorderRadius.circular(12),
-                                  borderSide: const BorderSide(
-                                    color: AppColors.error,
-                                    width: 1,
-                                  ),
-                                ),
-                              ),
-                              onChanged: (value) {
-                                if (value.isEmpty && index > 0) {
-                                  _focusNodes[index - 1].requestFocus();
-                                } else {
-                                  _onCodeChanged(value, index);
-                                }
-                              },
+                            ],
+                          ),
+                        ),
+                        focusedPinTheme: PinTheme(
+                          width: 50,
+                          height: 60,
+                          textStyle: const TextStyle(
+                            fontSize: 24,
+                            fontWeight: FontWeight.bold,
+                            color: AppColors.gray900,
+                          ),
+                          decoration: BoxDecoration(
+                            color: AppColors.white,
+                            borderRadius: BorderRadius.circular(12),
+                            border: Border.all(
+                              color: AppColors.primaryLimeGreen,
+                              width: 2,
                             ),
-                          );
-                        }),
+                            boxShadow: [
+                              BoxShadow(
+                                color: AppColors.primaryLimeGreen.withValues(
+                                  alpha: 0.3,
+                                ),
+                                blurRadius: 12,
+                                offset: const Offset(0, 4),
+                              ),
+                            ],
+                          ),
+                        ),
+                        submittedPinTheme: PinTheme(
+                          width: 50,
+                          height: 60,
+                          textStyle: const TextStyle(
+                            fontSize: 24,
+                            fontWeight: FontWeight.bold,
+                            color: AppColors.white,
+                          ),
+                          decoration: BoxDecoration(
+                            gradient: AppColors.primaryGradient,
+                            borderRadius: BorderRadius.circular(12),
+                            boxShadow: [
+                              BoxShadow(
+                                color: AppColors.primaryLimeGreen.withValues(
+                                  alpha: 0.3,
+                                ),
+                                blurRadius: 12,
+                                offset: const Offset(0, 4),
+                              ),
+                            ],
+                          ),
+                        ),
+                        errorPinTheme: PinTheme(
+                          width: 50,
+                          height: 60,
+                          textStyle: const TextStyle(
+                            fontSize: 24,
+                            fontWeight: FontWeight.bold,
+                            color: AppColors.error,
+                          ),
+                          decoration: BoxDecoration(
+                            color: AppColors.white,
+                            borderRadius: BorderRadius.circular(12),
+                            border: Border.all(
+                              color: AppColors.error,
+                              width: 2,
+                            ),
+                          ),
+                        ),
+                        pinAnimationType: PinAnimationType.scale,
+                        animationDuration: const Duration(milliseconds: 200),
+                        keyboardType: TextInputType.number,
+                        autofocus: true,
+                        onCompleted: (pin) {
+                          _verifyCode();
+                        },
+                        onChanged: (value) {
+                          // Clear any previous errors when user types
+                          if (value.isNotEmpty) {
+                            setState(() {});
+                          }
+                        },
                       ),
 
                       const SizedBox(height: 48),
