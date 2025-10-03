@@ -23,6 +23,8 @@ class EventsLoaded extends EventsState {
   final String searchTerm;
   final EventType? filterType;
   final EventSearchMode searchMode;
+  final double? selectedLat;
+  final double? selectedLng;
 
   const EventsLoaded({
     required this.tournaments,
@@ -32,6 +34,8 @@ class EventsLoaded extends EventsState {
     this.searchTerm = '',
     this.filterType,
     this.searchMode = EventSearchMode.eventName,
+    this.selectedLat,
+    this.selectedLng,
   });
 
   EventsLoaded copyWith({
@@ -44,6 +48,9 @@ class EventsLoaded extends EventsState {
     bool clearSelectedDate = false,
     bool clearFilterType = false,
     EventSearchMode? searchMode,
+    double? selectedLat,
+    double? selectedLng,
+    bool clearLocation = false,
   }) {
     return EventsLoaded(
       tournaments: tournaments ?? this.tournaments,
@@ -55,6 +62,8 @@ class EventsLoaded extends EventsState {
       searchTerm: searchTerm ?? this.searchTerm,
       filterType: clearFilterType ? null : (filterType ?? this.filterType),
       searchMode: searchMode ?? this.searchMode,
+      selectedLat: clearLocation ? null : (selectedLat ?? this.selectedLat),
+      selectedLng: clearLocation ? null : (selectedLng ?? this.selectedLng),
     );
   }
 
@@ -67,6 +76,8 @@ class EventsLoaded extends EventsState {
     searchTerm,
     filterType,
     searchMode,
+    selectedLat,
+    selectedLng,
   ];
 }
 

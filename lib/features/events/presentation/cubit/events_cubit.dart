@@ -3,6 +3,7 @@ import 'package:injectable/injectable.dart';
 import '../../domain/entities/calendar_event.dart';
 import '../../domain/usecases/get_tournaments.dart';
 import '../../domain/usecases/get_calendar_events.dart';
+import '../../../../core/utils/location_utils.dart';
 import 'events_state.dart';
 
 @injectable
@@ -72,17 +73,25 @@ class EventsCubit extends Cubit<EventsState> {
     }
   }
 
-  void updateSearch(String searchTerm) {
+  void updateSearch(String searchTerm, {double? lat, double? lng}) {
     if (state is EventsLoaded) {
       final current = state as EventsLoaded;
-      emit(current.copyWith(searchTerm: searchTerm));
+      emit(
+        current.copyWith(
+          searchTerm: searchTerm,
+          selectedLat: lat,
+          selectedLng: lng,
+        ),
+      );
     }
   }
 
   void updateSearchMode(EventSearchMode mode) {
     if (state is EventsLoaded) {
       final current = state as EventsLoaded;
-      emit(current.copyWith(searchMode: mode, searchTerm: ''));
+      emit(
+        current.copyWith(searchMode: mode, searchTerm: '', clearLocation: true),
+      );
     }
   }
 
@@ -161,20 +170,50 @@ class EventsCubit extends Cubit<EventsState> {
     final current = state as EventsLoaded;
     final lowerQuery = query.toLowerCase();
     final suggestions = <String>[];
-    final source = current.searchMode == EventSearchMode.location
-        ? current.events.map((event) => event.location)
-        : current.events.map((event) => event.title);
 
-    for (final item in source) {
-      final normalized = item.trim();
-      if (normalized.isEmpty) continue;
-      final alreadyAdded = suggestions.any(
-        (existing) => existing.toLowerCase() == normalized.toLowerCase(),
-      );
-      if (!alreadyAdded && normalized.toLowerCase().contains(lowerQuery)) {
-        suggestions.add(normalized);
+    if (current.searchMode == EventSearchMode.location) {
+      // Add unique tournament addresses
+      final tournamentAddresses = current.tournaments
+          .where((t) => t.address.trim().isNotEmpty)
+          .map((t) => t.address.trim())
+          .toSet()
+          .toList();
+
+      for (final address in tournamentAddresses) {
+        if (address.toLowerCase().contains(lowerQuery)) {
+          suggestions.add(address);
+        }
+        if (suggestions.length >= 10) break;
       }
-      if (suggestions.length >= 6) break;
+
+      // Add event locations if needed
+      if (suggestions.length < 10) {
+        for (final event in current.events) {
+          final location = event.location.trim();
+          if (location.isEmpty) continue;
+          final alreadyAdded = suggestions.any(
+            (existing) => existing.toLowerCase() == location.toLowerCase(),
+          );
+          if (!alreadyAdded && location.toLowerCase().contains(lowerQuery)) {
+            suggestions.add(location);
+          }
+          if (suggestions.length >= 10) break;
+        }
+      }
+    } else {
+      // Event name search
+      final source = current.events.map((event) => event.title);
+      for (final item in source) {
+        final normalized = item.trim();
+        if (normalized.isEmpty) continue;
+        final alreadyAdded = suggestions.any(
+          (existing) => existing.toLowerCase() == normalized.toLowerCase(),
+        );
+        if (!alreadyAdded && normalized.toLowerCase().contains(lowerQuery)) {
+          suggestions.add(normalized);
+        }
+        if (suggestions.length >= 6) break;
+      }
     }
 
     return suggestions;
@@ -202,5 +241,66 @@ class EventsCubit extends Cubit<EventsState> {
       }).length;
     }
     return 0;
+  }
+
+  /// Get filtered tournaments based on search criteria
+  /// For location search with coordinates, filters by 50km (~31 miles) radius
+  List<dynamic> getFilteredTournaments() {
+    if (state is! EventsLoaded) return [];
+
+    final current = state as EventsLoaded;
+    var filtered = current.tournaments.toList();
+
+    // Filter by search term
+    if (current.searchTerm.isNotEmpty) {
+      final searchLower = current.searchTerm.toLowerCase();
+
+      if (current.searchMode == EventSearchMode.eventName) {
+        // Filter by tournament name
+        filtered = filtered
+            .where((t) => t.name.toLowerCase().contains(searchLower))
+            .toList();
+      } else if (current.searchMode == EventSearchMode.location) {
+        // Filter by location
+        if (current.selectedLat != null && current.selectedLng != null) {
+          // Location-based filtering with 50km radius (~31 miles)
+          const radiusMiles = 31.0; // 50km
+          final centerLat = current.selectedLat!;
+          final centerLng = current.selectedLng!;
+
+          filtered = filtered.where((tournament) {
+            // Check if tournament has coordinates
+            if (tournament.lat == null || tournament.long == null) {
+              // Include if address matches search term (fallback)
+              return tournament.address.toLowerCase().contains(searchLower);
+            }
+
+            try {
+              final tournamentLat = double.parse(tournament.lat!);
+              final tournamentLng = double.parse(tournament.long!);
+
+              // Check if within radius
+              return LocationUtils.isWithinRadius(
+                centerLat,
+                centerLng,
+                tournamentLat,
+                tournamentLng,
+                radiusMiles,
+              );
+            } catch (e) {
+              // If parsing fails, fallback to address matching
+              return tournament.address.toLowerCase().contains(searchLower);
+            }
+          }).toList();
+        } else {
+          // No coordinates, just filter by address text
+          filtered = filtered
+              .where((t) => t.address.toLowerCase().contains(searchLower))
+              .toList();
+        }
+      }
+    }
+
+    return filtered;
   }
 }

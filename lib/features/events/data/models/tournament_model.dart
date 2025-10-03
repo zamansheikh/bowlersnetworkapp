@@ -12,6 +12,8 @@ class TournamentModel extends Tournament {
     required String format,
     required int alreadyEnrolled,
     int? participantsCount,
+    String? lat,
+    String? long,
   }) : super(
          id: id,
          name: name,
@@ -23,6 +25,8 @@ class TournamentModel extends Tournament {
          format: format,
          alreadyEnrolled: alreadyEnrolled,
          participantsCount: participantsCount,
+         lat: lat,
+         long: long,
        );
 
   factory TournamentModel.fromJson(Map<String, dynamic> json) {
@@ -37,6 +41,8 @@ class TournamentModel extends Tournament {
       format: json['format'] as String,
       alreadyEnrolled: json['already_enrolled'] as int? ?? 0,
       participantsCount: json['participants_count'] as int?,
+      lat: json['lat'] as String?,
+      long: json['long'] as String?,
     );
   }
 
@@ -52,6 +58,8 @@ class TournamentModel extends Tournament {
       'format': format,
       'already_enrolled': alreadyEnrolled,
       'participants_count': participantsCount,
+      'lat': lat,
+      'long': long,
     };
   }
 
@@ -66,5 +74,7 @@ class TournamentModel extends Tournament {
     format: format,
     alreadyEnrolled: alreadyEnrolled,
     participantsCount: participantsCount,
+    lat: lat,
+    long: long,
   );
 }

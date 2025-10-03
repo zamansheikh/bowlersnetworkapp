@@ -11,6 +11,8 @@ class Tournament extends Equatable {
   final String format; // 'Singles', 'Doubles', 'Teams'
   final int alreadyEnrolled;
   final int? participantsCount;
+  final String? lat;
+  final String? long;
 
   const Tournament({
     required this.id,
@@ -23,6 +25,8 @@ class Tournament extends Equatable {
     required this.format,
     required this.alreadyEnrolled,
     this.participantsCount,
+    this.lat,
+    this.long,
   });
 
   @override
@@ -37,5 +41,7 @@ class Tournament extends Equatable {
     format,
     alreadyEnrolled,
     participantsCount,
+    lat,
+    long,
   ];
 }

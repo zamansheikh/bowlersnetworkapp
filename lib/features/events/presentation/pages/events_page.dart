@@ -3,6 +3,8 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:mapbox_maps_flutter/mapbox_maps_flutter.dart' as mapbox;
 import 'package:table_calendar/table_calendar.dart';
+import 'dart:convert';
+import 'package:http/http.dart' as http;
 import '../../../../core/constants/colors.dart';
 import '../../../../core/constants/constants.dart';
 import '../../../../core/theme/app_spacing.dart';
@@ -465,7 +467,11 @@ class _EventsPageState extends State<EventsPage> {
             Expanded(
               child: TextField(
                 controller: _searchController,
-                onChanged: eventsCubit.updateSearch,
+                onChanged: (value) {
+                  // For location search, just update the search term
+                  // Geocoding happens when user selects a suggestion
+                  eventsCubit.updateSearch(value);
+                },
                 style: TextStyle(
                   fontFamily: 'Poppins',
                   fontSize: 12.sp,
@@ -661,16 +667,37 @@ class _EventsPageState extends State<EventsPage> {
     );
   }
 
-  void _onSuggestionSelected(String suggestion) {
+  void _onSuggestionSelected(String suggestion) async {
     final eventsCubit = context.read<EventsCubit>();
-    eventsCubit.updateSearch(suggestion);
+    final currentState = eventsCubit.state;
+
+    // If in location mode, geocode the selected location
+    if (currentState is EventsLoaded &&
+        currentState.searchMode == EventSearchMode.location) {
+      // Try to geocode the location to get coordinates
+      final coordinates = await _geocodeLocation(suggestion);
+
+      if (coordinates != null) {
+        eventsCubit.updateSearch(
+          suggestion,
+          lat: coordinates['lat'],
+          lng: coordinates['lng'],
+        );
+      } else {
+        // Fallback: just use text search without coordinates
+        eventsCubit.updateSearch(suggestion);
+      }
+    } else {
+      // Event name search - no geocoding needed
+      eventsCubit.updateSearch(suggestion);
+    }
+
     _searchController.value = TextEditingValue(
       text: suggestion,
       selection: TextSelection.collapsed(offset: suggestion.length),
     );
     FocusScope.of(context).unfocus();
 
-    final currentState = eventsCubit.state;
     if (currentState is EventsLoaded) {
       final filteredEvents = eventsCubit.getFilteredEvents(
         currentState.selectedDate,
@@ -680,6 +707,40 @@ class _EventsPageState extends State<EventsPage> {
         _refreshMapAnnotations(currentState, filteredEvents);
       });
     }
+  }
+
+  Future<Map<String, double>?> _geocodeLocation(String locationName) async {
+    if (!_hasValidMapboxToken) return null;
+
+    try {
+      final String url =
+          'https://api.mapbox.com/geocoding/v5/mapbox.places/${Uri.encodeComponent(locationName)}.json'
+          '?access_token=${AppConstants.mapboxAccessToken}'
+          '&limit=1'
+          '&types=address,poi,place';
+
+      final response = await http.get(Uri.parse(url));
+
+      if (response.statusCode == 200) {
+        final Map<String, dynamic> data = json.decode(response.body);
+        final List<dynamic> features = data['features'] ?? [];
+
+        if (features.isNotEmpty) {
+          final feature = features[0];
+          final List<double> coordinates = List<double>.from(
+            feature['center'] ?? [0.0, 0.0],
+          );
+
+          if (coordinates.length >= 2) {
+            return {'lng': coordinates[0], 'lat': coordinates[1]};
+          }
+        }
+      }
+    } catch (e) {
+      debugPrint('Geocoding error: $e');
+    }
+
+    return null;
   }
 
   Widget _buildMapSection(
