@@ -27,6 +27,7 @@ class _EventsPageState extends State<EventsPage> {
   EventsLoaded? _latestLoadedState;
   mapbox.MapboxMap? _mapboxMap;
   mapbox.PointAnnotationManager? _pointAnnotationManager;
+  List<Map<String, dynamic>> _mapboxSuggestions = [];
 
   static const List<double> _defaultCoordinates = [39.0997, -94.5786];
   static const Map<String, List<double>> _fallbackLocationCoordinates = {
@@ -156,13 +157,16 @@ class _EventsPageState extends State<EventsPage> {
                   // Search and Filter Row
                   _buildSearchAndFilter(state),
 
-                  if (state.events.isNotEmpty)
+                  // Show map only in location mode
+                  if (state.searchMode == EventSearchMode.location &&
+                      state.events.isNotEmpty)
                     _buildMapSection(state, filteredEvents),
 
                   SizedBox(height: 24.h),
 
-                  // Calendar
-                  _buildCompactCalendar(state),
+                  // Show calendar only in event name mode
+                  if (state.searchMode == EventSearchMode.eventName)
+                    _buildCompactCalendar(state),
 
                   SizedBox(height: 24.h),
 
@@ -444,9 +448,19 @@ class _EventsPageState extends State<EventsPage> {
 
   Widget _buildSearchAndFilter(EventsLoaded state) {
     final eventsCubit = context.read<EventsCubit>();
-    final suggestions = state.searchTerm.isEmpty
+
+    // Get local suggestions from tournaments and events
+    final localSuggestions = state.searchTerm.isEmpty
         ? const <String>[]
         : eventsCubit.getSearchSuggestions(state.searchTerm);
+
+    // Combine local and Mapbox suggestions for location search
+    final allSuggestions = state.searchMode == EventSearchMode.location
+        ? [
+            ...localSuggestions,
+            ..._mapboxSuggestions.map((m) => m['place_name'] as String),
+          ]
+        : localSuggestions;
 
     if (_searchController.text != state.searchTerm) {
       _searchController.value = TextEditingValue(
@@ -468,9 +482,18 @@ class _EventsPageState extends State<EventsPage> {
               child: TextField(
                 controller: _searchController,
                 onChanged: (value) {
-                  // For location search, just update the search term
-                  // Geocoding happens when user selects a suggestion
+                  // Update search term in cubit
                   eventsCubit.updateSearch(value);
+
+                  // Fetch Mapbox suggestions if in location mode
+                  if (state.searchMode == EventSearchMode.location) {
+                    _fetchMapboxSuggestions(value);
+                  } else {
+                    // Clear Mapbox suggestions for non-location search
+                    setState(() {
+                      _mapboxSuggestions = [];
+                    });
+                  }
                 },
                 style: TextStyle(
                   fontFamily: 'Poppins',
@@ -520,6 +543,10 @@ class _EventsPageState extends State<EventsPage> {
                     eventsCubit.updateSearchMode(value);
                     _searchController.clear();
                     FocusScope.of(context).unfocus();
+                    // Clear Mapbox suggestions when changing search mode
+                    setState(() {
+                      _mapboxSuggestions = [];
+                    });
                   } else if (value == null) {
                     eventsCubit.clearFilter();
                   } else if (value is EventType) {
@@ -590,7 +617,7 @@ class _EventsPageState extends State<EventsPage> {
             ),
           ],
         ),
-        if (state.searchTerm.isNotEmpty && suggestions.isNotEmpty)
+        if (state.searchTerm.isNotEmpty && allSuggestions.isNotEmpty)
           Container(
             margin: EdgeInsets.only(top: 8.h),
             decoration: BoxDecoration(
@@ -605,7 +632,7 @@ class _EventsPageState extends State<EventsPage> {
               ],
             ),
             child: Column(
-              children: suggestions
+              children: allSuggestions
                   .map(
                     (suggestion) => ListTile(
                       dense: true,
@@ -671,18 +698,36 @@ class _EventsPageState extends State<EventsPage> {
     final eventsCubit = context.read<EventsCubit>();
     final currentState = eventsCubit.state;
 
-    // If in location mode, geocode the selected location
+    // If in location mode, get coordinates
     if (currentState is EventsLoaded &&
         currentState.searchMode == EventSearchMode.location) {
-      // Try to geocode the location to get coordinates
-      final coordinates = await _geocodeLocation(suggestion);
+      // First check if this is a Mapbox suggestion (already has coordinates)
+      final mapboxSuggestion = _mapboxSuggestions.firstWhere(
+        (m) => m['place_name'] == suggestion,
+        orElse: () => {},
+      );
 
-      if (coordinates != null) {
-        eventsCubit.updateSearch(
-          suggestion,
-          lat: coordinates['lat'],
-          lng: coordinates['lng'],
-        );
+      double? lat;
+      double? lng;
+
+      if (mapboxSuggestion.isNotEmpty) {
+        // Use coordinates from Mapbox suggestion
+        lat = mapboxSuggestion['lat'] as double?;
+        lng = mapboxSuggestion['lng'] as double?;
+      } else {
+        // It's a local suggestion, try to geocode it
+        final coordinates = await _geocodeLocation(suggestion);
+        if (coordinates != null) {
+          lat = coordinates['lat'];
+          lng = coordinates['lng'];
+        }
+      }
+
+      if (lat != null && lng != null) {
+        eventsCubit.updateSearch(suggestion, lat: lat, lng: lng);
+
+        // Update map camera to show the selected location
+        _updateMapCamera(lat, lng);
       } else {
         // Fallback: just use text search without coordinates
         eventsCubit.updateSearch(suggestion);
@@ -697,6 +742,11 @@ class _EventsPageState extends State<EventsPage> {
       selection: TextSelection.collapsed(offset: suggestion.length),
     );
     FocusScope.of(context).unfocus();
+
+    // Clear suggestions to hide the dropdown
+    setState(() {
+      _mapboxSuggestions = [];
+    });
 
     if (currentState is EventsLoaded) {
       final filteredEvents = eventsCubit.getFilteredEvents(
@@ -743,6 +793,76 @@ class _EventsPageState extends State<EventsPage> {
     return null;
   }
 
+  void _updateMapCamera(double lat, double lng) {
+    if (_mapboxMap == null) return;
+
+    try {
+      _mapboxMap!.flyTo(
+        mapbox.CameraOptions(
+          center: mapbox.Point(coordinates: mapbox.Position(lng, lat)),
+          zoom: 12.0,
+          pitch: 0,
+          bearing: 0,
+        ),
+        mapbox.MapAnimationOptions(duration: 1000),
+      );
+    } catch (e) {
+      debugPrint('Map camera update error: $e');
+    }
+  }
+
+  Future<void> _fetchMapboxSuggestions(String query) async {
+    if (!_hasValidMapboxToken || query.trim().isEmpty) {
+      setState(() {
+        _mapboxSuggestions = [];
+      });
+      return;
+    }
+
+    try {
+      final String url =
+          'https://api.mapbox.com/geocoding/v5/mapbox.places/${Uri.encodeComponent(query)}.json'
+          '?access_token=${AppConstants.mapboxAccessToken}'
+          '&limit=5'
+          '&types=address,poi,place';
+
+      final response = await http.get(Uri.parse(url));
+
+      if (response.statusCode == 200) {
+        final Map<String, dynamic> data = json.decode(response.body);
+        final List<dynamic> features = data['features'] ?? [];
+
+        if (mounted) {
+          setState(() {
+            _mapboxSuggestions = features.map((feature) {
+              final List<double> coordinates = List<double>.from(
+                feature['center'] ?? [0.0, 0.0],
+              );
+              return {
+                'place_name': feature['place_name'] ?? '',
+                'lat': coordinates.length > 1 ? coordinates[1] : 0.0,
+                'lng': coordinates.isNotEmpty ? coordinates[0] : 0.0,
+              };
+            }).toList();
+          });
+        }
+      } else {
+        if (mounted) {
+          setState(() {
+            _mapboxSuggestions = [];
+          });
+        }
+      }
+    } catch (e) {
+      debugPrint('Mapbox suggestions error: $e');
+      if (mounted) {
+        setState(() {
+          _mapboxSuggestions = [];
+        });
+      }
+    }
+  }
+
   Widget _buildMapSection(
     EventsLoaded state,
     List<CalendarEvent> filteredEvents,
@@ -785,6 +905,9 @@ class _EventsPageState extends State<EventsPage> {
                   zoom: 9,
                 ),
                 onMapCreated: _onMapCreated,
+                gestureRecognizers: const {
+                  // Enable all gestures including pinch zoom
+                },
               )
             : _buildMapPlaceholder(),
       ),
@@ -826,29 +949,86 @@ class _EventsPageState extends State<EventsPage> {
 
     await manager.deleteAll();
 
+    // Get filtered tournaments based on search
+    final eventsCubit = context.read<EventsCubit>();
+    final filteredTournaments = eventsCubit.getFilteredTournaments();
+
     final eventsToDisplay = filteredEvents.isNotEmpty
         ? filteredEvents
         : state.events;
-    if (eventsToDisplay.isEmpty) return;
 
-    final annotations = eventsToDisplay.map((event) {
+    final annotations = <mapbox.PointAnnotationOptions>[];
+
+    // Add event annotations
+    for (final event in eventsToDisplay) {
       final point = _resolveLocationToPoint(event.location);
-      return mapbox.PointAnnotationOptions(
-        geometry: point,
-        iconImage: 'marker-15',
-        iconSize: 1.2,
-        textField: event.title,
-        textOffset: const [0, 1.2],
-        textColor: 0xFF212121,
+      annotations.add(
+        mapbox.PointAnnotationOptions(
+          geometry: point,
+          iconImage: 'marker-15',
+          iconSize: 1.2,
+          textField: event.title,
+          textOffset: const [0, 1.2],
+          textColor: 0xFF212121,
+        ),
       );
-    }).toList();
+    }
+
+    // Add tournament annotations
+    for (final tournament in filteredTournaments) {
+      if (tournament.lat != null && tournament.long != null) {
+        try {
+          final lat = double.parse(tournament.lat!);
+          final lng = double.parse(tournament.long!);
+          final point = mapbox.Point(coordinates: mapbox.Position(lng, lat));
+          annotations.add(
+            mapbox.PointAnnotationOptions(
+              geometry: point,
+              iconImage: 'marker-15',
+              iconSize: 1.5,
+              textField: tournament.name,
+              textOffset: const [0, 1.2],
+              textColor: 0xFF8BC342, // Green color for tournaments
+            ),
+          );
+        } catch (e) {
+          debugPrint('Error parsing tournament coordinates: $e');
+        }
+      }
+    }
 
     if (annotations.isNotEmpty) {
       await manager.createMulti(annotations);
-      final firstPoint = _resolveLocationToPoint(
-        eventsToDisplay.first.location,
-      );
-      await map.setCamera(mapbox.CameraOptions(center: firstPoint, zoom: 9));
+
+      // If location search is active with coordinates, center on search location
+      if (state.searchMode == EventSearchMode.location &&
+          state.selectedLat != null &&
+          state.selectedLng != null) {
+        final searchPoint = mapbox.Point(
+          coordinates: mapbox.Position(state.selectedLng!, state.selectedLat!),
+        );
+        await map.setCamera(
+          mapbox.CameraOptions(center: searchPoint, zoom: 11),
+        );
+      } else if (eventsToDisplay.isNotEmpty) {
+        // Otherwise center on first event
+        final firstPoint = _resolveLocationToPoint(
+          eventsToDisplay.first.location,
+        );
+        await map.setCamera(mapbox.CameraOptions(center: firstPoint, zoom: 9));
+      } else if (filteredTournaments.isNotEmpty &&
+          filteredTournaments.first.lat != null &&
+          filteredTournaments.first.long != null) {
+        // Or center on first tournament
+        try {
+          final lat = double.parse(filteredTournaments.first.lat!);
+          final lng = double.parse(filteredTournaments.first.long!);
+          final point = mapbox.Point(coordinates: mapbox.Position(lng, lat));
+          await map.setCamera(mapbox.CameraOptions(center: point, zoom: 9));
+        } catch (e) {
+          debugPrint('Error centering on tournament: $e');
+        }
+      }
     }
   }
 
