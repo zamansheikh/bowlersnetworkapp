@@ -346,50 +346,6 @@ class _FeedPostCardState extends State<FeedPostCard> {
                   ),
                 ),
                 SizedBox(width: 6.w),
-                // Share button
-                Container(
-                  padding: EdgeInsets.symmetric(
-                    horizontal: 12.w,
-                    vertical: 8.h,
-                  ),
-                  decoration: BoxDecoration(
-                    border: Border.all(
-                      color: const Color(0xFFE2E2E2),
-                      width: 1.w,
-                    ),
-                    borderRadius: BorderRadius.circular(50.r),
-                  ),
-                  child: InkWell(
-                    onTap: () {
-                      // TODO: Implement share functionality
-                    },
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        SvgPicture.asset(
-                          'assets/icons/share.svg',
-                          width: 20.w,
-                          height: 20.h,
-                          colorFilter: const ColorFilter.mode(
-                            Color(0xFF6D6D6D),
-                            BlendMode.srcIn,
-                          ),
-                        ),
-                        SizedBox(width: 8.w),
-                        Text(
-                          '13',
-                          style: TextStyle(
-                            fontFamily: 'Poppins',
-                            fontSize: 14.sp,
-                            fontWeight: FontWeight.w500,
-                            color: const Color(0xFF6D6D6D),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-                SizedBox(width: 6.w),
                 // Comment button
                 Container(
                   padding: EdgeInsets.symmetric(
@@ -422,6 +378,50 @@ class _FeedPostCardState extends State<FeedPostCard> {
                         SizedBox(width: 8.w),
                         Text(
                           '${widget.post.metadata.totalComments}',
+                          style: TextStyle(
+                            fontFamily: 'Poppins',
+                            fontSize: 14.sp,
+                            fontWeight: FontWeight.w500,
+                            color: const Color(0xFF6D6D6D),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+                SizedBox(width: 6.w),
+                // Share button
+                Container(
+                  padding: EdgeInsets.symmetric(
+                    horizontal: 12.w,
+                    vertical: 8.h,
+                  ),
+                  decoration: BoxDecoration(
+                    border: Border.all(
+                      color: const Color(0xFFE2E2E2),
+                      width: 1.w,
+                    ),
+                    borderRadius: BorderRadius.circular(50.r),
+                  ),
+                  child: InkWell(
+                    onTap: () {
+                      // TODO: Implement share functionality
+                    },
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        SvgPicture.asset(
+                          'assets/icons/share.svg',
+                          width: 20.w,
+                          height: 20.h,
+                          colorFilter: const ColorFilter.mode(
+                            Color(0xFF6D6D6D),
+                            BlendMode.srcIn,
+                          ),
+                        ),
+                        SizedBox(width: 8.w),
+                        Text(
+                          '0',
                           style: TextStyle(
                             fontFamily: 'Poppins',
                             fontSize: 14.sp,

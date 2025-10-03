@@ -116,14 +116,14 @@ class AuthRepositoryImpl implements AuthRepository {
   }
 
   @override
-  Future<Either<Failure, void>> deleteAccount() async {
+  Future<Either<Failure, void>> deleteAccount(String password) async {
     try {
       final token = prefs.getString(AppConstants.tokenKey);
       if (token == null || token.isEmpty) {
         return Left(NetworkFailure('Missing token'));
       }
 
-      await remote.deleteAccount(token);
+      await remote.deleteAccount(token, password);
 
       // Clear all stored data
       await prefs.remove(AppConstants.tokenKey);

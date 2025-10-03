@@ -144,6 +144,44 @@ class _CreateTournamentBottomSheetState
 
               SizedBox(height: AppSpacing.md),
 
+              // Participants Count (only for Teams)
+              if (_selectedFormat == 'Teams') ...[
+                Text(
+                  'Number of Participants *',
+                  style: AppTextStyles.labelMedium.copyWith(
+                    fontWeight: FontWeight.w600,
+                    color: AppColors.gray800,
+                  ),
+                ),
+                SizedBox(height: AppSpacing.xs),
+                TextFormField(
+                  initialValue: _participantsCount.toString(),
+                  keyboardType: TextInputType.number,
+                  decoration: _buildInputDecoration('10'),
+                  onChanged: (value) {
+                    final count = int.tryParse(value);
+                    if (count != null) {
+                      setState(() {
+                        _participantsCount = count;
+                      });
+                    }
+                  },
+                  validator: (value) {
+                    if (_selectedFormat == 'Teams') {
+                      if (value?.isEmpty ?? true) {
+                        return 'Number of participants is required';
+                      }
+                      final count = int.tryParse(value!);
+                      if (count == null || count < 2) {
+                        return 'Teams requires at least 2 participants';
+                      }
+                    }
+                    return null;
+                  },
+                ),
+                SizedBox(height: AppSpacing.md),
+              ],
+
               // Date Fields Row
               Row(
                 children: [
@@ -654,22 +692,18 @@ class _CreateTournamentBottomSheetState
     }
 
     if (_startDate == null || _regDeadline == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Please select start date and registration deadline'),
-          backgroundColor: AppColors.error,
-        ),
+      _showSnackBar(
+        'Please select start date and registration deadline',
+        isError: true,
       );
       return;
     }
 
-        print('Creating tournament...');
+    print('Creating tournament...');
     if (_regDeadline!.isAfter(_startDate!)) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Registration deadline must be before start date'),
-          backgroundColor: AppColors.error,
-        ),
+      _showSnackBar(
+        'Registration deadline must be before start date',
+        isError: true,
       );
       return;
     }
@@ -717,21 +751,22 @@ class _CreateTournamentBottomSheetState
 
       if (mounted) {
         Navigator.pop(context);
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Tournament created successfully!'),
-            backgroundColor: AppColors.success,
-          ),
-        );
+        // Show success message after bottom sheet is closed
+        Future.delayed(const Duration(milliseconds: 300), () {
+          if (mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(
+                content: Text('Tournament created successfully!'),
+                backgroundColor: AppColors.success,
+                behavior: SnackBarBehavior.floating,
+              ),
+            );
+          }
+        });
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Failed to create tournament: $e'),
-            backgroundColor: AppColors.error,
-          ),
-        );
+        _showSnackBar('Failed to create tournament: $e', isError: true);
       }
     } finally {
       if (mounted) {
@@ -815,6 +850,21 @@ class _CreateTournamentBottomSheetState
         // Handicap - keep both fields
       }
     });
+  }
+
+  void _showSnackBar(String message, {bool isError = false}) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(message),
+        backgroundColor: isError ? AppColors.error : AppColors.success,
+        behavior: SnackBarBehavior.floating,
+        margin: EdgeInsets.only(
+          bottom: MediaQuery.of(context).size.height * 0.7,
+          left: 16,
+          right: 16,
+        ),
+      ),
+    );
   }
 
   void _onAddressChanged(String query) {

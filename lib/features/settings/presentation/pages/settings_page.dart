@@ -565,8 +565,8 @@ class SettingsPage extends StatelessWidget {
   }
 
   void _showFinalDeleteAccountDialog(BuildContext context, String password) {
-    // Trigger account deletion immediately
-    context.read<AuthCubit>().deleteAccount();
+    // Trigger account deletion immediately with password
+    context.read<AuthCubit>().deleteAccount(password);
 
     showDialog(
       context: context,

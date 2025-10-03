@@ -35,5 +35,5 @@ abstract class AuthRepository {
   );
 
   // Account deletion
-  Future<Either<Failure, void>> deleteAccount();
+  Future<Either<Failure, void>> deleteAccount(String password);
 }
