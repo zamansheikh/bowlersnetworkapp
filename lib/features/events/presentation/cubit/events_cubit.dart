@@ -90,7 +90,12 @@ class EventsCubit extends Cubit<EventsState> {
     if (state is EventsLoaded) {
       final current = state as EventsLoaded;
       emit(
-        current.copyWith(searchMode: mode, searchTerm: '', clearLocation: true),
+        current.copyWith(
+          searchMode: mode,
+          searchTerm: '',
+          clearLocation: true,
+          clearSelectedDate: true, // Reset date selection when switching modes
+        ),
       );
     }
   }
