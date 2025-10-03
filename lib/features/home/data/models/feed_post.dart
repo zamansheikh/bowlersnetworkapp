@@ -6,6 +6,7 @@ class FeedPost {
   final String caption;
   final List<String> media;
   final PostPoll? poll;
+  final PostEvent? event;
   final List<String> tags;
   final bool isLikedByMe;
 
@@ -17,6 +18,7 @@ class FeedPost {
     required this.caption,
     required this.media,
     this.poll,
+    this.event,
     required this.tags,
     required this.isLikedByMe,
   });
@@ -30,6 +32,7 @@ class FeedPost {
       caption: json['caption'] ?? '',
       media: List<String>.from(json['media'] ?? []),
       poll: json['poll'] != null ? PostPoll.fromJson(json['poll']) : null,
+      event: json['event'] != null ? PostEvent.fromJson(json['event']) : null,
       tags: List<String>.from(json['tags'] ?? []),
       isLikedByMe: json['is_liked_by_me'] ?? false,
     );
@@ -44,6 +47,7 @@ class FeedPost {
       'caption': caption,
       'media': media,
       'poll': poll?.toJson(),
+      'event': event?.toJson(),
       'tags': tags,
       'is_liked_by_me': isLikedByMe,
     };
@@ -57,6 +61,7 @@ class FeedPost {
     String? caption,
     List<String>? media,
     PostPoll? poll,
+    PostEvent? event,
     List<String>? tags,
     bool? isLikedByMe,
   }) {
@@ -68,6 +73,7 @@ class FeedPost {
       caption: caption ?? this.caption,
       media: media ?? this.media,
       poll: poll ?? this.poll,
+      event: event ?? this.event,
       tags: tags ?? this.tags,
       isLikedByMe: isLikedByMe ?? this.isLikedByMe,
     );
@@ -463,6 +469,118 @@ class PollOption {
       content: content ?? this.content,
       vote: vote ?? this.vote,
       perc: perc ?? this.perc,
+    );
+  }
+}
+
+class PostEvent {
+  final int id;
+  final String uid;
+  final int metadataId;
+  final String title;
+  final int date;
+  final String eventDate;
+  final String time;
+  final String country;
+  final String city;
+  final String placeId;
+  final String longitude;
+  final String latitude;
+  final String strAddress;
+  final String? postCode;
+  final String description;
+
+  const PostEvent({
+    required this.id,
+    required this.uid,
+    required this.metadataId,
+    required this.title,
+    required this.date,
+    required this.eventDate,
+    required this.time,
+    required this.country,
+    required this.city,
+    required this.placeId,
+    required this.longitude,
+    required this.latitude,
+    required this.strAddress,
+    this.postCode,
+    required this.description,
+  });
+
+  factory PostEvent.fromJson(Map<String, dynamic> json) {
+    return PostEvent(
+      id: (json['id'] as num).toInt(),
+      uid: json['uid'] ?? '',
+      metadataId: (json['metadata_id'] as num).toInt(),
+      title: json['title'] ?? '',
+      date: (json['date'] as num?)?.toInt() ?? -1,
+      eventDate: json['event_date'] ?? '',
+      time: json['time'] ?? '',
+      country: json['country'] ?? '',
+      city: json['city'] ?? '',
+      placeId: json['place_id'] ?? '',
+      longitude: json['longitude'] ?? '',
+      latitude: json['latitude'] ?? '',
+      strAddress: json['str_address'] ?? '',
+      postCode: json['post_code'],
+      description: json['description'] ?? '',
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'uid': uid,
+      'metadata_id': metadataId,
+      'title': title,
+      'date': date,
+      'event_date': eventDate,
+      'time': time,
+      'country': country,
+      'city': city,
+      'place_id': placeId,
+      'longitude': longitude,
+      'latitude': latitude,
+      'str_address': strAddress,
+      'post_code': postCode,
+      'description': description,
+    };
+  }
+
+  PostEvent copyWith({
+    int? id,
+    String? uid,
+    int? metadataId,
+    String? title,
+    int? date,
+    String? eventDate,
+    String? time,
+    String? country,
+    String? city,
+    String? placeId,
+    String? longitude,
+    String? latitude,
+    String? strAddress,
+    String? postCode,
+    String? description,
+  }) {
+    return PostEvent(
+      id: id ?? this.id,
+      uid: uid ?? this.uid,
+      metadataId: metadataId ?? this.metadataId,
+      title: title ?? this.title,
+      date: date ?? this.date,
+      eventDate: eventDate ?? this.eventDate,
+      time: time ?? this.time,
+      country: country ?? this.country,
+      city: city ?? this.city,
+      placeId: placeId ?? this.placeId,
+      longitude: longitude ?? this.longitude,
+      latitude: latitude ?? this.latitude,
+      strAddress: strAddress ?? this.strAddress,
+      postCode: postCode ?? this.postCode,
+      description: description ?? this.description,
     );
   }
 }

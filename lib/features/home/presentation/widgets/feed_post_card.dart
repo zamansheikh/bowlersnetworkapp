@@ -227,6 +227,188 @@ class _FeedPostCardState extends State<FeedPostCard> {
     );
   }
 
+  Widget _buildEvent() {
+    final event = widget.post.event;
+    if (event == null) return const SizedBox.shrink();
+
+    // Parse event date
+    String eventDateStr = 'TBD';
+    try {
+      if (event.eventDate.isNotEmpty) {
+        final eventDateTime = DateTime.parse(event.eventDate);
+        eventDateStr = DateFormat('MMM dd, yyyy').format(eventDateTime);
+      }
+    } catch (e) {
+      eventDateStr = 'Date TBD';
+    }
+
+    return Container(
+      margin: EdgeInsets.symmetric(vertical: 12.h),
+      padding: EdgeInsets.all(16.w),
+      decoration: BoxDecoration(
+        gradient: const LinearGradient(
+          colors: [Color(0xFFF4F9ED), Color(0xFFE8F5E9)],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
+        borderRadius: BorderRadius.circular(12.r),
+        border: Border.all(
+          color: AppColors.primaryLimeGreen.withOpacity(0.3),
+          width: 1.5.w,
+        ),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Event icon and title
+          Row(
+            children: [
+              Container(
+                padding: EdgeInsets.all(8.w),
+                decoration: BoxDecoration(
+                  color: AppColors.primaryLimeGreen,
+                  borderRadius: BorderRadius.circular(8.r),
+                ),
+                child: Icon(Icons.event, color: Colors.white, size: 20.sp),
+              ),
+              SizedBox(width: 12.w),
+              Expanded(
+                child: Text(
+                  event.title,
+                  style: TextStyle(
+                    fontFamily: 'Poppins',
+                    fontSize: 16.sp,
+                    fontWeight: FontWeight.w600,
+                    color: const Color(0xFF2E7D32),
+                    height: 1.3,
+                  ),
+                ),
+              ),
+            ],
+          ),
+
+          SizedBox(height: 12.h),
+
+          // Event details
+          if (event.description.isNotEmpty) ...[
+            Text(
+              event.description,
+              style: TextStyle(
+                fontFamily: 'Poppins',
+                fontSize: 13.sp,
+                fontWeight: FontWeight.w400,
+                color: const Color(0xFF424242),
+                height: 1.4,
+              ),
+            ),
+            SizedBox(height: 12.h),
+          ],
+
+          // Date and time
+          Row(
+            children: [
+              Icon(
+                Icons.calendar_today,
+                size: 16.sp,
+                color: const Color(0xFF6D6D6D),
+              ),
+              SizedBox(width: 8.w),
+              Text(
+                eventDateStr,
+                style: TextStyle(
+                  fontFamily: 'Poppins',
+                  fontSize: 13.sp,
+                  fontWeight: FontWeight.w500,
+                  color: const Color(0xFF424242),
+                ),
+              ),
+              if (event.time.isNotEmpty) ...[
+                SizedBox(width: 12.w),
+                Icon(
+                  Icons.access_time,
+                  size: 16.sp,
+                  color: const Color(0xFF6D6D6D),
+                ),
+                SizedBox(width: 8.w),
+                Text(
+                  event.time,
+                  style: TextStyle(
+                    fontFamily: 'Poppins',
+                    fontSize: 13.sp,
+                    fontWeight: FontWeight.w500,
+                    color: const Color(0xFF424242),
+                  ),
+                ),
+              ],
+            ],
+          ),
+
+          // Location
+          if (event.strAddress.isNotEmpty) ...[
+            SizedBox(height: 8.h),
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Icon(
+                  Icons.location_on,
+                  size: 16.sp,
+                  color: const Color(0xFF6D6D6D),
+                ),
+                SizedBox(width: 8.w),
+                Expanded(
+                  child: Text(
+                    event.strAddress,
+                    style: TextStyle(
+                      fontFamily: 'Poppins',
+                      fontSize: 13.sp,
+                      fontWeight: FontWeight.w400,
+                      color: const Color(0xFF6D6D6D),
+                      height: 1.3,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ],
+
+          SizedBox(height: 12.h),
+
+          // Interested button
+          SizedBox(
+            width: double.infinity,
+            child: ElevatedButton(
+              onPressed: () {
+                // TODO: Handle event interest
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text('Event feature coming soon!'),
+                    backgroundColor: AppColors.primaryLimeGreen,
+                  ),
+                );
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: AppColors.primaryLimeGreen,
+                padding: EdgeInsets.symmetric(vertical: 12.h),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8.r),
+                ),
+              ),
+              child: Text(
+                'Interested',
+                style: TextStyle(
+                  fontFamily: 'Poppins',
+                  fontSize: 14.sp,
+                  fontWeight: FontWeight.w600,
+                  color: Colors.white,
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
   Widget _buildLikedByAndActions() {
     return Column(
       children: [
@@ -613,6 +795,9 @@ class _FeedPostCardState extends State<FeedPostCard> {
 
                 // Poll
                 _buildPoll(),
+
+                // Event
+                _buildEvent(),
               ],
             ),
           ),
