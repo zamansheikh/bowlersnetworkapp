@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'dart:async';
 import 'package:go_router/go_router.dart';
+import '../../features/games/presentation/pages/add_score_screen.dart';
 import '../../features/home/presentation/pages/home_page.dart';
 import '../../features/home/presentation/pages/post_detail_page.dart';
 import '../../features/auth/presentation/bloc/auth_cubit.dart';
@@ -219,6 +220,11 @@ class AppRouter {
             final teamId = state.pathParameters['id']!;
             return TeamDetailsPage(teamId: teamId);
           },
+        ),
+        GoRoute(
+          path: '/add-score',
+          name: 'add_score',
+          builder: (context, state) => const AddScoreScreen(),
         ),
         GoRoute(
           path: '/settings',

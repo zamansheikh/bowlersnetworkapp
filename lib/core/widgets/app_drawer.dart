@@ -140,6 +140,12 @@ class AppDrawer extends StatelessWidget {
                     onTap: () => _go(context, '/teams'),
                   ),
                   _NavItem(
+                    icon: Icons.score,
+                    label: 'Add Score',
+                    selected: currentPath.startsWith('/add-score'),
+                    onTap: () => _go(context, '/add-score'),
+                  ),
+                  _NavItem(
                     icon: Icons.settings,
                     label: 'Settings',
                     selected: currentPath.startsWith('/settings'),

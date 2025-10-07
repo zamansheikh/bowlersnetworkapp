@@ -54,6 +54,12 @@ import 'package:bowlersnetworkapp/features/events/domain/usecases/get_tournament
     as _i116;
 import 'package:bowlersnetworkapp/features/events/presentation/cubit/events_cubit.dart'
     as _i415;
+import 'package:bowlersnetworkapp/features/games/data/repositories/game_repository_impl.dart'
+    as _i26;
+import 'package:bowlersnetworkapp/features/games/domain/repositories/game_repository.dart'
+    as _i201;
+import 'package:bowlersnetworkapp/features/games/presentation/bloc/add_score_bloc.dart'
+    as _i166;
 import 'package:bowlersnetworkapp/features/home/data/datasources/user_remote_data_source.dart'
     as _i528;
 import 'package:bowlersnetworkapp/features/home/data/repositories/feed_repository.dart'
@@ -163,6 +169,7 @@ extension GetItInjectableX on _i174.GetIt {
     gh.lazySingleton<_i1073.AuthRemoteDataSource>(
       () => _i1073.AuthRemoteDataSourceImpl(gh<_i361.Dio>()),
     );
+    gh.lazySingleton<_i201.GameRepository>(() => _i26.GameRepositoryImpl());
     gh.lazySingleton<_i154.MessagesRemoteDataSource>(
       () => _i154.MessagesRemoteDataSourceImpl(gh<_i460.SharedPreferences>()),
     );
@@ -187,6 +194,9 @@ extension GetItInjectableX on _i174.GetIt {
       () => _i290.ProPlayersRepositoryImpl(
         gh<_i607.ProPlayersRemoteDataSource>(),
       ),
+    );
+    gh.factory<_i166.AddScoreBloc>(
+      () => _i166.AddScoreBloc(gh<_i201.GameRepository>()),
     );
     gh.lazySingleton<_i599.MessagesRepository>(
       () => _i528.MessagesRepositoryImpl(gh<_i154.MessagesRemoteDataSource>()),
