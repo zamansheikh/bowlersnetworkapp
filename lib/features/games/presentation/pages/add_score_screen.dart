@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 
-import '../../domain/repositories/game_repository.dart';
+import '../../../../core/di/injection.dart';
 import '../bloc/add_score_bloc.dart';
 import '../bloc/add_score_event.dart';
 import '../bloc/add_score_state.dart';
@@ -15,7 +15,7 @@ class AddScoreScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return BlocProvider(
-      create: (context) => AddScoreBloc(context.read<GameRepository>())..add(StartNewGame()),
+      create: (_) => getIt<AddScoreBloc>()..add(StartNewGame()),
       child: Scaffold(
         body: SafeArea(
           child: Column(
@@ -32,7 +32,9 @@ class AddScoreScreen extends StatelessWidget {
               BlocBuilder<AddScoreBloc, AddScoreState>(
                 builder: (context, state) {
                   final bloc = context.read<AddScoreBloc>();
-                  final displayStrings = state.frames.map((f) => f.display).toList();
+                  final displayStrings = state.frames
+                      .map((f) => f.display)
+                      .toList();
                   final cum = state.cumulativeScores;
 
                   return Column(
@@ -48,7 +50,11 @@ class AddScoreScreen extends StatelessWidget {
                               children: List.generate(10, (i) {
                                 return Padding(
                                   padding: const EdgeInsets.all(4),
-                                  child: Text(displayStrings.length > i ? displayStrings[i] : ''),
+                                  child: Text(
+                                    displayStrings.length > i
+                                        ? displayStrings[i]
+                                        : '',
+                                  ),
                                 );
                               }),
                             ),
@@ -56,7 +62,9 @@ class AddScoreScreen extends StatelessWidget {
                               children: List.generate(10, (i) {
                                 return Padding(
                                   padding: const EdgeInsets.all(4),
-                                  child: Text(cum.length > i ? '${cum[i]}' : ''),
+                                  child: Text(
+                                    cum.length > i ? '${cum[i]}' : '',
+                                  ),
                                 );
                               }),
                             ),
@@ -89,8 +97,11 @@ class AddScoreScreen extends StatelessWidget {
                                 double x = e.value.dx * width - r;
                                 double y = e.value.dy * height - r;
                                 int pin = e.key;
-                                bool isStanding = state.remainingPins.contains(pin);
-                                bool isKnocked = state.currentKnockedPins.contains(pin);
+                                bool isStanding = state.remainingPins.contains(
+                                  pin,
+                                );
+                                bool isKnocked = state.currentKnockedPins
+                                    .contains(pin);
                                 Color color;
                                 if (!isStanding) {
                                   color = Colors.grey.shade800;
@@ -114,14 +125,19 @@ class AddScoreScreen extends StatelessWidget {
                                         color: color,
                                         shape: BoxShape.circle,
                                         border: color == Colors.white
-                                            ? Border.all(color: Colors.red, width: 2)
+                                            ? Border.all(
+                                                color: Colors.red,
+                                                width: 2,
+                                              )
                                             : null,
                                       ),
                                       child: Center(
                                         child: Text(
                                           '$pin',
                                           style: TextStyle(
-                                            color: color == Colors.white ? Colors.black : Colors.white,
+                                            color: color == Colors.white
+                                                ? Colors.black
+                                                : Colors.white,
                                             fontSize: 12,
                                           ),
                                         ),
@@ -141,21 +157,32 @@ class AddScoreScreen extends StatelessWidget {
                           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                           children: [
                             ElevatedButton(
-                              style: ElevatedButton.styleFrom(backgroundColor: Colors.pink),
-                              onPressed: () => bloc.add(PressShortcut(ShortcutType.foul)),
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: Colors.pink,
+                              ),
+                              onPressed: () =>
+                                  bloc.add(PressShortcut(ShortcutType.foul)),
                               child: const Text('Foul'),
                             ),
                             ElevatedButton(
-                              style: ElevatedButton.styleFrom(backgroundColor: Colors.yellow.shade700),
-                              onPressed: () => bloc.add(PressShortcut(ShortcutType.miss)),
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: Colors.yellow.shade700,
+                              ),
+                              onPressed: () =>
+                                  bloc.add(PressShortcut(ShortcutType.miss)),
                               child: const Text('Miss'),
                             ),
                             ElevatedButton(
-                              style: ElevatedButton.styleFrom(backgroundColor: Colors.green),
-                              onPressed: () => bloc.add(PressShortcut(ShortcutType.strikeOrSpare)),
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: Colors.green,
+                              ),
+                              onPressed: () => bloc.add(
+                                PressShortcut(ShortcutType.strikeOrSpare),
+                              ),
                               child: Text(
                                 (state.currentThrow == 1 ||
-                                        (state.currentFrame == 10 && state.currentThrow == 3))
+                                        (state.currentFrame == 10 &&
+                                            state.currentThrow == 3))
                                     ? 'Strike'
                                     : 'Spare',
                               ),
