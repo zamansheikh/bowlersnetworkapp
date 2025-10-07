@@ -2,6 +2,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_svg/svg.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../../core/di/injection.dart';
@@ -83,51 +84,40 @@ class _AddScoreView extends StatelessWidget {
               if (!context.mounted) return;
               context.read<AddScoreBloc>().add(DismissCompletionDialog());
             },
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                _Header(onBackPressed: () => context.pop()),
-                const SizedBox(height: 20),
-                Expanded(
-                  child: BlocBuilder<AddScoreBloc, AddScoreState>(
-                    builder: (context, state) {
-                      final bloc = context.read<AddScoreBloc>();
-                      return Column(
-                        crossAxisAlignment: CrossAxisAlignment.stretch,
-                        children: [
-                          _Scoreboard(state: state),
-                          const SizedBox(height: 24),
-                          Expanded(
-                            child: _PinDeck(
-                              state: state,
-                              onPinTap: (pin) => bloc.add(SelectPin(pin)),
-                            ),
-                          ),
-                          const SizedBox(height: 24),
-                          _ShortcutRow(
-                            state: state,
-                            onFoul: () =>
-                                bloc.add(PressShortcut(ShortcutType.foul)),
-                            onMiss: () =>
-                                bloc.add(PressShortcut(ShortcutType.miss)),
-                            onStrikeOrSpare: () => bloc.add(
-                              PressShortcut(ShortcutType.strikeOrSpare),
-                            ),
-                          ),
-                          const SizedBox(height: 18),
-                          _BottomControls(
-                            onPrevious: () => bloc.add(PreviousThrow()),
-                            onSave: () => bloc.add(SaveGame()),
-                            onNext: () => bloc.add(NextThrow()),
-                            canGoPrevious: state.canGoPrevious,
-                            canGoNext: state.canGoNext,
-                          ),
-                        ],
-                      );
-                    },
-                  ),
-                ),
-              ],
+            child: BlocBuilder<AddScoreBloc, AddScoreState>(
+              builder: (context, state) {
+                final bloc = context.read<AddScoreBloc>();
+                return Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    _Header(onBackPressed: () => context.pop()),
+                    const SizedBox(height: 20),
+                    _Scoreboard(state: state),
+                    const SizedBox(height: 16),
+                    _PinDeck(
+                      state: state,
+                      onPinTap: (pin) => bloc.add(SelectPin(pin)),
+                    ),
+                    const Spacer(),
+                    _ShortcutRow(
+                      state: state,
+                      onFoul: () => bloc.add(PressShortcut(ShortcutType.foul)),
+                      onMiss: () => bloc.add(PressShortcut(ShortcutType.miss)),
+                      onStrikeOrSpare: () =>
+                          bloc.add(PressShortcut(ShortcutType.strikeOrSpare)),
+                    ),
+                    const SizedBox(height: 18),
+                    _BottomControls(
+                      onPrevious: () => bloc.add(PreviousThrow()),
+                      onSave: () => bloc.add(SaveGame()),
+                      onNext: () => bloc.add(NextThrow()),
+                      canGoPrevious: state.canGoPrevious,
+                      canGoNext: state.canGoNext,
+                    ),
+                    const SizedBox(height: 16), // Bottom padding
+                  ],
+                );
+              },
             ),
           ),
         ),
@@ -320,59 +310,89 @@ class _PinDeck extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        final width = constraints.maxWidth;
-        final height = constraints.maxHeight;
-        final radius = width / 14;
-        final positions = {
-          1: const Offset(0.5, 0.87),
-          2: const Offset(0.42, 0.69),
-          3: const Offset(0.58, 0.69),
-          4: const Offset(0.34, 0.51),
-          5: const Offset(0.5, 0.51),
-          6: const Offset(0.66, 0.51),
-          7: const Offset(0.26, 0.33),
-          8: const Offset(0.42, 0.33),
-          9: const Offset(0.58, 0.33),
-          10: const Offset(0.74, 0.33),
-        };
+    final screenSize = MediaQuery.of(context).size;
+    final screenHeight = screenSize.height;
+    final screenWidth = screenSize.width;
 
-        return Container(
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(28),
-            gradient: const LinearGradient(
-              colors: [Color(0xFF141829), Color(0xFF0F121E)],
-              begin: Alignment.topCenter,
-              end: Alignment.bottomCenter,
+    // Calculate component heights
+    const safetyMargin = 20.0;
+    const headerHeight = 76.0; // Header + spacing
+    const scoreboardHeight = 66.0; // Scoreboard height
+    const shortcutRowHeight = 52.0; // Shortcut buttons height
+    const bottomControlsHeight = 54.0; // Bottom controls height
+    const spacingTotal = 20 + 16 + 18 + 16; // All spacing between components
+
+    // Calculate available height for pin deck
+    final availableHeight =
+        screenHeight -
+        headerHeight -
+        scoreboardHeight -
+        shortcutRowHeight -
+        bottomControlsHeight -
+        safetyMargin -
+        spacingTotal;
+
+    // Use calculated height or minimum height if screen is too small
+    final deckHeight = availableHeight.clamp(280.0, 500.0);
+    final deckWidth = screenWidth - 32; // Account for horizontal padding
+
+    return SizedBox(
+      height: deckHeight,
+      width: deckWidth,
+      child: LayoutBuilder(
+        builder: (context, constraints) {
+          final width = constraints.maxWidth;
+          final height = constraints.maxHeight;
+          final radius = (width / 16).clamp(22.0, 32.0);
+          final positions = {
+            1: const Offset(0.5, 0.85),
+            2: const Offset(0.37, 0.6),
+            3: const Offset(0.63, 0.6),
+            4: const Offset(0.25, 0.35),
+            5: const Offset(0.5, 0.35),
+            6: const Offset(0.75, 0.35),
+            7: const Offset(0.15, 0.1),
+            8: const Offset(0.37, 0.1),
+            9: const Offset(0.63, 0.1),
+            10: const Offset(0.85, 0.1),
+          };
+
+          return Container(
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(20),
+              gradient: const LinearGradient(
+                colors: [Color(0xFF141829), Color(0xFF0F121E)],
+                begin: Alignment.topCenter,
+                end: Alignment.bottomCenter,
+              ),
             ),
-          ),
-          child: Stack(
-            children: positions.entries.map((entry) {
-              final pinNumber = entry.key;
-              final position = entry.value;
-              final availablePins = state.remainingPins;
-              final isAvailable = availablePins.contains(pinNumber);
-              final isKnocked = state.currentKnockedPins.contains(pinNumber);
-              final isStanding = isAvailable && !isKnocked;
-              final isDisabled = state.currentIsFoul || !isAvailable;
+            child: Stack(
+              children: positions.entries.map((entry) {
+                final pinNumber = entry.key;
+                final position = entry.value;
+                final availablePins = state.remainingPins;
+                final isAvailable = availablePins.contains(pinNumber);
+                final isKnocked = state.currentKnockedPins.contains(pinNumber);
+                final isStanding = isAvailable && !isKnocked;
+                final isDisabled = state.currentIsFoul || !isAvailable;
 
-              return Positioned(
-                left: position.dx * width - radius,
-                top: position.dy * height - radius,
-                child: _Pin(
-                  number: pinNumber,
-                  radius: radius,
-                  isStanding: isStanding,
-                  isKnocked: isKnocked,
-                  isDisabled: isDisabled,
-                  onTap: () => onPinTap(pinNumber),
-                ),
-              );
-            }).toList(),
-          ),
-        );
-      },
+                return Positioned(
+                  left: position.dx * width - radius * 1.5,
+                  top: position.dy * height - radius,
+                  child: _Pin(
+                    number: pinNumber,
+                    radius: radius * 1.5,
+                    isStanding: isStanding,
+                    isKnocked: isKnocked,
+                    isDisabled: isDisabled,
+                    onTap: () => onPinTap(pinNumber),
+                  ),
+                );
+              }).toList(),
+            ),
+          );
+        },
+      ),
     );
   }
 }
@@ -466,14 +486,15 @@ class _Pin extends StatelessWidget {
                 ],
               ),
             ),
+            //Bowling pin Icon
             Positioned(
-              top: size * 0.22,
-              child: Container(
-                width: size * 0.68,
-                height: size * 0.2,
-                decoration: BoxDecoration(
-                  color: const Color(0xFFE43F4E),
-                  borderRadius: BorderRadius.circular(size),
+              bottom: size * 0.0,
+              child: SvgPicture.asset(
+                'assets/icons/bowling_pin.svg',
+                width: size,
+                colorFilter: ColorFilter.mode(
+                  isKnocked ? const Color(0xFF35D07F) : const Color(0xFFE43F4E),
+                  BlendMode.srcIn,
                 ),
               ),
             ),
@@ -496,7 +517,7 @@ class _Pin extends StatelessWidget {
                 '$number',
                 style: const TextStyle(
                   fontWeight: FontWeight.w700,
-                  color: Color(0xFF1F2233),
+                  color: Color.fromARGB(255, 231, 235, 255),
                 ),
               ),
             ),
