@@ -1,6 +1,6 @@
 // presentation/bloc/add_score_bloc.dart
 
-import 'package:bloc/bloc.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:injectable/injectable.dart';
 import '../../domain/entities/bowling_game_entity.dart';
 import '../../domain/entities/frame_entity.dart';
@@ -14,14 +14,16 @@ class AddScoreBloc extends Bloc<AddScoreEvent, AddScoreState> {
   final GameRepository _gameRepository;
 
   AddScoreBloc(this._gameRepository)
-      : super(const AddScoreState(
+    : super(
+        const AddScoreState(
           frames: [],
           currentFrame: 1,
           currentThrow: 1,
           currentKnockedPins: {},
           currentIsFoul: false,
           cumulativeScores: [],
-        )) {
+        ),
+      ) {
     on<StartNewGame>(_onStartNewGame);
     on<SelectPin>(_onSelectPin);
     on<PressShortcut>(_onPressShortcut);
@@ -32,14 +34,16 @@ class AddScoreBloc extends Bloc<AddScoreEvent, AddScoreState> {
 
   void _onStartNewGame(StartNewGame event, Emitter<AddScoreState> emit) {
     final frames = List.generate(10, (i) => FrameEntity(number: i + 1));
-    emit(AddScoreState(
-      frames: frames,
-      currentFrame: 1,
-      currentThrow: 1,
-      currentKnockedPins: {},
-      currentIsFoul: false,
-      cumulativeScores: [],
-    ));
+    emit(
+      AddScoreState(
+        frames: frames,
+        currentFrame: 1,
+        currentThrow: 1,
+        currentKnockedPins: {},
+        currentIsFoul: false,
+        cumulativeScores: [],
+      ),
+    );
   }
 
   void _onSelectPin(SelectPin event, Emitter<AddScoreState> emit) {
@@ -62,7 +66,12 @@ class AddScoreBloc extends Bloc<AddScoreEvent, AddScoreState> {
         emit(state.copyWith(currentIsFoul: false, currentKnockedPins: {}));
         break;
       case ShortcutType.strikeOrSpare:
-        emit(state.copyWith(currentIsFoul: false, currentKnockedPins: state.remainingPins.toSet()));
+        emit(
+          state.copyWith(
+            currentIsFoul: false,
+            currentKnockedPins: state.remainingPins.toSet(),
+          ),
+        );
         break;
     }
   }
@@ -103,14 +112,16 @@ class AddScoreBloc extends Bloc<AddScoreEvent, AddScoreState> {
 
     final newCumulatives = _computeCumulatives(newFrames);
 
-    emit(state.copyWith(
-      frames: newFrames,
-      currentFrame: nextFrame,
-      currentThrow: nextThrow,
-      currentKnockedPins: {},
-      currentIsFoul: false,
-      cumulativeScores: newCumulatives,
-    ));
+    emit(
+      state.copyWith(
+        frames: newFrames,
+        currentFrame: nextFrame,
+        currentThrow: nextThrow,
+        currentKnockedPins: {},
+        currentIsFoul: false,
+        cumulativeScores: newCumulatives,
+      ),
+    );
   }
 
   void _onPreviousThrow(PreviousThrow event, Emitter<AddScoreState> emit) {
@@ -119,29 +130,40 @@ class AddScoreBloc extends Bloc<AddScoreEvent, AddScoreState> {
       return;
     }
 
-    final frameIndex = state.currentFrame - 1;
-    final frame = state.frames[frameIndex];
-    if (frame.throws.isNotEmpty) {
-      final lastThrow = frame.throws.last;
-      final newThrows = frame.throws.sublist(0, frame.throws.length - 1);
-      final newFrames = [...state.frames];
-      newFrames[frameIndex] = frame.copyWith(throws: newThrows);
+    final frames = state.frames;
+    int? targetFrameIndex;
 
-      final newCumulatives = _computeCumulatives(newFrames);
-
-      emit(state.copyWith(
-        frames: newFrames,
-        currentKnockedPins: lastThrow.knockedPins,
-        currentIsFoul: lastThrow.isFoul,
-        cumulativeScores: newCumulatives,
-      ));
-    } else if (state.currentFrame > 1) {
-      final prevFrameIndex = state.currentFrame - 2;
-      final prevFrame = state.frames[prevFrameIndex];
-      if (prevFrame.throws.isNotEmpty) {
-        add(PreviousThrow()); // Recurse to remove from prev
+    for (int i = frames.length - 1; i >= 0; i--) {
+      if (frames[i].throws.isNotEmpty) {
+        targetFrameIndex = i;
+        break;
       }
     }
+
+    if (targetFrameIndex == null) {
+      return;
+    }
+
+    final frame = frames[targetFrameIndex];
+    final lastThrow = frame.throws.last;
+    final updatedThrows = frame.throws.sublist(0, frame.throws.length - 1);
+    final updatedFrames = [...frames];
+    updatedFrames[targetFrameIndex] = frame.copyWith(throws: updatedThrows);
+
+    final newCumulatives = _computeCumulatives(updatedFrames);
+    final newFrameNumber = targetFrameIndex + 1;
+    final newThrowNumber = _determineNextThrow(targetFrameIndex, updatedThrows);
+
+    emit(
+      state.copyWith(
+        frames: updatedFrames,
+        currentFrame: newFrameNumber,
+        currentThrow: newThrowNumber,
+        currentKnockedPins: Set<int>.from(lastThrow.knockedPins),
+        currentIsFoul: lastThrow.isFoul,
+        cumulativeScores: newCumulatives,
+      ),
+    );
   }
 
   Future<void> _onSaveGame(SaveGame event, Emitter<AddScoreState> emit) async {
@@ -152,6 +174,24 @@ class AddScoreBloc extends Bloc<AddScoreEvent, AddScoreState> {
     );
     await _gameRepository.saveGame(game);
     // Optionally emit a saved state or reset
+  }
+
+  int _determineNextThrow(int frameIndex, List<ThrowEntity> throws) {
+    if (throws.isEmpty) {
+      return 1;
+    }
+
+    if (frameIndex < 9) {
+      if (throws.length == 1 &&
+          !throws.first.isFoul &&
+          throws.first.pinsKnocked == 10) {
+        return 1;
+      }
+      return throws.length + 1 > 2 ? 2 : throws.length + 1;
+    }
+
+    final nextThrow = throws.length + 1;
+    return nextThrow.clamp(1, 3);
   }
 
   List<int> _computeCumulatives(List<FrameEntity> frames) {
@@ -175,15 +215,21 @@ class AddScoreBloc extends Bloc<AddScoreEvent, AddScoreState> {
       throwIndex++;
 
       if (first == 10) {
-        if (throwIndex < throwPins.length) frameScore += throwPins[throwIndex];
-        if (throwIndex + 1 < throwPins.length) frameScore += throwPins[throwIndex + 1];
+        if (throwIndex < throwPins.length) {
+          frameScore += throwPins[throwIndex];
+        }
+        if (throwIndex + 1 < throwPins.length) {
+          frameScore += throwPins[throwIndex + 1];
+        }
       } else {
         if (throwIndex < throwPins.length) {
           int second = throwPins[throwIndex];
           frameScore += second;
           throwIndex++;
           if (first + second == 10) {
-            if (throwIndex < throwPins.length) frameScore += throwPins[throwIndex];
+            if (throwIndex < throwPins.length) {
+              frameScore += throwPins[throwIndex];
+            }
           }
         }
       }

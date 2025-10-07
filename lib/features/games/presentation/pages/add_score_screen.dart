@@ -166,82 +166,75 @@ class _FrameScoreTile extends StatelessWidget {
     final isTenth = frame.number == 10;
     final slots = isTenth ? 3 : 2;
     final symbols = _frameSymbols(frame);
-    final highlightColor = isActive ? const Color(0xFF1FD27D) : Colors.white;
-    final textColor = isActive ? Colors.black : const Color(0xFF1F2233);
+
+    final double tileWidth = isTenth ? 68 : 56;
+    final Color borderColor = isActive
+        ? const Color(0xFF35D07F)
+        : Colors.white.withValues(alpha: 0.14);
 
     return Container(
-      width: isTenth ? 76 : 64,
+      width: tileWidth,
       margin: const EdgeInsets.symmetric(horizontal: 4),
       decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(10),
-        border: Border.all(
-          color: isActive
-              ? const Color(0xFF1FD27D)
-              : Colors.white.withValues(alpha: 0.18),
-          width: isActive ? 2 : 1,
-        ),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.2),
-            blurRadius: 8,
-            offset: const Offset(0, 4),
-          ),
-        ],
+        color: const Color(0xFF101426),
+        borderRadius: BorderRadius.circular(12),
       ),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          ClipRRect(
-            borderRadius: const BorderRadius.vertical(top: Radius.circular(8)),
-            child: Container(
-              color: highlightColor,
-              child: Row(
-                children: List.generate(slots, (index) {
-                  return Expanded(
-                    child: Container(
-                      height: 32,
-                      alignment: Alignment.center,
-                      decoration: BoxDecoration(
-                        border: Border(
-                          right: index == slots - 1
-                              ? BorderSide.none
-                              : BorderSide(
-                                  color: Colors.black.withValues(alpha: 0.08),
-                                ),
-                          bottom: BorderSide(
-                            color: Colors.black.withValues(alpha: 0.12),
-                          ),
-                        ),
+      child: Container(
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(10),
+          border: Border.all(color: borderColor, width: 2),
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Row(
+              children: List.generate(slots, (index) {
+                return Expanded(
+                  child: Container(
+                    height: 28,
+                    decoration: BoxDecoration(
+                      border: Border(
+                        right: index == slots - 1
+                            ? BorderSide.none
+                            : const BorderSide(color: Color(0xFFE3E6F3)),
+                        bottom: const BorderSide(color: Color(0xFFE3E6F3)),
                       ),
-                      child: Text(
-                        symbols[index],
-                        style: TextStyle(
-                          fontWeight: FontWeight.w700,
-                          fontSize: 16,
-                          color: textColor,
-                        ),
+                      color: Colors.white,
+                    ),
+                    alignment: Alignment.center,
+                    child: Text(
+                      symbols[index],
+                      style: const TextStyle(
+                        fontWeight: FontWeight.w700,
+                        fontSize: 15,
+                        color: Color(0xFF1F2233),
                       ),
                     ),
-                  );
-                }),
-              ),
+                  ),
+                );
+              }),
             ),
-          ),
-          SizedBox(
-            height: 32,
-            child: Center(
+            Container(
+              height: 28,
+              alignment: Alignment.center,
+              decoration: BoxDecoration(
+                color: isActive ? const Color(0xFF35D07F) : Colors.white,
+                borderRadius: const BorderRadius.vertical(
+                  bottom: Radius.circular(8),
+                ),
+              ),
               child: Text(
                 cumulativeScore != null ? '$cumulativeScore' : '',
-                style: const TextStyle(
+                style: TextStyle(
                   fontWeight: FontWeight.w700,
-                  fontSize: 16,
-                  color: Color(0xFF1F2233),
+                  fontSize: 15,
+                  color: isActive ? Colors.white : const Color(0xFF1F2233),
                 ),
               ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
@@ -331,29 +324,35 @@ class _Pin extends StatelessWidget {
   Widget build(BuildContext context) {
     final size = radius * 2;
 
-    if (!isStanding) {
-      return SizedBox(
-        width: size,
-        height: size,
-        child: DecoratedBox(
-          decoration: BoxDecoration(
-            color: const Color(0xFF262A3A),
-            shape: BoxShape.circle,
-            border: Border.all(color: Colors.white.withValues(alpha: 0.05)),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withValues(alpha: 0.3),
-                blurRadius: 10,
-                offset: const Offset(0, 4),
-              ),
-            ],
-          ),
-          child: Center(
-            child: Text(
-              '$number',
-              style: const TextStyle(
-                color: Color(0xFFB9BEDA),
-                fontWeight: FontWeight.w700,
+    final bool showPinGraphic = !isStanding || isSelected;
+
+    if (!showPinGraphic) {
+      return GestureDetector(
+        onTap: isDisabled ? null : onTap,
+        child: SizedBox(
+          width: size,
+          height: size,
+          child: DecoratedBox(
+            decoration: BoxDecoration(
+              color: const Color(0xFF191D2D),
+              shape: BoxShape.circle,
+              border: Border.all(color: Colors.white.withValues(alpha: 0.08)),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withValues(alpha: 0.25),
+                  blurRadius: 10,
+                  offset: const Offset(0, 4),
+                ),
+              ],
+            ),
+            child: Center(
+              child: Text(
+                '$number',
+                style: const TextStyle(
+                  color: Color(0xFFD9DFF5),
+                  fontWeight: FontWeight.w700,
+                  fontSize: 16,
+                ),
               ),
             ),
           ),
@@ -376,8 +375,8 @@ class _Pin extends StatelessWidget {
                 shape: BoxShape.circle,
                 gradient: LinearGradient(
                   colors: isSelected
-                      ? [Colors.white, const Color(0xFFE4FFF2)]
-                      : [const Color(0xFFF9F9FC), const Color(0xFFE0E4F7)],
+                      ? [const Color(0xFFFFFFFF), const Color(0xFFEAFEF3)]
+                      : [const Color(0xFFF6F6FB), const Color(0xFFE4E7F6)],
                   begin: Alignment.topCenter,
                   end: Alignment.bottomCenter,
                 ),
@@ -401,15 +400,29 @@ class _Pin extends StatelessWidget {
                 ),
               ),
             ),
-            if (isSelected)
-              Container(
-                width: size,
-                height: size,
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  border: Border.all(color: const Color(0xFF35D07F), width: 2),
+            Container(
+              width: size,
+              height: size,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                border: Border.all(
+                  color: isSelected
+                      ? const Color(0xFF35D07F)
+                      : Colors.transparent,
+                  width: 2,
                 ),
               ),
+            ),
+            Positioned(
+              bottom: 6,
+              child: Text(
+                '$number',
+                style: const TextStyle(
+                  fontWeight: FontWeight.w700,
+                  color: Color(0xFF1F2233),
+                ),
+              ),
+            ),
           ],
         ),
       ),
