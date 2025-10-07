@@ -80,11 +80,20 @@ class ProfileCompletionCubit extends Cubit<ProfileCompletionState> {
     try {
       emit(ProfileCompletionLoading());
 
+      // Ensure minimum loading duration for better UX
+      final stopwatch = Stopwatch()..start();
+
       // Update favorite brands
       await _brandsDataSource.updateFavoriteBrands(_data.selectedBrandIds);
 
       // Refresh user profile to get updated completion status
       await _authRepository.getProfile();
+
+      // Ensure minimum loading time of 1000ms for better UX
+      final elapsed = stopwatch.elapsedMilliseconds;
+      if (elapsed < 1000) {
+        await Future.delayed(Duration(milliseconds: 1000 - elapsed));
+      }
 
       emit(ProfileCompletionSuccess());
     } catch (e) {

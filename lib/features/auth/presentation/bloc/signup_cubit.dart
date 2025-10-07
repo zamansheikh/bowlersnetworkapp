@@ -78,16 +78,30 @@ class SignupCubit extends Cubit<SignupState> {
   }) async {
     emit(SignupLoading());
 
+    // Ensure minimum loading duration for better UX
+    final stopwatch = Stopwatch()..start();
+
     final request = VerifyEmailRequest(email: email, code: code);
     final result = await verifyEmail(request);
 
-    result.fold((failure) => emit(SignupError(failure.toString())), (response) {
-      if (response.success) {
-        emit(EmailVerified());
-      } else {
-        emit(SignupError(response.message ?? 'Email verification failed'));
-      }
-    });
+    result.fold(
+      (failure) {
+        emit(SignupError(failure.toString()));
+      },
+      (response) async {
+        // Ensure minimum loading time of 600ms for better UX
+        final elapsed = stopwatch.elapsedMilliseconds;
+        if (elapsed < 600) {
+          await Future.delayed(Duration(milliseconds: 600 - elapsed));
+        }
+
+        if (response.success) {
+          emit(EmailVerified());
+        } else {
+          emit(SignupError(response.message ?? 'Email verification failed'));
+        }
+      },
+    );
   }
 
   Future<void> createUserAccount({

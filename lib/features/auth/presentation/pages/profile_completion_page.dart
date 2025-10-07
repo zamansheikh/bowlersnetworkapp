@@ -6,6 +6,7 @@ import '../../../../core/constants/colors.dart';
 import '../../../../core/theme/app_text_styles.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../domain/entities/brand.dart';
+import '../bloc/auth_cubit.dart';
 import '../cubit/profile_completion_cubit.dart';
 import '../cubit/profile_completion_state.dart';
 
@@ -46,7 +47,8 @@ class _ProfileCompletionViewState extends State<ProfileCompletionView> {
         child: BlocListener<ProfileCompletionCubit, ProfileCompletionState>(
           listenWhen: (previous, current) =>
               current is ProfileStepChanged ||
-              current is ProfileCompletionSuccess,
+              current is ProfileCompletionSuccess ||
+              current is ProfileCompletionError,
           listener: (context, state) async {
             if (state is ProfileStepChanged) {
               await _pageController.animateToPage(
@@ -59,6 +61,20 @@ class _ProfileCompletionViewState extends State<ProfileCompletionView> {
                 const SnackBar(
                   content: Text('Profile completed successfully!'),
                   behavior: SnackBarBehavior.floating,
+                  backgroundColor: AppColors.success,
+                ),
+              );
+              // Navigate to home after profile completion
+              if (context.mounted) {
+                // Trigger auth cubit to update profile completion status
+                context.read<AuthCubit>().completeProfile();
+              }
+            } else if (state is ProfileCompletionError) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Text(state.message),
+                  behavior: SnackBarBehavior.floating,
+                  backgroundColor: AppColors.error,
                 ),
               );
             }
@@ -213,8 +229,29 @@ class _ProfileCompletionViewState extends State<ProfileCompletionView> {
             child: BlocBuilder<ProfileCompletionCubit, ProfileCompletionState>(
               builder: (context, state) {
                 final canProceed = cubit.canProceedFromCurrentStep();
+                final isLoading = state is ProfileCompletionLoading;
+
+                if (isLoading && cubit.currentStep == 2) {
+                  // Show loading spinner when completing profile
+                  return Container(
+                    padding: EdgeInsets.symmetric(vertical: AppSpacing.md),
+                    decoration: BoxDecoration(
+                      color: AppColors.primaryLimeGreen,
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: const Center(
+                      child: CircularProgressIndicator(
+                        color: AppColors.white,
+                        strokeWidth: 2,
+                      ),
+                    ),
+                  );
+                }
+
                 return ElevatedButton(
-                  onPressed: canProceed ? () => _nextStep(cubit) : null,
+                  onPressed: canProceed && !isLoading
+                      ? () => _nextStep(cubit)
+                      : null,
                   style: ElevatedButton.styleFrom(
                     backgroundColor: AppColors.primaryLimeGreen,
                     padding: EdgeInsets.symmetric(vertical: AppSpacing.md),

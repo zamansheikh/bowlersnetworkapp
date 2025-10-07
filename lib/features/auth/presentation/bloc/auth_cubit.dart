@@ -61,24 +61,41 @@ class AuthCubit extends Cubit<AuthState> {
 
   Future<void> signIn(String username, String password) async {
     emit(AuthLoading());
+
+    // Ensure minimum loading duration for better UX
+    final stopwatch = Stopwatch()..start();
+
     final result = await login(
       LoginParams(username: username, password: password),
     );
-    result.fold((failure) => emit(AuthError(failure.toString())), (
-      token,
-    ) async {
-      final profileResult = await getProfile(NoParams());
-      profileResult.fold((failure) => emit(AuthError(failure.toString())), (
-        user,
-      ) {
-        // Check if user is UserModel and has isComplete field
-        if (user is UserModel && !user.isComplete) {
-          emit(AuthenticatedIncompleteProfile(token: token, user: user));
-        } else {
-          emit(Authenticated(token: token, user: user));
-        }
-      });
-    });
+
+    result.fold(
+      (failure) {
+        emit(AuthError(failure.toString()));
+      },
+      (token) async {
+        final profileResult = await getProfile(NoParams());
+        profileResult.fold(
+          (failure) {
+            emit(AuthError(failure.toString()));
+          },
+          (user) async {
+            // Ensure minimum loading time of 800ms for better UX
+            final elapsed = stopwatch.elapsedMilliseconds;
+            if (elapsed < 800) {
+              await Future.delayed(Duration(milliseconds: 800 - elapsed));
+            }
+
+            // Check if user is UserModel and has isComplete field
+            if (user is UserModel && !user.isComplete) {
+              emit(AuthenticatedIncompleteProfile(token: token, user: user));
+            } else {
+              emit(Authenticated(token: token, user: user));
+            }
+          },
+        );
+      },
+    );
   }
 
   Future<void> logout() async {
