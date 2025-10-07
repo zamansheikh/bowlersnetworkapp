@@ -46,14 +46,34 @@ class AddScoreState extends Equatable {
       return allPins.toSet();
     }
 
-    if (currentFrame == 10 && currentThrow == 3) {
+    final frame = frames[currentFrame - 1];
+    final targetIndex = currentThrow - 1;
+
+    if (currentFrame == 10) {
+      if (targetIndex <= 0) {
+        return allPins.toSet();
+      }
+
+      final first = frame.throws.isNotEmpty ? frame.throws[0] : null;
+      if (targetIndex == 1) {
+        if (first != null && !first.isFoul && first.pinsKnocked == 10) {
+          return allPins.toSet();
+        }
+
+        final standing = allPins.toSet();
+        if (first != null) {
+          standing.removeAll(first.knockedPins);
+        }
+        return standing;
+      }
+
+      // Third ball in the 10th frame always has a fresh rack when eligible.
       return allPins.toSet();
     }
 
-    final frame = frames[currentFrame - 1];
     final standing = allPins.toSet();
-    for (var t in frame.throws) {
-      standing.removeAll(t.knockedPins);
+    for (var i = 0; i < frame.throws.length && i < targetIndex; i++) {
+      standing.removeAll(frame.throws[i].knockedPins);
     }
     return standing;
   }

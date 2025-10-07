@@ -35,4 +35,6 @@ class ConfirmThrow extends AddScoreEvent {}
 
 class PreviousThrow extends AddScoreEvent {}
 
+class NextThrow extends AddScoreEvent {}
+
 class SaveGame extends AddScoreEvent {}

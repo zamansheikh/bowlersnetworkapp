@@ -68,7 +68,7 @@ class _AddScoreView extends StatelessWidget {
                         _BottomControls(
                           onPrevious: () => bloc.add(PreviousThrow()),
                           onSave: () => bloc.add(SaveGame()),
-                          onNext: () => bloc.add(ConfirmThrow()),
+                          onNext: () => bloc.add(NextThrow()),
                         ),
                       ],
                     );
