@@ -54,7 +54,7 @@ class _MessageInputState extends State<MessageInput> {
     // Allow sending if either text is not empty OR there are media files
     // This matches the web implementation
     if (text.isNotEmpty || _selectedFiles.isNotEmpty) {
-      print(
+      debugPrint(
         'Sending message: text="$text", media files: ${_selectedFiles.length}',
       );
       widget.onSendMessage(text, List.from(_selectedFiles));
@@ -63,7 +63,7 @@ class _MessageInputState extends State<MessageInput> {
       _updateCanSend();
       setState(() {});
     } else {
-      print('Cannot send empty message without text or media');
+      debugPrint('Cannot send empty message without text or media');
     }
   }
 

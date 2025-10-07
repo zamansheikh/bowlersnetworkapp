@@ -1,4 +1,5 @@
 import 'package:dio/dio.dart';
+import 'package:flutter/material.dart';
 import 'package:injectable/injectable.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../../../../core/constants/constants.dart';
@@ -16,7 +17,7 @@ class TournamentRemoteDataSourceImpl implements TournamentRemoteDataSource {
   @override
   Future<List<Tournament>> getTournaments() async {
     try {
-      print(
+      debugPrint(
         '🏆 TournamentDataSource: Fetching tournaments from /api/tournaments',
       );
 
@@ -25,8 +26,10 @@ class TournamentRemoteDataSourceImpl implements TournamentRemoteDataSource {
         options: _getOptionsWithAuth(),
       );
 
-      print('🏆 TournamentDataSource: Response status: ${response.statusCode}');
-      print('🏆 TournamentDataSource: Response data: ${response.data}');
+      debugPrint(
+        '🏆 TournamentDataSource: Response status: ${response.statusCode}',
+      );
+      debugPrint('🏆 TournamentDataSource: Response data: ${response.data}');
 
       if (response.statusCode == 200) {
         final List<dynamic> data = response.data as List<dynamic>;
@@ -41,16 +44,18 @@ class TournamentRemoteDataSourceImpl implements TournamentRemoteDataSource {
         throw Exception('Failed to load tournaments: ${response.statusCode}');
       }
     } on DioException catch (e) {
-      print('🏆 TournamentDataSource: Dio error: ${e.message}');
+      debugPrint('🏆 TournamentDataSource: Dio error: ${e.message}');
       if (e.response != null) {
-        print('🏆 TournamentDataSource: Error response: ${e.response?.data}');
+        debugPrint(
+          '🏆 TournamentDataSource: Error response: ${e.response?.data}',
+        );
         throw Exception(
           'Failed to load tournaments: ${e.response?.statusCode} - ${e.response?.data}',
         );
       }
       throw Exception('Network error: ${e.message}');
     } catch (e) {
-      print('🏆 TournamentDataSource: Unexpected error: $e');
+      debugPrint('🏆 TournamentDataSource: Unexpected error: $e');
       throw Exception('Failed to load tournaments: $e');
     }
   }
@@ -58,7 +63,7 @@ class TournamentRemoteDataSourceImpl implements TournamentRemoteDataSource {
   @override
   Future<Tournament> getTournamentById(int id) async {
     try {
-      print('🏆 TournamentDataSource: Fetching tournament $id');
+      debugPrint('🏆 TournamentDataSource: Fetching tournament $id');
 
       // For now, get all tournaments and find the one we need
       // In a real API, this would be GET /api/tournaments/$id
@@ -70,7 +75,7 @@ class TournamentRemoteDataSourceImpl implements TournamentRemoteDataSource {
 
       return tournament;
     } catch (e) {
-      print('🏆 TournamentDataSource: Error fetching tournament $id: $e');
+      debugPrint('🏆 TournamentDataSource: Error fetching tournament $id: $e');
       rethrow;
     }
   }
@@ -78,7 +83,7 @@ class TournamentRemoteDataSourceImpl implements TournamentRemoteDataSource {
   @override
   Future<void> registerForTournament(int tournamentId) async {
     try {
-      print(
+      debugPrint(
         '🏆 TournamentDataSource: Registering for tournament $tournamentId',
       );
 
@@ -87,7 +92,7 @@ class TournamentRemoteDataSourceImpl implements TournamentRemoteDataSource {
         options: _getOptionsWithAuth(),
       );
 
-      print(
+      debugPrint(
         '🏆 TournamentDataSource: Registration response: ${response.statusCode}',
       );
 
@@ -95,7 +100,7 @@ class TournamentRemoteDataSourceImpl implements TournamentRemoteDataSource {
         throw Exception('Failed to register: ${response.statusCode}');
       }
     } on DioException catch (e) {
-      print('🏆 TournamentDataSource: Registration error: ${e.message}');
+      debugPrint('🏆 TournamentDataSource: Registration error: ${e.message}');
       if (e.response != null) {
         throw Exception(
           'Registration failed: ${e.response?.statusCode} - ${e.response?.data}',
@@ -108,7 +113,7 @@ class TournamentRemoteDataSourceImpl implements TournamentRemoteDataSource {
   @override
   Future<void> unregisterFromTournament(int tournamentId) async {
     try {
-      print(
+      debugPrint(
         '🏆 TournamentDataSource: Unregistering from tournament $tournamentId',
       );
 
@@ -117,7 +122,7 @@ class TournamentRemoteDataSourceImpl implements TournamentRemoteDataSource {
         options: _getOptionsWithAuth(),
       );
 
-      print(
+      debugPrint(
         '🏆 TournamentDataSource: Unregistration response: ${response.statusCode}',
       );
 
@@ -125,7 +130,7 @@ class TournamentRemoteDataSourceImpl implements TournamentRemoteDataSource {
         throw Exception('Failed to unregister: ${response.statusCode}');
       }
     } on DioException catch (e) {
-      print('🏆 TournamentDataSource: Unregistration error: ${e.message}');
+      debugPrint('🏆 TournamentDataSource: Unregistration error: ${e.message}');
       if (e.response != null) {
         throw Exception(
           'Unregistration failed: ${e.response?.statusCode} - ${e.response?.data}',
@@ -151,7 +156,7 @@ class TournamentRemoteDataSourceImpl implements TournamentRemoteDataSource {
     double? percentage,
   }) async {
     try {
-      print('🏆 TournamentDataSource: Creating tournament: $name');
+      debugPrint('🏆 TournamentDataSource: Creating tournament: $name');
 
       final data = {
         'name': name,
@@ -174,7 +179,9 @@ class TournamentRemoteDataSourceImpl implements TournamentRemoteDataSource {
         options: _getOptionsWithAuth(),
       );
 
-      print('🏆 TournamentDataSource: Create response: ${response.statusCode}');
+      debugPrint(
+        '🏆 TournamentDataSource: Create response: ${response.statusCode}',
+      );
 
       if (response.statusCode == 200 || response.statusCode == 201) {
         final tournamentModel = TournamentModel.fromJson(
@@ -185,7 +192,7 @@ class TournamentRemoteDataSourceImpl implements TournamentRemoteDataSource {
         throw Exception('Failed to create tournament: ${response.statusCode}');
       }
     } on DioException catch (e) {
-      print('🏆 TournamentDataSource: Create error: ${e.message}');
+      debugPrint('🏆 TournamentDataSource: Create error: ${e.message}');
       if (e.response != null) {
         throw Exception(
           'Failed to create tournament: ${e.response?.statusCode} - ${e.response?.data}',
@@ -203,7 +210,7 @@ class TournamentRemoteDataSourceImpl implements TournamentRemoteDataSource {
           .where((tournament) => tournament.isRegistered)
           .toList();
     } catch (e) {
-      print(
+      debugPrint(
         '🏆 TournamentDataSource: Error fetching registered tournaments: $e',
       );
       rethrow;
@@ -218,7 +225,7 @@ class TournamentRemoteDataSourceImpl implements TournamentRemoteDataSource {
           .where((tournament) => !tournament.isRegistered)
           .toList();
     } catch (e) {
-      print(
+      debugPrint(
         '🏆 TournamentDataSource: Error fetching available tournaments: $e',
       );
       rethrow;
@@ -234,13 +241,13 @@ class TournamentRemoteDataSourceImpl implements TournamentRemoteDataSource {
     final options = Options();
     final token = _getAuthToken();
 
-    print(
+    debugPrint(
       '🏆 TournamentDataSource: Token retrieved: ${token != null ? 'Token exists (${token.length} chars)' : 'No token found'}',
     );
 
     if (token != null) {
       options.headers = {'Authorization': 'Bearer $token'};
-      print('🏆 TournamentDataSource: Added Authorization header');
+      debugPrint('🏆 TournamentDataSource: Added Authorization header');
     }
 
     return options;
@@ -252,7 +259,7 @@ class TournamentRemoteDataSourceImpl implements TournamentRemoteDataSource {
     int playerId,
   ) async {
     try {
-      print(
+      debugPrint(
         '🏆 TournamentDataSource: Registering player $playerId for singles tournament $tournamentId',
       );
 
@@ -261,7 +268,7 @@ class TournamentRemoteDataSourceImpl implements TournamentRemoteDataSource {
         options: _getOptionsWithAuth(),
       );
 
-      print(
+      debugPrint(
         '🏆 TournamentDataSource: Singles registration response: ${response.statusCode}',
       );
 
@@ -271,7 +278,7 @@ class TournamentRemoteDataSourceImpl implements TournamentRemoteDataSource {
         );
       }
     } on DioException catch (e) {
-      print(
+      debugPrint(
         '🏆 TournamentDataSource: Singles registration error: ${e.message}',
       );
       if (e.response != null) {
@@ -286,7 +293,7 @@ class TournamentRemoteDataSourceImpl implements TournamentRemoteDataSource {
   @override
   Future<void> registerTeamForTournament(int tournamentId, int teamId) async {
     try {
-      print(
+      debugPrint(
         '🏆 TournamentDataSource: Registering team $teamId for tournament $tournamentId',
       );
 
@@ -295,7 +302,7 @@ class TournamentRemoteDataSourceImpl implements TournamentRemoteDataSource {
         options: _getOptionsWithAuth(),
       );
 
-      print(
+      debugPrint(
         '🏆 TournamentDataSource: Team registration response: ${response.statusCode}',
       );
 
@@ -305,7 +312,9 @@ class TournamentRemoteDataSourceImpl implements TournamentRemoteDataSource {
         );
       }
     } on DioException catch (e) {
-      print('🏆 TournamentDataSource: Team registration error: ${e.message}');
+      debugPrint(
+        '🏆 TournamentDataSource: Team registration error: ${e.message}',
+      );
       if (e.response != null) {
         throw Exception(
           'Team registration failed: ${e.response?.statusCode} - ${e.response?.data}',

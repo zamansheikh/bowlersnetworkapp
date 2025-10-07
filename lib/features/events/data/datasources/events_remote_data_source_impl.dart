@@ -1,4 +1,5 @@
 import 'package:dio/dio.dart';
+import 'package:flutter/material.dart';
 import 'package:injectable/injectable.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../../../../core/constants/constants.dart';
@@ -32,25 +33,25 @@ class EventsRemoteDataSourceImpl implements EventsRemoteDataSource {
       InterceptorsWrapper(
         onRequest: (options, handler) async {
           final token = _getAuthToken();
-          print(
+          debugPrint(
             '🏆 Interceptor: Token retrieved: ${token != null ? 'Token exists (${token.length} chars)' : 'No token found'}',
           );
           if (token != null) {
             options.headers['Authorization'] = 'Bearer $token';
-            print(
+            debugPrint(
               '🏆 Interceptor: Added Authorization header: Bearer ${token.substring(0, 10)}...',
             );
           } else {
-            print(
+            debugPrint(
               '🏆 Interceptor: No token found, skipping Authorization header',
             );
           }
-          print('🏆 Interceptor: Final headers: ${options.headers}');
+          debugPrint('🏆 Interceptor: Final headers: ${options.headers}');
           handler.next(options);
         },
         onError: (error, handler) {
-          print('🏆 Events API Error: ${error.message}');
-          print('🏆 Events API Error Response: ${error.response?.data}');
+          debugPrint('🏆 Events API Error: ${error.message}');
+          debugPrint('🏆 Events API Error Response: ${error.response?.data}');
           handler.next(error);
         },
       ),
@@ -61,14 +62,14 @@ class EventsRemoteDataSourceImpl implements EventsRemoteDataSource {
       LogInterceptor(
         requestBody: true,
         responseBody: true,
-        logPrint: (object) => print('[Events API] $object'),
+        logPrint: (object) => debugPrint('[Events API] $object'),
       ),
     );
   }
 
   String? _getAuthToken() {
     final token = _prefs.getString(AppConstants.tokenKey);
-    print(
+    debugPrint(
       '🏆 Auth token retrieved: ${token != null ? 'Token exists (${token.length} chars)' : 'No token found'}',
     );
     return token;
@@ -77,12 +78,16 @@ class EventsRemoteDataSourceImpl implements EventsRemoteDataSource {
   @override
   Future<List<TournamentModel>> getTournaments() async {
     try {
-      print('🏆 EventsDataSource: Fetching tournaments from /api/tournaments');
+      debugPrint(
+        '🏆 EventsDataSource: Fetching tournaments from /api/tournaments',
+      );
 
       final response = await _dio.get('/api/tournaments');
 
-      print('🏆 EventsDataSource: Response status: ${response.statusCode}');
-      print('🏆 EventsDataSource: Response data: ${response.data}');
+      debugPrint(
+        '🏆 EventsDataSource: Response status: ${response.statusCode}',
+      );
+      debugPrint('🏆 EventsDataSource: Response data: ${response.data}');
 
       if (response.statusCode == 200) {
         final List<dynamic> data = response.data as List<dynamic>;
@@ -95,16 +100,16 @@ class EventsRemoteDataSourceImpl implements EventsRemoteDataSource {
         throw Exception('Failed to load tournaments: ${response.statusCode}');
       }
     } on DioException catch (e) {
-      print('🏆 EventsDataSource: Dio error: ${e.message}');
+      debugPrint('🏆 EventsDataSource: Dio error: ${e.message}');
       if (e.response != null) {
-        print('🏆 EventsDataSource: Error response: ${e.response?.data}');
+        debugPrint('🏆 EventsDataSource: Error response: ${e.response?.data}');
         throw Exception(
           'Failed to load tournaments: ${e.response?.statusCode} - ${e.response?.data}',
         );
       }
       throw Exception('Network error: ${e.message}');
     } catch (e) {
-      print('🏆 EventsDataSource: Unexpected error: $e');
+      debugPrint('🏆 EventsDataSource: Unexpected error: $e');
       throw Exception('Failed to load tournaments: $e');
     }
   }
@@ -112,13 +117,15 @@ class EventsRemoteDataSourceImpl implements EventsRemoteDataSource {
   @override
   Future<void> registerForTournament(int tournamentId) async {
     try {
-      print('🏆 EventsDataSource: Registering for tournament $tournamentId');
+      debugPrint(
+        '🏆 EventsDataSource: Registering for tournament $tournamentId',
+      );
 
       final response = await _dio.post(
         '/api/tournaments/$tournamentId/register',
       );
 
-      print(
+      debugPrint(
         '🏆 EventsDataSource: Registration response: ${response.statusCode}',
       );
 
@@ -126,7 +133,7 @@ class EventsRemoteDataSourceImpl implements EventsRemoteDataSource {
         throw Exception('Failed to register: ${response.statusCode}');
       }
     } on DioException catch (e) {
-      print('🏆 EventsDataSource: Registration error: ${e.message}');
+      debugPrint('🏆 EventsDataSource: Registration error: ${e.message}');
       if (e.response != null) {
         throw Exception(
           'Registration failed: ${e.response?.statusCode} - ${e.response?.data}',
@@ -139,13 +146,15 @@ class EventsRemoteDataSourceImpl implements EventsRemoteDataSource {
   @override
   Future<void> unregisterFromTournament(int tournamentId) async {
     try {
-      print('🏆 EventsDataSource: Unregistering from tournament $tournamentId');
+      debugPrint(
+        '🏆 EventsDataSource: Unregistering from tournament $tournamentId',
+      );
 
       final response = await _dio.delete(
         '/api/tournaments/$tournamentId/register',
       );
 
-      print(
+      debugPrint(
         '🏆 EventsDataSource: Unregistration response: ${response.statusCode}',
       );
 
@@ -153,7 +162,7 @@ class EventsRemoteDataSourceImpl implements EventsRemoteDataSource {
         throw Exception('Failed to unregister: ${response.statusCode}');
       }
     } on DioException catch (e) {
-      print('🏆 EventsDataSource: Unregistration error: ${e.message}');
+      debugPrint('🏆 EventsDataSource: Unregistration error: ${e.message}');
       if (e.response != null) {
         throw Exception(
           'Unregistration failed: ${e.response?.statusCode} - ${e.response?.data}',

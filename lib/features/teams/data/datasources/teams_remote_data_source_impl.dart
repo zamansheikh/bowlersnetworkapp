@@ -1,4 +1,5 @@
 import 'package:dio/dio.dart';
+import 'package:flutter/material.dart';
 import 'package:injectable/injectable.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../../../../core/constants/constants.dart';
@@ -20,15 +21,17 @@ class TeamsRemoteDataSourceImpl implements TeamsRemoteDataSource {
   @override
   Future<List<Team>> getUserTeams() async {
     try {
-      print('🏆 TeamsDataSource: Fetching user teams from /api/user/teams');
+      debugPrint(
+        '🏆 TeamsDataSource: Fetching user teams from /api/user/teams',
+      );
 
       final response = await _dio.get(
         '/api/user/teams',
         options: _getOptionsWithAuth(),
       );
 
-      print('🏆 TeamsDataSource: Response status: ${response.statusCode}');
-      print('🏆 TeamsDataSource: Response data: ${response.data}');
+      debugPrint('🏆 TeamsDataSource: Response status: ${response.statusCode}');
+      debugPrint('🏆 TeamsDataSource: Response data: ${response.data}');
 
       if (response.statusCode == 200) {
         final data = response.data as Map<String, dynamic>;
@@ -57,7 +60,7 @@ class TeamsRemoteDataSourceImpl implements TeamsRemoteDataSource {
               teamsWithMembers.add(team);
             }
           } catch (e) {
-            print('🏆 TeamsDataSource: Error processing team: $e');
+            debugPrint('🏆 TeamsDataSource: Error processing team: $e');
             continue;
           }
         }
@@ -67,16 +70,16 @@ class TeamsRemoteDataSourceImpl implements TeamsRemoteDataSource {
         throw Exception('Failed to load teams: ${response.statusCode}');
       }
     } on DioException catch (e) {
-      print('🏆 TeamsDataSource: Dio error: ${e.message}');
+      debugPrint('🏆 TeamsDataSource: Dio error: ${e.message}');
       if (e.response != null) {
-        print('🏆 TeamsDataSource: Error response: ${e.response?.data}');
+        debugPrint('🏆 TeamsDataSource: Error response: ${e.response?.data}');
         throw Exception(
           'Failed to load teams: ${e.response?.statusCode} - ${e.response?.data}',
         );
       }
       throw Exception('Network error: ${e.message}');
     } catch (e) {
-      print('🏆 TeamsDataSource: Unexpected error: $e');
+      debugPrint('🏆 TeamsDataSource: Unexpected error: $e');
       throw Exception('Failed to load teams: $e');
     }
   }
@@ -84,7 +87,7 @@ class TeamsRemoteDataSourceImpl implements TeamsRemoteDataSource {
   @override
   Future<Team> createTeam({required String name}) async {
     try {
-      print('🏆 TeamsDataSource: Creating team: $name');
+      debugPrint('🏆 TeamsDataSource: Creating team: $name');
 
       final data = {'name': name};
 
@@ -94,7 +97,7 @@ class TeamsRemoteDataSourceImpl implements TeamsRemoteDataSource {
         options: _getOptionsWithAuth(),
       );
 
-      print('🏆 TeamsDataSource: Create response: ${response.statusCode}');
+      debugPrint('🏆 TeamsDataSource: Create response: ${response.statusCode}');
 
       if (response.statusCode == 200 || response.statusCode == 201) {
         final teamModel = TeamModel.fromJson(
@@ -105,7 +108,7 @@ class TeamsRemoteDataSourceImpl implements TeamsRemoteDataSource {
         throw Exception('Failed to create team: ${response.statusCode}');
       }
     } on DioException catch (e) {
-      print('🏆 TeamsDataSource: Create error: ${e.message}');
+      debugPrint('🏆 TeamsDataSource: Create error: ${e.message}');
       if (e.response != null) {
         throw Exception(
           'Failed to create team: ${e.response?.statusCode} - ${e.response?.data}',
@@ -118,20 +121,20 @@ class TeamsRemoteDataSourceImpl implements TeamsRemoteDataSource {
   @override
   Future<void> deleteTeam(int teamId) async {
     try {
-      print('🏆 TeamsDataSource: Deleting team $teamId');
+      debugPrint('🏆 TeamsDataSource: Deleting team $teamId');
 
       final response = await _dio.delete(
         '/api/user/teams/$teamId/delete',
         options: _getOptionsWithAuth(),
       );
 
-      print('🏆 TeamsDataSource: Delete response: ${response.statusCode}');
+      debugPrint('🏆 TeamsDataSource: Delete response: ${response.statusCode}');
 
       if (response.statusCode != 200 && response.statusCode != 204) {
         throw Exception('Failed to delete team: ${response.statusCode}');
       }
     } on DioException catch (e) {
-      print('🏆 TeamsDataSource: Delete error: ${e.message}');
+      debugPrint('🏆 TeamsDataSource: Delete error: ${e.message}');
       if (e.response != null) {
         throw Exception(
           'Failed to delete team: ${e.response?.statusCode} - ${e.response?.data}',
@@ -144,14 +147,14 @@ class TeamsRemoteDataSourceImpl implements TeamsRemoteDataSource {
   @override
   Future<TeamDetails> getTeamDetails(int teamId) async {
     try {
-      print('🏆 TeamsDataSource: Fetching team details $teamId');
+      debugPrint('🏆 TeamsDataSource: Fetching team details $teamId');
 
       final response = await _dio.get(
         '/api/user/teams/$teamId/members',
         options: _getOptionsWithAuth(),
       );
 
-      print(
+      debugPrint(
         '🏆 TeamsDataSource: Team details response: ${response.statusCode}',
       );
 
@@ -164,7 +167,7 @@ class TeamsRemoteDataSourceImpl implements TeamsRemoteDataSource {
         throw Exception('Failed to get team details: ${response.statusCode}');
       }
     } on DioException catch (e) {
-      print('🏆 TeamsDataSource: Team details error: ${e.message}');
+      debugPrint('🏆 TeamsDataSource: Team details error: ${e.message}');
       if (e.response != null) {
         throw Exception(
           'Failed to get team details: ${e.response?.statusCode} - ${e.response?.data}',
@@ -177,14 +180,14 @@ class TeamsRemoteDataSourceImpl implements TeamsRemoteDataSource {
   @override
   Future<List<AvailableMember>> getAvailableMembers() async {
     try {
-      print('🏆 TeamsDataSource: Fetching available members');
+      debugPrint('🏆 TeamsDataSource: Fetching available members');
 
       final response = await _dio.get(
         '/api/user-data',
         options: _getOptionsWithAuth(),
       );
 
-      print(
+      debugPrint(
         '🏆 TeamsDataSource: Available members response: ${response.statusCode}',
       );
 
@@ -204,7 +207,7 @@ class TeamsRemoteDataSourceImpl implements TeamsRemoteDataSource {
         );
       }
     } on DioException catch (e) {
-      print('🏆 TeamsDataSource: Available members error: ${e.message}');
+      debugPrint('🏆 TeamsDataSource: Available members error: ${e.message}');
       if (e.response != null) {
         throw Exception(
           'Failed to load available members: ${e.response?.statusCode} - ${e.response?.data}',
@@ -220,7 +223,9 @@ class TeamsRemoteDataSourceImpl implements TeamsRemoteDataSource {
     required int invitedUserId,
   }) async {
     try {
-      print('🏆 TeamsDataSource: Inviting user $invitedUserId to team $teamId');
+      debugPrint(
+        '🏆 TeamsDataSource: Inviting user $invitedUserId to team $teamId',
+      );
 
       final data = {'team_id': teamId, 'invited_user_id': invitedUserId};
 
@@ -230,13 +235,13 @@ class TeamsRemoteDataSourceImpl implements TeamsRemoteDataSource {
         options: _getOptionsWithAuth(),
       );
 
-      print('🏆 TeamsDataSource: Invite response: ${response.statusCode}');
+      debugPrint('🏆 TeamsDataSource: Invite response: ${response.statusCode}');
 
       if (response.statusCode != 200 && response.statusCode != 201) {
         throw Exception('Failed to invite user: ${response.statusCode}');
       }
     } on DioException catch (e) {
-      print('🏆 TeamsDataSource: Invite error: ${e.message}');
+      debugPrint('🏆 TeamsDataSource: Invite error: ${e.message}');
       if (e.response != null) {
         throw Exception(
           'Failed to invite user: ${e.response?.statusCode} - ${e.response?.data}',
@@ -249,14 +254,16 @@ class TeamsRemoteDataSourceImpl implements TeamsRemoteDataSource {
   @override
   Future<TeamInvitations> getTeamInvitations() async {
     try {
-      print('🏆 TeamsDataSource: Fetching team invitations');
+      debugPrint('🏆 TeamsDataSource: Fetching team invitations');
 
       final response = await _dio.get(
         '/api/user/teams/invitations',
         options: _getOptionsWithAuth(),
       );
 
-      print('🏆 TeamsDataSource: Invitations response: ${response.statusCode}');
+      debugPrint(
+        '🏆 TeamsDataSource: Invitations response: ${response.statusCode}',
+      );
 
       if (response.statusCode == 200) {
         final teamInvitationsModel = TeamInvitationsModel.fromJson(
@@ -267,7 +274,7 @@ class TeamsRemoteDataSourceImpl implements TeamsRemoteDataSource {
         throw Exception('Failed to load invitations: ${response.statusCode}');
       }
     } on DioException catch (e) {
-      print('🏆 TeamsDataSource: Invitations error: ${e.message}');
+      debugPrint('🏆 TeamsDataSource: Invitations error: ${e.message}');
       if (e.response != null) {
         throw Exception(
           'Failed to load invitations: ${e.response?.statusCode} - ${e.response?.data}',
@@ -283,7 +290,7 @@ class TeamsRemoteDataSourceImpl implements TeamsRemoteDataSource {
     required bool isAccepted,
   }) async {
     try {
-      print(
+      debugPrint(
         '🏆 TeamsDataSource: Responding to invitation $invitationId: $isAccepted',
       );
 
@@ -295,7 +302,9 @@ class TeamsRemoteDataSourceImpl implements TeamsRemoteDataSource {
         options: _getOptionsWithAuth(),
       );
 
-      print('🏆 TeamsDataSource: Respond response: ${response.statusCode}');
+      debugPrint(
+        '🏆 TeamsDataSource: Respond response: ${response.statusCode}',
+      );
 
       if (response.statusCode != 200 && response.statusCode != 201) {
         throw Exception(
@@ -303,7 +312,7 @@ class TeamsRemoteDataSourceImpl implements TeamsRemoteDataSource {
         );
       }
     } on DioException catch (e) {
-      print('🏆 TeamsDataSource: Respond error: ${e.message}');
+      debugPrint('🏆 TeamsDataSource: Respond error: ${e.message}');
       if (e.response != null) {
         throw Exception(
           'Failed to respond to invitation: ${e.response?.statusCode} - ${e.response?.data}',
@@ -316,7 +325,7 @@ class TeamsRemoteDataSourceImpl implements TeamsRemoteDataSource {
   @override
   Future<void> withdrawInvitation(int invitationId) async {
     try {
-      print('🏆 TeamsDataSource: Withdrawing invitation $invitationId');
+      debugPrint('🏆 TeamsDataSource: Withdrawing invitation $invitationId');
 
       final data = {'invitation_id': invitationId};
 
@@ -326,7 +335,9 @@ class TeamsRemoteDataSourceImpl implements TeamsRemoteDataSource {
         options: _getOptionsWithAuth(),
       );
 
-      print('🏆 TeamsDataSource: Withdraw response: ${response.statusCode}');
+      debugPrint(
+        '🏆 TeamsDataSource: Withdraw response: ${response.statusCode}',
+      );
 
       if (response.statusCode != 200 && response.statusCode != 204) {
         throw Exception(
@@ -334,7 +345,7 @@ class TeamsRemoteDataSourceImpl implements TeamsRemoteDataSource {
         );
       }
     } on DioException catch (e) {
-      print('🏆 TeamsDataSource: Withdraw error: ${e.message}');
+      debugPrint('🏆 TeamsDataSource: Withdraw error: ${e.message}');
       if (e.response != null) {
         throw Exception(
           'Failed to withdraw invitation: ${e.response?.statusCode} - ${e.response?.data}',
@@ -350,14 +361,16 @@ class TeamsRemoteDataSourceImpl implements TeamsRemoteDataSource {
     required int memberId,
   }) async {
     try {
-      print('🏆 TeamsDataSource: Removing member $memberId from team $teamId');
+      debugPrint(
+        '🏆 TeamsDataSource: Removing member $memberId from team $teamId',
+      );
 
       final response = await _dio.delete(
         '/api/user/teams/$teamId/members/$memberId',
         options: _getOptionsWithAuth(),
       );
 
-      print(
+      debugPrint(
         '🏆 TeamsDataSource: Remove member response: ${response.statusCode}',
       );
 
@@ -365,7 +378,7 @@ class TeamsRemoteDataSourceImpl implements TeamsRemoteDataSource {
         throw Exception('Failed to remove member: ${response.statusCode}');
       }
     } on DioException catch (e) {
-      print('🏆 TeamsDataSource: Remove member error: ${e.message}');
+      debugPrint('🏆 TeamsDataSource: Remove member error: ${e.message}');
       if (e.response != null) {
         throw Exception(
           'Failed to remove member: ${e.response?.statusCode} - ${e.response?.data}',
@@ -384,13 +397,13 @@ class TeamsRemoteDataSourceImpl implements TeamsRemoteDataSource {
     final options = Options();
     final token = _getAuthToken();
 
-    print(
+    debugPrint(
       '🏆 TeamsDataSource: Token retrieved: ${token != null ? 'Token exists (${token.length} chars)' : 'No token found'}',
     );
 
     if (token != null) {
       options.headers = {'Authorization': 'Bearer $token'};
-      print('🏆 TeamsDataSource: Added Authorization header');
+      debugPrint('🏆 TeamsDataSource: Added Authorization header');
     }
 
     return options;

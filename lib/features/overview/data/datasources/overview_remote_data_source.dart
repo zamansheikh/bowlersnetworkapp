@@ -1,4 +1,5 @@
 import 'package:dio/dio.dart';
+import 'package:flutter/material.dart';
 import 'package:injectable/injectable.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../../../../core/constants/constants.dart';
@@ -87,7 +88,7 @@ class OverviewRemoteDataSourceImpl implements OverviewRemoteDataSource {
       }
     } catch (e) {
       // Return mock data if API doesn't exist or fails
-      print('Dashboard API failed, using mock data: $e');
+      debugPrint('Dashboard API failed, using mock data: $e');
       return DashboardDataModel(
         userId: 1,
         likes: 128,
@@ -117,7 +118,7 @@ class OverviewRemoteDataSourceImpl implements OverviewRemoteDataSource {
       }
     } catch (e) {
       // Return mock data if API doesn't exist or fails
-      print('Favorite brands API failed, using mock data: $e');
+      debugPrint('Favorite brands API failed, using mock data: $e');
       return [
         FavoriteBrandModel(
           brandId: 1,

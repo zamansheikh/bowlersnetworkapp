@@ -1,4 +1,5 @@
 import 'package:dio/dio.dart';
+import 'package:flutter/material.dart';
 import 'package:injectable/injectable.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../../../../core/constants/constants.dart';
@@ -38,8 +39,8 @@ class BrandsRemoteDataSourceImpl implements BrandsRemoteDataSource {
           handler.next(options);
         },
         onError: (error, handler) {
-          print('🏷️ Brands API Error: ${error.message}');
-          print('🏷️ Brands API Error Response: ${error.response?.data}');
+          debugPrint('🏷️ Brands API Error: ${error.message}');
+          debugPrint('🏷️ Brands API Error Response: ${error.response?.data}');
           handler.next(error);
         },
       ),
@@ -50,14 +51,14 @@ class BrandsRemoteDataSourceImpl implements BrandsRemoteDataSource {
       LogInterceptor(
         requestBody: true,
         responseBody: true,
-        logPrint: (object) => print('[Brands API] $object'),
+        logPrint: (object) => debugPrint('[Brands API] $object'),
       ),
     );
   }
 
   String? _getAuthToken() {
     final token = _prefs.getString(AppConstants.tokenKey);
-    print(
+    debugPrint(
       '🏷️ Auth token retrieved: ${token != null ? 'Token exists (${token.length} chars)' : 'No token found'}',
     );
     return token;
@@ -66,27 +67,33 @@ class BrandsRemoteDataSourceImpl implements BrandsRemoteDataSource {
   @override
   Future<BrandResponseModel> getBrands() async {
     try {
-      print('🏷️ BrandsDataSource: Fetching brands from /api/brands');
-      
+      debugPrint('🏷️ BrandsDataSource: Fetching brands from /api/brands');
+
       final response = await _dio.get('/api/brands');
-      
-      print('🏷️ BrandsDataSource: Response status: ${response.statusCode}');
-      print('🏷️ BrandsDataSource: Response data: ${response.data}');
+
+      debugPrint(
+        '🏷️ BrandsDataSource: Response status: ${response.statusCode}',
+      );
+      debugPrint('🏷️ BrandsDataSource: Response data: ${response.data}');
 
       if (response.statusCode == 200) {
-        return BrandResponseModel.fromJson(response.data as Map<String, dynamic>);
+        return BrandResponseModel.fromJson(
+          response.data as Map<String, dynamic>,
+        );
       } else {
         throw Exception('Failed to load brands: ${response.statusCode}');
       }
     } on DioException catch (e) {
-      print('🏷️ BrandsDataSource: Dio error: ${e.message}');
+      debugPrint('🏷️ BrandsDataSource: Dio error: ${e.message}');
       if (e.response != null) {
-        print('🏷️ BrandsDataSource: Error response: ${e.response?.data}');
-        throw Exception('Failed to load brands: ${e.response?.statusCode} - ${e.response?.data}');
+        debugPrint('🏷️ BrandsDataSource: Error response: ${e.response?.data}');
+        throw Exception(
+          'Failed to load brands: ${e.response?.statusCode} - ${e.response?.data}',
+        );
       }
       throw Exception('Network error: ${e.message}');
     } catch (e) {
-      print('🏷️ BrandsDataSource: Unexpected error: $e');
+      debugPrint('🏷️ BrandsDataSource: Unexpected error: $e');
       throw Exception('Failed to load brands: $e');
     }
   }
@@ -94,24 +101,28 @@ class BrandsRemoteDataSourceImpl implements BrandsRemoteDataSource {
   @override
   Future<void> updateFavoriteBrands(List<int> brandIds) async {
     try {
-      print('🏷️ BrandsDataSource: Updating favorite brands: $brandIds');
-      
+      debugPrint('🏷️ BrandsDataSource: Updating favorite brands: $brandIds');
+
       final response = await _dio.patch(
         '/api/user/brands/favorites',
-        data: {
-          'brandIDs': brandIds,
-        },
+        data: {'brandIDs': brandIds},
       );
-      
-      print('🏷️ BrandsDataSource: Update response: ${response.statusCode}');
+
+      debugPrint(
+        '🏷️ BrandsDataSource: Update response: ${response.statusCode}',
+      );
 
       if (response.statusCode != 200 && response.statusCode != 201) {
-        throw Exception('Failed to update favorite brands: ${response.statusCode}');
+        throw Exception(
+          'Failed to update favorite brands: ${response.statusCode}',
+        );
       }
     } on DioException catch (e) {
-      print('🏷️ BrandsDataSource: Update error: ${e.message}');
+      debugPrint('🏷️ BrandsDataSource: Update error: ${e.message}');
       if (e.response != null) {
-        throw Exception('Update failed: ${e.response?.statusCode} - ${e.response?.data}');
+        throw Exception(
+          'Update failed: ${e.response?.statusCode} - ${e.response?.data}',
+        );
       }
       throw Exception('Network error: ${e.message}');
     }

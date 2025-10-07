@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'package:dio/dio.dart';
+import 'package:flutter/material.dart';
 import 'package:injectable/injectable.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../../../../core/constants/constants.dart';
@@ -56,8 +57,8 @@ class MessagesRemoteDataSourceImpl implements MessagesRemoteDataSource {
           handler.next(options);
         },
         onError: (error, handler) {
-          print('Message API Error: ${error.message}');
-          print('Message API Error Response: ${error.response?.data}');
+          debugPrint('Message API Error: ${error.message}');
+          debugPrint('Message API Error Response: ${error.response?.data}');
           handler.next(error);
         },
       ),
@@ -68,14 +69,14 @@ class MessagesRemoteDataSourceImpl implements MessagesRemoteDataSource {
       LogInterceptor(
         requestBody: true,
         responseBody: true,
-        logPrint: (object) => print('[Messages API] $object'),
+        logPrint: (object) => debugPrint('[Messages API] $object'),
       ),
     );
   }
 
   String? _getAuthToken() {
     final token = _prefs.getString(AppConstants.tokenKey);
-    print(
+    debugPrint(
       'Auth token retrieved: ${token != null ? 'Token exists (${token.length} chars)' : 'No token found'}',
     );
     return token;
@@ -87,7 +88,7 @@ class MessagesRemoteDataSourceImpl implements MessagesRemoteDataSource {
       final response = await _dio.get('/api/chat/rooms');
       return ChatRoomsResponseModel.fromJson(response.data);
     } catch (e) {
-      print('Error fetching chat rooms: $e');
+      debugPrint('Error fetching chat rooms: $e');
       // Return mock data for development
       return _getMockChatRooms();
     }
@@ -100,7 +101,7 @@ class MessagesRemoteDataSourceImpl implements MessagesRemoteDataSource {
       final List<dynamic> messagesJson = response.data;
       return messagesJson.map((json) => MessageModel.fromJson(json)).toList();
     } catch (e) {
-      print('Error fetching messages for room $roomId: $e');
+      debugPrint('Error fetching messages for room $roomId: $e');
       // Return mock messages for development
       return _getMockMessages(roomId);
     }
@@ -131,7 +132,7 @@ class MessagesRemoteDataSourceImpl implements MessagesRemoteDataSource {
         }
       }
 
-      print(
+      debugPrint(
         'Sending message to room $roomId with text: "$text" and ${mediaFiles?.length ?? 0} media files',
       );
 
@@ -147,12 +148,12 @@ class MessagesRemoteDataSourceImpl implements MessagesRemoteDataSource {
         ),
         onSendProgress: (count, total) {
           final progress = (count / total * 100).toStringAsFixed(1);
-          print('Upload progress: $progress%');
+          debugPrint('Upload progress: $progress%');
         },
       );
 
       if (response.statusCode == 200 || response.statusCode == 201) {
-        print('Message sent successfully: ${response.data}');
+        debugPrint('Message sent successfully: ${response.data}');
         return MessageModel.fromJson(response.data);
       } else {
         throw Exception(
@@ -160,7 +161,7 @@ class MessagesRemoteDataSourceImpl implements MessagesRemoteDataSource {
         );
       }
     } catch (e) {
-      print('Error sending message: $e');
+      debugPrint('Error sending message: $e');
 
       // Return mock sent message for development
       return _getMockSentMessage(roomId, text, mediaFiles);
@@ -176,7 +177,7 @@ class MessagesRemoteDataSourceImpl implements MessagesRemoteDataSource {
       );
       return ConversationModel.fromJson(response.data);
     } catch (e) {
-      print('Error creating conversation: $e');
+      debugPrint('Error creating conversation: $e');
       // Return mock conversation for development
       return _getMockNewConversation(otherUsername);
     }
@@ -191,7 +192,7 @@ class MessagesRemoteDataSourceImpl implements MessagesRemoteDataSource {
           .map((json) => AvailableMemberModel.fromJson(json))
           .toList();
     } catch (e) {
-      print('Error fetching available members: $e');
+      debugPrint('Error fetching available members: $e');
       // Return mock members for development
       return _getMockAvailableMembers();
     }

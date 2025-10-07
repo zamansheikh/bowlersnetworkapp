@@ -687,7 +687,7 @@ class _CreateTournamentBottomSheetState
 
   Future<void> _createTournament() async {
     if (!_formKey.currentState!.validate()) {
-      print('Form is not valid');
+      debugPrint('Form is not valid');
       return;
     }
 
@@ -699,7 +699,7 @@ class _CreateTournamentBottomSheetState
       return;
     }
 
-    print('Creating tournament...');
+    debugPrint('Creating tournament...');
     if (_regDeadline!.isAfter(_startDate!)) {
       _showSnackBar(
         'Registration deadline must be before start date',

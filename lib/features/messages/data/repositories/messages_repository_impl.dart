@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'package:flutter/material.dart';
 import 'package:injectable/injectable.dart';
 import '../../domain/repositories/messages_repository.dart';
 import '../datasources/messages_remote_data_source.dart';
@@ -18,7 +19,7 @@ class MessagesRepositoryImpl implements MessagesRepository {
     try {
       return await _remoteDataSource.getChatRooms();
     } catch (e) {
-      print('Repository Error fetching chat rooms: $e');
+      debugPrint('Repository Error fetching chat rooms: $e');
       rethrow;
     }
   }
@@ -28,7 +29,7 @@ class MessagesRepositoryImpl implements MessagesRepository {
     try {
       return await _remoteDataSource.getMessages(roomId);
     } catch (e) {
-      print('Repository Error fetching messages for room $roomId: $e');
+      debugPrint('Repository Error fetching messages for room $roomId: $e');
       rethrow;
     }
   }
@@ -46,7 +47,7 @@ class MessagesRepositoryImpl implements MessagesRepository {
         mediaFiles: mediaFiles,
       );
     } catch (e) {
-      print('Repository Error sending message: $e');
+      debugPrint('Repository Error sending message: $e');
       rethrow;
     }
   }
@@ -56,7 +57,7 @@ class MessagesRepositoryImpl implements MessagesRepository {
     try {
       return await _remoteDataSource.createConversation(otherUsername);
     } catch (e) {
-      print('Repository Error creating conversation: $e');
+      debugPrint('Repository Error creating conversation: $e');
       rethrow;
     }
   }
@@ -66,7 +67,7 @@ class MessagesRepositoryImpl implements MessagesRepository {
     try {
       return await _remoteDataSource.getAvailableMembers();
     } catch (e) {
-      print('Repository Error fetching available members: $e');
+      debugPrint('Repository Error fetching available members: $e');
       rethrow;
     }
   }

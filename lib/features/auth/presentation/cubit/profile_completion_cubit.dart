@@ -1,3 +1,4 @@
+import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:injectable/injectable.dart';
 import '../../data/datasources/brands_remote_data_source.dart';
@@ -71,7 +72,7 @@ class ProfileCompletionCubit extends Cubit<ProfileCompletionState> {
       _brands = await _brandsDataSource.getBrands();
       emit(BrandsLoaded(_brands!));
     } catch (e) {
-      print('❌ Error loading brands: $e');
+      debugPrint('❌ Error loading brands: $e');
       emit(BrandsError('Failed to load brands: ${e.toString()}'));
     }
   }
@@ -97,7 +98,7 @@ class ProfileCompletionCubit extends Cubit<ProfileCompletionState> {
 
       emit(ProfileCompletionSuccess());
     } catch (e) {
-      print('❌ Error completing profile: $e');
+      debugPrint('❌ Error completing profile: $e');
       emit(
         ProfileCompletionError('Failed to complete profile: ${e.toString()}'),
       );

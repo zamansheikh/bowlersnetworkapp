@@ -1,3 +1,4 @@
+import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:injectable/injectable.dart';
 import '../../data/repositories/overview_repository_impl.dart';
@@ -22,7 +23,7 @@ class OverviewCubit extends Cubit<OverviewState> {
       try {
         dashboardData = await _repository.getDashboardData();
       } catch (e) {
-        print('Dashboard API failed, will use mock data: $e');
+        debugPrint('Dashboard API failed, will use mock data: $e');
         dashboardData = null;
       }
 

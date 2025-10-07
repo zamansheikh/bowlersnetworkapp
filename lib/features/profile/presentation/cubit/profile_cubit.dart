@@ -1,3 +1,4 @@
+import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:injectable/injectable.dart';
 import 'package:dio/dio.dart';
@@ -29,25 +30,27 @@ class ProfileCubit extends Cubit<ProfileState> {
       InterceptorsWrapper(
         onRequest: (options, handler) {
           final token = _prefs.getString(AppConstants.tokenKey);
-          print(
+          debugPrint(
             '👤 Profile Interceptor: Token retrieved: ${token != null ? 'Token exists (${token.length} chars)' : 'No token found'}',
           );
           if (token != null) {
             options.headers['Authorization'] = 'Bearer $token';
-            print(
+            debugPrint(
               '👤 Profile Interceptor: Added Authorization header: Bearer ${token.substring(0, 10)}...',
             );
           } else {
-            print(
+            debugPrint(
               '👤 Profile Interceptor: No token found, skipping Authorization header',
             );
           }
-          print('👤 Profile Interceptor: Final headers: ${options.headers}');
+          debugPrint(
+            '👤 Profile Interceptor: Final headers: ${options.headers}',
+          );
           handler.next(options);
         },
         onError: (error, handler) {
-          print('👤 Profile API Error: ${error.message}');
-          print('👤 Profile API Error Response: ${error.response?.data}');
+          debugPrint('👤 Profile API Error: ${error.message}');
+          debugPrint('👤 Profile API Error Response: ${error.response?.data}');
           handler.next(error);
         },
       ),
@@ -58,19 +61,19 @@ class ProfileCubit extends Cubit<ProfileState> {
       LogInterceptor(
         requestBody: true,
         responseBody: true,
-        logPrint: (object) => print('[Profile API] $object'),
+        logPrint: (object) => debugPrint('[Profile API] $object'),
       ),
     );
   }
 
   Future<void> loadUserPosts() async {
-    print('👤 ProfileCubit: Starting to load user posts');
+    debugPrint('👤 ProfileCubit: Starting to load user posts');
     emit(ProfileLoaded(isLoadingPosts: true));
 
     try {
-      print('👤 ProfileCubit: Making request to /api/user/posts');
+      debugPrint('👤 ProfileCubit: Making request to /api/user/posts');
       final response = await _dio.get('/api/user/posts');
-      print(
+      debugPrint(
         '👤 ProfileCubit: Response received - Status: ${response.statusCode}',
       );
 
@@ -80,7 +83,9 @@ class ProfileCubit extends Cubit<ProfileState> {
             .map((e) => FeedPost.fromJson(e as Map<String, dynamic>))
             .toList();
 
-        print('👤 ProfileCubit: Successfully parsed ${posts.length} posts');
+        debugPrint(
+          '👤 ProfileCubit: Successfully parsed ${posts.length} posts',
+        );
         emit(ProfileLoaded(posts: posts, isLoadingPosts: false));
       } else {
         throw Exception(
@@ -88,7 +93,7 @@ class ProfileCubit extends Cubit<ProfileState> {
         );
       }
     } catch (e) {
-      print('👤 ProfileCubit: Error loading posts: $e');
+      debugPrint('👤 ProfileCubit: Error loading posts: $e');
       emit(
         ProfileLoaded(
           posts: [],

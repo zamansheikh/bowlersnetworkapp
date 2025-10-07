@@ -1,3 +1,4 @@
+import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
 /// Utility class for parsing dates from the API
@@ -41,7 +42,7 @@ class DateUtils {
     }
 
     // If all formats fail, return null
-    print('Warning: Could not parse date string: $dateString');
+    debugPrint('Warning: Could not parse date string: $dateString');
     return null;
   }
 

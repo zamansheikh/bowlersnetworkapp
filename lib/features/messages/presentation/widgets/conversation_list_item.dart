@@ -39,7 +39,7 @@ class ConversationListItem extends StatelessWidget {
                   : null,
               backgroundColor: Colors.grey[300],
               onBackgroundImageError: (_, __) {
-                print(
+                debugPrint(
                   'Failed to load conversation image: ${conversation.displayImageUrl}',
                 );
               },

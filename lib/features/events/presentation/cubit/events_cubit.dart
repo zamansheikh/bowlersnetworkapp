@@ -1,3 +1,4 @@
+import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:injectable/injectable.dart';
 import '../../domain/entities/calendar_event.dart';
@@ -18,13 +19,13 @@ class EventsCubit extends Cubit<EventsState> {
     try {
       emit(EventsLoading());
 
-      print('🏆 EventsCubit: Loading events...');
+      debugPrint('🏆 EventsCubit: Loading events...');
 
       final tournaments = await getTournaments();
       final events = await getCalendarEvents();
 
-      print('🏆 EventsCubit: Loaded ${tournaments.length} tournaments');
-      print('🏆 EventsCubit: Loaded ${events.length} events');
+      debugPrint('🏆 EventsCubit: Loaded ${tournaments.length} tournaments');
+      debugPrint('🏆 EventsCubit: Loaded ${events.length} events');
 
       emit(
         EventsLoaded(
@@ -35,7 +36,7 @@ class EventsCubit extends Cubit<EventsState> {
         ),
       );
     } catch (e) {
-      print('🏆 EventsCubit: Error loading events: $e');
+      debugPrint('🏆 EventsCubit: Error loading events: $e');
       emit(EventsError('Failed to load events: $e'));
     }
   }

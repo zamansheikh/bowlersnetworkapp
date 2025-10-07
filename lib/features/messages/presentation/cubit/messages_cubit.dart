@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:io';
+import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:injectable/injectable.dart';
 import '../../domain/repositories/messages_repository.dart';
@@ -142,7 +143,7 @@ class MessagesCubit extends Cubit<MessagesState> {
     try {
       return await _repository.getAvailableMembers();
     } catch (e) {
-      print('Failed to load available members: $e');
+      debugPrint('Failed to load available members: $e');
       return [];
     }
   }
@@ -192,7 +193,7 @@ class MessagesCubit extends Cubit<MessagesState> {
         }
       } catch (e) {
         // Silent fail for polling errors
-        print('Polling error: $e');
+        debugPrint('Polling error: $e');
       }
     }
   }
