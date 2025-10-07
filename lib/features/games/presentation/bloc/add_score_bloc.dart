@@ -41,17 +41,16 @@ class AddScoreBloc extends Bloc<AddScoreEvent, AddScoreState> {
 
   void _onStartNewGame(StartNewGame event, Emitter<AddScoreState> emit) {
     final frames = List.generate(10, (i) => FrameEntity(number: i + 1));
-    emit(
-      AddScoreState(
-        frames: frames,
-        currentFrame: 1,
-        currentThrow: 1,
-        currentKnockedPins: _fullPinSet(),
-        currentIsFoul: false,
-        cumulativeScores: const <int>[],
-        completionScore: null,
-      ),
+    final newState = AddScoreState(
+      frames: frames,
+      currentFrame: 1,
+      currentThrow: 1,
+      currentKnockedPins: _fullPinSet(),
+      currentIsFoul: false,
+      cumulativeScores: const <int>[],
+      completionScore: null,
     );
+    _emitState(emit, newState);
   }
 
   void _onSelectPin(SelectPin event, Emitter<AddScoreState> emit) {
@@ -72,7 +71,8 @@ class AddScoreBloc extends Bloc<AddScoreEvent, AddScoreState> {
       updated.add(event.pin);
     }
 
-    emit(state.copyWith(currentKnockedPins: updated));
+    final newState = state.copyWith(currentKnockedPins: updated);
+    _emitState(emit, newState);
   }
 
   void _onPressShortcut(PressShortcut event, Emitter<AddScoreState> emit) {
@@ -112,7 +112,8 @@ class AddScoreBloc extends Bloc<AddScoreEvent, AddScoreState> {
     if (currentIndex <= 0) return;
 
     final pointer = timeline[currentIndex - 1];
-    emit(_stateForPointer(state, pointer));
+    final newState = _stateForPointer(state, pointer);
+    _emitState(emit, newState);
   }
 
   void _onNextThrow(NextThrow event, Emitter<AddScoreState> emit) {
@@ -126,7 +127,8 @@ class AddScoreBloc extends Bloc<AddScoreEvent, AddScoreState> {
 
     if (currentIndex < timeline.length - 1) {
       final pointer = timeline[currentIndex + 1];
-      emit(_stateForPointer(state, pointer));
+      final newState = _stateForPointer(state, pointer);
+      _emitState(emit, newState);
       return;
     }
 
@@ -135,7 +137,8 @@ class AddScoreBloc extends Bloc<AddScoreEvent, AddScoreState> {
 
     final pointer = _pointerForPosition(state.frames, nextEntry);
     if (pointer != null) {
-      emit(_stateForPointer(state, pointer));
+      final newState = _stateForPointer(state, pointer);
+      _emitState(emit, newState);
       return;
     }
 
@@ -145,14 +148,13 @@ class AddScoreBloc extends Bloc<AddScoreEvent, AddScoreState> {
       nextEntry.throwNumber - 1,
     );
 
-    emit(
-      state.copyWith(
-        currentFrame: nextEntry.frame,
-        currentThrow: nextEntry.throwNumber,
-        currentKnockedPins: standingBefore,
-        currentIsFoul: false,
-      ),
+    final newState = state.copyWith(
+      currentFrame: nextEntry.frame,
+      currentThrow: nextEntry.throwNumber,
+      currentKnockedPins: standingBefore,
+      currentIsFoul: false,
     );
+    _emitState(emit, newState);
   }
 
   Future<void> _onSaveGame(SaveGame event, Emitter<AddScoreState> emit) async {
@@ -169,7 +171,11 @@ class AddScoreBloc extends Bloc<AddScoreEvent, AddScoreState> {
     Emitter<AddScoreState> emit,
   ) {
     if (state.completionScore == null) return;
-    emit(state.copyWith(completionScore: null, setCompletionScore: true));
+    final newState = state.copyWith(
+      completionScore: null,
+      setCompletionScore: true,
+    );
+    _emitState(emit, newState);
   }
 
   void _commitThrow(
@@ -293,19 +299,69 @@ class AddScoreBloc extends Bloc<AddScoreEvent, AddScoreState> {
     }
 
     final int? completionScore = completed ? cumulatives.lastOrNull ?? 0 : null;
-
-    emit(
-      state.copyWith(
-        frames: updatedFrames,
-        currentFrame: newFrame,
-        currentThrow: newThrow,
-        currentKnockedPins: newKnockedPins,
-        currentIsFoul: newIsFoul,
-        cumulativeScores: cumulatives,
-        completionScore: completionScore,
-        setCompletionScore: true,
-      ),
+    final newState = state.copyWith(
+      frames: updatedFrames,
+      currentFrame: newFrame,
+      currentThrow: newThrow,
+      currentKnockedPins: newKnockedPins,
+      currentIsFoul: newIsFoul,
+      cumulativeScores: cumulatives,
+      completionScore: completionScore,
+      setCompletionScore: true,
     );
+
+    _emitState(emit, newState);
+  }
+
+  void _emitState(Emitter<AddScoreState> emit, AddScoreState newState) {
+    emit(_withDerivedFlags(newState));
+  }
+
+  AddScoreState _withDerivedFlags(AddScoreState base) {
+    final pending = _hasPendingChanges(base);
+    final timeline = _buildTimeline(base.frames);
+    final currentIndex = _currentTimelineIndex(base, timeline);
+    final hasPrevious =
+        timeline.isNotEmpty &&
+        (currentIndex > 0 || currentIndex == timeline.length);
+
+    bool hasNext = pending;
+    if (!hasNext) {
+      if (currentIndex < timeline.length - 1) {
+        hasNext = true;
+      } else {
+        final nextEntry = _nextEntryPosition(base.frames);
+        if (nextEntry != null &&
+            !_isCurrentPositionSameAsNextEntry(base, nextEntry)) {
+          hasNext = true;
+        }
+      }
+    }
+
+    return base.copyWith(
+      hasPendingChanges: pending,
+      canGoPrevious: hasPrevious,
+      canGoNext: hasNext,
+    );
+  }
+
+  bool _isCurrentPositionSameAsNextEntry(
+    AddScoreState state,
+    _Position position,
+  ) {
+    if (state.currentFrame != position.frame ||
+        state.currentThrow != position.throwNumber) {
+      return false;
+    }
+
+    final frameIndex = position.frame - 1;
+    if (frameIndex < 0 || frameIndex >= state.frames.length) {
+      return false;
+    }
+
+    final frame = state.frames[frameIndex];
+    final throwIndex = position.throwNumber - 1;
+    return throwIndex >= frame.throws.length;
   }
 
   bool _hasPendingChanges(AddScoreState state) {

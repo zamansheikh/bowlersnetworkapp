@@ -119,6 +119,8 @@ class _AddScoreView extends StatelessWidget {
                             onPrevious: () => bloc.add(PreviousThrow()),
                             onSave: () => bloc.add(SaveGame()),
                             onNext: () => bloc.add(NextThrow()),
+                            canGoPrevious: state.canGoPrevious,
+                            canGoNext: state.canGoNext,
                           ),
                         ],
                       );
@@ -189,10 +191,18 @@ class _Scoreboard extends StatelessWidget {
                 ? state.cumulativeScores[frame.number - 1]
                 : null;
             final isActive = state.currentFrame == frame.number;
+            final maxIndex = frame.number == 10 ? 2 : 1;
+            final currentIndex = state.currentThrow - 1;
+            final activeThrowIndex = isActive
+                ? (currentIndex < 0
+                      ? 0
+                      : (currentIndex > maxIndex ? maxIndex : currentIndex))
+                : null;
             return _FrameScoreTile(
               frame: frame,
               cumulativeScore: cumulative,
               isActive: isActive,
+              activeThrowIndex: activeThrowIndex,
             );
           }).toList(),
         ),
@@ -206,11 +216,13 @@ class _FrameScoreTile extends StatelessWidget {
     required this.frame,
     required this.cumulativeScore,
     required this.isActive,
+    this.activeThrowIndex,
   });
 
   final FrameEntity frame;
   final int? cumulativeScore;
   final bool isActive;
+  final int? activeThrowIndex;
 
   @override
   Widget build(BuildContext context) {
@@ -241,6 +253,14 @@ class _FrameScoreTile extends StatelessWidget {
           children: [
             Row(
               children: List.generate(slots, (index) {
+                final isActiveThrow =
+                    activeThrowIndex != null && activeThrowIndex == index;
+                final cellColor = isActiveThrow
+                    ? const Color(0xFF35D07F)
+                    : Colors.white;
+                final textColor = isActiveThrow
+                    ? Colors.white
+                    : const Color(0xFF1F2233);
                 return Expanded(
                   child: Container(
                     height: 28,
@@ -251,15 +271,15 @@ class _FrameScoreTile extends StatelessWidget {
                             : const BorderSide(color: Color(0xFFE3E6F3)),
                         bottom: const BorderSide(color: Color(0xFFE3E6F3)),
                       ),
-                      color: Colors.white,
+                      color: cellColor,
                     ),
                     alignment: Alignment.center,
                     child: Text(
                       symbols[index],
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontWeight: FontWeight.w700,
                         fontSize: 15,
-                        color: Color(0xFF1F2233),
+                        color: textColor,
                       ),
                     ),
                   ),
@@ -270,7 +290,7 @@ class _FrameScoreTile extends StatelessWidget {
               height: 28,
               alignment: Alignment.center,
               decoration: BoxDecoration(
-                color: isActive ? const Color(0xFF35D07F) : Colors.white,
+                color: Colors.white,
                 borderRadius: const BorderRadius.vertical(
                   bottom: Radius.circular(8),
                 ),
@@ -280,7 +300,9 @@ class _FrameScoreTile extends StatelessWidget {
                 style: TextStyle(
                   fontWeight: FontWeight.w700,
                   fontSize: 15,
-                  color: isActive ? Colors.white : const Color(0xFF1F2233),
+                  color: isActive
+                      ? const Color(0xFF35D07F)
+                      : const Color(0xFF1F2233),
                 ),
               ),
             ),
@@ -584,17 +606,25 @@ class _BottomControls extends StatelessWidget {
     required this.onPrevious,
     required this.onSave,
     required this.onNext,
+    required this.canGoPrevious,
+    required this.canGoNext,
   });
 
   final VoidCallback onPrevious;
   final VoidCallback onSave;
   final VoidCallback onNext;
+  final bool canGoPrevious;
+  final bool canGoNext;
 
   @override
   Widget build(BuildContext context) {
     return Row(
       children: [
-        _CircularIconButton(icon: Icons.arrow_back, onTap: onPrevious),
+        _CircularIconButton(
+          icon: Icons.arrow_back,
+          onTap: onPrevious,
+          isEnabled: canGoPrevious,
+        ),
         Expanded(
           child: Padding(
             padding: const EdgeInsets.symmetric(horizontal: 12),
@@ -619,7 +649,11 @@ class _BottomControls extends StatelessWidget {
             ),
           ),
         ),
-        _CircularIconButton(icon: Icons.arrow_forward, onTap: onNext),
+        _CircularIconButton(
+          icon: Icons.arrow_forward,
+          onTap: onNext,
+          isEnabled: canGoNext,
+        ),
       ],
     );
   }
@@ -631,33 +665,62 @@ class _CircularIconButton extends StatelessWidget {
     required this.onTap,
     this.backgroundColor = const Color(0xFF161A28),
     this.iconColor = const Color(0xFF35D07F),
+    this.isEnabled = true,
   });
 
   final IconData icon;
   final VoidCallback onTap;
   final Color backgroundColor;
   final Color iconColor;
+  final bool isEnabled;
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        width: 44,
-        height: 44,
-        decoration: BoxDecoration(
-          color: backgroundColor,
-          shape: BoxShape.circle,
-          border: Border.all(color: iconColor, width: 1.5),
-          boxShadow: [
+    final effectiveBackground = isEnabled
+        ? backgroundColor
+        : backgroundColor.withValues(alpha: 0.4);
+    final effectiveBorder = isEnabled
+        ? iconColor
+        : Colors.white.withValues(alpha: 0.18);
+    final effectiveIcon = isEnabled
+        ? iconColor
+        : Colors.white.withValues(alpha: 0.35);
+
+    final shadows = isEnabled
+        ? [
             BoxShadow(
               color: Colors.black.withValues(alpha: 0.25),
               blurRadius: 8,
               offset: const Offset(0, 4),
             ),
-          ],
+          ]
+        : [
+            BoxShadow(
+              color: Colors.black.withValues(alpha: 0.08),
+              blurRadius: 4,
+              offset: const Offset(0, 2),
+            ),
+          ];
+
+    return IgnorePointer(
+      ignoring: !isEnabled,
+      child: AnimatedOpacity(
+        duration: const Duration(milliseconds: 150),
+        opacity: isEnabled ? 1 : 0.45,
+        child: GestureDetector(
+          onTap: onTap,
+          child: Container(
+            width: 44,
+            height: 44,
+            decoration: BoxDecoration(
+              color: effectiveBackground,
+              shape: BoxShape.circle,
+              border: Border.all(color: effectiveBorder, width: 1.5),
+              boxShadow: shadows,
+            ),
+            child: Icon(icon, color: effectiveIcon, size: 20),
+          ),
         ),
-        child: Icon(icon, color: iconColor, size: 20),
       ),
     );
   }

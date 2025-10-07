@@ -13,6 +13,9 @@ class AddScoreState extends Equatable {
   final bool currentIsFoul;
   final List<int> cumulativeScores;
   final int? completionScore;
+  final bool canGoPrevious;
+  final bool canGoNext;
+  final bool hasPendingChanges;
 
   const AddScoreState({
     required this.frames,
@@ -22,6 +25,9 @@ class AddScoreState extends Equatable {
     required this.currentIsFoul,
     required this.cumulativeScores,
     this.completionScore,
+    this.canGoPrevious = false,
+    this.canGoNext = false,
+    this.hasPendingChanges = false,
   });
 
   AddScoreState copyWith({
@@ -33,6 +39,9 @@ class AddScoreState extends Equatable {
     List<int>? cumulativeScores,
     int? completionScore,
     bool setCompletionScore = false,
+    bool? canGoPrevious,
+    bool? canGoNext,
+    bool? hasPendingChanges,
   }) {
     return AddScoreState(
       frames: frames ?? this.frames,
@@ -44,6 +53,9 @@ class AddScoreState extends Equatable {
       completionScore: setCompletionScore
           ? completionScore
           : this.completionScore,
+      canGoPrevious: canGoPrevious ?? this.canGoPrevious,
+      canGoNext: canGoNext ?? this.canGoNext,
+      hasPendingChanges: hasPendingChanges ?? this.hasPendingChanges,
     );
   }
 
@@ -128,5 +140,8 @@ class AddScoreState extends Equatable {
     currentIsFoul,
     cumulativeScores,
     completionScore,
+    canGoPrevious,
+    canGoNext,
+    hasPendingChanges,
   ];
 }
