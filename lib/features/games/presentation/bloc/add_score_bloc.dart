@@ -335,7 +335,7 @@ class AddScoreBloc extends Bloc<AddScoreEvent, AddScoreState> {
       return true;
     }
 
-    return state.currentKnockedPins.isNotEmpty;
+    return !_setEquals(state.currentKnockedPins, standingBefore);
   }
 
   List<_ThrowPointer> _buildTimeline(List<FrameEntity> frames) {
