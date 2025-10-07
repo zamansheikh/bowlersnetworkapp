@@ -40,11 +40,18 @@ class AddScoreState extends Equatable {
   }
 
   Set<int> get remainingPins {
-    if (currentFrame == 10 && currentThrow == 3) {
-      return Set<int>.from(List.generate(10, (i) => i + 1));
+    final allPins = List.generate(10, (i) => i + 1);
+
+    if (frames.isEmpty || currentFrame < 1 || currentFrame > frames.length) {
+      return allPins.toSet();
     }
+
+    if (currentFrame == 10 && currentThrow == 3) {
+      return allPins.toSet();
+    }
+
     final frame = frames[currentFrame - 1];
-    Set<int> standing = Set<int>.from(List.generate(10, (i) => i + 1));
+    final standing = allPins.toSet();
     for (var t in frame.throws) {
       standing.removeAll(t.knockedPins);
     }
@@ -53,11 +60,11 @@ class AddScoreState extends Equatable {
 
   @override
   List<Object> get props => [
-        frames,
-        currentFrame,
-        currentThrow,
-        currentKnockedPins,
-        currentIsFoul,
-        cumulativeScores,
-      ];
+    frames,
+    currentFrame,
+    currentThrow,
+    currentKnockedPins,
+    currentIsFoul,
+    cumulativeScores,
+  ];
 }
