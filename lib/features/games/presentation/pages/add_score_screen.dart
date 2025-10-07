@@ -33,49 +33,100 @@ class _AddScoreView extends StatelessWidget {
       body: SafeArea(
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              _Header(onBackPressed: () => context.pop()),
-              const SizedBox(height: 20),
-              Expanded(
-                child: BlocBuilder<AddScoreBloc, AddScoreState>(
-                  builder: (context, state) {
-                    final bloc = context.read<AddScoreBloc>();
-                    return Column(
-                      crossAxisAlignment: CrossAxisAlignment.stretch,
-                      children: [
-                        _Scoreboard(state: state),
-                        const SizedBox(height: 24),
-                        Expanded(
-                          child: _PinDeck(
+          child: BlocListener<AddScoreBloc, AddScoreState>(
+            listenWhen: (previous, current) =>
+                previous.completionScore != current.completionScore,
+            listener: (context, state) async {
+              final score = state.completionScore;
+              if (score == null) return;
+
+              await showDialog<void>(
+                context: context,
+                barrierDismissible: true,
+                builder: (dialogContext) {
+                  return AlertDialog(
+                    backgroundColor: const Color(0xFF161A28),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(20),
+                    ),
+                    title: const Text(
+                      'Game complete!',
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 20,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                    content: Text(
+                      'Your total score is $score.',
+                      style: const TextStyle(
+                        color: Color(0xFFD9DFF5),
+                        fontSize: 16,
+                      ),
+                    ),
+                    actions: [
+                      TextButton(
+                        onPressed: () => Navigator.of(dialogContext).pop(),
+                        child: const Text(
+                          'Great',
+                          style: TextStyle(
+                            color: Color(0xFF35D07F),
+                            fontWeight: FontWeight.w700,
+                          ),
+                        ),
+                      ),
+                    ],
+                  );
+                },
+              );
+
+              if (!context.mounted) return;
+              context.read<AddScoreBloc>().add(DismissCompletionDialog());
+            },
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                _Header(onBackPressed: () => context.pop()),
+                const SizedBox(height: 20),
+                Expanded(
+                  child: BlocBuilder<AddScoreBloc, AddScoreState>(
+                    builder: (context, state) {
+                      final bloc = context.read<AddScoreBloc>();
+                      return Column(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: [
+                          _Scoreboard(state: state),
+                          const SizedBox(height: 24),
+                          Expanded(
+                            child: _PinDeck(
+                              state: state,
+                              onPinTap: (pin) => bloc.add(SelectPin(pin)),
+                            ),
+                          ),
+                          const SizedBox(height: 24),
+                          _ShortcutRow(
                             state: state,
-                            onPinTap: (pin) => bloc.add(SelectPin(pin)),
+                            onFoul: () =>
+                                bloc.add(PressShortcut(ShortcutType.foul)),
+                            onMiss: () =>
+                                bloc.add(PressShortcut(ShortcutType.miss)),
+                            onStrikeOrSpare: () => bloc.add(
+                              PressShortcut(ShortcutType.strikeOrSpare),
+                            ),
                           ),
-                        ),
-                        const SizedBox(height: 24),
-                        _ShortcutRow(
-                          state: state,
-                          onFoul: () =>
-                              bloc.add(PressShortcut(ShortcutType.foul)),
-                          onMiss: () =>
-                              bloc.add(PressShortcut(ShortcutType.miss)),
-                          onStrikeOrSpare: () => bloc.add(
-                            PressShortcut(ShortcutType.strikeOrSpare),
+                          const SizedBox(height: 18),
+                          _BottomControls(
+                            onPrevious: () => bloc.add(PreviousThrow()),
+                            onSave: () => bloc.add(SaveGame()),
+                            onNext: () => bloc.add(NextThrow()),
                           ),
-                        ),
-                        const SizedBox(height: 18),
-                        _BottomControls(
-                          onPrevious: () => bloc.add(PreviousThrow()),
-                          onSave: () => bloc.add(SaveGame()),
-                          onNext: () => bloc.add(NextThrow()),
-                        ),
-                      ],
-                    );
-                  },
+                        ],
+                      );
+                    },
+                  ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       ),
@@ -279,9 +330,11 @@ class _PinDeck extends StatelessWidget {
             children: positions.entries.map((entry) {
               final pinNumber = entry.key;
               final position = entry.value;
-              final isStanding = state.remainingPins.contains(pinNumber);
-              final isSelected = state.currentKnockedPins.contains(pinNumber);
-              final isDisabled = state.currentIsFoul || !isStanding;
+              final availablePins = state.remainingPins;
+              final isAvailable = availablePins.contains(pinNumber);
+              final isKnocked = state.currentKnockedPins.contains(pinNumber);
+              final isStanding = isAvailable && !isKnocked;
+              final isDisabled = state.currentIsFoul || !isAvailable;
 
               return Positioned(
                 left: position.dx * width - radius,
@@ -290,7 +343,7 @@ class _PinDeck extends StatelessWidget {
                   number: pinNumber,
                   radius: radius,
                   isStanding: isStanding,
-                  isSelected: isSelected,
+                  isKnocked: isKnocked,
                   isDisabled: isDisabled,
                   onTap: () => onPinTap(pinNumber),
                 ),
@@ -308,7 +361,7 @@ class _Pin extends StatelessWidget {
     required this.number,
     required this.radius,
     required this.isStanding,
-    required this.isSelected,
+    required this.isKnocked,
     required this.isDisabled,
     required this.onTap,
   });
@@ -316,7 +369,7 @@ class _Pin extends StatelessWidget {
   final int number;
   final double radius;
   final bool isStanding;
-  final bool isSelected;
+  final bool isKnocked;
   final bool isDisabled;
   final VoidCallback onTap;
 
@@ -324,9 +377,7 @@ class _Pin extends StatelessWidget {
   Widget build(BuildContext context) {
     final size = radius * 2;
 
-    final bool showPinGraphic = !isStanding || isSelected;
-
-    if (!showPinGraphic) {
+    if (!isStanding) {
       return GestureDetector(
         onTap: isDisabled ? null : onTap,
         child: SizedBox(
@@ -336,7 +387,12 @@ class _Pin extends StatelessWidget {
             decoration: BoxDecoration(
               color: const Color(0xFF191D2D),
               shape: BoxShape.circle,
-              border: Border.all(color: Colors.white.withValues(alpha: 0.08)),
+              border: Border.all(
+                color: isKnocked
+                    ? const Color(0xFF35D07F)
+                    : Colors.white.withValues(alpha: 0.08),
+                width: isKnocked ? 2 : 1,
+              ),
               boxShadow: [
                 BoxShadow(
                   color: Colors.black.withValues(alpha: 0.25),
@@ -374,7 +430,7 @@ class _Pin extends StatelessWidget {
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
                 gradient: LinearGradient(
-                  colors: isSelected
+                  colors: isKnocked
                       ? [const Color(0xFFFFFFFF), const Color(0xFFEAFEF3)]
                       : [const Color(0xFFF6F6FB), const Color(0xFFE4E7F6)],
                   begin: Alignment.topCenter,
@@ -406,7 +462,7 @@ class _Pin extends StatelessWidget {
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
                 border: Border.all(
-                  color: isSelected
+                  color: isKnocked
                       ? const Color(0xFF35D07F)
                       : Colors.transparent,
                   width: 2,

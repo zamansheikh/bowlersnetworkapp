@@ -38,3 +38,5 @@ class PreviousThrow extends AddScoreEvent {}
 class NextThrow extends AddScoreEvent {}
 
 class SaveGame extends AddScoreEvent {}
+
+class DismissCompletionDialog extends AddScoreEvent {}

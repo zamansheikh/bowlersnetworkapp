@@ -3,6 +3,7 @@
 import 'package:equatable/equatable.dart';
 
 import '../../domain/entities/frame_entity.dart';
+import '../../domain/entities/throw_entity.dart';
 
 class AddScoreState extends Equatable {
   final List<FrameEntity> frames;
@@ -11,6 +12,7 @@ class AddScoreState extends Equatable {
   final Set<int> currentKnockedPins;
   final bool currentIsFoul;
   final List<int> cumulativeScores;
+  final int? completionScore;
 
   const AddScoreState({
     required this.frames,
@@ -19,6 +21,7 @@ class AddScoreState extends Equatable {
     required this.currentKnockedPins,
     required this.currentIsFoul,
     required this.cumulativeScores,
+    this.completionScore,
   });
 
   AddScoreState copyWith({
@@ -28,6 +31,8 @@ class AddScoreState extends Equatable {
     Set<int>? currentKnockedPins,
     bool? currentIsFoul,
     List<int>? cumulativeScores,
+    int? completionScore,
+    bool setCompletionScore = false,
   }) {
     return AddScoreState(
       frames: frames ?? this.frames,
@@ -36,6 +41,9 @@ class AddScoreState extends Equatable {
       currentKnockedPins: currentKnockedPins ?? this.currentKnockedPins,
       currentIsFoul: currentIsFoul ?? this.currentIsFoul,
       cumulativeScores: cumulativeScores ?? this.cumulativeScores,
+      completionScore: setCompletionScore
+          ? completionScore
+          : this.completionScore,
     );
   }
 
@@ -54,37 +62,71 @@ class AddScoreState extends Equatable {
         return allPins.toSet();
       }
 
-      final first = frame.throws.isNotEmpty ? frame.throws[0] : null;
+      final first = frame.throws.isNotEmpty
+          ? frame.throws[0]
+          : ThrowEntity(knockedPins: <int>{});
+
       if (targetIndex == 1) {
-        if (first != null && !first.isFoul && first.pinsKnocked == 10) {
+        if (!first.isFoul && first.pinsKnocked == 10) {
           return allPins.toSet();
         }
-
         final standing = allPins.toSet();
-        if (first != null) {
+        if (!first.isFoul) {
           standing.removeAll(first.knockedPins);
         }
         return standing;
       }
 
-      // Third ball in the 10th frame always has a fresh rack when eligible.
-      return allPins.toSet();
+      final second = frame.throws.length > 1
+          ? frame.throws[1]
+          : ThrowEntity(knockedPins: <int>{});
+
+      if (!first.isFoul && first.pinsKnocked == 10) {
+        if (!second.isFoul && second.pinsKnocked == 10) {
+          return allPins.toSet();
+        }
+        if (second.isFoul) {
+          return allPins.toSet();
+        }
+        final standing = allPins.toSet();
+        standing.removeAll(second.knockedPins);
+        return standing;
+      }
+
+      if (!first.isFoul &&
+          !second.isFoul &&
+          first.pinsKnocked + second.pinsKnocked == 10) {
+        return allPins.toSet();
+      }
+
+      final standing = allPins.toSet();
+      if (!first.isFoul) {
+        standing.removeAll(first.knockedPins);
+      }
+      if (!second.isFoul) {
+        standing.removeAll(second.knockedPins);
+      }
+      return standing;
     }
 
     final standing = allPins.toSet();
     for (var i = 0; i < frame.throws.length && i < targetIndex; i++) {
-      standing.removeAll(frame.throws[i].knockedPins);
+      final previous = frame.throws[i];
+      if (!previous.isFoul) {
+        standing.removeAll(previous.knockedPins);
+      }
     }
     return standing;
   }
 
   @override
-  List<Object> get props => [
+  List<Object?> get props => [
     frames,
     currentFrame,
     currentThrow,
     currentKnockedPins,
     currentIsFoul,
     cumulativeScores,
+    completionScore,
   ];
 }
