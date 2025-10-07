@@ -177,10 +177,9 @@ class _Scoreboard extends StatelessWidget {
         : List.generate(10, (i) => FrameEntity(number: i + 1));
 
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
       decoration: BoxDecoration(
         color: const Color(0xFF161A2B),
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(8),
         border: Border.all(color: Colors.white.withValues(alpha: 0.08)),
       ),
       child: SingleChildScrollView(
@@ -230,14 +229,14 @@ class _FrameScoreTile extends StatelessWidget {
     final slots = isTenth ? 3 : 2;
     final symbols = _frameSymbols(frame);
 
-    final double tileWidth = isTenth ? 68 : 56;
+    final double tileWidth = isTenth ? 48 : 32;
     final Color borderColor = isActive
         ? const Color(0xFF35D07F)
         : Colors.white.withValues(alpha: 0.14);
 
     return Container(
       width: tileWidth,
-      margin: const EdgeInsets.symmetric(horizontal: 4),
+      margin: const EdgeInsets.symmetric(horizontal: 2),
       decoration: BoxDecoration(
         color: const Color(0xFF101426),
         borderRadius: BorderRadius.circular(12),
@@ -245,8 +244,8 @@ class _FrameScoreTile extends StatelessWidget {
       child: Container(
         decoration: BoxDecoration(
           color: Colors.white,
-          borderRadius: BorderRadius.circular(10),
-          border: Border.all(color: borderColor, width: 2),
+          borderRadius: BorderRadius.circular(4),
+          border: Border.all(color: borderColor, width: 1),
         ),
         child: Column(
           mainAxisSize: MainAxisSize.min,
@@ -263,7 +262,7 @@ class _FrameScoreTile extends StatelessWidget {
                     : const Color(0xFF1F2233);
                 return Expanded(
                   child: Container(
-                    height: 28,
+                    height: 22,
                     decoration: BoxDecoration(
                       border: Border(
                         right: index == slots - 1
@@ -277,8 +276,8 @@ class _FrameScoreTile extends StatelessWidget {
                     child: Text(
                       symbols[index],
                       style: TextStyle(
-                        fontWeight: FontWeight.w700,
-                        fontSize: 15,
+                        fontWeight: FontWeight.w600,
+                        fontSize: 14,
                         color: textColor,
                       ),
                     ),
@@ -287,19 +286,19 @@ class _FrameScoreTile extends StatelessWidget {
               }),
             ),
             Container(
-              height: 28,
+              height: 22,
               alignment: Alignment.center,
               decoration: BoxDecoration(
                 color: Colors.white,
                 borderRadius: const BorderRadius.vertical(
-                  bottom: Radius.circular(8),
+                  bottom: Radius.circular(4),
                 ),
               ),
               child: Text(
                 cumulativeScore != null ? '$cumulativeScore' : '',
                 style: TextStyle(
-                  fontWeight: FontWeight.w700,
-                  fontSize: 15,
+                  fontWeight: FontWeight.w600,
+                  fontSize: 14,
                   color: isActive
                       ? const Color(0xFF35D07F)
                       : const Color(0xFF1F2233),
