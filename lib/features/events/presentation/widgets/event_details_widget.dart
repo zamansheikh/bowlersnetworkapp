@@ -11,14 +11,14 @@ class EventDetailsWidget extends StatelessWidget {
   final Function(EventType?) onFilterChanged;
 
   const EventDetailsWidget({
-    Key? key,
+    super.key,
     required this.events,
     this.selectedDate,
     required this.searchTerm,
     this.filterType,
     required this.onSearchChanged,
     required this.onFilterChanged,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -62,7 +62,7 @@ class EventDetailsWidget extends StatelessWidget {
             const SizedBox(height: 8),
 
             DropdownButtonFormField<EventType?>(
-              value: filterType,
+              initialValue: filterType,
               decoration: const InputDecoration(
                 labelText: 'Filter by type',
                 border: OutlineInputBorder(),

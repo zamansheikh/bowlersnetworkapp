@@ -25,8 +25,6 @@ class AppTheme {
         onSecondary: AppColors.white,
         surface: AppColors.surface,
         onSurface: AppColors.onSurface,
-        background: AppColors.background,
-        onBackground: AppColors.onBackground,
         error: AppColors.error,
         onError: AppColors.white,
         outline: AppColors.border,
@@ -205,14 +203,14 @@ class AppTheme {
 
       // ========== CHECKBOX THEME ==========
       checkboxTheme: CheckboxThemeData(
-        fillColor: MaterialStateProperty.resolveWith((states) {
-          if (states.contains(MaterialState.selected)) {
+        fillColor: WidgetStateProperty.resolveWith((states) {
+          if (states.contains(WidgetState.selected)) {
             return AppColors.primaryLimeGreen;
           }
           return AppColors.surface;
         }),
-        checkColor: MaterialStateProperty.all(AppColors.onPrimary),
-        overlayColor: MaterialStateProperty.all(AppColors.primaryAlpha10),
+        checkColor: WidgetStateProperty.all(AppColors.onPrimary),
+        overlayColor: WidgetStateProperty.all(AppColors.primaryAlpha10),
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(AppSpacing.radiusXS),
         ),
@@ -220,30 +218,30 @@ class AppTheme {
 
       // ========== RADIO THEME ==========
       radioTheme: RadioThemeData(
-        fillColor: MaterialStateProperty.resolveWith((states) {
-          if (states.contains(MaterialState.selected)) {
+        fillColor: WidgetStateProperty .resolveWith((states) {
+          if (states.contains(WidgetState.selected)) {
             return AppColors.primaryLimeGreen;
           }
           return AppColors.gray400;
         }),
-        overlayColor: MaterialStateProperty.all(AppColors.primaryAlpha10),
+        overlayColor: WidgetStateProperty.all(AppColors.primaryAlpha10),
       ),
 
       // ========== SWITCH THEME ==========
       switchTheme: SwitchThemeData(
-        thumbColor: MaterialStateProperty.resolveWith((states) {
-          if (states.contains(MaterialState.selected)) {
+        thumbColor: WidgetStateProperty.resolveWith((states) {
+          if (states.contains(WidgetState.selected)) {
             return AppColors.primaryLimeGreen;
           }
           return AppColors.gray400;
         }),
-        trackColor: MaterialStateProperty.resolveWith((states) {
-          if (states.contains(MaterialState.selected)) {
+        trackColor: WidgetStateProperty.resolveWith((states) {
+          if (states.contains(WidgetState.selected)) {
             return AppColors.primaryAlpha30;
           }
           return AppColors.gray200;
         }),
-        overlayColor: MaterialStateProperty.all(AppColors.primaryAlpha10),
+        overlayColor: WidgetStateProperty.all(AppColors.primaryAlpha10),
       ),
 
       // ========== DIVIDER THEME ==========

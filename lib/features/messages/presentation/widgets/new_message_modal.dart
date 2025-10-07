@@ -125,7 +125,7 @@ class _NewMessageModalState extends State<NewMessageModal> {
                                 member.profilePictureUrl,
                               ),
                               backgroundColor: Colors.grey[300],
-                              onBackgroundImageError: (_, __) {},
+                              onBackgroundImageError: (_, _) {},
                               child: member.profilePictureUrl.isEmpty
                                   ? Text(
                                       member.name.isNotEmpty

@@ -253,7 +253,7 @@ class _FeedPostCardState extends State<FeedPostCard> {
         ),
         borderRadius: BorderRadius.circular(12.r),
         border: Border.all(
-          color: AppColors.primaryLimeGreen.withOpacity(0.3),
+          color: AppColors.primaryLimeGreen.withValues(alpha: 0.3),
           width: 1.5.w,
         ),
       ),

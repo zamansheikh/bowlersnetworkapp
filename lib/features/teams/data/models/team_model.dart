@@ -2,22 +2,14 @@ import '../../domain/entities/team.dart';
 
 class TeamModel extends Team {
   const TeamModel({
-    required int teamId,
-    required String name,
-    required TeamCreatorModel createdBy,
-    required String createdAt,
-    String? logoUrl,
-    int? teamChatRoomId,
-    int? memberCount,
-  }) : super(
-         teamId: teamId,
-         name: name,
-         createdBy: createdBy,
-         createdAt: createdAt,
-         logoUrl: logoUrl,
-         teamChatRoomId: teamChatRoomId,
-         memberCount: memberCount,
-       );
+    required super.teamId,
+    required super.name,
+    required TeamCreatorModel super.createdBy,
+    required super.createdAt,
+    super.logoUrl,
+    super.teamChatRoomId,
+    super.memberCount,
+  });
 
   factory TeamModel.fromJson(Map<String, dynamic> json) {
     return TeamModel(
@@ -58,32 +50,19 @@ class TeamModel extends Team {
 
 class TeamCreatorModel extends TeamCreator {
   const TeamCreatorModel({
-    required int userId,
-    required String username,
-    required String name,
-    required String firstName,
-    required String lastName,
-    required String email,
-    required int xp,
-    required int level,
-    String? profilePictureUrl,
-    String? introVideoUrl,
-    String? coverPhotoUrl,
-    String? cardTheme,
-  }) : super(
-         userId: userId,
-         username: username,
-         name: name,
-         firstName: firstName,
-         lastName: lastName,
-         email: email,
-         xp: xp,
-         level: level,
-         profilePictureUrl: profilePictureUrl,
-         introVideoUrl: introVideoUrl,
-         coverPhotoUrl: coverPhotoUrl,
-         cardTheme: cardTheme,
-       );
+    required super.userId,
+    required super.username,
+    required super.name,
+    required super.firstName,
+    required super.lastName,
+    required super.email,
+    required super.xp,
+    required super.level,
+    super.profilePictureUrl,
+    super.introVideoUrl,
+    super.coverPhotoUrl,
+    super.cardTheme,
+  });
 
   factory TeamCreatorModel.fromJson(Map<String, dynamic> json) {
     return TeamCreatorModel(

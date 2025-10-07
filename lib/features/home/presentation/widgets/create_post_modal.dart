@@ -30,10 +30,10 @@ class _CreatePostModalState extends State<CreatePostModal> {
   final TextEditingController _tagController = TextEditingController();
   final ImagePicker _picker = ImagePicker();
 
-  List<File> _selectedFiles = [];
-  List<String> _pollOptions = ['', ''];
+  final List<File> _selectedFiles = [];
+  final List<String> _pollOptions = ['', ''];
   String _pollType = 'Single';
-  List<String> _tags = [];
+  final List<String> _tags = [];
   bool _isCreating = false;
 
   @override
@@ -412,7 +412,7 @@ class _CreatePostModalState extends State<CreatePostModal> {
   }
 
   Widget _buildMediaPreview() {
-    return Container(
+    return SizedBox(
       height: 120,
       child: ListView.builder(
         scrollDirection: Axis.horizontal,
@@ -833,12 +833,18 @@ class _CreatePostModalState extends State<CreatePostModal> {
       if (widget.onPostCreated != null) {
         widget.onPostCreated!();
       }
-
-      Navigator.pop(context);
+      if (mounted) {
+        Navigator.pop(context);
+      }
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(e.toString()), backgroundColor: AppColors.error),
-      );
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(e.toString()),
+            backgroundColor: AppColors.error,
+          ),
+        );
+      }
     } finally {
       setState(() {
         _isCreating = false;

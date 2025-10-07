@@ -12,7 +12,7 @@ class CalendarWidget extends StatelessWidget {
   final VoidCallback onToday;
 
   const CalendarWidget({
-    Key? key,
+    super.key,
     required this.calendarDays,
     required this.currentDate,
     this.selectedDate,
@@ -20,7 +20,7 @@ class CalendarWidget extends StatelessWidget {
     required this.onPreviousMonth,
     required this.onNextMonth,
     required this.onToday,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

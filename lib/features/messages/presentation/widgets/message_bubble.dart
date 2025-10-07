@@ -120,7 +120,7 @@ class MessageBubble extends StatelessWidget {
               radius: 16,
               backgroundImage: NetworkImage(message.sender.profilePictureUrl),
               backgroundColor: Colors.grey[300],
-              onBackgroundImageError: (_, __) {},
+              onBackgroundImageError: (_, _) {},
               child: message.sender.profilePictureUrl.isEmpty
                   ? Text(
                       message.sender.name.isNotEmpty

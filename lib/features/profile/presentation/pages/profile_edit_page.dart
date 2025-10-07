@@ -28,10 +28,12 @@ class _ProfileEditPageState extends State<ProfileEditPage> {
   late TextEditingController _experienceController;
 
   File? _profilePicture;
+  // ignore: unused_field
   File? _coverPhoto;
   File? _introVideo;
 
   String? _existingProfilePictureUrl;
+  // ignore: unused_field
   String? _existingCoverPhotoUrl;
   String? _existingIntroVideoUrl;
 
@@ -113,9 +115,11 @@ class _ProfileEditPageState extends State<ProfileEditPage> {
         }
       }
     } catch (e) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text('Error picking $type: $e')));
+      if (mounted) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('Error picking $type: $e')));
+      }
     }
   }
 

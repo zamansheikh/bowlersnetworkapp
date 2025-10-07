@@ -568,7 +568,7 @@ class _MediaThumbnailState extends State<MediaThumbnail> {
   Widget build(BuildContext context) {
     return ClipRRect(
       borderRadius: BorderRadius.circular(12),
-      child: Container(
+      child: SizedBox(
         width: widget.width,
         height: widget.height,
         child: widget.mediaInfo.type == MediaType.video

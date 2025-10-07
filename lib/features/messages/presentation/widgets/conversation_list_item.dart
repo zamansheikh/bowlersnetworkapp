@@ -38,7 +38,7 @@ class ConversationListItem extends StatelessWidget {
                   ? NetworkImage(conversation.displayImageUrl!)
                   : null,
               backgroundColor: Colors.grey[300],
-              onBackgroundImageError: (_, __) {
+              onBackgroundImageError: (_, _) {
                 debugPrint(
                   'Failed to load conversation image: ${conversation.displayImageUrl}',
                 );

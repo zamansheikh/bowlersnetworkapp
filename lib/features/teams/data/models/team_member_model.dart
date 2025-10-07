@@ -2,10 +2,10 @@ import '../../domain/entities/team_member.dart';
 
 class TeamMemberModel extends TeamMember {
   const TeamMemberModel({
-    required int memberId,
-    required TeamMemberInfoModel member,
-    required bool isCreator,
-  }) : super(memberId: memberId, member: member, isCreator: isCreator);
+    required super.memberId,
+    required TeamMemberInfoModel super.member,
+    required super.isCreator,
+  });
 
   factory TeamMemberModel.fromJson(Map<String, dynamic> json) {
     return TeamMemberModel(
@@ -31,32 +31,19 @@ class TeamMemberModel extends TeamMember {
 
 class TeamMemberInfoModel extends TeamMemberInfo {
   const TeamMemberInfoModel({
-    required int userId,
-    required String username,
-    required String name,
-    required String firstName,
-    required String lastName,
-    required String email,
-    required int xp,
-    required int level,
-    String? profilePictureUrl,
-    String? introVideoUrl,
-    String? coverPhotoUrl,
-    String? cardTheme,
-  }) : super(
-         userId: userId,
-         username: username,
-         name: name,
-         firstName: firstName,
-         lastName: lastName,
-         email: email,
-         xp: xp,
-         level: level,
-         profilePictureUrl: profilePictureUrl,
-         introVideoUrl: introVideoUrl,
-         coverPhotoUrl: coverPhotoUrl,
-         cardTheme: cardTheme,
-       );
+    required super.userId,
+    required super.username,
+    required super.name,
+    required super.firstName,
+    required super.lastName,
+    required super.email,
+    required super.xp,
+    required super.level,
+    super.profilePictureUrl,
+    super.introVideoUrl,
+    super.coverPhotoUrl,
+    super.cardTheme,
+  });
 
   factory TeamMemberInfoModel.fromJson(Map<String, dynamic> json) {
     return TeamMemberInfoModel(
@@ -110,22 +97,14 @@ class TeamMemberInfoModel extends TeamMemberInfo {
 
 class TeamDetailsModel extends TeamDetails {
   const TeamDetailsModel({
-    required int teamId,
-    required String name,
-    required TeamMemberInfoModel createdBy,
-    required String createdAt,
-    required TeamMembersDataModel members,
-    String? logoUrl,
-    int? teamChatRoomId,
-  }) : super(
-         teamId: teamId,
-         name: name,
-         createdBy: createdBy,
-         createdAt: createdAt,
-         members: members,
-         logoUrl: logoUrl,
-         teamChatRoomId: teamChatRoomId,
-       );
+    required super.teamId,
+    required super.name,
+    required TeamMemberInfoModel super.createdBy,
+    required super.createdAt,
+    required TeamMembersDataModel super.members,
+    super.logoUrl,
+    super.teamChatRoomId,
+  });
 
   factory TeamDetailsModel.fromJson(Map<String, dynamic> json) {
     return TeamDetailsModel(
@@ -168,9 +147,9 @@ class TeamDetailsModel extends TeamDetails {
 
 class TeamMembersDataModel extends TeamMembersData {
   const TeamMembersDataModel({
-    required int memberCount,
-    required List<TeamMemberModel> members,
-  }) : super(memberCount: memberCount, members: members);
+    required super.memberCount,
+    required List<TeamMemberModel> super.members,
+  });
 
   factory TeamMembersDataModel.fromJson(Map<String, dynamic> json) {
     final membersList = json['members'] as List<dynamic>;

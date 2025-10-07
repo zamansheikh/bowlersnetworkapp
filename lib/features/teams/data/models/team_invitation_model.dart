@@ -4,10 +4,10 @@ import 'team_member_model.dart';
 
 class TeamInvitationModel extends TeamInvitation {
   const TeamInvitationModel({
-    required int invitationId,
-    required TeamMemberInfoModel invitedUser,
-    required TeamModel team,
-  }) : super(invitationId: invitationId, invitedUser: invitedUser, team: team);
+    required super.invitationId,
+    required TeamMemberInfoModel super.invitedUser,
+    required TeamModel super.team,
+  });
 
   factory TeamInvitationModel.fromJson(Map<String, dynamic> json) {
     return TeamInvitationModel(
@@ -78,22 +78,14 @@ class TeamInvitationsModel extends TeamInvitations {
 
 class AvailableMemberModel extends AvailableMember {
   const AvailableMemberModel({
-    required int userId,
-    required String username,
-    required String name,
-    required String firstName,
-    required String lastName,
-    required String email,
-    String? profilePictureUrl,
-  }) : super(
-         userId: userId,
-         username: username,
-         name: name,
-         firstName: firstName,
-         lastName: lastName,
-         email: email,
-         profilePictureUrl: profilePictureUrl,
-       );
+    required super.userId,
+    required super.username,
+    required super.name,
+    required super.firstName,
+    required super.lastName,
+    required super.email,
+    super.profilePictureUrl,
+  });
 
   factory AvailableMemberModel.fromJson(Map<String, dynamic> json) {
     return AvailableMemberModel(

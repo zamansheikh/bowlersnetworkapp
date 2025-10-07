@@ -2,32 +2,19 @@ import '../../domain/entities/tournament.dart';
 
 class TournamentModel extends Tournament {
   const TournamentModel({
-    required int id,
-    required String name,
-    required String startDate,
-    required String regDeadline,
-    required String address,
-    required double regFee,
-    required String accessType,
-    required String format,
-    required int alreadyEnrolled,
-    int? participantsCount,
-    String? lat,
-    String? long,
-  }) : super(
-         id: id,
-         name: name,
-         startDate: startDate,
-         regDeadline: regDeadline,
-         address: address,
-         regFee: regFee,
-         accessType: accessType,
-         format: format,
-         alreadyEnrolled: alreadyEnrolled,
-         participantsCount: participantsCount,
-         lat: lat,
-         long: long,
-       );
+    required super.id,
+    required super.name,
+    required super.startDate,
+    required super.regDeadline,
+    required super.address,
+    required super.regFee,
+    required super.accessType,
+    required super.format,
+    required super.alreadyEnrolled,
+    super.participantsCount,
+    super.lat,
+    super.long,
+  });
 
   factory TournamentModel.fromJson(Map<String, dynamic> json) {
     return TournamentModel(

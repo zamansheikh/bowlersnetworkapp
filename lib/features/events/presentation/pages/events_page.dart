@@ -741,7 +741,9 @@ class _EventsPageState extends State<EventsPage> {
       text: suggestion,
       selection: TextSelection.collapsed(offset: suggestion.length),
     );
-    FocusScope.of(context).unfocus();
+    if (mounted) {
+      FocusScope.of(context).unfocus();
+    }
 
     // Clear suggestions to hide the dropdown
     setState(() {
@@ -950,6 +952,7 @@ class _EventsPageState extends State<EventsPage> {
     await manager.deleteAll();
 
     // Get filtered tournaments based on search
+    // ignore: use_build_context_synchronously
     final eventsCubit = context.read<EventsCubit>();
     final filteredTournaments = eventsCubit.getFilteredTournaments();
 

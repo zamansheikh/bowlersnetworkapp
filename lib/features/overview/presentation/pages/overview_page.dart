@@ -9,8 +9,6 @@ import '../../../auth/presentation/bloc/auth_cubit.dart';
 import '../../../home/data/models/user_model.dart';
 import '../cubit/overview_cubit.dart';
 import '../cubit/overview_state.dart';
-import '../widgets/metric_card.dart';
-import '../widgets/performance_trends_chart.dart';
 
 class OverviewPage extends StatelessWidget {
   const OverviewPage({super.key});
@@ -435,107 +433,6 @@ class OverviewPage extends StatelessWidget {
       ),
     );
   }
-
-  SliverToBoxAdapter _buildFavoriteBrandsSection(
-    BuildContext context,
-    dynamic data,
-  ) {
-    return SliverToBoxAdapter(
-      child: Padding(
-        padding: EdgeInsets.all(AppSpacing.lg),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(
-                  '❤️ Favorite Brands',
-                  style: AppTextStyles.headlineSmall.copyWith(
-                    color: AppColors.gray900,
-                    fontWeight: FontWeight.w700,
-                  ),
-                ),
-                TextButton(
-                  onPressed: () {
-                    // Navigate to brands page
-                  },
-                  child: Text(
-                    'View All Brands',
-                    style: AppTextStyles.bodyMedium.copyWith(
-                      color: AppColors.primaryLimeGreen,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                ),
-              ],
-            ),
-            SizedBox(height: AppSpacing.lg),
-            SizedBox(
-              height: 120,
-              child: ListView(
-                scrollDirection: Axis.horizontal,
-                children: [
-                  _buildBrandCard('Storm Bowling'),
-                  SizedBox(width: AppSpacing.md),
-                  _buildBrandCard('Brunswick B...'),
-                  SizedBox(width: AppSpacing.md),
-                  _buildBrandCard('Dexter Shoes'),
-                  SizedBox(width: AppSpacing.md),
-                  _buildBrandCard('Add Brand'),
-                ],
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildBrandCard(String brandName) {
-    final isAddCard = brandName == 'Add Brand';
-    return Container(
-      width: 100,
-      padding: EdgeInsets.all(AppSpacing.md),
-      decoration: BoxDecoration(
-        color: isAddCard ? AppColors.gray50 : Colors.white,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(
-          color: isAddCard ? AppColors.gray300 : AppColors.gray200,
-        ),
-      ),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Container(
-            width: 48,
-            height: 48,
-            decoration: BoxDecoration(
-              color: isAddCard ? AppColors.gray200 : AppColors.gray100,
-              borderRadius: BorderRadius.circular(8),
-            ),
-            child: Icon(
-              isAddCard ? Icons.add_rounded : Icons.image,
-              color: isAddCard ? AppColors.gray500 : AppColors.gray400,
-              size: 24,
-            ),
-          ),
-          SizedBox(height: AppSpacing.sm),
-          Text(
-            brandName,
-            style: AppTextStyles.bodySmall.copyWith(
-              color: isAddCard ? AppColors.gray600 : AppColors.gray900,
-              fontWeight: FontWeight.w500,
-            ),
-            textAlign: TextAlign.center,
-            maxLines: 2,
-            overflow: TextOverflow.ellipsis,
-          ),
-        ],
-      ),
-    );
-  }
-
   SliverToBoxAdapter _buildPerformanceSection(
     BuildContext context,
     dynamic data,
@@ -603,7 +500,7 @@ class OverviewPage extends StatelessWidget {
               SizedBox(height: AppSpacing.xl),
 
               // Chart placeholder - using simple bars to match screenshot
-              Container(
+              SizedBox(
                 height: 200,
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
