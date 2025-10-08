@@ -1,6 +1,7 @@
 // presentation/pages/add_score_screen.dart
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:go_router/go_router.dart';
@@ -29,95 +30,104 @@ class _AddScoreView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: const Color(0xFF0F131F),
-      body: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-          child: BlocListener<AddScoreBloc, AddScoreState>(
-            listenWhen: (previous, current) =>
-                previous.completionScore != current.completionScore,
-            listener: (context, state) async {
-              final score = state.completionScore;
-              if (score == null) return;
+    return AnnotatedRegion<SystemUiOverlayStyle>(
+      value: const SystemUiOverlayStyle(
+        statusBarColor: Colors.transparent,
+        statusBarIconBrightness: Brightness.light,
+        statusBarBrightness: Brightness.dark,
+      ),
+      child: Scaffold(
+        backgroundColor: const Color(0xFF0F131F),
+        body: SafeArea(
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+            child: BlocListener<AddScoreBloc, AddScoreState>(
+              listenWhen: (previous, current) =>
+                  previous.completionScore != current.completionScore,
+              listener: (context, state) async {
+                final score = state.completionScore;
+                if (score == null) return;
 
-              await showDialog<void>(
-                context: context,
-                barrierDismissible: true,
-                builder: (dialogContext) {
-                  return AlertDialog(
-                    backgroundColor: const Color(0xFF161A28),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(20),
-                    ),
-                    title: const Text(
-                      'Game complete!',
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 20,
-                        fontWeight: FontWeight.w700,
+                await showDialog<void>(
+                  context: context,
+                  barrierDismissible: true,
+                  builder: (dialogContext) {
+                    return AlertDialog(
+                      backgroundColor: const Color(0xFF161A28),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(20),
                       ),
-                    ),
-                    content: Text(
-                      'Your total score is $score.',
-                      style: const TextStyle(
-                        color: Color(0xFFD9DFF5),
-                        fontSize: 16,
-                      ),
-                    ),
-                    actions: [
-                      TextButton(
-                        onPressed: () => Navigator.of(dialogContext).pop(),
-                        child: const Text(
-                          'Great',
-                          style: TextStyle(
-                            color: Color(0xFF35D07F),
-                            fontWeight: FontWeight.w700,
-                          ),
+                      title: const Text(
+                        'Game complete!',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 20,
+                          fontWeight: FontWeight.w700,
                         ),
                       ),
+                      content: Text(
+                        'Your total score is $score.',
+                        style: const TextStyle(
+                          color: Color(0xFFD9DFF5),
+                          fontSize: 16,
+                        ),
+                      ),
+                      actions: [
+                        TextButton(
+                          onPressed: () => Navigator.of(dialogContext).pop(),
+                          child: const Text(
+                            'Great',
+                            style: TextStyle(
+                              color: Color(0xFF35D07F),
+                              fontWeight: FontWeight.w700,
+                            ),
+                          ),
+                        ),
+                      ],
+                    );
+                  },
+                );
+
+                if (!context.mounted) return;
+                context.read<AddScoreBloc>().add(DismissCompletionDialog());
+              },
+              child: BlocBuilder<AddScoreBloc, AddScoreState>(
+                builder: (context, state) {
+                  final bloc = context.read<AddScoreBloc>();
+                  return Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      _Header(onBackPressed: () => context.pop()),
+                      const SizedBox(height: 20),
+                      _Scoreboard(state: state),
+                      const SizedBox(height: 16),
+                      _PinDeck(
+                        state: state,
+                        onPinTap: (pin) => bloc.add(SelectPin(pin)),
+                      ),
+                      const Spacer(),
+                      _ShortcutRow(
+                        state: state,
+                        onFoul: () =>
+                            bloc.add(PressShortcut(ShortcutType.foul)),
+                        onMiss: () =>
+                            bloc.add(PressShortcut(ShortcutType.miss)),
+                        onStrikeOrSpare: () =>
+                            bloc.add(PressShortcut(ShortcutType.strikeOrSpare)),
+                      ),
+                      const SizedBox(height: 18),
+                      _BottomControls(
+                        onPrevious: () => bloc.add(PreviousThrow()),
+                        onSave: () => bloc.add(SaveGame()),
+                        onNext: () => bloc.add(NextThrow()),
+                        canGoPrevious: state.canGoPrevious,
+                        canGoNext: state.canGoNext,
+                      ),
+                      const SizedBox(height: 16), // Bottom padding
                     ],
                   );
                 },
-              );
-
-              if (!context.mounted) return;
-              context.read<AddScoreBloc>().add(DismissCompletionDialog());
-            },
-            child: BlocBuilder<AddScoreBloc, AddScoreState>(
-              builder: (context, state) {
-                final bloc = context.read<AddScoreBloc>();
-                return Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    _Header(onBackPressed: () => context.pop()),
-                    const SizedBox(height: 20),
-                    _Scoreboard(state: state),
-                    const SizedBox(height: 16),
-                    _PinDeck(
-                      state: state,
-                      onPinTap: (pin) => bloc.add(SelectPin(pin)),
-                    ),
-                    const Spacer(),
-                    _ShortcutRow(
-                      state: state,
-                      onFoul: () => bloc.add(PressShortcut(ShortcutType.foul)),
-                      onMiss: () => bloc.add(PressShortcut(ShortcutType.miss)),
-                      onStrikeOrSpare: () =>
-                          bloc.add(PressShortcut(ShortcutType.strikeOrSpare)),
-                    ),
-                    const SizedBox(height: 18),
-                    _BottomControls(
-                      onPrevious: () => bloc.add(PreviousThrow()),
-                      onSave: () => bloc.add(SaveGame()),
-                      onNext: () => bloc.add(NextThrow()),
-                      canGoPrevious: state.canGoPrevious,
-                      canGoNext: state.canGoNext,
-                    ),
-                    const SizedBox(height: 16), // Bottom padding
-                  ],
-                );
-              },
+              ),
             ),
           ),
         ),
