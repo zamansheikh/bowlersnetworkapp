@@ -151,7 +151,9 @@ class AddScoreBloc extends Bloc<AddScoreEvent, AddScoreState> {
     final newState = state.copyWith(
       currentFrame: nextEntry.frame,
       currentThrow: nextEntry.throwNumber,
-      currentKnockedPins: standingBefore,
+      // For first throw, start with all pins knocked (full set)
+      // For subsequent throws, start with no pins knocked (empty set) to show standing pins
+      currentKnockedPins: nextEntry.throwNumber == 1 ? standingBefore : <int>{},
       currentIsFoul: false,
     );
     _emitState(emit, newState);
@@ -289,7 +291,9 @@ class AddScoreBloc extends Bloc<AddScoreEvent, AddScoreState> {
       );
       newFrame = nextEntry.frame;
       newThrow = nextEntry.throwNumber;
-      newKnockedPins = standingBeforeNext;
+      // For first throw (throwNumber == 1), start with all pins knocked (full set)
+      // For subsequent throws, start with no pins knocked (empty set) to show standing pins
+      newKnockedPins = nextEntry.throwNumber == 1 ? standingBeforeNext : <int>{};
       newIsFoul = false;
     } else {
       final standingBeforeCurrent = _pinsStandingBeforeThrow(
