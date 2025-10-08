@@ -39,95 +39,90 @@ class _AddScoreView extends StatelessWidget {
       child: Scaffold(
         backgroundColor: Colors.white, // Pure white background
         body: SafeArea(
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-            child: BlocListener<AddScoreBloc, AddScoreState>(
-              listenWhen: (previous, current) =>
-                  previous.completionScore != current.completionScore,
-              listener: (context, state) async {
-                final score = state.completionScore;
-                if (score == null) return;
+          child: BlocListener<AddScoreBloc, AddScoreState>(
+            listenWhen: (previous, current) =>
+                previous.completionScore != current.completionScore,
+            listener: (context, state) async {
+              final score = state.completionScore;
+              if (score == null) return;
 
-                await showDialog<void>(
-                  context: context,
-                  barrierDismissible: true,
-                  builder: (dialogContext) {
-                    return AlertDialog(
-                      backgroundColor: Colors.white,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(20),
+              await showDialog<void>(
+                context: context,
+                barrierDismissible: true,
+                builder: (dialogContext) {
+                  return AlertDialog(
+                    backgroundColor: Colors.white,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(20),
+                    ),
+                    title: const Text(
+                      'Game complete!',
+                      style: TextStyle(
+                        color: Color(0xFF1F2937),
+                        fontSize: 20,
+                        fontWeight: FontWeight.w700,
                       ),
-                      title: const Text(
-                        'Game complete!',
-                        style: TextStyle(
-                          color: Color(0xFF1F2937),
-                          fontSize: 20,
-                          fontWeight: FontWeight.w700,
-                        ),
+                    ),
+                    content: Text(
+                      'Your total score is $score.',
+                      style: const TextStyle(
+                        color: Color(0xFF6B7280),
+                        fontSize: 16,
                       ),
-                      content: Text(
-                        'Your total score is $score.',
-                        style: const TextStyle(
-                          color: Color(0xFF6B7280),
-                          fontSize: 16,
-                        ),
-                      ),
-                      actions: [
-                        TextButton(
-                          onPressed: () => Navigator.of(dialogContext).pop(),
-                          child: const Text(
-                            'Great',
-                            style: TextStyle(
-                              color: Color(0xFF35D07F),
-                              fontWeight: FontWeight.w700,
-                            ),
+                    ),
+                    actions: [
+                      TextButton(
+                        onPressed: () => Navigator.of(dialogContext).pop(),
+                        child: const Text(
+                          'Great',
+                          style: TextStyle(
+                            color: Color(0xFF35D07F),
+                            fontWeight: FontWeight.w700,
                           ),
                         ),
-                      ],
-                    );
-                  },
-                );
-
-                if (!context.mounted) return;
-                context.read<AddScoreBloc>().add(DismissCompletionDialog());
-              },
-              child: BlocBuilder<AddScoreBloc, AddScoreState>(
-                builder: (context, state) {
-                  final bloc = context.read<AddScoreBloc>();
-                  return Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      _Header(onBackPressed: () => context.pop()),
-                      const SizedBox(height: 20),
-                      _Scoreboard(state: state),
-                      const SizedBox(height: 16),
-                      _PinDeck(
-                        state: state,
-                        onPinTap: (pin) => bloc.add(SelectPin(pin)),
                       ),
-                      const Spacer(),
-                      _ShortcutRow(
-                        state: state,
-                        onFoul: () =>
-                            bloc.add(PressShortcut(ShortcutType.foul)),
-                        onMiss: () =>
-                            bloc.add(PressShortcut(ShortcutType.miss)),
-                        onStrikeOrSpare: () =>
-                            bloc.add(PressShortcut(ShortcutType.strikeOrSpare)),
-                      ),
-                      const SizedBox(height: 18),
-                      _BottomControls(
-                        onPrevious: () => bloc.add(PreviousThrow()),
-                        onSave: () => bloc.add(SaveGame()),
-                        onNext: () => bloc.add(NextThrow()),
-                        canGoPrevious: state.canGoPrevious,
-                        canGoNext: state.canGoNext,
-                      ),
-                      const SizedBox(height: 16), // Bottom padding
                     ],
                   );
                 },
-              ),
+              );
+
+              if (!context.mounted) return;
+              context.read<AddScoreBloc>().add(DismissCompletionDialog());
+            },
+            child: BlocBuilder<AddScoreBloc, AddScoreState>(
+              builder: (context, state) {
+                final bloc = context.read<AddScoreBloc>();
+                return Column(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    _Header(onBackPressed: () => context.pop()),
+                    const SizedBox(height: 20),
+                    _Scoreboard(state: state),
+                    const SizedBox(height: 16),
+                    _PinDeck(
+                      state: state,
+                      onPinTap: (pin) => bloc.add(SelectPin(pin)),
+                    ),
+                    const Spacer(),
+                    _ShortcutRow(
+                      state: state,
+                      onFoul: () => bloc.add(PressShortcut(ShortcutType.foul)),
+                      onMiss: () => bloc.add(PressShortcut(ShortcutType.miss)),
+                      onStrikeOrSpare: () =>
+                          bloc.add(PressShortcut(ShortcutType.strikeOrSpare)),
+                    ),
+                    const SizedBox(height: 18),
+                    _BottomControls(
+                      onPrevious: () => bloc.add(PreviousThrow()),
+                      onSave: () => bloc.add(SaveGame()),
+                      onNext: () => bloc.add(NextThrow()),
+                      canGoPrevious: state.canGoPrevious,
+                      canGoNext: state.canGoNext,
+                    ),
+                    const SizedBox(height: 16), // Bottom padding
+                  ],
+                );
+              },
             ),
           ),
         ),
@@ -143,30 +138,33 @@ class _Header extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Row(
-      children: [
-        Container(
-          decoration: BoxDecoration(
-            shape: BoxShape.circle,
-            border: Border.all(color: const Color(0xFF35D07F), width: 2),
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16.0),
+      child: Row(
+        children: [
+          Container(
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              border: Border.all(color: const Color(0xFF35D07F), width: 2),
+            ),
+            child: _CircularIconButton(
+              icon: Icons.arrow_back,
+              onTap: onBackPressed,
+              backgroundColor: Colors.white,
+              iconColor: const Color(0xFF35D07F),
+            ),
           ),
-          child: _CircularIconButton(
-            icon: Icons.arrow_back,
-            onTap: onBackPressed,
-            backgroundColor: Colors.white,
-            iconColor: const Color(0xFF35D07F),
+          const SizedBox(width: 12),
+          const Text(
+            'Add your scores',
+            style: TextStyle(
+              fontSize: 22,
+              fontWeight: FontWeight.w700,
+              color: Color(0xFF111827),
+            ),
           ),
-        ),
-        const SizedBox(width: 12),
-        const Text(
-          'Add your scores',
-          style: TextStyle(
-            fontSize: 22,
-            fontWeight: FontWeight.w700,
-            color: Color(0xFF111827),
-          ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 }
@@ -185,15 +183,15 @@ class _Scoreboard extends StatelessWidget {
     return Container(
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: const Color(0xFFD1D5DB), width: 1.5),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.06),
-            blurRadius: 12,
-            offset: const Offset(0, 2),
-          ),
-        ],
+        // borderRadius: BorderRadius.circular(12),
+        // border: Border.all(color: const Color(0xFFD1D5DB), width: 1.5),
+        // boxShadow: [
+        //   BoxShadow(
+        //     color: Colors.black.withValues(alpha: 0.06),
+        //     blurRadius: 12,
+        //     offset: const Offset(0, 2),
+        //   ),
+        // ],
       ),
       padding: const EdgeInsets.all(6),
       child: SingleChildScrollView(
@@ -254,7 +252,7 @@ class _FrameScoreTile extends StatelessWidget {
       child: Container(
         decoration: BoxDecoration(
           color: Colors.white,
-          borderRadius: BorderRadius.circular(8),
+          borderRadius: BorderRadius.circular(4),
           border: Border.all(color: borderColor, width: isActive ? 2 : 1),
           boxShadow: isActive
               ? [
@@ -587,28 +585,31 @@ class _ShortcutRow extends StatelessWidget {
         ? 'Strike'
         : 'Spare';
 
-    return Row(
-      children: [
-        _ShortcutButton(
-          label: 'Foul',
-          textColor: const Color(0xFFDC2626),
-          borderColor: const Color(0xFFDC2626),
-          onTap: onFoul,
-        ),
-        _ShortcutButton(
-          label: 'Miss',
-          textColor: const Color(0xFFF59E0B),
-          borderColor: const Color(0xFFF59E0B),
-          onTap: onMiss,
-        ),
-        _ShortcutButton(
-          label: strikeLabel,
-          textColor: Colors.white,
-          borderColor: const Color(0xFF35D07F),
-          backgroundColor: const Color(0xFF35D07F),
-          onTap: onStrikeOrSpare,
-        ),
-      ],
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16.0),
+      child: Row(
+        children: [
+          _ShortcutButton(
+            label: 'Foul',
+            textColor: const Color(0xFFDC2626),
+            borderColor: const Color(0xFFDC2626),
+            onTap: onFoul,
+          ),
+          _ShortcutButton(
+            label: 'Miss',
+            textColor: const Color(0xFFF59E0B),
+            borderColor: const Color(0xFFF59E0B),
+            onTap: onMiss,
+          ),
+          _ShortcutButton(
+            label: strikeLabel,
+            textColor: Colors.white,
+            borderColor: const Color(0xFF35D07F),
+            backgroundColor: const Color(0xFF35D07F),
+            onTap: onStrikeOrSpare,
+          ),
+        ],
+      ),
     );
   }
 }
@@ -677,48 +678,51 @@ class _BottomControls extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Row(
-      children: [
-        _CircularIconButton(
-          icon: Icons.arrow_back,
-          onTap: onPrevious,
-          isEnabled: canGoPrevious,
-        ),
-        Expanded(
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 12),
-            child: SizedBox(
-              height: 56,
-              child: ElevatedButton(
-                onPressed: onSave,
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFF374151),
-                  foregroundColor: Colors.white,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(14),
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16.0),
+      child: Row(
+        children: [
+          _CircularIconButton(
+            icon: Icons.arrow_back,
+            onTap: onPrevious,
+            isEnabled: canGoPrevious,
+          ),
+          Expanded(
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 12),
+              child: SizedBox(
+                height: 56,
+                child: ElevatedButton(
+                  onPressed: onSave,
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color(0xFF374151),
+                    foregroundColor: Colors.white,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(14),
+                    ),
+                    elevation: 1,
+                    shadowColor: Colors.black.withValues(alpha: 0.1),
+                    padding: const EdgeInsets.symmetric(vertical: 16),
                   ),
-                  elevation: 1,
-                  shadowColor: Colors.black.withValues(alpha: 0.1),
-                  padding: const EdgeInsets.symmetric(vertical: 16),
-                ),
-                child: const Text(
-                  'Save game',
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 17,
-                    fontWeight: FontWeight.w700,
+                  child: const Text(
+                    'Save game',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 17,
+                      fontWeight: FontWeight.w700,
+                    ),
                   ),
                 ),
               ),
             ),
           ),
-        ),
-        _CircularIconButton(
-          icon: Icons.arrow_forward,
-          onTap: onNext,
-          isEnabled: canGoNext,
-        ),
-      ],
+          _CircularIconButton(
+            icon: Icons.arrow_forward,
+            onTap: onNext,
+            isEnabled: canGoNext,
+          ),
+        ],
+      ),
     );
   }
 }
