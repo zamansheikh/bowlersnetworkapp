@@ -145,18 +145,24 @@ class _Header extends StatelessWidget {
   Widget build(BuildContext context) {
     return Row(
       children: [
-        _CircularIconButton(
-          icon: Icons.arrow_back,
-          onTap: onBackPressed,
-          backgroundColor: Colors.white,
-          iconColor: const Color(0xFF35D07F),
+        Container(
+          decoration: BoxDecoration(
+            shape: BoxShape.circle,
+            border: Border.all(color: const Color(0xFF35D07F), width: 2),
+          ),
+          child: _CircularIconButton(
+            icon: Icons.arrow_back,
+            onTap: onBackPressed,
+            backgroundColor: Colors.white,
+            iconColor: const Color(0xFF35D07F),
+          ),
         ),
         const SizedBox(width: 12),
         const Text(
           'Add your scores',
           style: TextStyle(
             fontSize: 22,
-            fontWeight: FontWeight.w600,
+            fontWeight: FontWeight.w700,
             color: Color(0xFF111827),
           ),
         ),
@@ -180,16 +186,16 @@ class _Scoreboard extends StatelessWidget {
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: const Color(0xFFE5E7EB)),
+        border: Border.all(color: const Color(0xFFD1D5DB), width: 1.5),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.04),
-            blurRadius: 10,
+            color: Colors.black.withValues(alpha: 0.06),
+            blurRadius: 12,
             offset: const Offset(0, 2),
           ),
         ],
       ),
-      padding: const EdgeInsets.all(4),
+      padding: const EdgeInsets.all(6),
       child: SingleChildScrollView(
         scrollDirection: Axis.horizontal,
         child: Row(
@@ -383,12 +389,12 @@ class _PinDeck extends StatelessWidget {
           return Container(
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(20),
-              color: const Color(0xFFFAFAFA),
-              border: Border.all(color: const Color(0xFFE5E7EB), width: 1),
+              color: Colors.white,
+              border: Border.all(color: const Color(0xFFE5E7EB), width: 1.5),
               boxShadow: [
                 BoxShadow(
-                  color: Colors.black.withValues(alpha: 0.03),
-                  blurRadius: 20,
+                  color: Colors.black.withValues(alpha: 0.04),
+                  blurRadius: 15,
                   offset: const Offset(0, 4),
                 ),
               ],
@@ -453,13 +459,13 @@ class _Pin extends StatelessWidget {
           height: size,
           child: DecoratedBox(
             decoration: BoxDecoration(
-              color: const Color(0xFFFAFAFA),
+              color: const Color(0xFFF9FAFB),
               shape: BoxShape.circle,
               border: Border.all(
                 color: isKnocked
                     ? const Color(0xFF35D07F)
-                    : const Color(0xFFE5E7EB),
-                width: isKnocked ? 2.5 : 1.5,
+                    : const Color(0xFFD1D5DB),
+                width: isKnocked ? 3 : 2,
               ),
               boxShadow: [
                 BoxShadow(
@@ -473,9 +479,9 @@ class _Pin extends StatelessWidget {
               child: Text(
                 '$number',
                 style: const TextStyle(
-                  color: Color(0xFFD1D5DB),
+                  color: Color(0xFFB0B5C0),
                   fontWeight: FontWeight.w700,
-                  fontSize: 16,
+                  fontSize: 17,
                 ),
               ),
             ),
@@ -501,16 +507,16 @@ class _Pin extends StatelessWidget {
                 border: Border.all(
                   color: isKnocked
                       ? const Color(0xFF35D07F)
-                      : const Color(0xFFE5E7EB),
-                  width: isKnocked ? 2.5 : 1.5,
+                      : const Color(0xFF35D07F),
+                  width: isKnocked ? 3 : 2.5,
                 ),
                 boxShadow: [
                   BoxShadow(
                     color: isKnocked
-                        ? const Color(0xFF35D07F).withValues(alpha: 0.15)
-                        : Colors.black.withValues(alpha: 0.08),
+                        ? const Color(0xFF35D07F).withValues(alpha: 0.2)
+                        : const Color(0xFF35D07F).withValues(alpha: 0.08),
                     blurRadius: 12,
-                    offset: const Offset(0, 4),
+                    offset: const Offset(0, 3),
                   ),
                 ],
               ),
@@ -545,11 +551,11 @@ class _Pin extends StatelessWidget {
               child: Text(
                 '$number',
                 style: TextStyle(
-                  fontWeight: FontWeight.w700,
-                  fontSize: 14,
+                  fontWeight: FontWeight.w800,
+                  fontSize: 15,
                   color: isKnocked
                       ? const Color(0xFF059669)
-                      : const Color(0xFF6B7280),
+                      : const Color(0xFF4B5563),
                 ),
               ),
             ),
@@ -628,22 +634,23 @@ class _ShortcutButton extends StatelessWidget {
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 4),
         child: SizedBox(
-          height: 52,
+          height: 54,
           child: OutlinedButton(
             onPressed: onTap,
             style: OutlinedButton.styleFrom(
-              backgroundColor: backgroundColor ?? Colors.transparent,
-              side: BorderSide(color: borderColor, width: 1.5),
+              backgroundColor: backgroundColor ?? Colors.white,
+              side: BorderSide(color: borderColor, width: 2),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(16),
               ),
+              elevation: 0,
             ),
             child: Text(
               label,
               style: TextStyle(
                 color: textColor,
                 fontWeight: FontWeight.w700,
-                fontSize: 16,
+                fontSize: 17,
               ),
             ),
           ),
@@ -681,24 +688,24 @@ class _BottomControls extends StatelessWidget {
           child: Padding(
             padding: const EdgeInsets.symmetric(horizontal: 12),
             child: SizedBox(
-              height: 54,
+              height: 56,
               child: ElevatedButton(
                 onPressed: onSave,
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFF4B5563),
+                  backgroundColor: const Color(0xFF374151),
                   foregroundColor: Colors.white,
                   shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
+                    borderRadius: BorderRadius.circular(14),
                   ),
-                  elevation: 0,
-                  shadowColor: Colors.transparent,
+                  elevation: 1,
+                  shadowColor: Colors.black.withValues(alpha: 0.1),
                   padding: const EdgeInsets.symmetric(vertical: 16),
                 ),
                 child: const Text(
                   'Save game',
                   style: TextStyle(
                     color: Colors.white,
-                    fontSize: 16,
+                    fontSize: 17,
                     fontWeight: FontWeight.w700,
                   ),
                 ),
@@ -762,10 +769,10 @@ class _CircularIconButton extends StatelessWidget {
             decoration: BoxDecoration(
               color: effectiveBackground,
               shape: BoxShape.circle,
-              border: Border.all(color: effectiveBorder, width: 1.5),
+              border: Border.all(color: effectiveBorder, width: 2),
               boxShadow: shadows,
             ),
-            child: Icon(icon, color: effectiveIcon, size: 20),
+            child: Icon(icon, color: effectiveIcon, size: 22),
           ),
         ),
       ),
