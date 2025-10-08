@@ -235,17 +235,28 @@ class AddScoreBloc extends Bloc<AddScoreEvent, AddScoreState> {
     _ThrowPointer? nextPointer;
     _Position? nextEntry;
 
-    if (!completed &&
-        committedTimelineIndex != -1 &&
-        committedTimelineIndex < timeline.length - 1) {
-      nextPointer = timeline[committedTimelineIndex + 1];
-    } else if (!completed) {
-      nextEntry = _nextEntryPosition(updatedFrames);
-      if (nextEntry != null) {
-        final candidate = _pointerForPosition(updatedFrames, nextEntry);
-        if (candidate != null) {
-          nextPointer = candidate;
-          nextEntry = null;
+    if (!completed) {
+      // First priority: Check if the current frame needs more throws
+      final currentFrameEntity = updatedFrames[frameIndex];
+      final maxThrows = _maxThrowsForFrame(frameIndex, currentFrameEntity);
+
+      if (normalizedThrows.length < maxThrows) {
+        // Current frame needs another throw
+        final nextThrowIndexInFrame = normalizedThrows.length;
+        nextEntry = _Position(frameIndex + 1, nextThrowIndexInFrame + 1);
+      } else if (committedTimelineIndex != -1 &&
+          committedTimelineIndex < timeline.length - 1) {
+        // Current frame is complete, check timeline ahead
+        nextPointer = timeline[committedTimelineIndex + 1];
+      } else {
+        // No timeline ahead, find next entry position
+        nextEntry = _nextEntryPosition(updatedFrames);
+        if (nextEntry != null) {
+          final candidate = _pointerForPosition(updatedFrames, nextEntry);
+          if (candidate != null) {
+            nextPointer = candidate;
+            nextEntry = null;
+          }
         }
       }
     } else {
