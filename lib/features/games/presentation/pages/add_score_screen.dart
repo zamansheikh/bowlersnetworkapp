@@ -76,7 +76,7 @@ class _AddScoreView extends StatelessWidget {
                         child: const Text(
                           'Great',
                           style: TextStyle(
-                            color: Color(0xFF35D07F),
+                            color: Color(0xFF8BC342),
                             fontWeight: FontWeight.w700,
                           ),
                         ),
@@ -142,17 +142,13 @@ class _Header extends StatelessWidget {
       padding: const EdgeInsets.symmetric(horizontal: 16.0),
       child: Row(
         children: [
-          Container(
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              border: Border.all(color: const Color(0xFF35D07F), width: 2),
-            ),
-            child: _CircularIconButton(
-              icon: Icons.arrow_back,
-              onTap: onBackPressed,
-              backgroundColor: Colors.white,
-              iconColor: const Color(0xFF35D07F),
-            ),
+          IconButton(
+            onPressed: onBackPressed,
+            icon: const Icon(Icons.arrow_back_ios),
+            color: const Color(0xFF212121),
+            iconSize: 24,
+            padding: EdgeInsets.zero,
+            constraints: const BoxConstraints(),
           ),
           const SizedBox(width: 12),
           const Text(
@@ -243,7 +239,7 @@ class _FrameScoreTile extends StatelessWidget {
 
     final double tileWidth = isTenth ? 48 : 32;
     final Color borderColor = isActive
-        ? const Color(0xFF35D07F)
+        ? const Color(0xFF8BC342)
         : const Color(0xFFE5E7EB);
 
     return Container(
@@ -257,7 +253,7 @@ class _FrameScoreTile extends StatelessWidget {
           boxShadow: isActive
               ? [
                   BoxShadow(
-                    color: const Color(0xFF35D07F).withValues(alpha: 0.2),
+                    color: const Color(0xFF8BC342).withValues(alpha: 0.2),
                     blurRadius: 8,
                     offset: const Offset(0, 2),
                   ),
@@ -272,7 +268,7 @@ class _FrameScoreTile extends StatelessWidget {
                 final isActiveThrow =
                     activeThrowIndex != null && activeThrowIndex == index;
                 final cellColor = isActiveThrow
-                    ? const Color(0xFF35D07F)
+                    ? const Color(0xFF8BC342)
                     : Colors.white;
                 final textColor = isActiveThrow
                     ? Colors.white
@@ -317,7 +313,7 @@ class _FrameScoreTile extends StatelessWidget {
                   fontWeight: FontWeight.w600,
                   fontSize: 14,
                   color: isActive
-                      ? const Color(0xFF35D07F)
+                      ? const Color(0xFF8BC342)
                       : const Color(0xFF111827),
                 ),
               ),
@@ -461,7 +457,7 @@ class _Pin extends StatelessWidget {
               shape: BoxShape.circle,
               border: Border.all(
                 color: isKnocked
-                    ? const Color(0xFF35D07F)
+                    ? const Color(0xFF8BC342)
                     : const Color(0xFFD1D5DB),
                 width: isKnocked ? 3 : 2,
               ),
@@ -504,15 +500,15 @@ class _Pin extends StatelessWidget {
                 color: isKnocked ? const Color(0xFFECFDF5) : Colors.white,
                 border: Border.all(
                   color: isKnocked
-                      ? const Color(0xFF35D07F)
-                      : const Color(0xFF35D07F),
+                      ? const Color(0xFF8BC342)
+                      : const Color(0xFF8BC342),
                   width: isKnocked ? 3 : 2.5,
                 ),
                 boxShadow: [
                   BoxShadow(
                     color: isKnocked
-                        ? const Color(0xFF35D07F).withValues(alpha: 0.2)
-                        : const Color(0xFF35D07F).withValues(alpha: 0.08),
+                        ? const Color(0xFF8BC342).withValues(alpha: 0.2)
+                        : const Color(0xFF8BC342).withValues(alpha: 0.08),
                     blurRadius: 12,
                     offset: const Offset(0, 3),
                   ),
@@ -526,7 +522,7 @@ class _Pin extends StatelessWidget {
                 'assets/icons/bowling_pin.svg',
                 width: size,
                 colorFilter: ColorFilter.mode(
-                  isKnocked ? const Color(0xFF35D07F) : const Color(0xFFE43F4E),
+                  isKnocked ? const Color(0xFF8BC342) : const Color(0xFFE43F4E),
                   BlendMode.srcIn,
                 ),
               ),
@@ -538,7 +534,7 @@ class _Pin extends StatelessWidget {
                 shape: BoxShape.circle,
                 border: Border.all(
                   color: isKnocked
-                      ? const Color(0xFF35D07F)
+                      ? const Color(0xFF8BC342)
                       : Colors.transparent,
                   width: 2,
                 ),
@@ -604,8 +600,8 @@ class _ShortcutRow extends StatelessWidget {
           _ShortcutButton(
             label: strikeLabel,
             textColor: Colors.white,
-            borderColor: const Color(0xFF35D07F),
-            backgroundColor: const Color(0xFF35D07F),
+            borderColor: const Color(0xFF8BC342),
+            backgroundColor: const Color(0xFF8BC342),
             onTap: onStrikeOrSpare,
           ),
         ],
@@ -732,7 +728,7 @@ class _CircularIconButton extends StatelessWidget {
     required this.icon,
     required this.onTap,
     this.backgroundColor = Colors.white,
-    this.iconColor = const Color(0xFF35D07F),
+    this.iconColor = const Color(0xFF8BC342),
     this.isEnabled = true,
   });
 
@@ -753,7 +749,7 @@ class _CircularIconButton extends StatelessWidget {
     final shadows = isEnabled
         ? [
             BoxShadow(
-              color: const Color(0xFF35D07F).withValues(alpha: 0.2),
+              color: const Color(0xFF8BC342).withValues(alpha: 0.2),
               blurRadius: 8,
               offset: const Offset(0, 2),
             ),
