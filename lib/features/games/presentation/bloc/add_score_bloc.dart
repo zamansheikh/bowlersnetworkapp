@@ -293,7 +293,9 @@ class AddScoreBloc extends Bloc<AddScoreEvent, AddScoreState> {
       newThrow = nextEntry.throwNumber;
       // For first throw (throwNumber == 1), start with all pins knocked (full set)
       // For subsequent throws, start with no pins knocked (empty set) to show standing pins
-      newKnockedPins = nextEntry.throwNumber == 1 ? standingBeforeNext : <int>{};
+      newKnockedPins = nextEntry.throwNumber == 1
+          ? standingBeforeNext
+          : <int>{};
       newIsFoul = false;
     } else {
       final standingBeforeCurrent = _pinsStandingBeforeThrow(
