@@ -1,11 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../../core/di/injection.dart';
 import '../../domain/repositories/game_repository.dart';
-import '../bloc/add_score_bloc.dart';
-import '../bloc/add_score_event.dart';
 import 'add_score_screen.dart';
 
 class EditGamePage extends StatelessWidget {
@@ -72,23 +69,9 @@ class EditGamePage extends StatelessWidget {
               ),
             ),
           ),
-          (game) => _EditGameView(game: game),
+          (game) => AddScoreScreen(initialGame: game),
         );
       },
-    );
-  }
-}
-
-class _EditGameView extends StatelessWidget {
-  final dynamic game;
-
-  const _EditGameView({required this.game});
-
-  @override
-  Widget build(BuildContext context) {
-    return BlocProvider(
-      create: (_) => getIt<AddScoreBloc>()..add(LoadExistingGame(game)),
-      child: const AddScoreScreen(),
     );
   }
 }

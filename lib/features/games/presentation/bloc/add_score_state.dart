@@ -7,6 +7,7 @@ import '../../domain/entities/throw_entity.dart';
 
 class AddScoreState extends Equatable {
   final String? gameId; // null for new games
+  final DateTime? gameDate; // preserve original date for edits
   final List<FrameEntity> frames;
   final int currentFrame; // 1-10
   final int currentThrow; // 1-3
@@ -21,6 +22,7 @@ class AddScoreState extends Equatable {
 
   const AddScoreState({
     this.gameId,
+    this.gameDate,
     required this.frames,
     required this.currentFrame,
     required this.currentThrow,
@@ -37,6 +39,8 @@ class AddScoreState extends Equatable {
   AddScoreState copyWith({
     String? gameId,
     bool setGameId = false,
+    DateTime? gameDate,
+    bool setGameDate = false,
     List<FrameEntity>? frames,
     int? currentFrame,
     int? currentThrow,
@@ -53,6 +57,7 @@ class AddScoreState extends Equatable {
   }) {
     return AddScoreState(
       gameId: setGameId ? gameId : this.gameId,
+      gameDate: setGameDate ? gameDate : this.gameDate,
       frames: frames ?? this.frames,
       currentFrame: currentFrame ?? this.currentFrame,
       currentThrow: currentThrow ?? this.currentThrow,
@@ -190,6 +195,7 @@ class AddScoreState extends Equatable {
   @override
   List<Object?> get props => [
     gameId,
+    gameDate,
     frames,
     currentFrame,
     currentThrow,

@@ -12,14 +12,25 @@ import '../../domain/entities/throw_entity.dart';
 import '../bloc/add_score_bloc.dart';
 import '../bloc/add_score_event.dart';
 import '../bloc/add_score_state.dart';
+import '../../domain/entities/bowling_game_entity.dart';
 
 class AddScoreScreen extends StatelessWidget {
-  const AddScoreScreen({super.key});
+  final BowlingGameEntity? initialGame;
+
+  const AddScoreScreen({super.key, this.initialGame});
 
   @override
   Widget build(BuildContext context) {
     return BlocProvider(
-      create: (_) => getIt<AddScoreBloc>()..add(StartNewGame()),
+      create: (_) {
+        final bloc = getIt<AddScoreBloc>();
+        if (initialGame != null) {
+          bloc.add(LoadExistingGame(initialGame!));
+        } else {
+          bloc.add(StartNewGame());
+        }
+        return bloc;
+      },
       child: const _AddScoreView(),
     );
   }

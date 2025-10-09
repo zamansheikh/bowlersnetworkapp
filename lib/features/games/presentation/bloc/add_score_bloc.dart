@@ -59,33 +59,93 @@ class AddScoreBloc extends Bloc<AddScoreEvent, AddScoreState> {
     Emitter<AddScoreState> emit,
   ) {
     final game = event.game;
-    final timeline = _buildTimeline(game.frames);
-
-    // Find the last position in timeline
-    final lastPosition = timeline.isNotEmpty ? timeline.last : null;
-
+    
+    // Ensure we have all 10 frames
+    List<FrameEntity> frames = List.from(game.frames);
+    while (frames.length < 10) {
+      frames.add(FrameEntity(number: frames.length + 1));
+    }
+    
+    // Find the next position to edit (first empty throw)
     int currentFrame = 1;
     int currentThrow = 1;
     Set<int> currentKnockedPins = _fullPinSet();
     bool currentIsFoul = false;
 
-    if (lastPosition != null) {
-      currentFrame = lastPosition.frameIndex + 1;
-      currentThrow = lastPosition.throwIndex + 1;
-
-      // Determine standing pins for the current position
-      final standingBefore = _pinsStandingBeforeThrow(
-        game.frames,
-        lastPosition.frameIndex,
-        lastPosition.throwIndex,
-      );
-      currentKnockedPins = standingBefore.isEmpty ? _fullPinSet() : <int>{};
+    // Iterate through frames to find where to continue
+    bool foundPosition = false;
+    for (int i = 0; i < frames.length && !foundPosition; i++) {
+      final frame = frames[i];
+      final frameNumber = i + 1;
+      
+      if (frameNumber < 10) {
+        // Frames 1-9
+        if (frame.throws.isEmpty) {
+          // This frame has no throws yet
+          currentFrame = frameNumber;
+          currentThrow = 1;
+          currentKnockedPins = _fullPinSet();
+          foundPosition = true;
+        } else if (frame.throws.length == 1) {
+          // Check if this frame needs a second throw
+          final first = frame.throws[0];
+          if (first.isFoul || first.pinsKnocked < 10) {
+            // Need second throw
+            currentFrame = frameNumber;
+            currentThrow = 2;
+            _pinsStandingBeforeThrow(
+              game.frames,
+              i,
+              1,
+            );
+            currentKnockedPins = <int>{};
+            foundPosition = true;
+          }
+          // If it's a strike, continue to next frame
+        }
+        // If frame has 2+ throws, it's complete, continue
+      } else {
+        // Frame 10
+        if (frame.throws.isEmpty) {
+          currentFrame = 10;
+          currentThrow = 1;
+          currentKnockedPins = _fullPinSet();
+          foundPosition = true;
+        } else if (frame.throws.length == 1) {
+          currentFrame = 10;
+          currentThrow = 2;
+          final standingBefore = _pinsStandingBeforeThrow(
+            frames,
+            i,
+            1,
+          );
+          currentKnockedPins = standingBefore.isEmpty ? _fullPinSet() : <int>{};
+          foundPosition = true;
+        } else if (frame.throws.length == 2) {
+          // Check if third throw is needed
+          final first = frame.throws[0];
+          final second = frame.throws[1];
+          final needsThird = _allowTenthFrameThirdBall(first, second);
+          if (needsThird) {
+            currentFrame = 10;
+            currentThrow = 3;
+            final standingBefore = _pinsStandingBeforeThrow(
+              frames,
+              i,
+              2,
+            );
+            currentKnockedPins = standingBefore.isEmpty ? _fullPinSet() : <int>{};
+            foundPosition = true;
+          }
+        }
+      }
     }
 
-    final cumulatives = _computeCumulatives(game.frames);
+    final cumulatives = _computeCumulatives(frames);
     final newState = AddScoreState(
       gameId: game.id,
-      frames: game.frames,
+      gameDate: game.date,
+      frames: frames,
       currentFrame: currentFrame,
       currentThrow: currentThrow,
       currentKnockedPins: currentKnockedPins,
@@ -93,6 +153,13 @@ class AddScoreBloc extends Bloc<AddScoreEvent, AddScoreState> {
       cumulativeScores: cumulatives,
       completionScore: null,
     );
+    
+    // Debug: print to verify gameId is set
+    print('LoadExistingGame: gameId = ${game.id}');
+    print('LoadExistingGame: gameDate = ${game.date}');
+    print('LoadExistingGame: frames count = ${frames.length}');
+    print('LoadExistingGame: currentFrame = $currentFrame, currentThrow = $currentThrow');
+    
     _emitState(emit, newState);
   }
 
@@ -209,11 +276,16 @@ class AddScoreBloc extends Bloc<AddScoreEvent, AddScoreState> {
     final gameId =
         state.gameId ?? DateTime.now().millisecondsSinceEpoch.toString();
 
+    // Debug: print to verify gameId
+    print('SaveGame: state.gameId = ${state.gameId}');
+    print('SaveGame: final gameId = $gameId');
+    print('SaveGame: isUpdate = ${state.gameId != null}');
+
     final game = BowlingGameEntity(
       id: gameId,
       frames: state.frames,
       totalScore: state.cumulativeScores.lastOrNull ?? 0,
-      date: DateTime.now(),
+      date: state.gameDate ?? DateTime.now(), // Preserve original date
       isComplete: isComplete,
     );
 
