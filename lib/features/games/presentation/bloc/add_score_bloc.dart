@@ -59,13 +59,13 @@ class AddScoreBloc extends Bloc<AddScoreEvent, AddScoreState> {
     Emitter<AddScoreState> emit,
   ) {
     final game = event.game;
-    
+
     // Ensure we have all 10 frames
     List<FrameEntity> frames = List.from(game.frames);
     while (frames.length < 10) {
       frames.add(FrameEntity(number: frames.length + 1));
     }
-    
+
     // Find the next position to edit (first empty throw)
     int currentFrame = 1;
     int currentThrow = 1;
@@ -77,7 +77,7 @@ class AddScoreBloc extends Bloc<AddScoreEvent, AddScoreState> {
     for (int i = 0; i < frames.length && !foundPosition; i++) {
       final frame = frames[i];
       final frameNumber = i + 1;
-      
+
       if (frameNumber < 10) {
         // Frames 1-9
         if (frame.throws.isEmpty) {
@@ -93,11 +93,7 @@ class AddScoreBloc extends Bloc<AddScoreEvent, AddScoreState> {
             // Need second throw
             currentFrame = frameNumber;
             currentThrow = 2;
-            _pinsStandingBeforeThrow(
-              game.frames,
-              i,
-              1,
-            );
+            _pinsStandingBeforeThrow(game.frames, i, 1);
             currentKnockedPins = <int>{};
             foundPosition = true;
           }
@@ -114,11 +110,7 @@ class AddScoreBloc extends Bloc<AddScoreEvent, AddScoreState> {
         } else if (frame.throws.length == 1) {
           currentFrame = 10;
           currentThrow = 2;
-          final standingBefore = _pinsStandingBeforeThrow(
-            frames,
-            i,
-            1,
-          );
+          final standingBefore = _pinsStandingBeforeThrow(frames, i, 1);
           currentKnockedPins = standingBefore.isEmpty ? _fullPinSet() : <int>{};
           foundPosition = true;
         } else if (frame.throws.length == 2) {
@@ -129,12 +121,10 @@ class AddScoreBloc extends Bloc<AddScoreEvent, AddScoreState> {
           if (needsThird) {
             currentFrame = 10;
             currentThrow = 3;
-            final standingBefore = _pinsStandingBeforeThrow(
-              frames,
-              i,
-              2,
-            );
-            currentKnockedPins = standingBefore.isEmpty ? _fullPinSet() : <int>{};
+            final standingBefore = _pinsStandingBeforeThrow(frames, i, 2);
+            currentKnockedPins = standingBefore.isEmpty
+                ? _fullPinSet()
+                : <int>{};
             foundPosition = true;
           }
         }
@@ -153,13 +143,15 @@ class AddScoreBloc extends Bloc<AddScoreEvent, AddScoreState> {
       cumulativeScores: cumulatives,
       completionScore: null,
     );
-    
+
     // Debug: print to verify gameId is set
     print('LoadExistingGame: gameId = ${game.id}');
     print('LoadExistingGame: gameDate = ${game.date}');
     print('LoadExistingGame: frames count = ${frames.length}');
-    print('LoadExistingGame: currentFrame = $currentFrame, currentThrow = $currentThrow');
-    
+    print(
+      'LoadExistingGame: currentFrame = $currentFrame, currentThrow = $currentThrow',
+    );
+
     _emitState(emit, newState);
   }
 
