@@ -161,6 +161,7 @@ class AddScoreBloc extends Bloc<AddScoreEvent, AddScoreState> {
 
   Future<void> _onSaveGame(SaveGame event, Emitter<AddScoreState> emit) async {
     final game = BowlingGameEntity(
+      id: DateTime.now().millisecondsSinceEpoch.toString(),
       frames: state.frames,
       totalScore: state.cumulativeScores.lastOrNull ?? 0,
       date: DateTime.now(),

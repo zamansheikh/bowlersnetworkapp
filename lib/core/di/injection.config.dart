@@ -60,6 +60,8 @@ import 'package:bowlersnetworkapp/features/games/domain/repositories/game_reposi
     as _i201;
 import 'package:bowlersnetworkapp/features/games/presentation/bloc/add_score_bloc.dart'
     as _i166;
+import 'package:bowlersnetworkapp/features/games/presentation/bloc/games_list_bloc.dart'
+    as _i188;
 import 'package:bowlersnetworkapp/features/home/data/datasources/user_remote_data_source.dart'
     as _i528;
 import 'package:bowlersnetworkapp/features/home/data/repositories/feed_repository.dart'
@@ -197,6 +199,9 @@ extension GetItInjectableX on _i174.GetIt {
     );
     gh.factory<_i166.AddScoreBloc>(
       () => _i166.AddScoreBloc(gh<_i201.GameRepository>()),
+    );
+    gh.factory<_i188.GamesListBloc>(
+      () => _i188.GamesListBloc(gh<_i201.GameRepository>()),
     );
     gh.lazySingleton<_i599.MessagesRepository>(
       () => _i528.MessagesRepositoryImpl(gh<_i154.MessagesRemoteDataSource>()),
