@@ -30,6 +30,7 @@ class AddScoreBloc extends Bloc<AddScoreEvent, AddScoreState> {
         ),
       ) {
     on<StartNewGame>(_onStartNewGame);
+    on<LoadExistingGame>(_onLoadExistingGame);
     on<SelectPin>(_onSelectPin);
     on<PressShortcut>(_onPressShortcut);
     on<ConfirmThrow>(_onConfirmThrow);
@@ -48,6 +49,48 @@ class AddScoreBloc extends Bloc<AddScoreEvent, AddScoreState> {
       currentKnockedPins: _fullPinSet(),
       currentIsFoul: false,
       cumulativeScores: const <int>[],
+      completionScore: null,
+    );
+    _emitState(emit, newState);
+  }
+
+  void _onLoadExistingGame(
+    LoadExistingGame event,
+    Emitter<AddScoreState> emit,
+  ) {
+    final game = event.game;
+    final timeline = _buildTimeline(game.frames);
+
+    // Find the last position in timeline
+    final lastPosition = timeline.isNotEmpty ? timeline.last : null;
+
+    int currentFrame = 1;
+    int currentThrow = 1;
+    Set<int> currentKnockedPins = _fullPinSet();
+    bool currentIsFoul = false;
+
+    if (lastPosition != null) {
+      currentFrame = lastPosition.frameIndex + 1;
+      currentThrow = lastPosition.throwIndex + 1;
+
+      // Determine standing pins for the current position
+      final standingBefore = _pinsStandingBeforeThrow(
+        game.frames,
+        lastPosition.frameIndex,
+        lastPosition.throwIndex,
+      );
+      currentKnockedPins = standingBefore.isEmpty ? _fullPinSet() : <int>{};
+    }
+
+    final cumulatives = _computeCumulatives(game.frames);
+    final newState = AddScoreState(
+      gameId: game.id,
+      frames: game.frames,
+      currentFrame: currentFrame,
+      currentThrow: currentThrow,
+      currentKnockedPins: currentKnockedPins,
+      currentIsFoul: currentIsFoul,
+      cumulativeScores: cumulatives,
       completionScore: null,
     );
     _emitState(emit, newState);
@@ -160,13 +203,41 @@ class AddScoreBloc extends Bloc<AddScoreEvent, AddScoreState> {
   }
 
   Future<void> _onSaveGame(SaveGame event, Emitter<AddScoreState> emit) async {
+    // Allow saving at any time (complete or incomplete)
+    final isComplete = _isGameComplete(state.frames);
+
+    final gameId =
+        state.gameId ?? DateTime.now().millisecondsSinceEpoch.toString();
+
     final game = BowlingGameEntity(
-      id: DateTime.now().millisecondsSinceEpoch.toString(),
+      id: gameId,
       frames: state.frames,
       totalScore: state.cumulativeScores.lastOrNull ?? 0,
       date: DateTime.now(),
+      isComplete: isComplete,
     );
-    await _gameRepository.saveGame(game);
+
+    // Use update if gameId exists, otherwise save new
+    final result = state.gameId != null
+        ? await _gameRepository.updateGame(game)
+        : await _gameRepository.saveGame(game);
+
+    result.fold(
+      (failure) {
+        // Handle error - could emit an error state if needed
+      },
+      (_) {
+        // Successfully saved - emit a saved state that UI can listen to
+        emit(
+          state.copyWith(
+            gameId: gameId,
+            setGameId: true,
+            gameSaved: true,
+            setGameSaved: true,
+          ),
+        );
+      },
+    );
   }
 
   void _onDismissCompletionDialog(

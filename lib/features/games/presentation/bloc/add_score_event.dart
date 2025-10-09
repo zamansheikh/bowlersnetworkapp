@@ -2,12 +2,23 @@
 
 import 'package:equatable/equatable.dart';
 
+import '../../domain/entities/bowling_game_entity.dart';
+
 abstract class AddScoreEvent extends Equatable {
   @override
-  List<Object> get props => [];
+  List<Object?> get props => [];
 }
 
 class StartNewGame extends AddScoreEvent {}
+
+class LoadExistingGame extends AddScoreEvent {
+  final BowlingGameEntity game;
+
+  LoadExistingGame(this.game);
+
+  @override
+  List<Object> get props => [game];
+}
 
 class SelectPin extends AddScoreEvent {
   final int pin;

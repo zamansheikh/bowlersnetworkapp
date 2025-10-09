@@ -39,56 +39,77 @@ class _AddScoreView extends StatelessWidget {
       child: Scaffold(
         backgroundColor: Colors.white, // Pure white background
         body: SafeArea(
-          child: BlocListener<AddScoreBloc, AddScoreState>(
-            listenWhen: (previous, current) =>
-                previous.completionScore != current.completionScore,
-            listener: (context, state) async {
-              final score = state.completionScore;
-              if (score == null) return;
+          child: MultiBlocListener(
+            listeners: [
+              BlocListener<AddScoreBloc, AddScoreState>(
+                listenWhen: (previous, current) =>
+                    previous.completionScore != current.completionScore,
+                listener: (context, state) async {
+                  final score = state.completionScore;
+                  if (score == null) return;
 
-              await showDialog<void>(
-                context: context,
-                barrierDismissible: true,
-                builder: (dialogContext) {
-                  return AlertDialog(
-                    backgroundColor: Colors.white,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(20),
-                    ),
-                    title: const Text(
-                      'Game complete!',
-                      style: TextStyle(
-                        color: Color(0xFF1F2937),
-                        fontSize: 20,
-                        fontWeight: FontWeight.w700,
-                      ),
-                    ),
-                    content: Text(
-                      'Your total score is $score.',
-                      style: const TextStyle(
-                        color: Color(0xFF6B7280),
-                        fontSize: 16,
-                      ),
-                    ),
-                    actions: [
-                      TextButton(
-                        onPressed: () => Navigator.of(dialogContext).pop(),
-                        child: const Text(
-                          'Great',
+                  await showDialog<void>(
+                    context: context,
+                    barrierDismissible: true,
+                    builder: (dialogContext) {
+                      return AlertDialog(
+                        backgroundColor: Colors.white,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(20),
+                        ),
+                        title: const Text(
+                          'Game complete!',
                           style: TextStyle(
-                            color: Color(0xFF8BC342),
+                            color: Color(0xFF1F2937),
+                            fontSize: 20,
                             fontWeight: FontWeight.w700,
                           ),
                         ),
-                      ),
-                    ],
+                        content: Text(
+                          'Your total score is $score.',
+                          style: const TextStyle(
+                            color: Color(0xFF6B7280),
+                            fontSize: 16,
+                          ),
+                        ),
+                        actions: [
+                          TextButton(
+                            onPressed: () => Navigator.of(dialogContext).pop(),
+                            child: const Text(
+                              'Great',
+                              style: TextStyle(
+                                color: Color(0xFF8BC342),
+                                fontWeight: FontWeight.w700,
+                              ),
+                            ),
+                          ),
+                        ],
+                      );
+                    },
                   );
-                },
-              );
 
-              if (!context.mounted) return;
-              context.read<AddScoreBloc>().add(DismissCompletionDialog());
-            },
+                  if (!context.mounted) return;
+                  context.read<AddScoreBloc>().add(DismissCompletionDialog());
+                },
+              ),
+              BlocListener<AddScoreBloc, AddScoreState>(
+                listenWhen: (previous, current) =>
+                    previous.gameSaved != current.gameSaved &&
+                    current.gameSaved,
+                listener: (context, state) {
+                  // Show success message
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text('Game saved successfully!'),
+                      backgroundColor: Color(0xFF8BC342),
+                      duration: Duration(seconds: 2),
+                    ),
+                  );
+                  // Navigate back to games list
+                  context.pop();
+                },
+              ),
+            ],
             child: BlocBuilder<AddScoreBloc, AddScoreState>(
               builder: (context, state) {
                 final bloc = context.read<AddScoreBloc>();
@@ -118,6 +139,8 @@ class _AddScoreView extends StatelessWidget {
                       onNext: () => bloc.add(NextThrow()),
                       canGoPrevious: state.canGoPrevious,
                       canGoNext: state.canGoNext,
+                      canSave: true, // Always allow saving
+                      isGameComplete: state.isGameComplete,
                     ),
                     const SizedBox(height: 16), // Bottom padding
                   ],
@@ -664,6 +687,8 @@ class _BottomControls extends StatelessWidget {
     required this.onNext,
     required this.canGoPrevious,
     required this.canGoNext,
+    this.canSave = false,
+    this.isGameComplete = false,
   });
 
   final VoidCallback onPrevious;
@@ -671,6 +696,8 @@ class _BottomControls extends StatelessWidget {
   final VoidCallback onNext;
   final bool canGoPrevious;
   final bool canGoNext;
+  final bool canSave;
+  final bool isGameComplete;
 
   @override
   Widget build(BuildContext context) {
@@ -689,21 +716,27 @@ class _BottomControls extends StatelessWidget {
               child: SizedBox(
                 height: 56,
                 child: ElevatedButton(
-                  onPressed: onSave,
+                  onPressed: canSave ? onSave : null,
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFF374151),
+                    backgroundColor: canSave
+                        ? const Color(0xFF374151)
+                        : const Color(0xFFE5E7EB),
                     foregroundColor: Colors.white,
+                    disabledBackgroundColor: const Color(0xFFE5E7EB),
+                    disabledForegroundColor: const Color(0xFF9CA3AF),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(14),
                     ),
-                    elevation: 1,
+                    elevation: canSave ? 1 : 0,
                     shadowColor: Colors.black.withValues(alpha: 0.1),
                     padding: const EdgeInsets.symmetric(vertical: 16),
                   ),
-                  child: const Text(
-                    'Save game',
+                  child: Text(
+                    canSave
+                        ? (isGameComplete ? 'Save game' : 'Save (Incomplete)')
+                        : 'Complete all frames',
                     style: TextStyle(
-                      color: Colors.white,
+                      color: canSave ? Colors.white : const Color(0xFF9CA3AF),
                       fontSize: 17,
                       fontWeight: FontWeight.w700,
                     ),

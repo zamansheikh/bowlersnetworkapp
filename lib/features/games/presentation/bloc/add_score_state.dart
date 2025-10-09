@@ -6,6 +6,7 @@ import '../../domain/entities/frame_entity.dart';
 import '../../domain/entities/throw_entity.dart';
 
 class AddScoreState extends Equatable {
+  final String? gameId; // null for new games
   final List<FrameEntity> frames;
   final int currentFrame; // 1-10
   final int currentThrow; // 1-3
@@ -16,8 +17,10 @@ class AddScoreState extends Equatable {
   final bool canGoPrevious;
   final bool canGoNext;
   final bool hasPendingChanges;
+  final bool gameSaved;
 
   const AddScoreState({
+    this.gameId,
     required this.frames,
     required this.currentFrame,
     required this.currentThrow,
@@ -28,9 +31,12 @@ class AddScoreState extends Equatable {
     this.canGoPrevious = false,
     this.canGoNext = false,
     this.hasPendingChanges = false,
+    this.gameSaved = false,
   });
 
   AddScoreState copyWith({
+    String? gameId,
+    bool setGameId = false,
     List<FrameEntity>? frames,
     int? currentFrame,
     int? currentThrow,
@@ -42,8 +48,11 @@ class AddScoreState extends Equatable {
     bool? canGoPrevious,
     bool? canGoNext,
     bool? hasPendingChanges,
+    bool? gameSaved,
+    bool setGameSaved = false,
   }) {
     return AddScoreState(
+      gameId: setGameId ? gameId : this.gameId,
       frames: frames ?? this.frames,
       currentFrame: currentFrame ?? this.currentFrame,
       currentThrow: currentThrow ?? this.currentThrow,
@@ -56,6 +65,7 @@ class AddScoreState extends Equatable {
       canGoPrevious: canGoPrevious ?? this.canGoPrevious,
       canGoNext: canGoNext ?? this.canGoNext,
       hasPendingChanges: hasPendingChanges ?? this.hasPendingChanges,
+      gameSaved: setGameSaved ? (gameSaved ?? false) : this.gameSaved,
     );
   }
 
@@ -131,8 +141,55 @@ class AddScoreState extends Equatable {
     return standing;
   }
 
+  bool get isGameComplete {
+    if (frames.length < 10) return false;
+    for (var i = 0; i < 10; i++) {
+      if (i >= frames.length) return false;
+      final frame = frames[i];
+      if (!_isFrameComplete(i, frame)) {
+        return false;
+      }
+    }
+    return true;
+  }
+
+  bool _isFrameComplete(int index, FrameEntity frame) {
+    if (index < 9) {
+      if (frame.throws.isEmpty) {
+        return false;
+      }
+      final first = frame.throws.first;
+      if (!first.isFoul && first.pinsKnocked == 10) {
+        return true;
+      }
+      return frame.throws.length >= 2;
+    }
+
+    // 10th frame
+    if (frame.throws.length < 2) {
+      return false;
+    }
+
+    final first = frame.throws[0];
+    final second = frame.throws[1];
+
+    // Check if third ball is needed
+    final strikeOrSpareInFirstTwo =
+        (!first.isFoul && first.pinsKnocked == 10) ||
+        (!first.isFoul &&
+            !second.isFoul &&
+            first.pinsKnocked + second.pinsKnocked == 10);
+
+    if (strikeOrSpareInFirstTwo) {
+      return frame.throws.length >= 3;
+    }
+
+    return true; // Only 2 throws needed
+  }
+
   @override
   List<Object?> get props => [
+    gameId,
     frames,
     currentFrame,
     currentThrow,
@@ -143,5 +200,6 @@ class AddScoreState extends Equatable {
     canGoPrevious,
     canGoNext,
     hasPendingChanges,
+    gameSaved,
   ];
 }

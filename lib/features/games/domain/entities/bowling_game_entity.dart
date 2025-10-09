@@ -9,14 +9,16 @@ class BowlingGameEntity extends Equatable {
   final List<FrameEntity> frames;
   final int totalScore;
   final DateTime date;
+  final bool isComplete;
 
   const BowlingGameEntity({
     required this.id,
     required this.frames,
     required this.totalScore,
     required this.date,
+    required this.isComplete,
   });
 
   @override
-  List<Object> get props => [id, frames, totalScore, date];
+  List<Object> get props => [id, frames, totalScore, date, isComplete];
 }

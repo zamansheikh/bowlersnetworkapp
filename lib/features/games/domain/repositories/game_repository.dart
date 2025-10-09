@@ -9,4 +9,6 @@ abstract class GameRepository {
   Future<Either<Failure, void>> saveGame(BowlingGameEntity game);
   Future<Either<Failure, List<BowlingGameEntity>>> getAllGames();
   Future<Either<Failure, void>> deleteGame(String id);
+  Future<Either<Failure, BowlingGameEntity>> getGameById(String id);
+  Future<Either<Failure, void>> updateGame(BowlingGameEntity game);
 }

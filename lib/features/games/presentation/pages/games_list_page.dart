@@ -27,172 +27,248 @@ class GamesListView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('My Games'),
-        backgroundColor: const Color(0xFF8BC342),
-        foregroundColor: Colors.white,
-      ),
-      body: BlocBuilder<GamesListBloc, GamesListState>(
-        builder: (context, state) {
-          if (state is GamesListLoading) {
-            return const Center(child: CircularProgressIndicator());
-          }
+    // Listen for navigation back to refresh the list
+    return PopScope(
+      onPopInvoked: (didPop) {
+        if (!didPop) {
+          context.read<GamesListBloc>().add(LoadGames());
+        }
+      },
+      child: Scaffold(
+        appBar: AppBar(
+          title: const Text('My Games'),
+          backgroundColor: const Color(0xFF8BC342),
+          foregroundColor: Colors.white,
+        ),
+        body: BlocBuilder<GamesListBloc, GamesListState>(
+          builder: (context, state) {
+            if (state is GamesListLoading) {
+              return const Center(child: CircularProgressIndicator());
+            }
 
-          if (state is GamesListError) {
-            return Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  const Icon(Icons.error_outline, size: 64, color: Colors.red),
-                  const SizedBox(height: 16),
-                  Text(
-                    state.message,
-                    style: const TextStyle(fontSize: 16),
-                    textAlign: TextAlign.center,
-                  ),
-                  const SizedBox(height: 16),
-                  ElevatedButton(
-                    onPressed: () {
-                      context.read<GamesListBloc>().add(LoadGames());
-                    },
-                    child: const Text('Retry'),
-                  ),
-                ],
-              ),
-            );
-          }
-
-          if (state is GamesListLoaded) {
-            if (state.games.isEmpty) {
+            if (state is GamesListError) {
               return Center(
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Icon(
-                      Icons.sports_baseball,
-                      size: 80,
-                      color: Colors.grey[400],
+                    const Icon(
+                      Icons.error_outline,
+                      size: 64,
+                      color: Colors.red,
                     ),
-                    const SizedBox(height: 24),
+                    const SizedBox(height: 16),
                     Text(
-                      'No games yet',
-                      style: TextStyle(
-                        fontSize: 20,
-                        fontWeight: FontWeight.w500,
-                        color: Colors.grey[600],
-                      ),
+                      state.message,
+                      style: const TextStyle(fontSize: 16),
+                      textAlign: TextAlign.center,
                     ),
-                    const SizedBox(height: 8),
-                    Text(
-                      'Tap the + button to add your first game',
-                      style: TextStyle(fontSize: 14, color: Colors.grey[500]),
+                    const SizedBox(height: 16),
+                    ElevatedButton(
+                      onPressed: () {
+                        context.read<GamesListBloc>().add(LoadGames());
+                      },
+                      child: const Text('Retry'),
                     ),
                   ],
                 ),
               );
             }
 
-            return ListView.builder(
-              padding: const EdgeInsets.all(16),
-              itemCount: state.games.length,
-              itemBuilder: (context, index) {
-                final game = state.games[index];
-                final dateFormat = DateFormat('MMM dd, yyyy - hh:mm a');
-
-                return Card(
-                  margin: const EdgeInsets.only(bottom: 12),
-                  elevation: 2,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: InkWell(
-                    borderRadius: BorderRadius.circular(12),
-                    onTap: () {
-                      // TODO: Navigate to game details/analytics page
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(
-                          content: Text('Game details coming soon!'),
-                          duration: Duration(seconds: 1),
-                        ),
-                      );
-                    },
-                    child: Padding(
-                      padding: const EdgeInsets.all(16),
-                      child: Row(
-                        children: [
-                          // Score circle
-                          Container(
-                            width: 64,
-                            height: 64,
-                            decoration: BoxDecoration(
-                              color: const Color(0xFF8BC342),
-                              shape: BoxShape.circle,
-                            ),
-                            child: Center(
-                              child: Text(
-                                '${game.totalScore}',
-                                style: const TextStyle(
-                                  fontSize: 24,
-                                  fontWeight: FontWeight.bold,
-                                  color: Colors.white,
-                                ),
-                              ),
-                            ),
-                          ),
-                          const SizedBox(width: 16),
-                          // Game info
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  'Game #${state.games.length - index}',
-                                  style: const TextStyle(
-                                    fontSize: 18,
-                                    fontWeight: FontWeight.w600,
-                                  ),
-                                ),
-                                const SizedBox(height: 4),
-                                Text(
-                                  dateFormat.format(game.date),
-                                  style: TextStyle(
-                                    fontSize: 14,
-                                    color: Colors.grey[600],
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                          // Delete button
-                          IconButton(
-                            icon: const Icon(Icons.delete_outline),
-                            color: Colors.red[400],
-                            onPressed: () {
-                              _showDeleteConfirmation(context, game.id);
-                            },
-                          ),
-                        ],
+            if (state is GamesListLoaded) {
+              if (state.games.isEmpty) {
+                return Center(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(
+                        Icons.sports_baseball,
+                        size: 80,
+                        color: Colors.grey[400],
                       ),
-                    ),
+                      const SizedBox(height: 24),
+                      Text(
+                        'No games yet',
+                        style: TextStyle(
+                          fontSize: 20,
+                          fontWeight: FontWeight.w500,
+                          color: Colors.grey[600],
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      Text(
+                        'Tap the + button to add your first game',
+                        style: TextStyle(fontSize: 14, color: Colors.grey[500]),
+                      ),
+                    ],
                   ),
                 );
-              },
-            );
-          }
+              }
 
-          return const SizedBox.shrink();
-        },
-      ),
-      floatingActionButton: FloatingActionButton.extended(
-        onPressed: () {
-          context.push('/add-score');
-        },
-        backgroundColor: const Color(0xFF8BC342),
-        icon: const Icon(Icons.add, color: Colors.white),
-        label: const Text(
-          'Add Score',
-          style: TextStyle(color: Colors.white, fontWeight: FontWeight.w600),
+              return ListView.builder(
+                padding: const EdgeInsets.all(16),
+                itemCount: state.games.length,
+                itemBuilder: (context, index) {
+                  final game = state.games[index];
+                  final dateFormat = DateFormat('MMM dd, yyyy - hh:mm a');
+
+                  return Card(
+                    margin: const EdgeInsets.only(bottom: 12),
+                    elevation: 2,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: InkWell(
+                      borderRadius: BorderRadius.circular(12),
+                      onTap: () {
+                        // Navigate to analytics page
+                        context.push('/game-analytics/${game.id}');
+                      },
+                      child: Padding(
+                        padding: const EdgeInsets.all(16),
+                        child: Row(
+                          children: [
+                            // Score circle with status indicator
+                            Stack(
+                              children: [
+                                Container(
+                                  width: 64,
+                                  height: 64,
+                                  decoration: BoxDecoration(
+                                    color: game.isComplete
+                                        ? const Color(0xFF8BC342)
+                                        : const Color(0xFFF59E0B),
+                                    shape: BoxShape.circle,
+                                  ),
+                                  child: Center(
+                                    child: Text(
+                                      '${game.totalScore}',
+                                      style: const TextStyle(
+                                        fontSize: 24,
+                                        fontWeight: FontWeight.bold,
+                                        color: Colors.white,
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                                if (!game.isComplete)
+                                  Positioned(
+                                    bottom: 0,
+                                    right: 0,
+                                    child: Container(
+                                      padding: const EdgeInsets.all(2),
+                                      decoration: const BoxDecoration(
+                                        color: Colors.white,
+                                        shape: BoxShape.circle,
+                                      ),
+                                      child: const Icon(
+                                        Icons.edit,
+                                        size: 16,
+                                        color: Color(0xFFF59E0B),
+                                      ),
+                                    ),
+                                  ),
+                              ],
+                            ),
+                            const SizedBox(width: 16),
+                            // Game info
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Row(
+                                    children: [
+                                      Text(
+                                        'Game #${state.games.length - index}',
+                                        style: const TextStyle(
+                                          fontSize: 18,
+                                          fontWeight: FontWeight.w600,
+                                        ),
+                                      ),
+                                      if (!game.isComplete) ...[
+                                        const SizedBox(width: 8),
+                                        Container(
+                                          padding: const EdgeInsets.symmetric(
+                                            horizontal: 8,
+                                            vertical: 2,
+                                          ),
+                                          decoration: BoxDecoration(
+                                            color: const Color(0xFFFEF3C7),
+                                            borderRadius: BorderRadius.circular(
+                                              8,
+                                            ),
+                                          ),
+                                          child: const Text(
+                                            'Incomplete',
+                                            style: TextStyle(
+                                              fontSize: 11,
+                                              fontWeight: FontWeight.w600,
+                                              color: Color(0xFFF59E0B),
+                                            ),
+                                          ),
+                                        ),
+                                      ],
+                                    ],
+                                  ),
+                                  const SizedBox(height: 4),
+                                  Text(
+                                    dateFormat.format(game.date),
+                                    style: TextStyle(
+                                      fontSize: 14,
+                                      color: Colors.grey[600],
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                            // Action buttons
+                            if (!game.isComplete)
+                              IconButton(
+                                icon: const Icon(Icons.edit_outlined),
+                                color: const Color(0xFF8BC342),
+                                tooltip: 'Continue',
+                                onPressed: () async {
+                                  await context.push('/edit-game/${game.id}');
+                                  if (context.mounted) {
+                                    context.read<GamesListBloc>().add(
+                                      LoadGames(),
+                                    );
+                                  }
+                                },
+                              ),
+                            IconButton(
+                              icon: const Icon(Icons.delete_outline),
+                              color: Colors.red[400],
+                              tooltip: 'Delete',
+                              onPressed: () {
+                                _showDeleteConfirmation(context, game.id);
+                              },
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  );
+                },
+              );
+            }
+
+            return const SizedBox.shrink();
+          },
+        ),
+        floatingActionButton: FloatingActionButton.extended(
+          onPressed: () async {
+            await context.push('/add-score');
+            // Reload games when returning from add score
+            if (context.mounted) {
+              context.read<GamesListBloc>().add(LoadGames());
+            }
+          },
+          backgroundColor: const Color(0xFF8BC342),
+          icon: const Icon(Icons.add, color: Colors.white),
+          label: const Text(
+            'Add Score',
+            style: TextStyle(color: Colors.white, fontWeight: FontWeight.w600),
+          ),
         ),
       ),
     );

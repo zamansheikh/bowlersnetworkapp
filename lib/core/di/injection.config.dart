@@ -54,6 +54,8 @@ import 'package:bowlersnetworkapp/features/events/domain/usecases/get_tournament
     as _i116;
 import 'package:bowlersnetworkapp/features/events/presentation/cubit/events_cubit.dart'
     as _i415;
+import 'package:bowlersnetworkapp/features/games/data/datasources/game_local_data_source.dart'
+    as _i847;
 import 'package:bowlersnetworkapp/features/games/data/repositories/game_repository_impl.dart'
     as _i26;
 import 'package:bowlersnetworkapp/features/games/domain/repositories/game_repository.dart'
@@ -165,13 +167,18 @@ extension GetItInjectableX on _i174.GetIt {
     gh.lazySingleton<_i394.BrandsRemoteDataSource>(
       () => _i483.BrandsRemoteDataSourceImpl(gh<_i460.SharedPreferences>()),
     );
+    gh.lazySingleton<_i847.GameLocalDataSource>(
+      () => _i847.GameLocalDataSourceImpl(gh<_i460.SharedPreferences>()),
+    );
     gh.factory<_i813.FeedCubit>(
       () => _i813.FeedCubit(repository: gh<_i535.FeedRepository>()),
+    );
+    gh.lazySingleton<_i201.GameRepository>(
+      () => _i26.GameRepositoryImpl(gh<_i847.GameLocalDataSource>()),
     );
     gh.lazySingleton<_i1073.AuthRemoteDataSource>(
       () => _i1073.AuthRemoteDataSourceImpl(gh<_i361.Dio>()),
     );
-    gh.lazySingleton<_i201.GameRepository>(() => _i26.GameRepositoryImpl());
     gh.lazySingleton<_i154.MessagesRemoteDataSource>(
       () => _i154.MessagesRemoteDataSourceImpl(gh<_i460.SharedPreferences>()),
     );

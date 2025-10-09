@@ -3,6 +3,8 @@ import 'dart:async';
 import 'package:go_router/go_router.dart';
 import '../../features/games/presentation/pages/add_score_screen.dart';
 import '../../features/games/presentation/pages/games_list_page.dart';
+import '../../features/games/presentation/pages/edit_game_page.dart';
+import '../../features/games/presentation/pages/game_analytics_page.dart';
 import '../../features/home/presentation/pages/home_page.dart';
 import '../../features/home/presentation/pages/post_detail_page.dart';
 import '../../features/auth/presentation/bloc/auth_cubit.dart';
@@ -231,6 +233,22 @@ class AppRouter {
           path: '/add-score',
           name: 'add_score',
           builder: (context, state) => const AddScoreScreen(),
+        ),
+        GoRoute(
+          path: '/edit-game/:id',
+          name: 'edit_game',
+          builder: (context, state) {
+            final gameId = state.pathParameters['id']!;
+            return EditGamePage(gameId: gameId);
+          },
+        ),
+        GoRoute(
+          path: '/game-analytics/:id',
+          name: 'game_analytics',
+          builder: (context, state) {
+            final gameId = state.pathParameters['id']!;
+            return GameAnalyticsPage(gameId: gameId);
+          },
         ),
         GoRoute(
           path: '/settings',
