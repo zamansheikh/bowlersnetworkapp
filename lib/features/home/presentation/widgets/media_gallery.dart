@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:video_player/video_player.dart';
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:visibility_detector/visibility_detector.dart';
 import '../../../../core/constants/colors.dart';
 
 enum MediaType { image, video }
@@ -378,46 +379,102 @@ class _MediaThumbnailState extends State<MediaThumbnail> {
   VideoPlayerController? _controller;
   bool _isInitialized = false;
   bool _hasError = false;
+  bool _isVisible = false;
+  bool _isInitializing = false;
 
   @override
   void initState() {
     super.initState();
-    if (widget.mediaInfo.type == MediaType.video) {
-      _initializeVideoThumbnail();
-    }
-  }
-
-  Future<void> _initializeVideoThumbnail() async {
-    try {
-      _controller = VideoPlayerController.networkUrl(
-        Uri.parse(widget.mediaInfo.url),
-      );
-
-      await _controller!.initialize();
-
-      // Seek to a frame for thumbnail (1 second in)
-      if (_controller!.value.duration.inSeconds > 1) {
-        await _controller!.seekTo(const Duration(seconds: 1));
-      }
-
-      if (mounted) {
-        setState(() {
-          _isInitialized = true;
-        });
-      }
-    } catch (e) {
-      if (mounted) {
-        setState(() {
-          _hasError = true;
-        });
-      }
-    }
+    // Don't initialize immediately - wait for visibility
   }
 
   @override
   void dispose() {
-    _controller?.dispose();
+    _disposeController();
     super.dispose();
+  }
+
+  void _disposeController() {
+    _controller?.dispose();
+    _controller = null;
+    _isInitialized = false;
+  }
+
+  void _onVisibilityChanged(VisibilityInfo info) {
+    final isNowVisible = info.visibleFraction > 0.1; // 10% visible threshold
+
+    if (isNowVisible && !_isVisible && !_isInitializing) {
+      // Widget became visible - initialize video in background
+      _isVisible = true;
+      if (widget.mediaInfo.type == MediaType.video && !_isInitialized) {
+        _initializeVideoThumbnail();
+      }
+    } else if (!isNowVisible && _isVisible) {
+      // Widget became invisible - dispose to free memory
+      _isVisible = false;
+      if (widget.mediaInfo.type == MediaType.video) {
+        // Delay disposal slightly to prevent rapid dispose/reinit cycles
+        Future.delayed(const Duration(seconds: 2), () {
+          if (!_isVisible && mounted) {
+            _disposeController();
+            if (mounted) {
+              setState(() {});
+            }
+          }
+        });
+      }
+    }
+  }
+
+  Future<void> _initializeVideoThumbnail() async {
+    if (_isInitializing || _isInitialized) return;
+
+    _isInitializing = true;
+
+    try {
+      // Use compute/microtask to prevent blocking UI
+      await Future.microtask(() async {
+        if (!mounted) return;
+
+        _controller = VideoPlayerController.networkUrl(
+          Uri.parse(widget.mediaInfo.url),
+          videoPlayerOptions: VideoPlayerOptions(
+            mixWithOthers: true, // Allow multiple videos
+            allowBackgroundPlayback: false,
+          ),
+        );
+
+        // Initialize in background
+        await _controller!.initialize();
+
+        if (!mounted || !_isVisible) {
+          // User scrolled away before initialization completed
+          _controller?.dispose();
+          _controller = null;
+          return;
+        }
+
+        // Seek to a frame for thumbnail (1 second in)
+        if (_controller!.value.duration.inSeconds > 1) {
+          await _controller!.seekTo(const Duration(seconds: 1));
+        }
+
+        if (mounted && _isVisible) {
+          setState(() {
+            _isInitialized = true;
+            _isInitializing = false;
+          });
+        }
+      });
+    } catch (e) {
+      debugPrint('Video thumbnail initialization error: $e');
+      if (mounted) {
+        setState(() {
+          _hasError = true;
+          _isInitializing = false;
+        });
+      }
+    }
   }
 
   Widget _buildVideoThumbnail() {
@@ -566,14 +623,19 @@ class _MediaThumbnailState extends State<MediaThumbnail> {
 
   @override
   Widget build(BuildContext context) {
-    return ClipRRect(
-      borderRadius: BorderRadius.circular(12),
-      child: SizedBox(
-        width: widget.width,
-        height: widget.height,
-        child: widget.mediaInfo.type == MediaType.video
-            ? _buildVideoThumbnail()
-            : _buildImageThumbnail(),
+    // Wrap with VisibilityDetector to track when widget is visible
+    return VisibilityDetector(
+      key: Key('media_${widget.mediaInfo.url}_${widget.mediaInfo.index}'),
+      onVisibilityChanged: _onVisibilityChanged,
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(12),
+        child: SizedBox(
+          width: widget.width,
+          height: widget.height,
+          child: widget.mediaInfo.type == MediaType.video
+              ? _buildVideoThumbnail()
+              : _buildImageThumbnail(),
+        ),
       ),
     );
   }
@@ -737,38 +799,64 @@ class _FullScreenMediaItemState extends State<FullScreenMediaItem> {
   VideoPlayerController? _controller;
   bool _isInitialized = false;
   bool _isPlaying = false;
+  bool _isInitializing = false;
 
   @override
   void initState() {
     super.initState();
     if (widget.mediaInfo.type == MediaType.video) {
+      // Initialize in microtask to prevent blocking UI
       _initializeVideo();
     }
   }
 
   Future<void> _initializeVideo() async {
+    if (_isInitializing) return;
+
+    _isInitializing = true;
+
     try {
-      _controller = VideoPlayerController.networkUrl(
-        Uri.parse(widget.mediaInfo.url),
-      );
+      // Use microtask to prevent blocking main thread
+      await Future.microtask(() async {
+        if (!mounted) return;
 
-      await _controller!.initialize();
+        _controller = VideoPlayerController.networkUrl(
+          Uri.parse(widget.mediaInfo.url),
+          videoPlayerOptions: VideoPlayerOptions(
+            mixWithOthers: true,
+            allowBackgroundPlayback: false,
+          ),
+        );
 
-      if (mounted) {
-        setState(() {
-          _isInitialized = true;
-        });
-      }
+        // Initialize video in background
+        await _controller!.initialize();
 
-      _controller!.addListener(() {
-        if (mounted && _controller!.value.isPlaying != _isPlaying) {
+        if (!mounted) {
+          _controller?.dispose();
+          _controller = null;
+          return;
+        }
+
+        if (mounted) {
           setState(() {
-            _isPlaying = _controller!.value.isPlaying;
+            _isInitialized = true;
+            _isInitializing = false;
           });
         }
+
+        _controller!.addListener(() {
+          if (mounted &&
+              _controller != null &&
+              _controller!.value.isPlaying != _isPlaying) {
+            setState(() {
+              _isPlaying = _controller!.value.isPlaying;
+            });
+          }
+        });
       });
     } catch (e) {
       debugPrint('Error initializing full-screen video: $e');
+      _isInitializing = false;
     }
   }
 
