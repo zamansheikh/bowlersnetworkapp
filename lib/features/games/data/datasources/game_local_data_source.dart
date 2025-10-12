@@ -1,6 +1,4 @@
 import 'dart:convert';
-import 'dart:io';
-
 import 'package:injectable/injectable.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -77,13 +75,6 @@ class GameLocalDataSourceImpl implements GameLocalDataSource {
 
   Future<void> _saveGames(List<BowlingGameModel> games) async {
     final gamesJson = json.encode(games.map((g) => g.toJson()).toList());
-    //Also game this game to a json file --> file path:  assets/games/games.json
-    try {
-      final file = File('assets/games/games.json');
-      await file.writeAsString(gamesJson);
-    } catch (e) {
-      print('Error saving games to JSON file: $e');
-    }
     await _prefs.setString(_gamesKey, gamesJson);
   }
 }

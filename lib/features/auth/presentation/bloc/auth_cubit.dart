@@ -63,36 +63,51 @@ class AuthCubit extends Cubit<AuthState> {
   }
 
   Future<void> signIn(String username, String password) async {
+    debugPrint('🔐 Auth: Starting signIn');
     emit(AuthLoading());
 
     // Ensure minimum loading duration for better UX
     final stopwatch = Stopwatch()..start();
 
+    debugPrint('🔐 Auth: Calling login API');
     final result = await login(
       LoginParams(username: username, password: password),
     );
 
     result.fold(
       (failure) {
+        debugPrint('❌ Auth: Login failed: $failure');
         emit(AuthError(failure.toString()));
       },
       (token) async {
+        debugPrint('✅ Auth: Login successful, fetching profile');
         final profileResult = await getProfile(NoParams());
         profileResult.fold(
           (failure) {
+            debugPrint('❌ Auth: Get profile failed: $failure');
             emit(AuthError(failure.toString()));
           },
           (user) async {
+            debugPrint('✅ Auth: Profile fetched successfully');
+
             // Ensure minimum loading time of 800ms for better UX
             final elapsed = stopwatch.elapsedMilliseconds;
             if (elapsed < 800) {
-              await Future.delayed(Duration(milliseconds: 800 - elapsed));
+              final remaining = 800 - elapsed;
+              debugPrint('⏳ Auth: Waiting ${remaining}ms for better UX');
+              await Future.delayed(Duration(milliseconds: remaining));
             }
 
             // Check if user is UserModel and has isComplete field
             if (user is UserModel && !user.isComplete) {
+              debugPrint(
+                '📝 Auth: Profile incomplete, redirecting to completion',
+              );
               emit(AuthenticatedIncompleteProfile(token: token, user: user));
             } else {
+              debugPrint(
+                '🏠 Auth: Authentication complete, redirecting to home',
+              );
               emit(Authenticated(token: token, user: user));
             }
           },

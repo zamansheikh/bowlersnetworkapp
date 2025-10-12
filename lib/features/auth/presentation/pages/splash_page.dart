@@ -43,9 +43,17 @@ class _SplashPageState extends State<SplashPage>
     _animationController.forward();
 
     // Start auth check after animations begin
+    // Only if we're in initial state (not already loading from signin)
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      debugPrint('🚀 Splash: Starting auth check');
-      context.read<AuthCubit>().checkAuthStatus();
+      final authState = context.read<AuthCubit>().state;
+      if (authState is AuthInitial) {
+        debugPrint('🚀 Splash: Starting auth check');
+        context.read<AuthCubit>().checkAuthStatus();
+      } else {
+        debugPrint(
+          '🚀 Splash: Already in auth flow (${authState.runtimeType}), skipping check',
+        );
+      }
     });
   }
 

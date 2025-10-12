@@ -38,14 +38,7 @@ class _SignInPageState extends State<SignInPage> {
               horizontal: 20.0,
               vertical: AppSpacing.lg,
             ),
-            child: BlocConsumer<AuthCubit, AuthState>(
-              listener: (context, state) {
-                if (state is Authenticated) {
-                  context.go('/');
-                } else if (state is AuthenticatedIncompleteProfile) {
-                  context.go('/complete-profile');
-                }
-              },
+            child: BlocBuilder<AuthCubit, AuthState>(
               builder: (context, state) {
                 return Form(
                   key: _formKey,
