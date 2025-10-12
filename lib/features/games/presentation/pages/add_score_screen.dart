@@ -359,11 +359,80 @@ class _FrameScoreTile extends StatelessWidget {
   }
 }
 
-class _PinDeck extends StatelessWidget {
+class _PinDeck extends StatefulWidget {
   const _PinDeck({required this.state, required this.onPinTap});
 
   final AddScoreState state;
   final ValueChanged<int> onPinTap;
+
+  @override
+  State<_PinDeck> createState() => _PinDeckState();
+}
+
+class _PinDeckState extends State<_PinDeck> {
+  final Set<int> _swipedPins = {};
+  bool _isSwiping = false;
+
+  void _handlePanStart(DragStartDetails details, RenderBox box) {
+    setState(() {
+      _isSwiping = true;
+      _swipedPins.clear();
+    });
+    _checkPinAtPosition(details.localPosition, box);
+  }
+
+  void _handlePanUpdate(DragUpdateDetails details, RenderBox box) {
+    if (!_isSwiping) return;
+    _checkPinAtPosition(details.localPosition, box);
+  }
+
+  void _handlePanEnd(DragEndDetails details) {
+    setState(() {
+      _isSwiping = false;
+      _swipedPins.clear();
+    });
+  }
+
+  void _checkPinAtPosition(Offset position, RenderBox box) {
+    final width = box.size.width;
+    final height = box.size.height;
+    final radius = (width / 16).clamp(22.0, 32.0) * 1.5;
+
+    final positions = {
+      1: Offset(0.5 * width, 0.85 * height),
+      2: Offset(0.37 * width, 0.6 * height),
+      3: Offset(0.63 * width, 0.6 * height),
+      4: Offset(0.25 * width, 0.35 * height),
+      5: Offset(0.5 * width, 0.35 * height),
+      6: Offset(0.75 * width, 0.35 * height),
+      7: Offset(0.15 * width, 0.1 * height),
+      8: Offset(0.37 * width, 0.1 * height),
+      9: Offset(0.63 * width, 0.1 * height),
+      10: Offset(0.85 * width, 0.1 * height),
+    };
+
+    for (final entry in positions.entries) {
+      final pinNumber = entry.key;
+      final pinCenter = entry.value;
+      final distance = (position - pinCenter).distance;
+
+      // Check if touch is within pin radius
+      if (distance <= radius && !_swipedPins.contains(pinNumber)) {
+        final availablePins = widget.state.remainingPins;
+        final isAvailable = availablePins.contains(pinNumber);
+        final isDisabled = widget.state.currentIsFoul || !isAvailable;
+
+        if (!isDisabled) {
+          _swipedPins.add(pinNumber);
+          widget.onPinTap(pinNumber);
+
+          // Add haptic feedback for better UX
+          HapticFeedback.lightImpact();
+        }
+        break;
+      }
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -414,42 +483,55 @@ class _PinDeck extends StatelessWidget {
             10: const Offset(0.85, 0.1),
           };
 
-          return Container(
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(20),
-              color: Colors.white,
-              border: Border.all(color: const Color(0xFFE5E7EB), width: 1.5),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withValues(alpha: 0.04),
-                  blurRadius: 15,
-                  offset: const Offset(0, 4),
-                ),
-              ],
-            ),
-            child: Stack(
-              children: positions.entries.map((entry) {
-                final pinNumber = entry.key;
-                final position = entry.value;
-                final availablePins = state.remainingPins;
-                final isAvailable = availablePins.contains(pinNumber);
-                final isKnocked = state.currentKnockedPins.contains(pinNumber);
-                final isStanding = isAvailable && !isKnocked;
-                final isDisabled = state.currentIsFoul || !isAvailable;
-
-                return Positioned(
-                  left: position.dx * width - radius * 1.5,
-                  top: position.dy * height - radius,
-                  child: _Pin(
-                    number: pinNumber,
-                    radius: radius * 1.5,
-                    isStanding: isStanding,
-                    isKnocked: isKnocked,
-                    isDisabled: isDisabled,
-                    onTap: () => onPinTap(pinNumber),
+          return GestureDetector(
+            onPanStart: (details) {
+              final box = context.findRenderObject() as RenderBox;
+              _handlePanStart(details, box);
+            },
+            onPanUpdate: (details) {
+              final box = context.findRenderObject() as RenderBox;
+              _handlePanUpdate(details, box);
+            },
+            onPanEnd: _handlePanEnd,
+            child: Container(
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(20),
+                color: Colors.white,
+                border: Border.all(color: const Color(0xFFE5E7EB), width: 1.5),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withValues(alpha: 0.04),
+                    blurRadius: 15,
+                    offset: const Offset(0, 4),
                   ),
-                );
-              }).toList(),
+                ],
+              ),
+              child: Stack(
+                children: positions.entries.map((entry) {
+                  final pinNumber = entry.key;
+                  final position = entry.value;
+                  final availablePins = widget.state.remainingPins;
+                  final isAvailable = availablePins.contains(pinNumber);
+                  final isKnocked = widget.state.currentKnockedPins.contains(
+                    pinNumber,
+                  );
+                  final isStanding = isAvailable && !isKnocked;
+                  final isDisabled = widget.state.currentIsFoul || !isAvailable;
+
+                  return Positioned(
+                    left: position.dx * width - radius * 1.5,
+                    top: position.dy * height - radius,
+                    child: _Pin(
+                      number: pinNumber,
+                      radius: radius * 1.5,
+                      isStanding: isStanding,
+                      isKnocked: isKnocked,
+                      isDisabled: isDisabled,
+                      onTap: () => widget.onPinTap(pinNumber),
+                    ),
+                  );
+                }).toList(),
+              ),
             ),
           );
         },
@@ -771,24 +853,24 @@ class _CircularIconButton extends StatelessWidget {
   const _CircularIconButton({
     required this.icon,
     required this.onTap,
-    this.backgroundColor = Colors.white,
-    this.iconColor = const Color(0xFF8BC342),
     this.isEnabled = true,
   });
 
   final IconData icon;
   final VoidCallback onTap;
-  final Color backgroundColor;
-  final Color iconColor;
   final bool isEnabled;
 
   @override
   Widget build(BuildContext context) {
     final effectiveBackground = isEnabled
-        ? backgroundColor
+        ? Colors.white
         : const Color(0xFFF3F4F6);
-    final effectiveBorder = isEnabled ? iconColor : const Color(0xFFD1D5DB);
-    final effectiveIcon = isEnabled ? iconColor : const Color(0xFF9CA3AF);
+    final effectiveBorder = isEnabled
+        ? const Color(0xFF8BC342)
+        : const Color(0xFFD1D5DB);
+    final effectiveIcon = isEnabled
+        ? const Color(0xFF8BC342)
+        : const Color(0xFF9CA3AF);
 
     final shadows = isEnabled
         ? [
