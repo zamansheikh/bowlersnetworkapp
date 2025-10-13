@@ -2,22 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../../domain/entities/frame_entity.dart';
 import '../../../domain/entities/throw_entity.dart';
-
-const Set<int> _fullPinSet = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10};
-
-// Physical neighbors in a bowling pin rack used to determine split groupings.
-const Map<int, List<int>> _pinNeighbors = {
-  1: [2, 3, 5],
-  2: [1, 3, 4, 5],
-  3: [1, 2, 5, 6],
-  4: [2, 5, 7, 8],
-  5: [1, 2, 3, 4, 6, 8, 9],
-  6: [3, 5, 9, 10],
-  7: [4, 8],
-  8: [4, 5, 7, 9],
-  9: [5, 6, 8, 10],
-  10: [6, 9],
-};
+import '../../../utils/bowling_pin_utils.dart';
 
 class FrameScoreTile extends StatelessWidget {
   const FrameScoreTile({
@@ -214,139 +199,9 @@ String _symbolForFirstThrow(ThrowEntity throwEntity) {
 Set<int> _splitThrowIndexes(FrameEntity frame) {
   final result = <int>{};
   for (var i = 0; i < frame.throws.length; i++) {
-    if (_isSplit(frame, i)) {
+    if (isSplitLeave(frame, i)) {
       result.add(i);
     }
   }
   return result;
-}
-
-bool _isSplit(FrameEntity frame, int throwIndex) {
-  if (throwIndex < 0 || throwIndex >= frame.throws.length) {
-    return false;
-  }
-
-  if (frame.number < 10 && throwIndex != 0) {
-    return false; // Only first ball can create a split in frames 1-9.
-  }
-
-  if (frame.number == 10 && throwIndex > 1) {
-    return false; // No split context after the final ball in the tenth frame.
-  }
-
-  final ThrowEntity currentThrow = frame.throws[throwIndex];
-  if (currentThrow.isFoul || currentThrow.knockedPins.isEmpty) {
-    return false;
-  }
-
-  final Set<int> standingBefore = _standingBeforeThrow(
-    frame,
-    throwIndex,
-  ).toSet();
-  final Set<int> standingAfter = _applyThrowToStanding(
-    standingBefore,
-    currentThrow,
-  );
-
-  if (standingAfter.length < 2) {
-    return false; // Need at least two pins for a split.
-  }
-
-  if (standingAfter.contains(1)) {
-    return false; // Head pin still standing, not a split.
-  }
-
-  final int clusters = _countClusters(standingAfter);
-  return clusters > 1;
-}
-
-Set<int> _standingBeforeThrow(FrameEntity frame, int throwIndex) {
-  var standing = _fullPinSet.toSet();
-  if (frame.number < 10) {
-    for (var i = 0; i < throwIndex && i < frame.throws.length; i++) {
-      standing = _applyThrowToStanding(standing, frame.throws[i]);
-    }
-    return standing;
-  }
-
-  if (throwIndex <= 0) {
-    return standing;
-  }
-
-  final ThrowEntity first = frame.throws.isNotEmpty
-      ? _clipThrow(frame.throws[0], standing)
-      : ThrowEntity(knockedPins: <int>{});
-  if (throwIndex == 1) {
-    return _standingBeforeSecondInTenth(first);
-  }
-
-  final ThrowEntity second = frame.throws.length > 1
-      ? _clipThrow(frame.throws[1], _standingBeforeSecondInTenth(first))
-      : ThrowEntity(knockedPins: <int>{});
-  return _standingBeforeThirdInTenth(first, second);
-}
-
-Set<int> _applyThrowToStanding(Set<int> standing, ThrowEntity throwEntity) {
-  final nextStanding = Set<int>.from(standing);
-  if (!throwEntity.isFoul) {
-    nextStanding.removeAll(throwEntity.knockedPins);
-  }
-  return nextStanding;
-}
-
-ThrowEntity _clipThrow(ThrowEntity throwEntity, Set<int> standingBefore) {
-  if (throwEntity.isFoul) {
-    return const ThrowEntity(knockedPins: <int>{}, isFoul: true);
-  }
-  final clipped = throwEntity.knockedPins
-      .where((pin) => standingBefore.contains(pin))
-      .toSet();
-  return ThrowEntity(knockedPins: clipped, isFoul: false);
-}
-
-Set<int> _standingBeforeSecondInTenth(ThrowEntity first) {
-  if (!first.isFoul && first.pinsKnocked == 10) {
-    return _fullPinSet.toSet();
-  }
-  return _applyThrowToStanding(_fullPinSet, first);
-}
-
-Set<int> _standingBeforeThirdInTenth(ThrowEntity first, ThrowEntity second) {
-  if (!first.isFoul && first.pinsKnocked == 10) {
-    if (!second.isFoul && second.pinsKnocked == 10) {
-      return _fullPinSet.toSet();
-    }
-    return _applyThrowToStanding(_fullPinSet, second);
-  }
-
-  if (!first.isFoul &&
-      !second.isFoul &&
-      first.pinsKnocked + second.pinsKnocked == 10) {
-    return _fullPinSet.toSet();
-  }
-
-  final standingBeforeSecond = _standingBeforeSecondInTenth(first);
-  return _applyThrowToStanding(standingBeforeSecond, second);
-}
-
-int _countClusters(Set<int> pins) {
-  final visited = <int>{};
-  var clusters = 0;
-
-  for (final pin in pins) {
-    if (visited.contains(pin)) continue;
-    clusters++;
-    final queue = <int>[pin];
-    while (queue.isNotEmpty) {
-      final current = queue.removeLast();
-      if (!visited.add(current)) continue;
-      for (final neighbor in _pinNeighbors[current] ?? const <int>[]) {
-        if (pins.contains(neighbor) && !visited.contains(neighbor)) {
-          queue.add(neighbor);
-        }
-      }
-    }
-  }
-
-  return clusters;
 }
