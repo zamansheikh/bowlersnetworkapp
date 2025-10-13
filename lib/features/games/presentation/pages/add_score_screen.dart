@@ -166,5 +166,3 @@ class AddScoreView extends StatelessWidget {
     );
   }
 }
-
-
