@@ -7,23 +7,35 @@ import '../../domain/entities/bowling_game_entity.dart';
 import '../../domain/entities/frame_entity.dart';
 import '../../domain/entities/throw_entity.dart';
 import '../../domain/repositories/game_repository.dart';
+import '../../../../core/di/injection.dart';
+import '../../domain/services/pin_settings_service.dart';
 import 'add_score_event.dart';
 import 'add_score_state.dart';
 
 @injectable
 class AddScoreBloc extends Bloc<AddScoreEvent, AddScoreState> {
   final GameRepository _gameRepository;
+  final PinSettingsService _pinSettingsService;
   static const List<int> _pinNumbers = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
 
   static Set<int> _fullPinSet() => _pinNumbers.toSet();
+  static Set<int> _initialKnockedPins() {
+    final service = getIt<PinSettingsService>();
+    return service.pinsKnockedByDefault ? _fullPinSet() : <int>{};
+  }
+
+  Set<int> _defaultKnockedPins() {
+    return _pinSettingsService.pinsKnockedByDefault ? _fullPinSet() : <int>{};
+  }
 
   AddScoreBloc(this._gameRepository)
-    : super(
+    : _pinSettingsService = getIt<PinSettingsService>(),
+      super(
         AddScoreState(
           frames: const <FrameEntity>[],
           currentFrame: 1,
           currentThrow: 1,
-          currentKnockedPins: _fullPinSet(),
+          currentKnockedPins: _initialKnockedPins(),
           currentIsFoul: false,
           cumulativeScores: const <int>[],
           completionScore: null,
@@ -46,7 +58,7 @@ class AddScoreBloc extends Bloc<AddScoreEvent, AddScoreState> {
       frames: frames,
       currentFrame: 1,
       currentThrow: 1,
-      currentKnockedPins: _fullPinSet(),
+      currentKnockedPins: _defaultKnockedPins(),
       currentIsFoul: false,
       cumulativeScores: const <int>[],
       completionScore: null,
@@ -69,7 +81,7 @@ class AddScoreBloc extends Bloc<AddScoreEvent, AddScoreState> {
     // Find the next position to edit (first empty throw)
     int currentFrame = 1;
     int currentThrow = 1;
-    Set<int> currentKnockedPins = _fullPinSet();
+    Set<int> currentKnockedPins = _defaultKnockedPins();
     bool currentIsFoul = false;
 
     // Iterate through frames to find where to continue
@@ -84,7 +96,7 @@ class AddScoreBloc extends Bloc<AddScoreEvent, AddScoreState> {
           // This frame has no throws yet
           currentFrame = frameNumber;
           currentThrow = 1;
-          currentKnockedPins = _fullPinSet();
+          currentKnockedPins = _defaultKnockedPins();
           foundPosition = true;
         } else if (frame.throws.length == 1) {
           // Check if this frame needs a second throw
@@ -93,7 +105,6 @@ class AddScoreBloc extends Bloc<AddScoreEvent, AddScoreState> {
             // Need second throw
             currentFrame = frameNumber;
             currentThrow = 2;
-            _pinsStandingBeforeThrow(game.frames, i, 1);
             currentKnockedPins = <int>{};
             foundPosition = true;
           }
@@ -105,13 +116,15 @@ class AddScoreBloc extends Bloc<AddScoreEvent, AddScoreState> {
         if (frame.throws.isEmpty) {
           currentFrame = 10;
           currentThrow = 1;
-          currentKnockedPins = _fullPinSet();
+          currentKnockedPins = _defaultKnockedPins();
           foundPosition = true;
         } else if (frame.throws.length == 1) {
           currentFrame = 10;
           currentThrow = 2;
           final standingBefore = _pinsStandingBeforeThrow(frames, i, 1);
-          currentKnockedPins = standingBefore.isEmpty ? _fullPinSet() : <int>{};
+          currentKnockedPins = standingBefore.length == 10
+              ? _defaultKnockedPins()
+              : <int>{};
           foundPosition = true;
         } else if (frame.throws.length == 2) {
           // Check if third throw is needed
@@ -121,10 +134,7 @@ class AddScoreBloc extends Bloc<AddScoreEvent, AddScoreState> {
           if (needsThird) {
             currentFrame = 10;
             currentThrow = 3;
-            final standingBefore = _pinsStandingBeforeThrow(frames, i, 2);
-            currentKnockedPins = standingBefore.isEmpty
-                ? _fullPinSet()
-                : <int>{};
+            currentKnockedPins = <int>{};
             foundPosition = true;
           }
         }
@@ -244,18 +254,12 @@ class AddScoreBloc extends Bloc<AddScoreEvent, AddScoreState> {
       return;
     }
 
-    final standingBefore = _pinsStandingBeforeThrow(
-      state.frames,
-      nextEntry.frame - 1,
-      nextEntry.throwNumber - 1,
-    );
-
     final newState = state.copyWith(
       currentFrame: nextEntry.frame,
       currentThrow: nextEntry.throwNumber,
-      // For first throw, start with all pins knocked (full set)
-      // For subsequent throws, start with no pins knocked (empty set) to show standing pins
-      currentKnockedPins: nextEntry.throwNumber == 1 ? standingBefore : <int>{},
+      currentKnockedPins: nextEntry.throwNumber == 1
+          ? _defaultKnockedPins()
+          : <int>{},
       currentIsFoul: false,
     );
     _emitState(emit, newState);
@@ -420,17 +424,10 @@ class AddScoreBloc extends Bloc<AddScoreEvent, AddScoreState> {
       newKnockedPins = clippedNext.knockedPins;
       newIsFoul = clippedNext.isFoul;
     } else if (nextEntry != null) {
-      final standingBeforeNext = _pinsStandingBeforeThrow(
-        updatedFrames,
-        nextEntry.frame - 1,
-        nextEntry.throwNumber - 1,
-      );
       newFrame = nextEntry.frame;
       newThrow = nextEntry.throwNumber;
-      // For first throw (throwNumber == 1), start with all pins knocked (full set)
-      // For subsequent throws, start with no pins knocked (empty set) to show standing pins
       newKnockedPins = nextEntry.throwNumber == 1
-          ? standingBeforeNext
+          ? _defaultKnockedPins()
           : <int>{};
       newIsFoul = false;
     } else {

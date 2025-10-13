@@ -9,6 +9,7 @@ import '../../../../core/di/injection.dart';
 import '../bloc/games_list_bloc.dart';
 import '../bloc/games_list_event.dart';
 import '../bloc/games_list_state.dart';
+import '../../domain/services/pin_settings_service.dart';
 
 class GamesListPage extends StatelessWidget {
   const GamesListPage({super.key});
@@ -39,6 +40,13 @@ class GamesListView extends StatelessWidget {
           title: const Text('My Games'),
           backgroundColor: const Color(0xFF8BC342),
           foregroundColor: Colors.white,
+          actions: [
+            IconButton(
+              icon: const Icon(Icons.settings_outlined),
+              tooltip: 'Game settings',
+              onPressed: () => _showSettings(context),
+            ),
+          ],
         ),
         body: BlocBuilder<GamesListBloc, GamesListState>(
           builder: (context, state) {
@@ -297,6 +305,83 @@ class GamesListView extends StatelessWidget {
           ),
         ],
       ),
+    );
+  }
+
+  void _showSettings(BuildContext context) {
+    final pinSettings = getIt<PinSettingsService>();
+    final theme = Theme.of(context);
+    showModalBottomSheet<void>(
+      context: context,
+      backgroundColor: Colors.white,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+      ),
+      builder: (sheetContext) {
+        var knockedByDefault = pinSettings.pinsKnockedByDefault;
+        return StatefulBuilder(
+          builder: (context, setState) {
+            return Padding(
+              padding: const EdgeInsets.fromLTRB(24, 24, 24, 32),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Game settings',
+                    style: theme.textTheme.titleMedium?.copyWith(
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+                  Text(
+                    'Choose how the pin deck behaves when you open the score sheet.',
+                    style: theme.textTheme.bodyMedium?.copyWith(
+                      color: const Color(0xFF6B7280),
+                    ),
+                  ),
+                  const SizedBox(height: 20),
+                  Material(
+                    color: const Color(0xFFF9FAFB),
+                    borderRadius: BorderRadius.circular(16),
+                    child: SwitchListTile.adaptive(
+                      value: knockedByDefault,
+                      contentPadding: const EdgeInsets.symmetric(
+                        horizontal: 16,
+                        vertical: 4,
+                      ),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(16),
+                      ),
+                      title: const Text(
+                        'Pins knocked by default',
+                        style: TextStyle(
+                          fontWeight: FontWeight.w600,
+                          fontSize: 16,
+                        ),
+                      ),
+                      subtitle: const Text(
+                        'Enable to keep pins down when you start a throw. Disable to see all pins standing.',
+                      ),
+                      onChanged: (value) async {
+                        setState(() => knockedByDefault = value);
+                        await pinSettings.setPinsKnockedByDefault(value);
+                      },
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    'Changes apply the next time you open or advance to a fresh frame.',
+                    style: theme.textTheme.bodySmall?.copyWith(
+                      color: const Color(0xFF9CA3AF),
+                    ),
+                  ),
+                ],
+              ),
+            );
+          },
+        );
+      },
     );
   }
 }
