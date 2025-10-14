@@ -283,7 +283,7 @@ class _Pin extends StatelessWidget {
                 'assets/icons/bowling_pin.svg',
                 width: size,
                 colorFilter: ColorFilter.mode(
-                  isKnocked ? const Color(0xFF8BC342) : const Color(0xFFE43F4E),
+                  isKnocked ? const Color(0xFFE43F4E) : const Color(0xFF8BC342),
                   BlendMode.srcIn,
                 ),
               ),
