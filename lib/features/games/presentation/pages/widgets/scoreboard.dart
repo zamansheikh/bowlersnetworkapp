@@ -1,5 +1,3 @@
-
-
 import 'package:flutter/material.dart';
 
 import '../../../domain/entities/frame_entity.dart';
@@ -22,26 +20,70 @@ class Scoreboard extends StatelessWidget {
       padding: const EdgeInsets.all(6),
       child: SingleChildScrollView(
         scrollDirection: Axis.horizontal,
-        child: Row(
-          children: frames.map((frame) {
-            final cumulative = frame.number <= state.cumulativeScores.length
-                ? state.cumulativeScores[frame.number - 1]
-                : null;
-            final isActive = state.currentFrame == frame.number;
-            final maxIndex = frame.number == 10 ? 2 : 1;
-            final currentIndex = state.currentThrow - 1;
-            final activeThrowIndex = isActive
-                ? (currentIndex < 0
-                      ? 0
-                      : (currentIndex > maxIndex ? maxIndex : currentIndex))
-                : null;
-            return FrameScoreTile(
-              frame: frame,
-              cumulativeScore: cumulative,
-              isActive: isActive,
-              activeThrowIndex: activeThrowIndex,
-            );
-          }).toList(),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            // Frame numbers row
+            Row(
+              children: frames.map((frame) {
+                final isTenth = frame.number == 10;
+                final double tileWidth = isTenth ? 48 : 32;
+                final isActive = state.currentFrame == frame.number;
+                final Color borderColor = isActive
+                    ? const Color(0xFF8BC342)
+                    : const Color(0xFFE5E7EB);
+                final Color textColor = isActive
+                    ? const Color(0xFF8BC342)
+                    : const Color(0xFF6B7280);
+
+                return Container(
+                  width: tileWidth,
+                  height: 24,
+                  margin: const EdgeInsets.symmetric(horizontal: 2),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(4),
+                    border: Border.all(
+                      color: borderColor,
+                      width: isActive ? 2 : 1,
+                    ),
+                  ),
+                  alignment: Alignment.center,
+                  child: Text(
+                    '${frame.number}',
+                    style: TextStyle(
+                      fontSize: 12,
+                      fontWeight: isActive ? FontWeight.w700 : FontWeight.w600,
+                      color: textColor,
+                    ),
+                  ),
+                );
+              }).toList(),
+            ),
+            const SizedBox(height: 4),
+            // Score tiles row
+            Row(
+              children: frames.map((frame) {
+                final cumulative = frame.number <= state.cumulativeScores.length
+                    ? state.cumulativeScores[frame.number - 1]
+                    : null;
+                final isActive = state.currentFrame == frame.number;
+                final maxIndex = frame.number == 10 ? 2 : 1;
+                final currentIndex = state.currentThrow - 1;
+                final activeThrowIndex = isActive
+                    ? (currentIndex < 0
+                          ? 0
+                          : (currentIndex > maxIndex ? maxIndex : currentIndex))
+                    : null;
+                return FrameScoreTile(
+                  frame: frame,
+                  cumulativeScore: cumulative,
+                  isActive: isActive,
+                  activeThrowIndex: activeThrowIndex,
+                );
+              }).toList(),
+            ),
+          ],
         ),
       ),
     );

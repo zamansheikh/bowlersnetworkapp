@@ -1,4 +1,3 @@
-
 import 'package:flutter/material.dart';
 
 import '../../bloc/add_score_state.dart';
@@ -6,7 +5,8 @@ import 'miss_or_foul_button.dart';
 import 'shortcut_button.dart';
 
 class ShortcutRow extends StatelessWidget {
-  const ShortcutRow({super.key, 
+  const ShortcutRow({
+    super.key,
     required this.state,
     required this.onFoul,
     required this.onMiss,
@@ -30,7 +30,6 @@ class ShortcutRow extends StatelessWidget {
       padding: const EdgeInsets.symmetric(horizontal: 16.0),
       child: Row(
         children: [
-          MissFoulButton(onMiss: onMiss, onFoul: onFoul),
           ShortcutButton(
             label: strikeLabel,
             textColor: Colors.white,
@@ -38,6 +37,7 @@ class ShortcutRow extends StatelessWidget {
             backgroundColor: const Color(0xFF8BC342),
             onTap: onStrikeOrSpare,
           ),
+          MissFoulButton(onMiss: onMiss, onFoul: onFoul),
         ],
       ),
     );

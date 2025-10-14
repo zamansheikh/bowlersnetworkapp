@@ -129,7 +129,10 @@ class AddScoreView extends StatelessWidget {
                 return Column(
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
-                    Header(onBackPressed: () => context.pop()),
+                    Header(
+                      onBackPressed: () => context.pop(),
+                      onSave: () => bloc.add(SaveGame()),
+                    ),
                     const SizedBox(height: 20),
                     Scoreboard(state: state),
                     const SizedBox(height: 16),
@@ -148,12 +151,9 @@ class AddScoreView extends StatelessWidget {
                     const SizedBox(height: 18),
                     BottomControls(
                       onPrevious: () => bloc.add(PreviousThrow()),
-                      onSave: () => bloc.add(SaveGame()),
                       onNext: () => bloc.add(NextThrow()),
                       canGoPrevious: state.canGoPrevious,
                       canGoNext: state.canGoNext,
-                      canSave: true, // Always allow saving
-                      isGameComplete: state.isGameComplete,
                     ),
                     const SizedBox(height: 16), // Bottom padding
                   ],
