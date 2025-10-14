@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../bloc/add_score_state.dart';
-import 'miss_or_foul_button.dart';
+import 'smart_next_button.dart';
 import 'shortcut_button.dart';
 
 class ShortcutRow extends StatelessWidget {
@@ -11,12 +11,14 @@ class ShortcutRow extends StatelessWidget {
     required this.onFoul,
     required this.onMiss,
     required this.onStrikeOrSpare,
+    required this.onNext,
   });
 
   final AddScoreState state;
   final VoidCallback onFoul;
   final VoidCallback onMiss;
   final VoidCallback onStrikeOrSpare;
+  final VoidCallback onNext;
 
   @override
   Widget build(BuildContext context) {
@@ -37,7 +39,7 @@ class ShortcutRow extends StatelessWidget {
             backgroundColor: const Color(0xFF8BC342),
             onTap: onStrikeOrSpare,
           ),
-          MissFoulButton(onMiss: onMiss, onFoul: onFoul),
+          SmartNextButton(onNext: onNext, onMiss: onMiss, onFoul: onFoul),
         ],
       ),
     );

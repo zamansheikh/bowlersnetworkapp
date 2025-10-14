@@ -147,6 +147,7 @@ class AddScoreView extends StatelessWidget {
                       onMiss: () => bloc.add(PressShortcut(ShortcutType.miss)),
                       onStrikeOrSpare: () =>
                           bloc.add(PressShortcut(ShortcutType.strikeOrSpare)),
+                      onNext: () => bloc.add(NextThrow()),
                     ),
                     const SizedBox(height: 18),
                     BottomControls(
