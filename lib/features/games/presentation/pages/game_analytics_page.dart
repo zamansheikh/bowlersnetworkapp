@@ -597,25 +597,15 @@ class _PrimaryStatsGrid extends StatelessWidget {
       ),
     ];
 
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        final maxWidth = constraints.maxWidth;
-        final bool singleColumn = maxWidth < 520;
-        final double tileWidth = singleColumn ? maxWidth : (maxWidth - 16) / 2;
-
-        return Wrap(
-          spacing: 16,
-          runSpacing: 16,
-          children: tiles
-              .map(
-                (data) => SizedBox(
-                  width: tileWidth,
-                  child: _PrimaryStatTile(data: data),
-                ),
-              )
-              .toList(),
-        );
-      },
+    return Column(
+      children: tiles
+          .map(
+            (data) => Padding(
+              padding: const EdgeInsets.only(bottom: 12),
+              child: _PrimaryStatTile(data: data),
+            ),
+          )
+          .toList(),
     );
   }
 }
@@ -643,58 +633,73 @@ class _PrimaryStatTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Card(
-      elevation: 1,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Container(
-              width: 40,
-              height: 40,
-              decoration: BoxDecoration(
-                color: data.accent.withValues(alpha: 0.12),
-                borderRadius: BorderRadius.circular(12),
-              ),
-              child: Icon(data.icon, color: data.accent),
-            ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    data.label,
-                    style: const TextStyle(
-                      fontSize: 12,
-                      color: Color(0xFF6B7280),
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                  const SizedBox(height: 4),
-                  Text(
-                    data.value,
-                    style: const TextStyle(
-                      fontSize: 28,
-                      fontWeight: FontWeight.bold,
-                      color: Color(0xFF111827),
-                    ),
-                  ),
-                  const SizedBox(height: 4),
-                  Text(
-                    data.helper,
-                    style: const TextStyle(
-                      fontSize: 12,
-                      color: Color(0xFF9CA3AF),
-                    ),
-                  ),
-                ],
-              ),
-            ),
+    return Container(
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          colors: [
+            data.accent.withValues(alpha: 0.1),
+            data.accent.withValues(alpha: 0.05),
           ],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
         ),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(
+          color: data.accent.withValues(alpha: 0.2),
+          width: 1.5,
+        ),
+      ),
+      padding: const EdgeInsets.all(16),
+      child: Row(
+        children: [
+          Container(
+            width: 56,
+            height: 56,
+            decoration: BoxDecoration(
+              color: data.accent.withValues(alpha: 0.15),
+              borderRadius: BorderRadius.circular(14),
+            ),
+            child: Icon(data.icon, color: data.accent, size: 28),
+          ),
+          const SizedBox(width: 14),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  data.label,
+                  style: TextStyle(
+                    fontSize: 13,
+                    fontWeight: FontWeight.w600,
+                    color: data.accent,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  data.helper,
+                  style: TextStyle(
+                    fontSize: 11,
+                    color: data.accent.withValues(alpha: 0.6),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.end,
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Text(
+                data.value,
+                style: TextStyle(
+                  fontSize: 28,
+                  fontWeight: FontWeight.w800,
+                  color: data.accent,
+                ),
+              ),
+            ],
+          ),
+        ],
       ),
     );
   }
@@ -711,60 +716,54 @@ class _ConversionBreakdown extends StatelessWidget {
       _ConversionStatData(
         label: 'Strike %',
         value: stats.strikePercentageString,
-        helper: 'Strike rate across frames',
+        helper: 'Strike rate',
+        percentage: _parsePercentage(stats.strikePercentageString),
+        color: const Color(0xFF10B981),
+        icon: Icons.flash_on,
       ),
       _ConversionStatData(
         label: 'Spare %',
         value: stats.sparePercentageString,
-        helper: 'Converted after first throw',
+        helper: 'After first throw',
+        percentage: _parsePercentage(stats.sparePercentageString),
+        color: const Color(0xFF3B82F6),
+        icon: Icons.sports_baseball,
       ),
       _ConversionStatData(
-        label: 'Makeable Spare %',
+        label: 'Makeable %',
         value: stats.makeableSpareConversionString,
-        helper: 'Excludes splits & washouts',
+        helper: 'Excl. splits',
+        percentage: _parsePercentage(stats.makeableSpareConversionString),
+        color: const Color(0xFF8B5CF6),
+        icon: Icons.check_circle,
       ),
       _ConversionStatData(
-        label: 'Split Conversion %',
+        label: 'Split %',
         value: stats.splitConversionString,
-        helper: 'Converted marked splits',
-      ),
-      _ConversionStatData(
-        label: 'Single Pin %',
-        value: stats.singlePinConversionString,
-        helper: 'Single-pin leave conversions',
+        helper: 'Marked splits',
+        percentage: _parsePercentage(stats.splitConversionString),
+        color: const Color(0xFFEC4899),
+        icon: Icons.splitscreen,
       ),
     ];
 
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        final maxWidth = constraints.maxWidth;
-        final bool singleColumn = maxWidth < 520;
-        final double tileWidth = singleColumn ? maxWidth : (maxWidth - 16) / 2;
-
-        return Card(
-          elevation: 1,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(16),
-          ),
-          child: Padding(
-            padding: const EdgeInsets.all(20),
-            child: Wrap(
-              spacing: 16,
-              runSpacing: 16,
-              children: items
-                  .map(
-                    (item) => SizedBox(
-                      width: tileWidth,
-                      child: _ConversionStatTile(data: item),
-                    ),
-                  )
-                  .toList(),
+    return Column(
+      children: items
+          .map(
+            (item) => Padding(
+              padding: const EdgeInsets.only(bottom: 12),
+              child: _ConversionStatTile(data: item),
             ),
-          ),
-        );
-      },
+          )
+          .toList(),
     );
   }
+}
+
+double _parsePercentage(String value) {
+  final numStr = value.replaceAll('%', '').trim();
+  final num = double.tryParse(numStr) ?? 0;
+  return (num / 100).clamp(0, 1);
 }
 
 class _ConversionStatData {
@@ -772,11 +771,17 @@ class _ConversionStatData {
     required this.label,
     required this.value,
     required this.helper,
+    required this.percentage,
+    required this.color,
+    required this.icon,
   });
 
   final String label;
   final String value;
   final String helper;
+  final double percentage;
+  final Color color;
+  final IconData icon;
 }
 
 class _ConversionStatTile extends StatelessWidget {
@@ -787,35 +792,78 @@ class _ConversionStatTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: const Color(0xFFF9FAFB),
-        borderRadius: BorderRadius.circular(12),
+        gradient: LinearGradient(
+          colors: [
+            data.color.withValues(alpha: 0.08),
+            data.color.withValues(alpha: 0.04),
+          ],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(
+          color: data.color.withValues(alpha: 0.2),
+          width: 1.5,
+        ),
       ),
+      padding: const EdgeInsets.all(16),
       child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            data.label,
-            style: const TextStyle(
-              fontSize: 12,
-              fontWeight: FontWeight.w600,
-              color: Color(0xFF6B7280),
-            ),
+          Row(
+            children: [
+              Container(
+                width: 48,
+                height: 48,
+                decoration: BoxDecoration(
+                  color: data.color.withValues(alpha: 0.15),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Icon(data.icon, color: data.color, size: 24),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      data.label,
+                      style: TextStyle(
+                        fontSize: 13,
+                        fontWeight: FontWeight.w600,
+                        color: data.color,
+                      ),
+                    ),
+                    const SizedBox(height: 2),
+                    Text(
+                      data.helper,
+                      style: TextStyle(
+                        fontSize: 11,
+                        color: data.color.withValues(alpha: 0.6),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              Text(
+                data.value,
+                style: TextStyle(
+                  fontSize: 24,
+                  fontWeight: FontWeight.w800,
+                  color: data.color,
+                ),
+              ),
+            ],
           ),
-          const SizedBox(height: 6),
-          Text(
-            data.value,
-            style: const TextStyle(
-              fontSize: 26,
-              fontWeight: FontWeight.w700,
-              color: Color(0xFF111827),
+          const SizedBox(height: 12),
+          ClipRRect(
+            borderRadius: BorderRadius.circular(4),
+            child: LinearProgressIndicator(
+              value: data.percentage,
+              minHeight: 6,
+              backgroundColor: data.color.withValues(alpha: 0.1),
+              valueColor: AlwaysStoppedAnimation(data.color),
             ),
-          ),
-          const SizedBox(height: 4),
-          Text(
-            data.helper,
-            style: const TextStyle(fontSize: 12, color: Color(0xFF9CA3AF)),
           ),
         ],
       ),
