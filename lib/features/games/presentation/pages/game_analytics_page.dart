@@ -303,16 +303,13 @@ class _FramesTab extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final movingAverage = _buildMovingAverage(frames);
-    
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         const _SectionHeading(title: 'Score Trend'),
         const SizedBox(height: 12),
-        _ScoreTrendCard(
-          frameScores: frames,
-          movingAverage: movingAverage,
-        ),
+        _ScoreTrendCard(frameScores: frames, movingAverage: movingAverage),
         const SizedBox(height: 24),
         const _SectionHeading(title: 'Frame-by-Frame Breakdown'),
         const SizedBox(height: 12),
@@ -468,10 +465,7 @@ class _ScoreTrendCard extends StatelessWidget {
     return Container(
       decoration: BoxDecoration(
         gradient: const LinearGradient(
-          colors: [
-            Color(0xFF7C3AED),
-            Color(0xFF5B21B6),
-          ],
+          colors: [Color(0xFF7C3AED), Color(0xFF5B21B6)],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         ),
@@ -514,7 +508,10 @@ class _ScoreTrendCard extends StatelessWidget {
                 ],
               ),
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 12,
+                  vertical: 6,
+                ),
                 decoration: BoxDecoration(
                   color: Colors.white.withValues(alpha: 0.15),
                   borderRadius: BorderRadius.circular(8),
@@ -537,37 +534,34 @@ class _ScoreTrendCard extends StatelessWidget {
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.end,
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              children: List.generate(
-                frameScoresInt.length,
-                (index) {
-                  final score = frameScoresInt[index];
-                  final normalized =
-                      (score - minScore) / (maxScore - minScore + 1).toDouble();
-                  final barHeight = normalized * 60;
+              children: List.generate(frameScoresInt.length, (index) {
+                final score = frameScoresInt[index];
+                final normalized =
+                    (score - minScore) / (maxScore - minScore + 1).toDouble();
+                final barHeight = normalized * 60;
 
-                  // Determine color based on moving average trend
-                  Color barColor = Colors.white;
-                  if (index < movingAverage.length) {
-                    if (score > movingAverage[index] + 5) {
-                      barColor = const Color(0xFF10B981); // Green - above trend
-                    } else if (score < movingAverage[index] - 5) {
-                      barColor = const Color(0xFFF87171); // Red - below trend
-                    }
+                // Determine color based on moving average trend
+                Color barColor = Colors.white;
+                if (index < movingAverage.length) {
+                  if (score > movingAverage[index] + 5) {
+                    barColor = const Color(0xFF10B981); // Green - above trend
+                  } else if (score < movingAverage[index] - 5) {
+                    barColor = const Color(0xFFF87171); // Red - below trend
                   }
+                }
 
-                  return Tooltip(
-                    message: 'Frame ${index + 1}: $score pins',
-                    child: Container(
-                      width: 20,
-                      height: barHeight,
-                      decoration: BoxDecoration(
-                        color: barColor,
-                        borderRadius: BorderRadius.circular(4),
-                      ),
+                return Tooltip(
+                  message: 'Frame ${index + 1}: $score pins',
+                  child: Container(
+                    width: 20,
+                    height: barHeight,
+                    decoration: BoxDecoration(
+                      color: barColor,
+                      borderRadius: BorderRadius.circular(4),
                     ),
-                  );
-                },
-              ),
+                  ),
+                );
+              }),
             ),
           ),
           const SizedBox(height: 12),
@@ -580,10 +574,7 @@ class _ScoreTrendCard extends StatelessWidget {
                 label: 'Above Trend',
               ),
               const SizedBox(width: 20),
-              _TrendLegend(
-                color: Colors.white,
-                label: 'On Trend',
-              ),
+              _TrendLegend(color: Colors.white, label: 'On Trend'),
               const SizedBox(width: 20),
               _TrendLegend(
                 color: const Color(0xFFF87171),
@@ -1684,10 +1675,12 @@ class _AnalyticsStats {
     if (frameScores.length == 1) return 0.0;
 
     final mean = frameScores.reduce((a, b) => a + b) / frameScores.length;
-    final variance = frameScores.fold<double>(
-      0.0,
-      (sum, score) => sum + ((score - mean) * (score - mean)),
-    ) / frameScores.length;
+    final variance =
+        frameScores.fold<double>(
+          0.0,
+          (sum, score) => sum + ((score - mean) * (score - mean)),
+        ) /
+        frameScores.length;
     return math.sqrt(variance);
   }
 
@@ -1696,8 +1689,7 @@ class _AnalyticsStats {
   String get sparePercentageString =>
       _percentage(spares, totalFrames - strikes);
 
-  String get pocketHitPercentageString =>
-      _percentage(pocketHits, totalFrames);
+  String get pocketHitPercentageString => _percentage(pocketHits, totalFrames);
 
   String get makeableSpareConversionString =>
       _percentage(makeableConverted, makeableLeaves);
@@ -2129,8 +2121,7 @@ class _GameTypeIndicator extends StatelessWidget {
                 Text(
                   description,
                   style: theme.textTheme.bodySmall?.copyWith(
-                    color:
-                        theme.colorScheme.onSurface.withValues(alpha: 0.6),
+                    color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
                   ),
                 ),
               ],
