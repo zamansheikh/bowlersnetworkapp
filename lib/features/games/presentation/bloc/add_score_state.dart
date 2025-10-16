@@ -4,6 +4,9 @@ import 'package:equatable/equatable.dart';
 
 import '../../domain/entities/frame_entity.dart';
 import '../../domain/entities/throw_entity.dart';
+import '../../domain/entities/oil_pattern.dart';
+import '../../domain/entities/lane_condition.dart';
+import '../../domain/entities/game_type.dart';
 
 class AddScoreState extends Equatable {
   final String? gameId; // null for new games
@@ -19,6 +22,10 @@ class AddScoreState extends Equatable {
   final bool canGoNext;
   final bool hasPendingChanges;
   final bool gameSaved;
+  final OilPattern? oilPattern;
+  final LaneCondition? laneCondition;
+  final GameType? gameType;
+  final String? laneNumber;
 
   const AddScoreState({
     this.gameId,
@@ -34,6 +41,10 @@ class AddScoreState extends Equatable {
     this.canGoNext = false,
     this.hasPendingChanges = false,
     this.gameSaved = false,
+    this.oilPattern,
+    this.laneCondition,
+    this.gameType,
+    this.laneNumber,
   });
 
   AddScoreState copyWith({
@@ -54,6 +65,14 @@ class AddScoreState extends Equatable {
     bool? hasPendingChanges,
     bool? gameSaved,
     bool setGameSaved = false,
+    OilPattern? oilPattern,
+    bool setOilPattern = false,
+    LaneCondition? laneCondition,
+    bool setLaneCondition = false,
+    GameType? gameType,
+    bool setGameType = false,
+    String? laneNumber,
+    bool setLaneNumber = false,
   }) {
     return AddScoreState(
       gameId: setGameId ? gameId : this.gameId,
@@ -71,6 +90,10 @@ class AddScoreState extends Equatable {
       canGoNext: canGoNext ?? this.canGoNext,
       hasPendingChanges: hasPendingChanges ?? this.hasPendingChanges,
       gameSaved: setGameSaved ? (gameSaved ?? false) : this.gameSaved,
+      oilPattern: setOilPattern ? oilPattern : this.oilPattern,
+      laneCondition: setLaneCondition ? laneCondition : this.laneCondition,
+      gameType: setGameType ? gameType : this.gameType,
+      laneNumber: setLaneNumber ? laneNumber : this.laneNumber,
     );
   }
 
@@ -207,5 +230,9 @@ class AddScoreState extends Equatable {
     canGoNext,
     hasPendingChanges,
     gameSaved,
+    oilPattern,
+    laneCondition,
+    gameType,
+    laneNumber,
   ];
 }

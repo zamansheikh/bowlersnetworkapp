@@ -10,6 +10,7 @@ import '../bloc/add_score_bloc.dart';
 import '../bloc/add_score_event.dart';
 import '../bloc/add_score_state.dart';
 import '../../domain/entities/bowling_game_entity.dart';
+import '../widgets/game_setup_dialog.dart';
 import 'widgets/buttom_controls.dart';
 import 'widgets/header.dart';
 import 'widgets/pin_deck.dart';
@@ -18,8 +19,9 @@ import 'widgets/shortcut_row.dart';
 
 class AddScoreScreen extends StatelessWidget {
   final BowlingGameEntity? initialGame;
+  final dynamic gameSetupData;
 
-  const AddScoreScreen({super.key, this.initialGame});
+  const AddScoreScreen({super.key, this.initialGame, this.gameSetupData});
 
   @override
   Widget build(BuildContext context) {
@@ -29,7 +31,15 @@ class AddScoreScreen extends StatelessWidget {
         if (initialGame != null) {
           bloc.add(LoadExistingGame(initialGame!));
         } else {
-          bloc.add(StartNewGame());
+          final setup = gameSetupData as GameSetupData?;
+          bloc.add(
+            StartNewGame(
+              oilPattern: setup?.oilPattern,
+              laneCondition: setup?.laneCondition,
+              gameType: setup?.gameType,
+              laneNumber: setup?.laneNumber,
+            ),
+          );
         }
         return bloc;
       },

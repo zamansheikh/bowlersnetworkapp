@@ -3,13 +3,31 @@
 import 'package:equatable/equatable.dart';
 
 import '../../domain/entities/bowling_game_entity.dart';
+import '../../domain/entities/game_type.dart';
+import '../../domain/entities/lane_condition.dart';
+import '../../domain/entities/oil_pattern.dart';
 
 abstract class AddScoreEvent extends Equatable {
   @override
   List<Object?> get props => [];
 }
 
-class StartNewGame extends AddScoreEvent {}
+class StartNewGame extends AddScoreEvent {
+  final OilPattern? oilPattern;
+  final LaneCondition? laneCondition;
+  final GameType? gameType;
+  final String? laneNumber;
+
+  StartNewGame({
+    this.oilPattern,
+    this.laneCondition,
+    this.gameType,
+    this.laneNumber,
+  });
+
+  @override
+  List<Object?> get props => [oilPattern, laneCondition, gameType, laneNumber];
+}
 
 class LoadExistingGame extends AddScoreEvent {
   final BowlingGameEntity game;

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../../core/di/injection.dart';
+import '../../domain/entities/bowling_game_entity.dart';
 import '../../domain/entities/frame_entity.dart';
 import '../../domain/entities/throw_entity.dart';
 import '../../domain/repositories/game_repository.dart';
@@ -108,6 +109,8 @@ class _GameAnalyticsView extends StatelessWidget {
               completed: (game.isComplete as bool?) ?? true,
               framesCompleted: stats.completedFrames,
             ),
+            const SizedBox(height: 24),
+            _EnvironmentSection(game: game),
             const SizedBox(height: 24),
             const _SectionHeading(title: 'Key Stats'),
             const SizedBox(height: 12),
@@ -1090,4 +1093,112 @@ List<int> _nextPins(List<FrameEntity> frames, int startFrame, int count) {
     }
   }
   return values;
+}
+
+// === Environment Section ===
+class _EnvironmentSection extends StatelessWidget {
+  const _EnvironmentSection({required this.game});
+
+  final BowlingGameEntity game;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: theme.colorScheme.surface,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(
+          color: theme.colorScheme.outline.withValues(alpha: 0.2),
+        ),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Icon(Icons.settings, color: theme.colorScheme.primary, size: 20),
+              const SizedBox(width: 8),
+              Text(
+                'Environment',
+                style: theme.textTheme.titleMedium?.copyWith(
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 16),
+          _EnvironmentRow(
+            label: 'Oil Pattern',
+            value: game.oilPattern.displayName,
+            icon: Icons.water_drop,
+          ),
+          const SizedBox(height: 12),
+          _EnvironmentRow(
+            label: 'Lane Condition',
+            value: game.laneCondition.displayName,
+            icon: Icons.gradient,
+          ),
+          const SizedBox(height: 12),
+          _EnvironmentRow(
+            label: 'Game Type',
+            value: game.gameType.displayName,
+            icon: Icons.emoji_events,
+          ),
+          if (game.laneNumber != null) ...[
+            const SizedBox(height: 12),
+            _EnvironmentRow(
+              label: 'Lane Number',
+              value: game.laneNumber!,
+              icon: Icons.pin_drop,
+            ),
+          ],
+        ],
+      ),
+    );
+  }
+}
+
+class _EnvironmentRow extends StatelessWidget {
+  const _EnvironmentRow({
+    required this.label,
+    required this.value,
+    required this.icon,
+  });
+
+  final String label;
+  final String value;
+  final IconData icon;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
+    return Row(
+      children: [
+        Icon(
+          icon,
+          size: 18,
+          color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
+        ),
+        const SizedBox(width: 12),
+        Expanded(
+          child: Text(
+            label,
+            style: theme.textTheme.bodyMedium?.copyWith(
+              color: theme.colorScheme.onSurface.withValues(alpha: 0.7),
+            ),
+          ),
+        ),
+        Text(
+          value,
+          style: theme.textTheme.bodyMedium?.copyWith(
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+      ],
+    );
+  }
 }

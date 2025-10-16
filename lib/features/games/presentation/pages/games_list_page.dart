@@ -10,6 +10,7 @@ import '../../domain/services/game_settings_service.dart';
 import '../bloc/games_list_bloc.dart';
 import '../bloc/games_list_event.dart';
 import '../bloc/games_list_state.dart';
+import '../widgets/game_setup_dialog.dart';
 import '../widgets/hand_preference_dialog.dart';
 
 class GamesListPage extends StatelessWidget {
@@ -281,11 +282,20 @@ class GamesListView extends StatelessWidget {
               }
             }
 
+            // Show game setup dialog
             if (context.mounted) {
-              await context.push('/add-score');
-              // Reload games when returning from add score
-              if (context.mounted) {
-                context.read<GamesListBloc>().add(LoadGames());
+              final setupData = await showDialog<GameSetupData>(
+                context: context,
+                barrierDismissible: false,
+                builder: (context) => const GameSetupDialog(),
+              );
+
+              if (setupData != null && context.mounted) {
+                await context.push('/add-score', extra: setupData);
+                // Reload games when returning from add score
+                if (context.mounted) {
+                  context.read<GamesListBloc>().add(LoadGames());
+                }
               }
             }
           },

@@ -6,6 +6,9 @@ import 'package:injectable/injectable.dart';
 import '../../domain/entities/bowling_game_entity.dart';
 import '../../domain/entities/frame_entity.dart';
 import '../../domain/entities/throw_entity.dart';
+import '../../domain/entities/oil_pattern.dart';
+import '../../domain/entities/lane_condition.dart';
+import '../../domain/entities/game_type.dart';
 import '../../domain/repositories/game_repository.dart';
 import '../../../../core/di/injection.dart';
 import '../../domain/services/game_settings_service.dart';
@@ -63,6 +66,10 @@ class AddScoreBloc extends Bloc<AddScoreEvent, AddScoreState> {
       currentIsFoul: false,
       cumulativeScores: const <int>[],
       completionScore: null,
+      oilPattern: event.oilPattern,
+      laneCondition: event.laneCondition,
+      gameType: event.gameType,
+      laneNumber: event.laneNumber,
     );
     _emitState(emit, newState);
   }
@@ -153,6 +160,10 @@ class AddScoreBloc extends Bloc<AddScoreEvent, AddScoreState> {
       currentIsFoul: currentIsFoul,
       cumulativeScores: cumulatives,
       completionScore: null,
+      oilPattern: game.oilPattern,
+      laneCondition: game.laneCondition,
+      gameType: game.gameType,
+      laneNumber: game.laneNumber,
     );
 
     // Debug: print to verify gameId is set
@@ -289,6 +300,10 @@ class AddScoreBloc extends Bloc<AddScoreEvent, AddScoreState> {
       date: state.gameDate ?? DateTime.now(), // Preserve original date
       isComplete: isComplete,
       handPreference: handPreference,
+      oilPattern: state.oilPattern ?? OilPattern.house,
+      laneCondition: state.laneCondition ?? LaneCondition.medium,
+      gameType: state.gameType ?? GameType.practice,
+      laneNumber: state.laneNumber,
     );
 
     // Use update if gameId exists, otherwise save new

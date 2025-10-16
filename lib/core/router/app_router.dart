@@ -238,7 +238,10 @@ class AppRouter {
         GoRoute(
           path: '/add-score',
           name: 'add_score',
-          builder: (context, state) => const AddScoreScreen(),
+          builder: (context, state) {
+            final setupData = state.extra;
+            return AddScoreScreen(gameSetupData: setupData);
+          },
         ),
         GoRoute(
           path: '/edit-game/:id',

@@ -1,6 +1,9 @@
 import '../../domain/entities/bowling_game_entity.dart';
 import '../../domain/entities/frame_entity.dart';
+import '../../domain/entities/game_type.dart';
 import '../../domain/entities/hand_preference.dart';
+import '../../domain/entities/lane_condition.dart';
+import '../../domain/entities/oil_pattern.dart';
 import '../../domain/entities/throw_entity.dart';
 
 class BowlingGameModel {
@@ -10,6 +13,10 @@ class BowlingGameModel {
   final DateTime date;
   final bool isComplete;
   final HandPreference handPreference;
+  final OilPattern oilPattern;
+  final LaneCondition laneCondition;
+  final GameType gameType;
+  final String? laneNumber;
 
   BowlingGameModel({
     required this.id,
@@ -18,6 +25,10 @@ class BowlingGameModel {
     required this.date,
     required this.isComplete,
     required this.handPreference,
+    required this.oilPattern,
+    required this.laneCondition,
+    required this.gameType,
+    this.laneNumber,
   });
 
   // Convert from entity
@@ -29,6 +40,10 @@ class BowlingGameModel {
       date: entity.date,
       isComplete: entity.isComplete,
       handPreference: entity.handPreference,
+      oilPattern: entity.oilPattern,
+      laneCondition: entity.laneCondition,
+      gameType: entity.gameType,
+      laneNumber: entity.laneNumber,
     );
   }
 
@@ -41,6 +56,10 @@ class BowlingGameModel {
       date: date,
       isComplete: isComplete,
       handPreference: handPreference,
+      oilPattern: oilPattern,
+      laneCondition: laneCondition,
+      gameType: gameType,
+      laneNumber: laneNumber,
     );
   }
 
@@ -53,6 +72,10 @@ class BowlingGameModel {
       'date': date.toIso8601String(),
       'isComplete': isComplete,
       'handPreference': handPreference.toJson(),
+      'oilPattern': oilPattern.toJson(),
+      'laneCondition': laneCondition.toJson(),
+      'gameType': gameType.toJson(),
+      'laneNumber': laneNumber,
     };
   }
 
@@ -68,6 +91,16 @@ class BowlingGameModel {
       handPreference: json['handPreference'] != null
           ? HandPreference.fromJson(json['handPreference'] as String)
           : HandPreference.right, // Default for backward compatibility
+      oilPattern: json['oilPattern'] != null
+          ? OilPattern.fromJson(json['oilPattern'] as String)
+          : OilPattern.house, // Default
+      laneCondition: json['laneCondition'] != null
+          ? LaneCondition.fromJson(json['laneCondition'] as String)
+          : LaneCondition.medium, // Default
+      gameType: json['gameType'] != null
+          ? GameType.fromJson(json['gameType'] as String)
+          : GameType.practice, // Default
+      laneNumber: json['laneNumber'] as String?,
     );
   }
 }
