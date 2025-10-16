@@ -82,14 +82,21 @@ class _ErrorAnalytics extends StatelessWidget {
   }
 }
 
-class _GameAnalyticsView extends StatelessWidget {
+class _GameAnalyticsView extends StatefulWidget {
   const _GameAnalyticsView({required this.game});
 
   final dynamic game;
 
   @override
+  State<_GameAnalyticsView> createState() => _GameAnalyticsViewState();
+}
+
+class _GameAnalyticsViewState extends State<_GameAnalyticsView> {
+  int _selectedTab = 0; // 0: Overview, 1: Details, 2: Frames
+
+  @override
   Widget build(BuildContext context) {
-    final frames = (game.frames as List<FrameEntity>).toList();
+    final frames = (widget.game.frames as List<FrameEntity>).toList();
     final stats = _calculateStats(frames);
     final cumulativeScores = _buildCumulativeScores(frames);
 
@@ -98,40 +105,303 @@ class _GameAnalyticsView extends StatelessWidget {
         title: const Text('Game Analytics'),
         backgroundColor: const Color(0xFF8BC342),
         foregroundColor: Colors.white,
+        elevation: 0,
       ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            _ScoreSummaryCard(
-              totalScore: game.totalScore as int,
-              completed: (game.isComplete as bool?) ?? true,
-              framesCompleted: stats.completedFrames,
+      body: Column(
+        children: [
+          // Quick Tab Navigation
+          Container(
+            color: const Color(0xFF8BC342).withValues(alpha: 0.1),
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+            child: Row(
+              children: [
+                _TabButton(
+                  label: 'Overview',
+                  isActive: _selectedTab == 0,
+                  onTap: () => setState(() => _selectedTab = 0),
+                  icon: Icons.dashboard,
+                ),
+                const SizedBox(width: 12),
+                _TabButton(
+                  label: 'Details',
+                  isActive: _selectedTab == 1,
+                  onTap: () => setState(() => _selectedTab = 1),
+                  icon: Icons.bar_chart,
+                ),
+                const SizedBox(width: 12),
+                _TabButton(
+                  label: 'Frames',
+                  isActive: _selectedTab == 2,
+                  onTap: () => setState(() => _selectedTab = 2),
+                  icon: Icons.apps,
+                ),
+              ],
             ),
-            const SizedBox(height: 24),
-            _EnvironmentSection(game: game),
-            const SizedBox(height: 24),
-            const _SectionHeading(title: 'Key Stats'),
-            const SizedBox(height: 12),
-            _PrimaryStatsGrid(stats: stats),
-            const SizedBox(height: 24),
-            const _SectionHeading(title: 'Conversion Breakdown'),
-            const SizedBox(height: 12),
-            _ConversionBreakdown(stats: stats),
-            const SizedBox(height: 24),
-            const _SectionHeading(title: 'Spare Attempts'),
-            const SizedBox(height: 12),
-            _SpareAttemptsSection(frames: frames),
-            const SizedBox(height: 24),
-            const _SectionHeading(title: 'Frame by Frame'),
-            const SizedBox(height: 12),
-            _AnalyticsScoreboard(
-              frames: frames,
-              cumulativeScores: cumulativeScores,
+          ),
+          Expanded(
+            child: SingleChildScrollView(
+              padding: const EdgeInsets.all(16),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  if (_selectedTab == 0) ...[
+                    // Overview Tab
+                    _OverviewTab(
+                      game: widget.game,
+                      stats: stats,
+                      frames: frames,
+                    ),
+                  ] else if (_selectedTab == 1) ...[
+                    // Details Tab
+                    _DetailsTab(stats: stats, frames: frames),
+                  ] else ...[
+                    // Frames Tab
+                    _FramesTab(
+                      frames: frames,
+                      cumulativeScores: cumulativeScores,
+                    ),
+                  ],
+                ],
+              ),
             ),
-          ],
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+// === Tab Button ===
+class _TabButton extends StatelessWidget {
+  const _TabButton({
+    required this.label,
+    required this.isActive,
+    required this.onTap,
+    required this.icon,
+  });
+
+  final String label;
+  final bool isActive;
+  final VoidCallback onTap;
+  final IconData icon;
+
+  @override
+  Widget build(BuildContext context) {
+    return Expanded(
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: onTap,
+          borderRadius: BorderRadius.circular(8),
+          child: Container(
+            padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 12),
+            decoration: BoxDecoration(
+              color: isActive ? const Color(0xFF8BC342) : Colors.transparent,
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(
+                  icon,
+                  size: 20,
+                  color: isActive ? Colors.white : const Color(0xFF8BC342),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  label,
+                  style: TextStyle(
+                    fontSize: 12,
+                    fontWeight: FontWeight.w600,
+                    color: isActive ? Colors.white : const Color(0xFF8BC342),
+                  ),
+                ),
+              ],
+            ),
+          ),
         ),
+      ),
+    );
+  }
+}
+
+// === Overview Tab ===
+class _OverviewTab extends StatelessWidget {
+  const _OverviewTab({
+    required this.game,
+    required this.stats,
+    required this.frames,
+  });
+
+  final dynamic game;
+  final _AnalyticsStats stats;
+  final List<FrameEntity> frames;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        _ScoreSummaryCard(
+          totalScore: game.totalScore as int,
+          completed: (game.isComplete as bool?) ?? true,
+          framesCompleted: stats.completedFrames,
+        ),
+        const SizedBox(height: 24),
+        _EnvironmentSection(game: game),
+        const SizedBox(height: 24),
+        const _SectionHeading(title: 'Performance Snapshot'),
+        const SizedBox(height: 12),
+        _QuickStatsRow(stats: stats),
+        const SizedBox(height: 24),
+        const _SectionHeading(title: 'Conversion Rate'),
+        const SizedBox(height: 12),
+        _ConversionBreakdown(stats: stats),
+      ],
+    );
+  }
+}
+
+// === Details Tab ===
+class _DetailsTab extends StatelessWidget {
+  const _DetailsTab({required this.stats, required this.frames});
+
+  final _AnalyticsStats stats;
+  final List<FrameEntity> frames;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const _SectionHeading(title: 'Detailed Statistics'),
+        const SizedBox(height: 12),
+        _PrimaryStatsGrid(stats: stats),
+        const SizedBox(height: 24),
+        const _SectionHeading(title: 'Spare Attempts Analysis'),
+        const SizedBox(height: 12),
+        _SpareAttemptsSection(frames: frames),
+      ],
+    );
+  }
+}
+
+// === Frames Tab ===
+class _FramesTab extends StatelessWidget {
+  const _FramesTab({required this.frames, required this.cumulativeScores});
+
+  final List<FrameEntity> frames;
+  final List<int> cumulativeScores;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const _SectionHeading(title: 'Frame-by-Frame Breakdown'),
+        const SizedBox(height: 12),
+        _AnalyticsScoreboard(
+          frames: frames,
+          cumulativeScores: cumulativeScores,
+        ),
+      ],
+    );
+  }
+}
+
+// === Quick Stats Row (compact horizontal view) ===
+class _QuickStatsRow extends StatelessWidget {
+  const _QuickStatsRow({required this.stats});
+
+  final _AnalyticsStats stats;
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      height: 120,
+      child: ListView(
+        scrollDirection: Axis.horizontal,
+        children: [
+          _QuickStatCard(
+            icon: Icons.flash_on,
+            label: 'Strikes',
+            value: '${stats.strikes}',
+            color: const Color(0xFF3CB371),
+          ),
+          const SizedBox(width: 12),
+          _QuickStatCard(
+            icon: Icons.sports_baseball,
+            label: 'Spares',
+            value: '${stats.spares}',
+            color: const Color(0xFF1D4ED8),
+          ),
+          const SizedBox(width: 12),
+          _QuickStatCard(
+            icon: Icons.remove_circle_outline,
+            label: 'Opens',
+            value: '${stats.opens}',
+            color: const Color(0xFFF59E0B),
+          ),
+          const SizedBox(width: 12),
+          _QuickStatCard(
+            icon: Icons.trending_up,
+            label: 'Avg (1st)',
+            value: stats.firstBallAverage.toStringAsFixed(1),
+            color: const Color(0xFF8B5CF6),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _QuickStatCard extends StatelessWidget {
+  const _QuickStatCard({
+    required this.icon,
+    required this.label,
+    required this.value,
+    required this.color,
+  });
+
+  final IconData icon;
+  final String label;
+  final String value;
+  final Color color;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: 100,
+      decoration: BoxDecoration(
+        color: color.withValues(alpha: 0.1),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: color.withValues(alpha: 0.3), width: 1),
+      ),
+      padding: const EdgeInsets.all(12),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(icon, color: color, size: 24),
+          const SizedBox(height: 8),
+          Text(
+            value,
+            style: TextStyle(
+              fontSize: 18,
+              fontWeight: FontWeight.bold,
+              color: color,
+            ),
+          ),
+          const SizedBox(height: 4),
+          Text(
+            label,
+            style: TextStyle(
+              fontSize: 11,
+              color: color.withValues(alpha: 0.7),
+              fontWeight: FontWeight.w600,
+            ),
+            textAlign: TextAlign.center,
+          ),
+        ],
       ),
     );
   }
@@ -150,97 +420,121 @@ class _ScoreSummaryCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Card(
-      elevation: 4,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-      clipBehavior: Clip.antiAlias,
-      child: Container(
-        width: double.infinity,
-        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 28),
-        decoration: const BoxDecoration(
-          gradient: LinearGradient(
-            colors: [Color(0xFF8BC342), Color(0xFF5A8B22)],
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-          ),
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const Text(
-              'Total Score',
-              style: TextStyle(
-                color: Colors.white70,
-                fontSize: 16,
-                fontWeight: FontWeight.w600,
-              ),
-            ),
-            const SizedBox(height: 12),
-            Text(
-              '$totalScore',
-              style: const TextStyle(
-                color: Colors.white,
-                fontSize: 56,
-                fontWeight: FontWeight.w800,
-              ),
-            ),
-            const SizedBox(height: 16),
-            Wrap(
-              spacing: 12,
-              runSpacing: 8,
-              children: [
-                _summaryChip(
-                  icon: Icons.timeline,
-                  label: 'Frames Scored',
-                  value: '$framesCompleted/10',
-                ),
-                if (!completed)
-                  _summaryChip(
-                    icon: Icons.warning_amber_rounded,
-                    label: 'Status',
-                    value: 'Incomplete game',
-                  ),
-              ],
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _summaryChip({
-    required IconData icon,
-    required String label,
-    required String value,
-  }) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+      width: double.infinity,
       decoration: BoxDecoration(
-        color: Colors.white.withValues(alpha: 0.15),
-        borderRadius: BorderRadius.circular(16),
+        gradient: const LinearGradient(
+          colors: [Color(0xFF8BC342), Color(0xFF5A8B22)],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
+        borderRadius: BorderRadius.circular(20),
+        boxShadow: [
+          BoxShadow(
+            color: const Color(0xFF8BC342).withValues(alpha: 0.3),
+            blurRadius: 20,
+            offset: const Offset(0, 8),
+          ),
+        ],
       ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
+      padding: const EdgeInsets.all(24),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Icon(icon, size: 16, color: Colors.white),
-          const SizedBox(width: 6),
-          Text(
-            label,
-            style: const TextStyle(
-              color: Colors.white70,
-              fontSize: 12,
-              fontWeight: FontWeight.w600,
-            ),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text(
+                    'Total Score',
+                    style: TextStyle(
+                      color: Colors.white70,
+                      fontSize: 14,
+                      fontWeight: FontWeight.w500,
+                      letterSpacing: 0.5,
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    '$totalScore',
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 64,
+                      fontWeight: FontWeight.w900,
+                      height: 1,
+                    ),
+                  ),
+                ],
+              ),
+              Container(
+                width: 100,
+                height: 100,
+                decoration: BoxDecoration(
+                  color: Colors.white.withValues(alpha: 0.15),
+                  borderRadius: BorderRadius.circular(16),
+                ),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Text(
+                      '$framesCompleted',
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 36,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                    const Text(
+                      'of 10',
+                      style: TextStyle(
+                        color: Colors.white70,
+                        fontSize: 12,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    ClipRRect(
+                      borderRadius: BorderRadius.circular(4),
+                      child: LinearProgressIndicator(
+                        value: framesCompleted / 10,
+                        minHeight: 4,
+                        backgroundColor: Colors.white.withValues(alpha: 0.2),
+                        valueColor: AlwaysStoppedAnimation(
+                          Colors.white.withValues(alpha: 0.9),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
           ),
-          const SizedBox(width: 6),
-          Text(
-            value,
-            style: const TextStyle(
-              color: Colors.white,
-              fontSize: 13,
-              fontWeight: FontWeight.w700,
+          const SizedBox(height: 20),
+          if (!completed)
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+              decoration: BoxDecoration(
+                color: Colors.white.withValues(alpha: 0.2),
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: const Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(Icons.info_outline, size: 16, color: Colors.white),
+                  SizedBox(width: 6),
+                  Text(
+                    'Game in progress',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 12,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ],
+              ),
             ),
-          ),
         ],
       ),
     );
