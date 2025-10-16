@@ -6,10 +6,11 @@ import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 
 import '../../../../core/di/injection.dart';
+import '../../domain/services/game_settings_service.dart';
 import '../bloc/games_list_bloc.dart';
 import '../bloc/games_list_event.dart';
 import '../bloc/games_list_state.dart';
-import '../../domain/services/pin_settings_service.dart';
+import '../widgets/hand_preference_dialog.dart';
 
 class GamesListPage extends StatelessWidget {
   const GamesListPage({super.key});
@@ -265,10 +266,27 @@ class GamesListView extends StatelessWidget {
         ),
         floatingActionButton: FloatingActionButton.extended(
           onPressed: () async {
-            await context.push('/add-score');
-            // Reload games when returning from add score
+            // Check if user has set hand preference
+            final gameSettings = getIt<GameSettingsService>();
+            if (!gameSettings.hasSetHandPreference) {
+              // Show dialog to ask for hand preference
+              final preference = await showDialog(
+                context: context,
+                barrierDismissible: false,
+                builder: (context) => const HandPreferenceDialog(),
+              );
+
+              if (preference != null && context.mounted) {
+                await gameSettings.setDefaultHandPreference(preference);
+              }
+            }
+
             if (context.mounted) {
-              context.read<GamesListBloc>().add(LoadGames());
+              await context.push('/add-score');
+              // Reload games when returning from add score
+              if (context.mounted) {
+                context.read<GamesListBloc>().add(LoadGames());
+              }
             }
           },
           backgroundColor: const Color(0xFF8BC342),
@@ -309,79 +327,9 @@ class GamesListView extends StatelessWidget {
   }
 
   void _showSettings(BuildContext context) {
-    final pinSettings = getIt<PinSettingsService>();
-    final theme = Theme.of(context);
-    showModalBottomSheet<void>(
-      context: context,
-      backgroundColor: Colors.white,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
-      ),
-      builder: (sheetContext) {
-        var knockedByDefault = pinSettings.pinsKnockedByDefault;
-        return StatefulBuilder(
-          builder: (context, setState) {
-            return Padding(
-              padding: const EdgeInsets.fromLTRB(24, 24, 24, 32),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    'Game settings',
-                    style: theme.textTheme.titleMedium?.copyWith(
-                      fontWeight: FontWeight.w700,
-                    ),
-                  ),
-                  const SizedBox(height: 12),
-                  Text(
-                    'Choose how the pin deck behaves when you open the score sheet.',
-                    style: theme.textTheme.bodyMedium?.copyWith(
-                      color: const Color(0xFF6B7280),
-                    ),
-                  ),
-                  const SizedBox(height: 20),
-                  Material(
-                    color: const Color(0xFFF9FAFB),
-                    borderRadius: BorderRadius.circular(16),
-                    child: SwitchListTile.adaptive(
-                      value: knockedByDefault,
-                      contentPadding: const EdgeInsets.symmetric(
-                        horizontal: 16,
-                        vertical: 4,
-                      ),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(16),
-                      ),
-                      title: const Text(
-                        'Pins knocked by default',
-                        style: TextStyle(
-                          fontWeight: FontWeight.w600,
-                          fontSize: 16,
-                        ),
-                      ),
-                      subtitle: const Text(
-                        'Enable to keep pins down when you start a throw. Disable to see all pins standing.',
-                      ),
-                      onChanged: (value) async {
-                        setState(() => knockedByDefault = value);
-                        await pinSettings.setPinsKnockedByDefault(value);
-                      },
-                    ),
-                  ),
-                  const SizedBox(height: 8),
-                  Text(
-                    'Changes apply the next time you open or advance to a fresh frame.',
-                    style: theme.textTheme.bodySmall?.copyWith(
-                      color: const Color(0xFF9CA3AF),
-                    ),
-                  ),
-                ],
-              ),
-            );
-          },
-        );
-      },
-    );
+    context.push('/games-settings').then((_) {
+      // Reload games when returning from settings in case anything changed
+      context.read<GamesListBloc>().add(LoadGames());
+    });
   }
 }

@@ -8,6 +8,7 @@ import '../../domain/entities/frame_entity.dart';
 import '../../domain/entities/throw_entity.dart';
 import '../../domain/repositories/game_repository.dart';
 import '../../../../core/di/injection.dart';
+import '../../domain/services/game_settings_service.dart';
 import '../../domain/services/pin_settings_service.dart';
 import 'add_score_event.dart';
 import 'add_score_state.dart';
@@ -277,12 +278,17 @@ class AddScoreBloc extends Bloc<AddScoreEvent, AddScoreState> {
     print('SaveGame: final gameId = $gameId');
     print('SaveGame: isUpdate = ${state.gameId != null}');
 
+    // Get hand preference from settings
+    final gameSettings = getIt<GameSettingsService>();
+    final handPreference = gameSettings.defaultHandPreference;
+
     final game = BowlingGameEntity(
       id: gameId,
       frames: state.frames,
       totalScore: state.cumulativeScores.lastOrNull ?? 0,
       date: state.gameDate ?? DateTime.now(), // Preserve original date
       isComplete: isComplete,
+      handPreference: handPreference,
     );
 
     // Use update if gameId exists, otherwise save new

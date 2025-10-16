@@ -3,6 +3,7 @@
 import 'package:equatable/equatable.dart';
 
 import 'frame_entity.dart';
+import 'hand_preference.dart';
 
 class BowlingGameEntity extends Equatable {
   final String id;
@@ -10,6 +11,7 @@ class BowlingGameEntity extends Equatable {
   final int totalScore;
   final DateTime date;
   final bool isComplete;
+  final HandPreference handPreference;
 
   const BowlingGameEntity({
     required this.id,
@@ -17,8 +19,16 @@ class BowlingGameEntity extends Equatable {
     required this.totalScore,
     required this.date,
     required this.isComplete,
+    required this.handPreference,
   });
 
   @override
-  List<Object> get props => [id, frames, totalScore, date, isComplete];
+  List<Object> get props => [
+    id,
+    frames,
+    totalScore,
+    date,
+    isComplete,
+    handPreference,
+  ];
 }

@@ -117,6 +117,10 @@ class _GameAnalyticsView extends StatelessWidget {
             const SizedBox(height: 12),
             _ConversionBreakdown(stats: stats),
             const SizedBox(height: 24),
+            const _SectionHeading(title: 'Spare Attempts'),
+            const SizedBox(height: 12),
+            _SpareAttemptsSection(frames: frames),
+            const SizedBox(height: 24),
             const _SectionHeading(title: 'Frame by Frame'),
             const SizedBox(height: 12),
             _AnalyticsScoreboard(
@@ -209,7 +213,7 @@ class _ScoreSummaryCard extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
       decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.15),
+        color: Colors.white.withValues(alpha: 0.15),
         borderRadius: BorderRadius.circular(16),
       ),
       child: Row(
@@ -354,7 +358,7 @@ class _PrimaryStatTile extends StatelessWidget {
               width: 40,
               height: 40,
               decoration: BoxDecoration(
-                color: data.accent.withOpacity(0.12),
+                color: data.accent.withValues(alpha: 0.12),
                 borderRadius: BorderRadius.circular(12),
               ),
               child: Icon(data.icon, color: data.accent),
@@ -567,6 +571,260 @@ class _AnalyticsScoreboard extends StatelessWidget {
         ),
       ),
     );
+  }
+}
+
+class _SpareAttemptsSection extends StatelessWidget {
+  const _SpareAttemptsSection({required this.frames});
+
+  final List<FrameEntity> frames;
+
+  @override
+  Widget build(BuildContext context) {
+    final spareAttempts = _groupSpareAttempts(frames);
+
+    if (spareAttempts.isEmpty) {
+      return Card(
+        elevation: 2,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        child: Padding(
+          padding: const EdgeInsets.all(24),
+          child: Center(
+            child: Text(
+              'No spare opportunities in this game',
+              style: TextStyle(color: Colors.grey[600], fontSize: 15),
+            ),
+          ),
+        ),
+      );
+    }
+
+    return Card(
+      elevation: 2,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      child: ListView.separated(
+        shrinkWrap: true,
+        physics: const NeverScrollableScrollPhysics(),
+        itemCount: spareAttempts.length,
+        separatorBuilder: (context, index) => const Divider(height: 1),
+        itemBuilder: (context, index) {
+          final attempt = spareAttempts[index];
+          return _SpareAttemptTile(attempt: attempt);
+        },
+      ),
+    );
+  }
+
+  List<_SpareAttemptGroup> _groupSpareAttempts(List<FrameEntity> frames) {
+    final Map<String, _SpareAttemptGroup> groups = {};
+
+    for (final frame in frames) {
+      if (frame.throws.isEmpty) continue;
+
+      final first = frame.throws.first;
+
+      // Skip strikes
+      if (!first.isFoul && first.pinsKnocked == 10) continue;
+
+      // Skip if no second throw opportunity
+      if (frame.throws.length < 2) continue;
+
+      final pinsLeft = standingPinsAfter(frame, 0);
+      if (pinsLeft.isEmpty) continue;
+
+      // Create a key based on the pin configuration
+      final key = pinsLeft.toList()..sort();
+      final keyString = key.join(',');
+
+      final second = frame.throws[1];
+      final converted =
+          !first.isFoul &&
+          !second.isFoul &&
+          first.pinsKnocked + second.pinsKnocked == 10;
+
+      if (!groups.containsKey(keyString)) {
+        groups[keyString] = _SpareAttemptGroup(
+          pinsLeft: pinsLeft,
+          attempts: [],
+        );
+      }
+
+      groups[keyString]!.attempts.add(
+        _SpareAttempt(
+          frameNumber: frame.number,
+          converted: converted,
+          isSplit: isSplitLeave(frame, 0),
+        ),
+      );
+    }
+
+    // Sort by number of pins remaining (ascending)
+    final result = groups.values.toList()
+      ..sort((a, b) => a.pinsLeft.length.compareTo(b.pinsLeft.length));
+
+    return result;
+  }
+}
+
+class _SpareAttemptGroup {
+  final Set<int> pinsLeft;
+  final List<_SpareAttempt> attempts;
+
+  _SpareAttemptGroup({required this.pinsLeft, required this.attempts});
+
+  int get converted => attempts.where((a) => a.converted).length;
+  int get total => attempts.length;
+  double get percentage => total == 0 ? 0 : (converted / total) * 100;
+}
+
+class _SpareAttempt {
+  final int frameNumber;
+  final bool converted;
+  final bool isSplit;
+
+  _SpareAttempt({
+    required this.frameNumber,
+    required this.converted,
+    required this.isSplit,
+  });
+}
+
+class _SpareAttemptTile extends StatelessWidget {
+  const _SpareAttemptTile({required this.attempt});
+
+  final _SpareAttemptGroup attempt;
+
+  @override
+  Widget build(BuildContext context) {
+    final percentage = attempt.percentage.toStringAsFixed(0);
+    final hasSplit = attempt.attempts.any((a) => a.isSplit);
+
+    return InkWell(
+      onTap: () {
+        // Could show detailed breakdown in a dialog
+      },
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+        child: Row(
+          children: [
+            // Pin visualization
+            Container(
+              width: 50,
+              height: 50,
+              decoration: BoxDecoration(
+                color: const Color(0xFFF3F4F6),
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: Center(child: _buildPinVisualization(attempt.pinsLeft)),
+            ),
+            const SizedBox(width: 16),
+            // Stats
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      Text(
+                        '$percentage% (${attempt.converted}/${attempt.total})',
+                        style: const TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w600,
+                          color: Color(0xFF111827),
+                        ),
+                      ),
+                      if (hasSplit) ...[
+                        const SizedBox(width: 8),
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 6,
+                            vertical: 2,
+                          ),
+                          decoration: BoxDecoration(
+                            color: const Color(
+                              0xFFDC2626,
+                            ).withValues(alpha: 0.1),
+                            borderRadius: BorderRadius.circular(4),
+                          ),
+                          child: const Text(
+                            'SPLIT',
+                            style: TextStyle(
+                              fontSize: 10,
+                              fontWeight: FontWeight.w700,
+                              color: Color(0xFFDC2626),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ],
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    '${attempt.pinsLeft.length} ${attempt.pinsLeft.length == 1 ? 'pin' : 'pins'} left',
+                    style: TextStyle(fontSize: 13, color: Colors.grey[600]),
+                  ),
+                ],
+              ),
+            ),
+            const Icon(Icons.chevron_right, color: Color(0xFF9CA3AF)),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildPinVisualization(Set<int> pinsLeft) {
+    // Simplified pin visualization showing which pins are standing
+    return CustomPaint(
+      size: const Size(40, 40),
+      painter: _PinPainter(pinsLeft: pinsLeft),
+    );
+  }
+}
+
+class _PinPainter extends CustomPainter {
+  _PinPainter({required this.pinsLeft});
+
+  final Set<int> pinsLeft;
+
+  // Standard bowling pin positions (normalized to 0-1 scale)
+  static const Map<int, Offset> pinPositions = {
+    7: Offset(0.25, 0.15),
+    8: Offset(0.5, 0.15),
+    9: Offset(0.75, 0.15),
+    4: Offset(0.33, 0.4),
+    5: Offset(0.5, 0.4),
+    6: Offset(0.67, 0.4),
+    2: Offset(0.42, 0.65),
+    3: Offset(0.58, 0.65),
+    1: Offset(0.5, 0.9),
+    10: Offset(0.95, 0.15), // Typically pin 10 not used in standard triangle
+  };
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final standingPaint = Paint()
+      ..color = const Color(0xFF8BC342)
+      ..style = PaintingStyle.fill;
+
+    final knockedPaint = Paint()
+      ..color = const Color(0xFFE5E7EB)
+      ..style = PaintingStyle.fill;
+
+    for (int pin = 1; pin <= 10; pin++) {
+      final pos = pinPositions[pin];
+      if (pos == null) continue;
+
+      final center = Offset(pos.dx * size.width, pos.dy * size.height);
+      final paint = pinsLeft.contains(pin) ? standingPaint : knockedPaint;
+
+      canvas.drawCircle(center, 2.5, paint);
+    }
+  }
+
+  @override
+  bool shouldRepaint(_PinPainter oldDelegate) {
+    return oldDelegate.pinsLeft != pinsLeft;
   }
 }
 

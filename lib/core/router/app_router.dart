@@ -5,6 +5,7 @@ import '../../features/games/presentation/pages/add_score_screen.dart';
 import '../../features/games/presentation/pages/games_list_page.dart';
 import '../../features/games/presentation/pages/edit_game_page.dart';
 import '../../features/games/presentation/pages/game_analytics_page.dart';
+import '../../features/games/presentation/pages/games_settings_page.dart';
 import '../../features/home/presentation/pages/home_page.dart';
 import '../../features/home/presentation/pages/post_detail_page.dart';
 import '../../features/auth/presentation/bloc/auth_cubit.dart';
@@ -228,6 +229,11 @@ class AppRouter {
           path: '/games',
           name: 'games',
           builder: (context, state) => const GamesListPage(),
+        ),
+        GoRoute(
+          path: '/games-settings',
+          name: 'games_settings',
+          builder: (context, state) => const GamesSettingsPage(),
         ),
         GoRoute(
           path: '/add-score',

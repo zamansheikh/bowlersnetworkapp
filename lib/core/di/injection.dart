@@ -1,6 +1,7 @@
 import 'package:get_it/get_it.dart';
 import 'package:injectable/injectable.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import '../../features/games/domain/services/game_settings_service.dart';
 import '../../features/games/domain/services/pin_settings_service.dart';
 import 'injection.config.dart';
 
@@ -12,6 +13,11 @@ Future<void> configureDependencies() async {
   if (!getIt.isRegistered<PinSettingsService>()) {
     getIt.registerLazySingleton<PinSettingsService>(
       () => PinSettingsService(getIt<SharedPreferences>()),
+    );
+  }
+  if (!getIt.isRegistered<GameSettingsService>()) {
+    getIt.registerLazySingleton<GameSettingsService>(
+      () => GameSettingsService(getIt<SharedPreferences>()),
     );
   }
   await getIt.allReady();

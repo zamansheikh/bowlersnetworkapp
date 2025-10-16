@@ -1,5 +1,6 @@
 import '../../domain/entities/bowling_game_entity.dart';
 import '../../domain/entities/frame_entity.dart';
+import '../../domain/entities/hand_preference.dart';
 import '../../domain/entities/throw_entity.dart';
 
 class BowlingGameModel {
@@ -8,6 +9,7 @@ class BowlingGameModel {
   final int totalScore;
   final DateTime date;
   final bool isComplete;
+  final HandPreference handPreference;
 
   BowlingGameModel({
     required this.id,
@@ -15,6 +17,7 @@ class BowlingGameModel {
     required this.totalScore,
     required this.date,
     required this.isComplete,
+    required this.handPreference,
   });
 
   // Convert from entity
@@ -25,6 +28,7 @@ class BowlingGameModel {
       totalScore: entity.totalScore,
       date: entity.date,
       isComplete: entity.isComplete,
+      handPreference: entity.handPreference,
     );
   }
 
@@ -36,6 +40,7 @@ class BowlingGameModel {
       totalScore: totalScore,
       date: date,
       isComplete: isComplete,
+      handPreference: handPreference,
     );
   }
 
@@ -47,6 +52,7 @@ class BowlingGameModel {
       'totalScore': totalScore,
       'date': date.toIso8601String(),
       'isComplete': isComplete,
+      'handPreference': handPreference.toJson(),
     };
   }
 
@@ -59,6 +65,9 @@ class BowlingGameModel {
       totalScore: json['totalScore'] as int,
       date: DateTime.parse(json['date'] as String),
       isComplete: json['isComplete'] as bool? ?? false,
+      handPreference: json['handPreference'] != null
+          ? HandPreference.fromJson(json['handPreference'] as String)
+          : HandPreference.right, // Default for backward compatibility
     );
   }
 }
