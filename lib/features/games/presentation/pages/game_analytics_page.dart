@@ -1472,13 +1472,27 @@ class _SpareAttemptTile extends StatelessWidget {
             children: [
               // Pin visualization
               Container(
-                width: 56,
-                height: 56,
+                width: 64,
+                height: 64,
                 decoration: BoxDecoration(
-                  color: successColor.withValues(alpha: 0.12),
+                  color: Colors.white,
                   borderRadius: BorderRadius.circular(12),
+                  border: Border.all(
+                    color: successColor.withValues(alpha: 0.3),
+                    width: 2,
+                  ),
+                  boxShadow: [
+                    BoxShadow(
+                      color: successColor.withValues(alpha: 0.1),
+                      blurRadius: 8,
+                      offset: const Offset(0, 2),
+                    ),
+                  ],
                 ),
-                child: Center(child: _buildPinVisualization(attempt.pinsLeft)),
+                padding: const EdgeInsets.all(8),
+                child: Center(
+                  child: _buildPinVisualization(attempt.pinsLeft, successColor),
+                ),
               ),
               const SizedBox(width: 14),
               Expanded(
@@ -1577,58 +1591,84 @@ class _SpareAttemptTile extends StatelessWidget {
     );
   }
 
-  Widget _buildPinVisualization(Set<int> pinsLeft) {
+  Widget _buildPinVisualization(Set<int> pinsLeft, Color successColor) {
     // Simplified pin visualization showing which pins are standing
     return CustomPaint(
-      size: const Size(40, 40),
-      painter: _PinPainter(pinsLeft: pinsLeft),
+      size: const Size(48, 48),
+      painter: _PinPainter(pinsLeft: pinsLeft, pinColor: successColor),
     );
   }
 }
 
 class _PinPainter extends CustomPainter {
-  _PinPainter({required this.pinsLeft});
+  _PinPainter({required this.pinsLeft, required this.pinColor});
 
   final Set<int> pinsLeft;
+  final Color pinColor;
 
-  // Standard bowling pin positions (normalized to 0-1 scale)
+  // Standard bowling pin positions (normalized, properly centered)
+  // Pin layout (standard 10-pin):
+  //       7  8  9  10
+  //        4  5  6
+  //         2  3
+  //          1
   static const Map<int, Offset> pinPositions = {
-    7: Offset(0.25, 0.15),
-    8: Offset(0.5, 0.15),
-    9: Offset(0.75, 0.15),
-    4: Offset(0.33, 0.4),
-    5: Offset(0.5, 0.4),
-    6: Offset(0.67, 0.4),
-    2: Offset(0.42, 0.65),
-    3: Offset(0.58, 0.65),
-    1: Offset(0.5, 0.9),
-    10: Offset(0.95, 0.15), // Typically pin 10 not used in standard triangle
+    // Back row (4 pins)
+    7: Offset(0.20, 0.15),
+    8: Offset(0.40, 0.15),
+    9: Offset(0.60, 0.15),
+    10: Offset(0.80, 0.15),
+    // Third row (3 pins)
+    4: Offset(0.30, 0.40),
+    5: Offset(0.50, 0.40),
+    6: Offset(0.70, 0.40),
+    // Second row (2 pins)
+    2: Offset(0.40, 0.65),
+    3: Offset(0.60, 0.65),
+    // Front pin
+    1: Offset(0.50, 0.85),
   };
 
   @override
   void paint(Canvas canvas, Size size) {
+    // Standing pins: Use the dynamic color with full opacity
     final standingPaint = Paint()
-      ..color = const Color(0xFF8BC342)
+      ..color = pinColor
       ..style = PaintingStyle.fill;
 
+    // Knocked pins: Light gray, very subtle
     final knockedPaint = Paint()
-      ..color = const Color(0xFFE5E7EB)
+      ..color = const Color(0xFFD1D5DB).withValues(alpha: 0.35)
       ..style = PaintingStyle.fill;
+
+    // Draw outline for standing pins to make them more visible
+    final outlinePaint = Paint()
+      ..color = Colors.white
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 1.0;
 
     for (int pin = 1; pin <= 10; pin++) {
       final pos = pinPositions[pin];
       if (pos == null) continue;
 
       final center = Offset(pos.dx * size.width, pos.dy * size.height);
-      final paint = pinsLeft.contains(pin) ? standingPaint : knockedPaint;
+      final isStanding = pinsLeft.contains(pin);
+      final paint = isStanding ? standingPaint : knockedPaint;
+      final radius = isStanding ? 3.8 : 2.2;
 
-      canvas.drawCircle(center, 2.5, paint);
+      // Draw the pin
+      canvas.drawCircle(center, radius, paint);
+
+      // Add white outline to standing pins for better visibility
+      if (isStanding) {
+        canvas.drawCircle(center, radius, outlinePaint);
+      }
     }
   }
 
   @override
   bool shouldRepaint(_PinPainter oldDelegate) {
-    return oldDelegate.pinsLeft != pinsLeft;
+    return oldDelegate.pinsLeft != pinsLeft || oldDelegate.pinColor != pinColor;
   }
 }
 
