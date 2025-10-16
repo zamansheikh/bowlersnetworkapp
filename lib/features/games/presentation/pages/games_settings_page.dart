@@ -52,34 +52,34 @@ class _GamesSettingsPageState extends State<GamesSettingsPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: const Color(0xFFFAFAFA),
       appBar: AppBar(
-        backgroundColor: Colors.white,
+        backgroundColor: const Color(0xFF8BC342),
         elevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios, color: Color(0xFF212121)),
+          icon: const Icon(Icons.arrow_back_ios, color: Colors.white),
           onPressed: () => Navigator.of(context).pop(),
         ),
         title: const Text(
-          'Game Settings',
+          'Game Settings ⚙️',
           style: TextStyle(
             fontSize: 22,
-            fontWeight: FontWeight.w700,
-            color: Color(0xFF111827),
+            fontWeight: FontWeight.w800,
+            color: Colors.white,
           ),
         ),
       ),
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: [
-          _buildSectionHeader('Player Settings'),
-          const SizedBox(height: 12),
+          _buildSectionHeader('👤 Player Settings'),
+          const SizedBox(height: 14),
           _buildHandPreferenceCard(),
-          const SizedBox(height: 24),
-          _buildSectionHeader('Pin Deck Settings'),
-          const SizedBox(height: 12),
+          const SizedBox(height: 28),
+          _buildSectionHeader('🎯 Pin Deck Settings'),
+          const SizedBox(height: 14),
           _buildPinDefaultCard(),
-          const SizedBox(height: 24),
+          const SizedBox(height: 28),
           _buildInfoCard(),
         ],
       ),
@@ -93,8 +93,8 @@ class _GamesSettingsPageState extends State<GamesSettingsPage> {
         title,
         style: const TextStyle(
           fontSize: 16,
-          fontWeight: FontWeight.w700,
-          color: Color(0xFF6B7280),
+          fontWeight: FontWeight.w800,
+          color: Color(0xFF374151),
           letterSpacing: 0.5,
         ),
       ),
@@ -104,32 +104,46 @@ class _GamesSettingsPageState extends State<GamesSettingsPage> {
   Widget _buildHandPreferenceCard() {
     return Container(
       decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: const Color(0xFFE5E7EB)),
+        gradient: const LinearGradient(
+          colors: [Color(0xFFFAFAFA), Color(0xFFF5F5F5)],
+        ),
+        borderRadius: BorderRadius.circular(18),
+        border: Border.all(
+          color: Colors.grey.withValues(alpha: 0.08),
+          width: 1,
+        ),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.05),
-            blurRadius: 10,
-            offset: const Offset(0, 2),
+            color: Colors.black.withValues(alpha: 0.06),
+            blurRadius: 16,
+            offset: const Offset(0, 4),
           ),
         ],
       ),
       child: Column(
         children: [
           Padding(
-            padding: const EdgeInsets.all(16),
+            padding: const EdgeInsets.all(20),
             child: Row(
               children: [
                 Container(
-                  padding: const EdgeInsets.all(10),
+                  padding: const EdgeInsets.all(12),
                   decoration: BoxDecoration(
-                    color: const Color(0xFF8BC342).withValues(alpha: 0.1),
-                    borderRadius: BorderRadius.circular(10),
+                    gradient: const LinearGradient(
+                      colors: [Color(0xFF8BC342), Color(0xFF7AB233)],
+                    ),
+                    borderRadius: BorderRadius.circular(12),
+                    boxShadow: [
+                      BoxShadow(
+                        color: const Color(0xFF8BC342).withValues(alpha: 0.25),
+                        blurRadius: 12,
+                        offset: const Offset(0, 4),
+                      ),
+                    ],
                   ),
                   child: const Icon(
                     Icons.back_hand,
-                    color: Color(0xFF8BC342),
+                    color: Colors.white,
                     size: 24,
                   ),
                 ),
@@ -142,7 +156,7 @@ class _GamesSettingsPageState extends State<GamesSettingsPage> {
                         'Hand Preference',
                         style: TextStyle(
                           fontSize: 17,
-                          fontWeight: FontWeight.w600,
+                          fontWeight: FontWeight.w800,
                           color: Color(0xFF111827),
                         ),
                       ),
@@ -150,8 +164,9 @@ class _GamesSettingsPageState extends State<GamesSettingsPage> {
                       Text(
                         'Choose your dominant hand',
                         style: TextStyle(
-                          fontSize: 14,
+                          fontSize: 13,
                           color: Color(0xFF6B7280),
+                          fontWeight: FontWeight.w500,
                         ),
                       ),
                     ],
@@ -160,29 +175,21 @@ class _GamesSettingsPageState extends State<GamesSettingsPage> {
               ],
             ),
           ),
-          const Divider(height: 1, color: Color(0xFFE5E7EB)),
           Padding(
-            padding: const EdgeInsets.all(16),
+            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
             child: Row(
               children: [
                 Expanded(
-                  child: _buildHandOption(
-                    HandPreference.left,
-                    Icons.keyboard_arrow_left,
-                    'Left',
-                  ),
+                  child: _buildHandOption(HandPreference.left, '👈', 'Left'),
                 ),
                 const SizedBox(width: 12),
                 Expanded(
-                  child: _buildHandOption(
-                    HandPreference.right,
-                    Icons.keyboard_arrow_right,
-                    'Right',
-                  ),
+                  child: _buildHandOption(HandPreference.right, '👉', 'Right'),
                 ),
               ],
             ),
           ),
+          const SizedBox(height: 8),
         ],
       ),
     );
@@ -190,7 +197,7 @@ class _GamesSettingsPageState extends State<GamesSettingsPage> {
 
   Widget _buildHandOption(
     HandPreference preference,
-    IconData icon,
+    String emoji,
     String label,
   ) {
     final isSelected = _handPreference == preference;
@@ -198,32 +205,41 @@ class _GamesSettingsPageState extends State<GamesSettingsPage> {
     return GestureDetector(
       onTap: () => _updateHandPreference(preference),
       child: AnimatedContainer(
-        duration: const Duration(milliseconds: 200),
+        duration: const Duration(milliseconds: 250),
         padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 12),
         decoration: BoxDecoration(
-          color: isSelected ? const Color(0xFF8BC342) : const Color(0xFFF9FAFB),
-          borderRadius: BorderRadius.circular(10),
+          gradient: isSelected
+              ? const LinearGradient(
+                  colors: [Color(0xFF8BC342), Color(0xFF7AB233)],
+                )
+              : null,
+          color: isSelected ? null : const Color(0xFFFAFAFA),
+          borderRadius: BorderRadius.circular(14),
           border: Border.all(
             color: isSelected
                 ? const Color(0xFF8BC342)
-                : const Color(0xFFE5E7EB),
+                : Colors.grey.withValues(alpha: 0.1),
             width: 2,
           ),
+          boxShadow: isSelected
+              ? [
+                  BoxShadow(
+                    color: const Color(0xFF8BC342).withValues(alpha: 0.2),
+                    blurRadius: 12,
+                    offset: const Offset(0, 4),
+                  ),
+                ]
+              : null,
         ),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.center,
+        child: Column(
           children: [
-            Icon(
-              icon,
-              color: isSelected ? Colors.white : const Color(0xFF6B7280),
-              size: 24,
-            ),
-            const SizedBox(width: 8),
+            Text(emoji, style: const TextStyle(fontSize: 28)),
+            const SizedBox(height: 6),
             Text(
               label,
               style: TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.w600,
+                fontSize: 14,
+                fontWeight: FontWeight.w700,
                 color: isSelected ? Colors.white : const Color(0xFF111827),
               ),
             ),
@@ -236,30 +252,44 @@ class _GamesSettingsPageState extends State<GamesSettingsPage> {
   Widget _buildPinDefaultCard() {
     return Container(
       decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: const Color(0xFFE5E7EB)),
+        gradient: const LinearGradient(
+          colors: [Color(0xFFFAFAFA), Color(0xFFF5F5F5)],
+        ),
+        borderRadius: BorderRadius.circular(18),
+        border: Border.all(
+          color: Colors.grey.withValues(alpha: 0.08),
+          width: 1,
+        ),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.05),
-            blurRadius: 10,
-            offset: const Offset(0, 2),
+            color: Colors.black.withValues(alpha: 0.06),
+            blurRadius: 16,
+            offset: const Offset(0, 4),
           ),
         ],
       ),
       child: Padding(
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.all(20),
         child: Row(
           children: [
             Container(
-              padding: const EdgeInsets.all(10),
+              padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
-                color: const Color(0xFF8BC342).withValues(alpha: 0.1),
-                borderRadius: BorderRadius.circular(10),
+                gradient: const LinearGradient(
+                  colors: [Color(0xFFF59E0B), Color(0xFFD97706)],
+                ),
+                borderRadius: BorderRadius.circular(12),
+                boxShadow: [
+                  BoxShadow(
+                    color: const Color(0xFFF59E0B).withValues(alpha: 0.25),
+                    blurRadius: 12,
+                    offset: const Offset(0, 4),
+                  ),
+                ],
               ),
               child: const Icon(
                 Icons.location_pin,
-                color: Color(0xFF8BC342),
+                color: Colors.white,
                 size: 24,
               ),
             ),
@@ -272,14 +302,18 @@ class _GamesSettingsPageState extends State<GamesSettingsPage> {
                     'Default Pin State',
                     style: TextStyle(
                       fontSize: 17,
-                      fontWeight: FontWeight.w600,
+                      fontWeight: FontWeight.w800,
                       color: Color(0xFF111827),
                     ),
                   ),
                   SizedBox(height: 4),
                   Text(
                     'Pins knocked down by default',
-                    style: TextStyle(fontSize: 14, color: Color(0xFF6B7280)),
+                    style: TextStyle(
+                      fontSize: 13,
+                      color: Color(0xFF6B7280),
+                      fontWeight: FontWeight.w500,
+                    ),
                   ),
                 ],
               ),
@@ -288,6 +322,8 @@ class _GamesSettingsPageState extends State<GamesSettingsPage> {
               value: _pinsKnockedByDefault,
               onChanged: _updatePinDefault,
               activeColor: const Color(0xFF8BC342),
+              activeTrackColor: const Color(0xFF8BC342).withValues(alpha: 0.3),
+              inactiveTrackColor: Colors.grey.withValues(alpha: 0.2),
             ),
           ],
         ),
@@ -298,25 +334,51 @@ class _GamesSettingsPageState extends State<GamesSettingsPage> {
   Widget _buildInfoCard() {
     return Container(
       decoration: BoxDecoration(
-        color: const Color(0xFFF0F9FF),
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: const Color(0xFFBAE6FD)),
+        gradient: LinearGradient(
+          colors: [
+            const Color(0xFFECF9FF).withValues(alpha: 0.6),
+            const Color(0xFFE0F2FE).withValues(alpha: 0.6),
+          ],
+        ),
+        borderRadius: BorderRadius.circular(18),
+        border: Border.all(
+          color: const Color(0xFF0284C7).withValues(alpha: 0.15),
+          width: 1.5,
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: const Color(0xFF0284C7).withValues(alpha: 0.08),
+            blurRadius: 12,
+            offset: const Offset(0, 3),
+          ),
+        ],
       ),
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.all(18),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Icon(Icons.info_outline, color: Color(0xFF0284C7), size: 24),
-          const SizedBox(width: 12),
+          Container(
+            padding: const EdgeInsets.all(8),
+            decoration: BoxDecoration(
+              color: const Color(0xFF0284C7).withValues(alpha: 0.2),
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: const Icon(
+              Icons.info_outline,
+              color: Color(0xFF0284C7),
+              size: 22,
+            ),
+          ),
+          const SizedBox(width: 14),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 const Text(
-                  'About Settings',
+                  'About Settings 💡',
                   style: TextStyle(
                     fontSize: 15,
-                    fontWeight: FontWeight.w600,
+                    fontWeight: FontWeight.w800,
                     color: Color(0xFF0C4A6E),
                   ),
                 ),
@@ -324,9 +386,10 @@ class _GamesSettingsPageState extends State<GamesSettingsPage> {
                 Text(
                   'These settings will be applied to all new games you create. Existing games will retain their original settings.',
                   style: TextStyle(
-                    fontSize: 14,
+                    fontSize: 13,
                     color: const Color(0xFF0C4A6E).withValues(alpha: 0.8),
-                    height: 1.5,
+                    height: 1.6,
+                    fontWeight: FontWeight.w500,
                   ),
                 ),
               ],
