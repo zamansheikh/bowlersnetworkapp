@@ -888,31 +888,41 @@ class _AnalyticsScoreboard extends StatelessWidget {
       (index) => frameMap[index + 1] ?? FrameEntity(number: index + 1),
     );
 
-    return Card(
-      elevation: 1,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-      child: Padding(
-        padding: const EdgeInsets.symmetric(vertical: 12),
-        child: SingleChildScrollView(
-          scrollDirection: Axis.horizontal,
-          padding: const EdgeInsets.symmetric(horizontal: 8),
-          child: Row(
-            children: List.generate(orderedFrames.length, (index) {
-              final frame = orderedFrames[index];
-              final cumulative = index < cumulativeScores.length
-                  ? cumulativeScores[index]
-                  : null;
-              return Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 2),
-                child: FrameScoreTile(
-                  frame: frame,
-                  cumulativeScore: cumulative,
-                  isActive: false,
-                  activeThrowIndex: null,
-                ),
-              );
-            }),
-          ),
+    return Container(
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          colors: [
+            const Color(0xFF8BC342).withValues(alpha: 0.08),
+            const Color(0xFF8BC342).withValues(alpha: 0.03),
+          ],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(
+          color: const Color(0xFF8BC342).withValues(alpha: 0.15),
+          width: 1.5,
+        ),
+      ),
+      padding: const EdgeInsets.all(16),
+      child: SingleChildScrollView(
+        scrollDirection: Axis.horizontal,
+        child: Row(
+          children: List.generate(orderedFrames.length, (index) {
+            final frame = orderedFrames[index];
+            final cumulative = index < cumulativeScores.length
+                ? cumulativeScores[index]
+                : null;
+            return Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 4),
+              child: FrameScoreTile(
+                frame: frame,
+                cumulativeScore: cumulative,
+                isActive: false,
+                activeThrowIndex: null,
+              ),
+            );
+          }),
         ),
       ),
     );
@@ -929,34 +939,41 @@ class _SpareAttemptsSection extends StatelessWidget {
     final spareAttempts = _groupSpareAttempts(frames);
 
     if (spareAttempts.isEmpty) {
-      return Card(
-        elevation: 2,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-        child: Padding(
-          padding: const EdgeInsets.all(24),
-          child: Center(
-            child: Text(
+      return Container(
+        width: double.infinity,
+        padding: const EdgeInsets.all(32),
+        decoration: BoxDecoration(
+          color: const Color(0xFFF3F4F6).withValues(alpha: 0.5),
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(color: const Color(0xFFE5E7EB), width: 1.5),
+        ),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(Icons.info_outline, size: 48, color: Colors.grey[400]),
+            const SizedBox(height: 12),
+            Text(
               'No spare opportunities in this game',
-              style: TextStyle(color: Colors.grey[600], fontSize: 15),
+              style: TextStyle(
+                color: Colors.grey[600],
+                fontSize: 15,
+                fontWeight: FontWeight.w500,
+              ),
             ),
-          ),
+          ],
         ),
       );
     }
 
-    return Card(
-      elevation: 2,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-      child: ListView.separated(
-        shrinkWrap: true,
-        physics: const NeverScrollableScrollPhysics(),
-        itemCount: spareAttempts.length,
-        separatorBuilder: (context, index) => const Divider(height: 1),
-        itemBuilder: (context, index) {
-          final attempt = spareAttempts[index];
-          return _SpareAttemptTile(attempt: attempt);
-        },
-      ),
+    return Column(
+      children: spareAttempts
+          .map(
+            (attempt) => Padding(
+              padding: const EdgeInsets.only(bottom: 12),
+              child: _SpareAttemptTile(attempt: attempt),
+            ),
+          )
+          .toList(),
     );
   }
 
@@ -1041,79 +1058,138 @@ class _SpareAttemptTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final percentage = attempt.percentage.toStringAsFixed(0);
+    final percentage = attempt.percentage;
     final hasSplit = attempt.attempts.any((a) => a.isSplit);
+    final successColor = percentage > 75
+        ? const Color(0xFF10B981)
+        : percentage > 50
+        ? const Color(0xFFF59E0B)
+        : const Color(0xFFEF4444);
 
-    return InkWell(
-      onTap: () {
-        // Could show detailed breakdown in a dialog
-      },
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-        child: Row(
-          children: [
-            // Pin visualization
-            Container(
-              width: 50,
-              height: 50,
-              decoration: BoxDecoration(
-                color: const Color(0xFFF3F4F6),
-                borderRadius: BorderRadius.circular(8),
+    return Container(
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          colors: [
+            successColor.withValues(alpha: 0.08),
+            successColor.withValues(alpha: 0.03),
+          ],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(
+          color: successColor.withValues(alpha: 0.2),
+          width: 1.5,
+        ),
+      ),
+      padding: const EdgeInsets.all(16),
+      child: Column(
+        children: [
+          Row(
+            children: [
+              // Pin visualization
+              Container(
+                width: 56,
+                height: 56,
+                decoration: BoxDecoration(
+                  color: successColor.withValues(alpha: 0.12),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Center(child: _buildPinVisualization(attempt.pinsLeft)),
               ),
-              child: Center(child: _buildPinVisualization(attempt.pinsLeft)),
-            ),
-            const SizedBox(width: 16),
-            // Stats
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    children: [
-                      Text(
-                        '$percentage% (${attempt.converted}/${attempt.total})',
-                        style: const TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.w600,
-                          color: Color(0xFF111827),
+              const SizedBox(width: 14),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                '${attempt.pinsLeft.length} ${attempt.pinsLeft.length == 1 ? 'Pin' : 'Pins'}',
+                                style: TextStyle(
+                                  fontSize: 13,
+                                  fontWeight: FontWeight.w600,
+                                  color: successColor,
+                                ),
+                              ),
+                              const SizedBox(height: 2),
+                              Text(
+                                'Left standing',
+                                style: TextStyle(
+                                  fontSize: 11,
+                                  color: successColor.withValues(alpha: 0.6),
+                                ),
+                              ),
+                            ],
+                          ),
                         ),
-                      ),
-                      if (hasSplit) ...[
-                        const SizedBox(width: 8),
-                        Container(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 6,
-                            vertical: 2,
-                          ),
-                          decoration: BoxDecoration(
-                            color: const Color(
-                              0xFFDC2626,
-                            ).withValues(alpha: 0.1),
-                            borderRadius: BorderRadius.circular(4),
-                          ),
-                          child: const Text(
-                            'SPLIT',
-                            style: TextStyle(
-                              fontSize: 10,
-                              fontWeight: FontWeight.w700,
-                              color: Color(0xFFDC2626),
+                        if (hasSplit) ...[
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 8,
+                              vertical: 4,
+                            ),
+                            decoration: BoxDecoration(
+                              color: const Color(
+                                0xFFDC2626,
+                              ).withValues(alpha: 0.1),
+                              borderRadius: BorderRadius.circular(6),
+                            ),
+                            child: const Text(
+                              'SPLIT',
+                              style: TextStyle(
+                                fontSize: 10,
+                                fontWeight: FontWeight.w700,
+                                color: Color(0xFFDC2626),
+                              ),
                             ),
                           ),
-                        ),
+                        ],
                       ],
-                    ],
-                  ),
-                  const SizedBox(height: 4),
+                    ),
+                  ],
+                ),
+              ),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.end,
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
                   Text(
-                    '${attempt.pinsLeft.length} ${attempt.pinsLeft.length == 1 ? 'pin' : 'pins'} left',
-                    style: TextStyle(fontSize: 13, color: Colors.grey[600]),
+                    '${percentage.toStringAsFixed(0)}%',
+                    style: TextStyle(
+                      fontSize: 26,
+                      fontWeight: FontWeight.w800,
+                      color: successColor,
+                    ),
+                  ),
+                  Text(
+                    '${attempt.converted}/${attempt.total}',
+                    style: TextStyle(
+                      fontSize: 11,
+                      fontWeight: FontWeight.w600,
+                      color: successColor.withValues(alpha: 0.7),
+                    ),
                   ),
                 ],
               ),
+            ],
+          ),
+          const SizedBox(height: 12),
+          // Progress bar
+          ClipRRect(
+            borderRadius: BorderRadius.circular(3),
+            child: LinearProgressIndicator(
+              value: attempt.percentage / 100,
+              minHeight: 5,
+              backgroundColor: successColor.withValues(alpha: 0.1),
+              valueColor: AlwaysStoppedAnimation(successColor),
             ),
-            const Icon(Icons.chevron_right, color: Color(0xFF9CA3AF)),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
