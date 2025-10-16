@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'dart:math' as math;
 import 'package:go_router/go_router.dart';
 
 import '../../../../core/di/injection.dart';
@@ -250,6 +251,8 @@ class _OverviewTab extends StatelessWidget {
         const SizedBox(height: 24),
         _EnvironmentSection(game: game),
         const SizedBox(height: 24),
+        _GameTypeIndicator(game: game),
+        const SizedBox(height: 24),
         const _SectionHeading(title: 'Performance Snapshot'),
         const SizedBox(height: 12),
         _QuickStatsRow(stats: stats),
@@ -278,6 +281,10 @@ class _DetailsTab extends StatelessWidget {
         const SizedBox(height: 12),
         _PrimaryStatsGrid(stats: stats),
         const SizedBox(height: 24),
+        const _SectionHeading(title: 'Consistency Analysis'),
+        const SizedBox(height: 12),
+        _ConsistencySection(stats: stats),
+        const SizedBox(height: 24),
         const _SectionHeading(title: 'Spare Attempts Analysis'),
         const SizedBox(height: 12),
         _SpareAttemptsSection(frames: frames),
@@ -295,9 +302,18 @@ class _FramesTab extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final movingAverage = _buildMovingAverage(frames);
+    
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
+        const _SectionHeading(title: 'Score Trend'),
+        const SizedBox(height: 12),
+        _ScoreTrendCard(
+          frameScores: frames,
+          movingAverage: movingAverage,
+        ),
+        const SizedBox(height: 24),
         const _SectionHeading(title: 'Frame-by-Frame Breakdown'),
         const SizedBox(height: 12),
         _AnalyticsScoreboard(
@@ -403,6 +419,212 @@ class _QuickStatCard extends StatelessWidget {
           ),
         ],
       ),
+    );
+  }
+}
+
+// === Score Trend Card ===
+class _ScoreTrendCard extends StatelessWidget {
+  const _ScoreTrendCard({
+    required this.frameScores,
+    required this.movingAverage,
+  });
+
+  final List<FrameEntity> frameScores;
+  final List<double> movingAverage;
+
+  @override
+  Widget build(BuildContext context) {
+    final orderedFrames = List<FrameEntity>.from(frameScores)
+      ..sort((a, b) => a.number.compareTo(b.number));
+    final limitedFrames = orderedFrames
+        .where((frame) => frame.number >= 1 && frame.number <= 10)
+        .toList();
+
+    final frameScoresInt = <int>[];
+    for (var i = 0; i < limitedFrames.length; i++) {
+      final score = _frameScoreAt(limitedFrames, i);
+      if (score != null) {
+        frameScoresInt.add(score);
+      }
+    }
+
+    if (frameScoresInt.isEmpty) {
+      return Container(
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: Colors.grey.shade100,
+          borderRadius: BorderRadius.circular(12),
+        ),
+        child: const Center(
+          child: Text('Insufficient data for trend analysis'),
+        ),
+      );
+    }
+
+    final maxScore = frameScoresInt.reduce((a, b) => a > b ? a : b);
+    final minScore = frameScoresInt.reduce((a, b) => a < b ? a : b);
+
+    return Container(
+      decoration: BoxDecoration(
+        gradient: const LinearGradient(
+          colors: [
+            Color(0xFF7C3AED),
+            Color(0xFF5B21B6),
+          ],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
+        borderRadius: BorderRadius.circular(12),
+        boxShadow: [
+          BoxShadow(
+            color: const Color(0xFF7C3AED).withValues(alpha: 0.3),
+            blurRadius: 20,
+            offset: const Offset(0, 8),
+          ),
+        ],
+      ),
+      padding: const EdgeInsets.all(16),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text(
+                    'Frame Score Trend',
+                    style: TextStyle(
+                      color: Colors.white70,
+                      fontSize: 12,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    '3-Frame Moving Average',
+                    style: TextStyle(
+                      color: Colors.white.withValues(alpha: 0.9),
+                      fontSize: 14,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ],
+              ),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                decoration: BoxDecoration(
+                  color: Colors.white.withValues(alpha: 0.15),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Text(
+                  'Frames: ${frameScoresInt.length}/10',
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 12,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 16),
+          // Mini graph representation
+          SizedBox(
+            height: 80,
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.end,
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: List.generate(
+                frameScoresInt.length,
+                (index) {
+                  final score = frameScoresInt[index];
+                  final normalized =
+                      (score - minScore) / (maxScore - minScore + 1).toDouble();
+                  final barHeight = normalized * 60;
+
+                  // Determine color based on moving average trend
+                  Color barColor = Colors.white;
+                  if (index < movingAverage.length) {
+                    if (score > movingAverage[index] + 5) {
+                      barColor = const Color(0xFF10B981); // Green - above trend
+                    } else if (score < movingAverage[index] - 5) {
+                      barColor = const Color(0xFFF87171); // Red - below trend
+                    }
+                  }
+
+                  return Tooltip(
+                    message: 'Frame ${index + 1}: $score pins',
+                    child: Container(
+                      width: 20,
+                      height: barHeight,
+                      decoration: BoxDecoration(
+                        color: barColor,
+                        borderRadius: BorderRadius.circular(4),
+                      ),
+                    ),
+                  );
+                },
+              ),
+            ),
+          ),
+          const SizedBox(height: 12),
+          // Legend
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              _TrendLegend(
+                color: const Color(0xFF10B981),
+                label: 'Above Trend',
+              ),
+              const SizedBox(width: 20),
+              _TrendLegend(
+                color: Colors.white,
+                label: 'On Trend',
+              ),
+              const SizedBox(width: 20),
+              _TrendLegend(
+                color: const Color(0xFFF87171),
+                label: 'Below Trend',
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _TrendLegend extends StatelessWidget {
+  const _TrendLegend({required this.color, required this.label});
+
+  final Color color;
+  final String label;
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      children: [
+        Container(
+          width: 8,
+          height: 8,
+          decoration: BoxDecoration(
+            color: color,
+            borderRadius: BorderRadius.circular(2),
+          ),
+        ),
+        const SizedBox(width: 6),
+        Text(
+          label,
+          style: const TextStyle(
+            color: Colors.white70,
+            fontSize: 11,
+            fontWeight: FontWeight.w500,
+          ),
+        ),
+      ],
     );
   }
 }
@@ -695,6 +917,176 @@ class _PrimaryStatTile extends StatelessWidget {
                   fontSize: 28,
                   fontWeight: FontWeight.w800,
                   color: data.accent,
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+// === Consistency Section ===
+class _ConsistencySection extends StatelessWidget {
+  const _ConsistencySection({required this.stats});
+
+  final _AnalyticsStats stats;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final stdDev = stats.scoreStandardDeviation;
+    final avgScore = stats.frameScores.isEmpty
+        ? 0
+        : stats.frameScores.reduce((a, b) => a + b) / stats.frameScores.length;
+
+    // Consistency rating based on std dev
+    String getConsistencyRating() {
+      if (stdDev < 15) return 'Excellent';
+      if (stdDev < 25) return 'Very Good';
+      if (stdDev < 35) return 'Good';
+      if (stdDev < 50) return 'Average';
+      return 'Variable';
+    }
+
+    Color getConsistencyColor() {
+      if (stdDev < 15) return const Color(0xFF10B981);
+      if (stdDev < 25) return const Color(0xFF3B82F6);
+      if (stdDev < 35) return const Color(0xFFF59E0B);
+      if (stdDev < 50) return const Color(0xFFF97316);
+      return const Color(0xFFEF4444);
+    }
+
+    return Container(
+      decoration: BoxDecoration(
+        color: theme.colorScheme.surface,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(
+          color: theme.colorScheme.outline.withValues(alpha: 0.2),
+        ),
+      ),
+      padding: const EdgeInsets.all(16),
+      child: Column(
+        children: [
+          // Standard Deviation
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Score Consistency',
+                    style: theme.textTheme.bodyMedium?.copyWith(
+                      color: theme.colorScheme.onSurface.withValues(alpha: 0.7),
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    getConsistencyRating(),
+                    style: theme.textTheme.titleMedium?.copyWith(
+                      fontWeight: FontWeight.bold,
+                      color: getConsistencyColor(),
+                    ),
+                  ),
+                ],
+              ),
+              Container(
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: getConsistencyColor().withValues(alpha: 0.1),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Text(
+                  'Std Dev:\n${stdDev.toStringAsFixed(1)}',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    fontSize: 12,
+                    fontWeight: FontWeight.bold,
+                    color: getConsistencyColor(),
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 16),
+          // Pocket Hits
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Pocket Hits',
+                    style: theme.textTheme.bodyMedium?.copyWith(
+                      color: theme.colorScheme.onSurface.withValues(alpha: 0.7),
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    '${stats.pocketHits} / ${stats.totalFrames}',
+                    style: theme.textTheme.titleMedium?.copyWith(
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ],
+              ),
+              Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 12,
+                  vertical: 8,
+                ),
+                decoration: BoxDecoration(
+                  color: const Color(0xFF3CB371).withValues(alpha: 0.1),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Text(
+                  stats.pocketHitPercentageString,
+                  style: const TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.bold,
+                    color: Color(0xFF3CB371),
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 16),
+          // Average Frame Score
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Average Frame Score',
+                    style: theme.textTheme.bodyMedium?.copyWith(
+                      color: theme.colorScheme.onSurface.withValues(alpha: 0.7),
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    avgScore.toStringAsFixed(1),
+                    style: theme.textTheme.titleMedium?.copyWith(
+                      fontWeight: FontWeight.bold,
+                      color: const Color(0xFF7C3AED),
+                    ),
+                  ),
+                ],
+              ),
+              Container(
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: const Color(0xFF7C3AED).withValues(alpha: 0.1),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: const Icon(
+                  Icons.trending_up,
+                  color: Color(0xFF7C3AED),
+                  size: 24,
                 ),
               ),
             ],
@@ -1263,6 +1655,8 @@ class _AnalyticsStats {
     required this.splitConverted,
     required this.singlePinLeaves,
     required this.singlePinConverted,
+    required this.pocketHits,
+    required this.frameScores,
   });
 
   final int strikes;
@@ -1277,16 +1671,33 @@ class _AnalyticsStats {
   final int splitConverted;
   final int singlePinLeaves;
   final int singlePinConverted;
+  final int pocketHits;
+  final List<int> frameScores;
 
   int get completedFrames => totalFrames;
 
   double get firstBallAverage =>
       firstBallAttempts == 0 ? 0 : firstBallPins / firstBallAttempts;
 
+  double get scoreStandardDeviation {
+    if (frameScores.isEmpty) return 0.0;
+    if (frameScores.length == 1) return 0.0;
+
+    final mean = frameScores.reduce((a, b) => a + b) / frameScores.length;
+    final variance = frameScores.fold<double>(
+      0.0,
+      (sum, score) => sum + ((score - mean) * (score - mean)),
+    ) / frameScores.length;
+    return math.sqrt(variance);
+  }
+
   String get strikePercentageString => _percentage(strikes, totalFrames);
 
   String get sparePercentageString =>
       _percentage(spares, totalFrames - strikes);
+
+  String get pocketHitPercentageString =>
+      _percentage(pocketHits, totalFrames);
 
   String get makeableSpareConversionString =>
       _percentage(makeableConverted, makeableLeaves);
@@ -1316,6 +1727,18 @@ _AnalyticsStats _calculateStats(List<FrameEntity> frames) {
   var splitConverted = 0;
   var singlePinLeaves = 0;
   var singlePinConverted = 0;
+  var pocketHits = 0;
+  final frameScores = <int>[];
+
+  // Build frame scores list first
+  final orderedFrames = List<FrameEntity>.from(frames)
+    ..sort((a, b) => a.number.compareTo(b.number));
+  for (var i = 0; i < orderedFrames.length; i++) {
+    final frameScore = _frameScoreAt(orderedFrames, i);
+    if (frameScore != null) {
+      frameScores.add(frameScore);
+    }
+  }
 
   for (final frame in frames) {
     if (frame.number < 1 || frame.number > 10) {
@@ -1335,6 +1758,7 @@ _AnalyticsStats _calculateStats(List<FrameEntity> frames) {
     final bool isStrike = !first.isFoul && first.pinsKnocked == 10;
     if (isStrike) {
       strikes++;
+      pocketHits++; // Pocket hit is a strike on first ball
       if (frame.number == 10) {
         if (frame.throws.length >= 2) {
           final ThrowEntity second = frame.throws[1];
@@ -1415,6 +1839,8 @@ _AnalyticsStats _calculateStats(List<FrameEntity> frames) {
     splitConverted: splitConverted,
     singlePinLeaves: singlePinLeaves,
     singlePinConverted: singlePinConverted,
+    pocketHits: pocketHits,
+    frameScores: frameScores,
   );
 }
 
@@ -1438,6 +1864,34 @@ List<int> _buildCumulativeScores(List<FrameEntity> frames) {
   }
 
   return cumulatives;
+}
+
+List<double> _buildMovingAverage(List<FrameEntity> frames, {int window = 3}) {
+  final orderedFrames = List<FrameEntity>.from(frames)
+    ..sort((a, b) => a.number.compareTo(b.number));
+  final limitedFrames = orderedFrames
+      .where((frame) => frame.number >= 1 && frame.number <= 10)
+      .toList();
+
+  final frameScores = <int>[];
+  for (var i = 0; i < limitedFrames.length; i++) {
+    final frameScore = _frameScoreAt(limitedFrames, i);
+    if (frameScore == null) {
+      break;
+    }
+    frameScores.add(frameScore);
+  }
+
+  final movingAverages = <double>[];
+  for (var i = 0; i < frameScores.length; i++) {
+    final start = (i - window + 1).clamp(0, frameScores.length - 1);
+    final end = (i + 1).clamp(1, frameScores.length);
+    final window_ = frameScores.sublist(start, end);
+    final avg = window_.reduce((a, b) => a + b) / window_.length;
+    movingAverages.add(avg);
+  }
+
+  return movingAverages;
 }
 
 int? _frameScoreAt(List<FrameEntity> frames, int index) {
@@ -1617,6 +2071,84 @@ class _EnvironmentRow extends StatelessWidget {
           ),
         ),
       ],
+    );
+  }
+}
+
+// === Game Type Indicator ===
+class _GameTypeIndicator extends StatelessWidget {
+  const _GameTypeIndicator({required this.game});
+
+  final BowlingGameEntity game;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final isTournament = game.gameType.name == 'tournament';
+    final backgroundColor = isTournament
+        ? const Color(0xFFDEDC1C).withValues(alpha: 0.1)
+        : const Color(0xFF3B82F6).withValues(alpha: 0.1);
+    final borderColor = isTournament
+        ? const Color(0xFFDEDC1C)
+        : const Color(0xFF3B82F6);
+    final icon = isTournament ? Icons.emoji_events : Icons.sports_basketball;
+    final label = isTournament ? 'Tournament Game' : 'Practice Game';
+    final description = isTournament
+        ? 'Official competition'
+        : 'Practice & improvement';
+
+    return Container(
+      decoration: BoxDecoration(
+        color: backgroundColor,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: borderColor.withValues(alpha: 0.3), width: 1),
+      ),
+      padding: const EdgeInsets.all(12),
+      child: Row(
+        children: [
+          Container(
+            padding: const EdgeInsets.all(8),
+            decoration: BoxDecoration(
+              color: borderColor.withValues(alpha: 0.2),
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: Icon(icon, color: borderColor, size: 20),
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  label,
+                  style: theme.textTheme.bodyMedium?.copyWith(
+                    fontWeight: FontWeight.bold,
+                    color: borderColor,
+                  ),
+                ),
+                Text(
+                  description,
+                  style: theme.textTheme.bodySmall?.copyWith(
+                    color:
+                        theme.colorScheme.onSurface.withValues(alpha: 0.6),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          Badge(
+            backgroundColor: borderColor,
+            label: Text(
+              game.gameType.displayName,
+              style: const TextStyle(
+                color: Colors.white,
+                fontSize: 11,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ),
+        ],
+      ),
     );
   }
 }
