@@ -41,6 +41,7 @@ class AppRouter {
         final isLoading = authState is AuthLoading;
         final isInitial = authState is AuthInitial;
         final isUnauthenticated = authState is Unauthenticated;
+        final isAccountDeleted = authState is AccountDeleted;
 
         final isSplash = state.matchedLocation == '/splash';
         final isSigningIn = state.matchedLocation == '/signin';
@@ -55,6 +56,12 @@ class AppRouter {
         if (isLoading || isInitial) {
           debugPrint('🛣️ Router: Staying on splash (loading/initial)');
           return '/splash';
+        }
+
+        // If account was deleted, redirect to signin
+        if (isAccountDeleted) {
+          debugPrint('🛣️ Router: Account deleted, redirecting to signin');
+          return '/signin';
         }
 
         // If user has incomplete profile and not on completion page, redirect there

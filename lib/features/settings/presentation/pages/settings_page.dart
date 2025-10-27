@@ -555,9 +555,22 @@ class SettingsPage extends StatelessWidget {
         return BlocConsumer<AuthCubit, AuthState>(
           listener: (context, state) {
             if (state is AccountDeleted) {
-              // Close dialog and navigate to signin
+              // Close dialog first
               Navigator.of(dialogContext).pop();
-              context.go('/signin');
+              
+              // Show success message
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Text('Account deleted successfully'),
+                  backgroundColor: Colors.green,
+                  duration: const Duration(seconds: 2),
+                ),
+              );
+              
+              // Navigate to signin after a brief delay
+              Future.delayed(const Duration(milliseconds: 500), () {
+                context.go('/signin');
+              });
             } else if (state is AuthError) {
               // Close dialog first
               Navigator.of(dialogContext).pop();
