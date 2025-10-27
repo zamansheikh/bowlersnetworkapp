@@ -259,7 +259,7 @@ class _SignInPageState extends State<SignInPage> {
                               SizedBox(width: AppSpacing.sm),
                               Expanded(
                                 child: Text(
-                                  "Something went wrong. Please try again.",
+                                  "Something went wrong with your credentials. Please try again.",
                                   style: AppTextStyles.bodySmall.copyWith(
                                     color: AppColors.error,
                                   ),
