@@ -42,6 +42,7 @@ class AppRouter {
         final isInitial = authState is AuthInitial;
         final isUnauthenticated = authState is Unauthenticated;
         final isAccountDeleted = authState is AccountDeleted;
+        final isAuthError = authState is AuthError;
 
         final isSplash = state.matchedLocation == '/splash';
         final isSigningIn = state.matchedLocation == '/signin';
@@ -52,10 +53,16 @@ class AppRouter {
         debugPrint('🛣️ Router: Redirecting from ${state.matchedLocation}');
         debugPrint('🛣️ Router: Auth state: ${authState.runtimeType}');
 
-        // Show splash during initial auth loading or initial state
-        if (isLoading || isInitial) {
+        // Show splash during initial auth loading or initial state (but not when signing in)
+        if ((isLoading || isInitial) && !isSigningIn && !isSigningUp) {
           debugPrint('🛣️ Router: Staying on splash (loading/initial)');
           return '/splash';
+        }
+
+        // If there's an auth error and user is on splash, redirect to signin
+        if (isAuthError && isSplash) {
+          debugPrint('🛣️ Router: Auth error on splash, redirecting to signin');
+          return '/signin';
         }
 
         // If account was deleted, redirect to signin

@@ -112,14 +112,50 @@ class _EmailVerificationPageState extends State<EmailVerificationPage> {
                   // Navigate to user creation with birth date
                   _handleEmailVerified();
                 } else if (state is SignupLoginSuccess) {
-                  // Navigate to home page after successful login
+                  // Show success message
                   if (mounted) {
-                    context.go('/');
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: const Text(
+                          '🎉 Account created successfully! Welcome to Bowlers Network!',
+                        ),
+                        backgroundColor: AppColors.success,
+                        behavior: SnackBarBehavior.floating,
+                        duration: const Duration(seconds: 3),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                      ),
+                    );
+                    // Navigate to home page after a brief delay
+                    Future.delayed(const Duration(milliseconds: 500), () {
+                      if (mounted) {
+                        context.go('/');
+                      }
+                    });
                   }
                 } else if (state is SignupLoginIncompleteProfile) {
-                  // Navigate to profile completion page
+                  // Show success message
                   if (mounted) {
-                    context.go('/complete-profile');
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: const Text(
+                          '🎉 Account created successfully! Please complete your profile.',
+                        ),
+                        backgroundColor: AppColors.success,
+                        behavior: SnackBarBehavior.floating,
+                        duration: const Duration(seconds: 3),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                      ),
+                    );
+                    // Navigate to profile completion page after a brief delay
+                    Future.delayed(const Duration(milliseconds: 500), () {
+                      if (mounted) {
+                        context.go('/complete-profile');
+                      }
+                    });
                   }
                 } else if (state is UserCreated) {
                   // This shouldn't happen anymore since we auto-login

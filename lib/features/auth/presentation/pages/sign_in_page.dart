@@ -38,7 +38,39 @@ class _SignInPageState extends State<SignInPage> {
               horizontal: 20.0,
               vertical: AppSpacing.lg,
             ),
-            child: BlocBuilder<AuthCubit, AuthState>(
+            child: BlocConsumer<AuthCubit, AuthState>(
+              listener: (context, state) {
+                // Show snackbar immediately when login fails
+                if (state is AuthError) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Row(
+                        children: [
+                          Icon(Icons.error_outline, color: Colors.white),
+                          SizedBox(width: 8),
+                          Expanded(
+                            child: Text(
+                              state.message.contains('401') ||
+                                      state.message.toLowerCase().contains(
+                                        'unauthorized',
+                                      )
+                                  ? 'Invalid username or password'
+                                  : "Something went wrong. Please try again.",
+                              style: TextStyle(color: Colors.white),
+                            ),
+                          ),
+                        ],
+                      ),
+                      backgroundColor: AppColors.error,
+                      behavior: SnackBarBehavior.floating,
+                      duration: const Duration(seconds: 4),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                    ),
+                  );
+                }
+              },
               builder: (context, state) {
                 return Form(
                   key: _formKey,
@@ -227,7 +259,7 @@ class _SignInPageState extends State<SignInPage> {
                               SizedBox(width: AppSpacing.sm),
                               Expanded(
                                 child: Text(
-                                  state.message,
+                                  "Something went wrong. Please try again.",
                                   style: AppTextStyles.bodySmall.copyWith(
                                     color: AppColors.error,
                                   ),
