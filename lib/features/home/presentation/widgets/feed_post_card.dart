@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import '../../../../core/constants/colors.dart';
@@ -31,6 +32,17 @@ class _FeedPostCardState extends State<FeedPostCard> {
   bool _isLiking = false;
   bool _isVoting = false;
   int? _selectedPollOption;
+
+  void _showToast(String message) {
+    Fluttertoast.showToast(
+      msg: message,
+      toastLength: Toast.LENGTH_SHORT,
+      gravity: ToastGravity.BOTTOM,
+      backgroundColor: const Color(0xFF424242),
+      textColor: Colors.white,
+      fontSize: 14.sp,
+    );
+  }
 
   void _handleLike() async {
     if (_isLiking) return;
@@ -378,13 +390,7 @@ class _FeedPostCardState extends State<FeedPostCard> {
             width: double.infinity,
             child: ElevatedButton(
               onPressed: () {
-                // TODO: Handle event interest
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(
-                    content: Text('Event feature coming soon!'),
-                    backgroundColor: AppColors.primaryLimeGreen,
-                  ),
-                );
+                _showToast('Event registration coming soon! 📅');
               },
               style: ElevatedButton.styleFrom(
                 backgroundColor: AppColors.primaryLimeGreen,
@@ -587,7 +593,7 @@ class _FeedPostCardState extends State<FeedPostCard> {
                   ),
                   child: InkWell(
                     onTap: () {
-                      // TODO: Implement share functionality
+                      _showToast('Share feature coming soon! 🚀');
                     },
                     child: Row(
                       mainAxisSize: MainAxisSize.min,
@@ -618,19 +624,27 @@ class _FeedPostCardState extends State<FeedPostCard> {
               ],
             ),
             // Right side - Bookmark button
-            Container(
-              padding: EdgeInsets.all(8.w),
-              decoration: BoxDecoration(
-                border: Border.all(color: const Color(0xFFF0EEEE), width: 1.w),
-                borderRadius: BorderRadius.circular(50.r),
-              ),
-              child: SvgPicture.asset(
-                'assets/icons/bookmark.svg',
-                width: 20.w,
-                height: 20.h,
-                colorFilter: const ColorFilter.mode(
-                  Color(0xFF6D6D6D),
-                  BlendMode.srcIn,
+            GestureDetector(
+              onTap: () {
+                _showToast('Bookmark feature coming soon! 🔖');
+              },
+              child: Container(
+                padding: EdgeInsets.all(8.w),
+                decoration: BoxDecoration(
+                  border: Border.all(
+                    color: const Color(0xFFF0EEEE),
+                    width: 1.w,
+                  ),
+                  borderRadius: BorderRadius.circular(50.r),
+                ),
+                child: SvgPicture.asset(
+                  'assets/icons/bookmark.svg',
+                  width: 20.w,
+                  height: 20.h,
+                  colorFilter: const ColorFilter.mode(
+                    Color(0xFF6D6D6D),
+                    BlendMode.srcIn,
+                  ),
                 ),
               ),
             ),
@@ -663,7 +677,7 @@ class _FeedPostCardState extends State<FeedPostCard> {
                     // User avatar
                     GestureDetector(
                       onTap: () {
-                        // TODO: Navigate to user profile
+                        _showToast('User profile feature coming soon! 👤');
                       },
                       child: CircleAvatar(
                         radius: 24.r,
@@ -691,7 +705,7 @@ class _FeedPostCardState extends State<FeedPostCard> {
                     Expanded(
                       child: GestureDetector(
                         onTap: () {
-                          // TODO: Navigate to user profile
+                          _showToast('User profile feature coming soon! 👤');
                         },
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
