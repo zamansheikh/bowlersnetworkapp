@@ -123,6 +123,7 @@ class AuthRepositoryImpl implements AuthRepository {
         return Left(NetworkFailure('Missing token'));
       }
 
+      // password parameter now contains username
       await remote.deleteAccount(token, password);
 
       // Clear all stored data

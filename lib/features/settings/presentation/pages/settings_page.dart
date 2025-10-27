@@ -8,6 +8,7 @@ import '../../../../core/constants/colors.dart';
 import '../../../../core/theme/app_text_styles.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../auth/presentation/bloc/auth_cubit.dart';
+import '../../../home/data/models/user_model.dart';
 
 class SettingsPage extends StatelessWidget {
   const SettingsPage({super.key});
@@ -435,138 +436,117 @@ class SettingsPage extends StatelessWidget {
   }
 
   void _showPasswordConfirmationDialog(BuildContext context) {
-    final TextEditingController passwordController = TextEditingController();
-    bool obscurePassword = true;
+    // Get username from auth state
+    final authState = context.read<AuthCubit>().state;
+    String username = '';
+
+    if (authState is Authenticated && authState.user is UserModel) {
+      username = (authState.user as UserModel).username;
+    }
+
+    final TextEditingController usernameController = TextEditingController(
+      text: username,
+    );
 
     showDialog(
       context: context,
       barrierDismissible: false,
       builder: (BuildContext dialogContext) {
-        return StatefulBuilder(
-          builder: (context, setState) {
-            return AlertDialog(
-              backgroundColor: AppColors.white,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(AppSpacing.radiusLG),
+        return AlertDialog(
+          backgroundColor: AppColors.white,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(AppSpacing.radiusLG),
+          ),
+          title: Row(
+            children: [
+              Icon(Icons.person_outline, color: AppColors.error, size: 28),
+              SizedBox(width: AppSpacing.sm),
+              Text(
+                'Confirm Username',
+                style: AppTextStyles.headlineSmall.copyWith(
+                  color: AppColors.error,
+                  fontWeight: FontWeight.w600,
+                ),
               ),
-              title: Row(
-                children: [
-                  Icon(Icons.lock_outline, color: AppColors.error, size: 28),
-                  SizedBox(width: AppSpacing.sm),
-                  Text(
-                    'Confirm Password',
-                    style: AppTextStyles.headlineSmall.copyWith(
-                      color: AppColors.error,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                ],
+            ],
+          ),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                'Please confirm your username to proceed with account deletion:',
+                style: AppTextStyles.bodyLarge.copyWith(
+                  color: AppColors.gray900,
+                ),
               ),
-              content: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    'Please enter your password to confirm account deletion:',
-                    style: AppTextStyles.bodyLarge.copyWith(
-                      color: AppColors.gray900,
-                    ),
+              SizedBox(height: AppSpacing.md),
+              TextField(
+                controller: usernameController,
+                enabled: false, // Make it uneditable
+                decoration: InputDecoration(
+                  hintText: 'Username',
+                  prefixIcon: Icon(
+                    Icons.person_outline,
+                    color: AppColors.gray500,
                   ),
-                  SizedBox(height: AppSpacing.md),
-                  TextField(
-                    controller: passwordController,
-                    obscureText: obscurePassword,
-                    decoration: InputDecoration(
-                      hintText: 'Enter your password',
-                      prefixIcon: Icon(
-                        Icons.lock_outline,
-                        color: AppColors.gray500,
-                      ),
-                      suffixIcon: IconButton(
-                        icon: Icon(
-                          obscurePassword
-                              ? Icons.visibility_off
-                              : Icons.visibility,
-                          color: AppColors.gray500,
-                        ),
-                        onPressed: () {
-                          setState(() {
-                            obscurePassword = !obscurePassword;
-                          });
-                        },
-                      ),
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(
-                          AppSpacing.radiusSM,
-                        ),
-                        borderSide: BorderSide(color: AppColors.border),
-                      ),
-                      focusedBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(
-                          AppSpacing.radiusSM,
-                        ),
-                        borderSide: BorderSide(
-                          color: AppColors.primaryLimeGreen,
-                        ),
-                      ),
-                    ),
+                  filled: true,
+                  fillColor: AppColors.gray100,
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(AppSpacing.radiusSM),
+                    borderSide: BorderSide(color: AppColors.border),
                   ),
-                ],
-              ),
-              actions: [
-                TextButton(
-                  onPressed: () => Navigator.of(dialogContext).pop(),
-                  child: Text(
-                    'Cancel',
-                    style: AppTextStyles.button.copyWith(
-                      color: AppColors.gray600,
-                    ),
+                  disabledBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(AppSpacing.radiusSM),
+                    borderSide: BorderSide(color: AppColors.border),
                   ),
                 ),
-                ElevatedButton(
-                  onPressed: () {
-                    if (passwordController.text.trim().isEmpty) {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(
-                          content: Text('Please enter your password'),
-                          backgroundColor: AppColors.error,
-                        ),
-                      );
-                      return;
-                    }
-                    Navigator.of(dialogContext).pop();
-                    _showFinalDeleteAccountDialog(
-                      context,
-                      passwordController.text,
-                    );
-                  },
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: AppColors.error,
-                    foregroundColor: AppColors.white,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(
-                        AppSpacing.buttonRadius,
-                      ),
+              ),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(dialogContext).pop(),
+              child: Text(
+                'Cancel',
+                style: AppTextStyles.button.copyWith(color: AppColors.gray600),
+              ),
+            ),
+            ElevatedButton(
+              onPressed: () {
+                if (usernameController.text.trim().isEmpty) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text('Username is required'),
+                      backgroundColor: AppColors.error,
                     ),
-                  ),
-                  child: Text(
-                    'Confirm',
-                    style: AppTextStyles.button.copyWith(
-                      color: AppColors.white,
-                    ),
-                  ),
+                  );
+                  return;
+                }
+                Navigator.of(dialogContext).pop();
+                _showFinalDeleteAccountDialog(context, usernameController.text);
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: AppColors.error,
+                foregroundColor: AppColors.white,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(AppSpacing.buttonRadius),
                 ),
-              ],
-            );
-          },
+              ),
+              child: Text(
+                'Confirm',
+                style: AppTextStyles.button.copyWith(color: AppColors.white),
+              ),
+            ),
+          ],
         );
       },
     );
   }
 
-  void _showFinalDeleteAccountDialog(BuildContext context, String password) {
-    // Trigger account deletion immediately with password
-    context.read<AuthCubit>().deleteAccount(password);
+  void _showFinalDeleteAccountDialog(BuildContext context, String username) {
+    // Trigger account deletion immediately with username
+    context.read<AuthCubit>().deleteAccount(username);
 
     showDialog(
       context: context,

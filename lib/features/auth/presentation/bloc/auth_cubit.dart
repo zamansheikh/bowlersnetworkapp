@@ -128,10 +128,10 @@ class AuthCubit extends Cubit<AuthState> {
     }
   }
 
-  Future<void> deleteAccount(String password) async {
+  Future<void> deleteAccount(String username) async {
     emit(AuthLoading());
     try {
-      final result = await authRepository.deleteAccount(password);
+      final result = await authRepository.deleteAccount(username);
       result.fold((failure) => emit(AuthError(failure.toString())), (_) {
         // Account successfully deleted, tokens are already cleared in repository
         // Emit AccountDeleted state which will trigger navigation to signin
