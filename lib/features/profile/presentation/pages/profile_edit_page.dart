@@ -28,12 +28,10 @@ class _ProfileEditPageState extends State<ProfileEditPage> {
   late TextEditingController _experienceController;
 
   File? _profilePicture;
-  // ignore: unused_field
   File? _coverPhoto;
   File? _introVideo;
 
   String? _existingProfilePictureUrl;
-  // ignore: unused_field
   String? _existingCoverPhotoUrl;
   String? _existingIntroVideoUrl;
 
@@ -315,7 +313,7 @@ class _ProfileEditPageState extends State<ProfileEditPage> {
         SizedBox(height: 12.h),
         Row(
           children: [
-            // Profile Picture
+            // Profile Picture - Available for everyone
             _buildMediaCard(
               title: 'Profile Picture',
               icon: Icons.image_outlined,
@@ -325,16 +323,25 @@ class _ProfileEditPageState extends State<ProfileEditPage> {
               existingUrl: _existingProfilePictureUrl,
             ),
             SizedBox(width: 8.w),
-            // Intro Video
+            // Intro Video (Pro only) OR Cover Photo (Non-Pro only)
             Expanded(
-              child: _buildMediaCard(
-                title: 'Intro Video',
-                icon: Icons.play_circle_outline,
-                onTap: () => _pickImage('video'),
-                isVideo: true,
-                imageFile: _introVideo,
-                existingUrl: _existingIntroVideoUrl,
-              ),
+              child: user.isPro
+                  ? _buildMediaCard(
+                      title: 'Intro Video',
+                      icon: Icons.play_circle_outline,
+                      onTap: () => _pickImage('video'),
+                      isVideo: true,
+                      imageFile: _introVideo,
+                      existingUrl: _existingIntroVideoUrl,
+                    )
+                  : _buildMediaCard(
+                      title: 'Cover Photo',
+                      icon: Icons.image_outlined,
+                      onTap: () => _pickImage('cover'),
+                      isVideo: false,
+                      imageFile: _coverPhoto,
+                      existingUrl: _existingCoverPhotoUrl,
+                    ),
             ),
           ],
         ),
