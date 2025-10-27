@@ -557,7 +557,7 @@ class SettingsPage extends StatelessWidget {
             if (state is AccountDeleted) {
               // Close dialog first
               Navigator.of(dialogContext).pop();
-              
+
               // Show success message
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(
@@ -566,7 +566,7 @@ class SettingsPage extends StatelessWidget {
                   duration: const Duration(seconds: 2),
                 ),
               );
-              
+
               // Navigate to signin after a brief delay
               Future.delayed(const Duration(milliseconds: 500), () {
                 context.go('/signin');
