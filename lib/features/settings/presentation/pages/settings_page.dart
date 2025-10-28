@@ -72,6 +72,13 @@ class SettingsPage extends StatelessWidget {
                           ),
                           const Divider(height: 1, color: AppColors.border),
                           _buildSettingsItem(
+                            icon: Icons.shield,
+                            title: 'Safety Center',
+                            subtitle: 'Safety tips and report concerns',
+                            onTap: () => context.push('/help-center'),
+                          ),
+                          const Divider(height: 1, color: AppColors.border),
+                          _buildSettingsItem(
                             icon: Icons.help_outline,
                             title: 'Help & Support',
                             subtitle: 'Get help and contact support',

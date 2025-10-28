@@ -9,6 +9,7 @@ import '../../../../core/constants/colors.dart';
 import '../../data/models/feed_post.dart';
 import '../cubit/feed_cubit.dart';
 import 'media_gallery.dart';
+import '../../../safety/presentation/widgets/report_dialog.dart';
 
 class FeedPostCard extends StatefulWidget {
   final FeedPost post;
@@ -623,30 +624,61 @@ class _FeedPostCardState extends State<FeedPostCard> {
                 ),
               ],
             ),
-            // Right side - Bookmark button
-            GestureDetector(
-              onTap: () {
-                _showToast('Bookmark feature coming soon! 🔖');
-              },
-              child: Container(
-                padding: EdgeInsets.all(8.w),
-                decoration: BoxDecoration(
-                  border: Border.all(
-                    color: const Color(0xFFF0EEEE),
-                    width: 1.w,
+            // Right side - Bookmark button and Report button
+            Row(
+              children: [
+                GestureDetector(
+                  onTap: () {
+                    _showToast('Bookmark feature coming soon! 🔖');
+                  },
+                  child: Container(
+                    padding: EdgeInsets.all(8.w),
+                    decoration: BoxDecoration(
+                      border: Border.all(
+                        color: const Color(0xFFF0EEEE),
+                        width: 1.w,
+                      ),
+                      borderRadius: BorderRadius.circular(50.r),
+                    ),
+                    child: SvgPicture.asset(
+                      'assets/icons/bookmark.svg',
+                      width: 20.w,
+                      height: 20.h,
+                      colorFilter: const ColorFilter.mode(
+                        Color(0xFF6D6D6D),
+                        BlendMode.srcIn,
+                      ),
+                    ),
                   ),
-                  borderRadius: BorderRadius.circular(50.r),
                 ),
-                child: SvgPicture.asset(
-                  'assets/icons/bookmark.svg',
-                  width: 20.w,
-                  height: 20.h,
-                  colorFilter: const ColorFilter.mode(
-                    Color(0xFF6D6D6D),
-                    BlendMode.srcIn,
+                SizedBox(width: 8.w),
+                // Report button
+                GestureDetector(
+                  onTap: () {
+                    showDialog(
+                      context: context,
+                      builder: (context) => ReportDialog(
+                        reportedUserId: widget.post.author.userId.toString(),
+                        reportedPostId: widget.post.metadata.id.toString(),
+                        onReportSubmitted: () {
+                          // Optional: handle post-report actions
+                        },
+                      ),
+                    );
+                  },
+                  child: Container(
+                    padding: EdgeInsets.all(8.w),
+                    decoration: BoxDecoration(
+                      border: Border.all(
+                        color: const Color(0xFFF0EEEE),
+                        width: 1.w,
+                      ),
+                      borderRadius: BorderRadius.circular(50.r),
+                    ),
+                    child: Icon(Icons.more_vert, size: 20.w, color: Colors.red),
                   ),
                 ),
-              ),
+              ],
             ),
           ],
         ),
