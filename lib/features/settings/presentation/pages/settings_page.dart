@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
+import 'package:package_info_plus/package_info_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../../../../core/constants/colors.dart';
@@ -10,8 +11,38 @@ import '../../../../core/theme/app_spacing.dart';
 import '../../../auth/presentation/bloc/auth_cubit.dart';
 import '../../../home/data/models/user_model.dart';
 
-class SettingsPage extends StatelessWidget {
+class SettingsPage extends StatefulWidget {
   const SettingsPage({super.key});
+
+  @override
+  State<SettingsPage> createState() => _SettingsPageState();
+}
+
+class _SettingsPageState extends State<SettingsPage> {
+  String _appVersion = 'Loading...';
+  String _buildNumber = '';
+
+  @override
+  void initState() {
+    super.initState();
+    _loadVersionInfo();
+  }
+
+  Future<void> _loadVersionInfo() async {
+    try {
+      final PackageInfo packageInfo = await PackageInfo.fromPlatform();
+      setState(() {
+        _appVersion = packageInfo.version;
+        _buildNumber = packageInfo.buildNumber;
+      });
+    } catch (e) {
+      debugPrint('Error loading version info: $e');
+      setState(() {
+        _appVersion = '1.0.1';
+        _buildNumber = '1';
+      });
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -137,7 +168,7 @@ class SettingsPage extends StatelessWidget {
                                   ),
                                 ),
                                 Text(
-                                  'Version 1.0.0',
+                                  'Version $_appVersion${_buildNumber.isNotEmpty ? ' (Build $_buildNumber)' : ''}',
                                   style: AppTextStyles.bodySmall.copyWith(
                                     color: AppColors.gray600,
                                   ),
