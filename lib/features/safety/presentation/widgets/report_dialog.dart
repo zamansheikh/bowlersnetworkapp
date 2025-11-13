@@ -2,7 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import '../../../../../core/constants/colors.dart';
+import '../../../../../core/di/injection.dart';
 import '../../data/models/report_model.dart';
+import '../../data/repository/report_repository.dart';
 
 class ReportDialog extends StatefulWidget {
   final String reportedUserId;
@@ -47,10 +49,36 @@ class _ReportDialogState extends State<ReportDialog> {
     });
 
     try {
-      // TODO: Call reportRepository to submit report when backend is ready
+      final reportRepository = getIt<ReportRepository>();
 
-      // Simulate network delay
-      await Future.delayed(const Duration(milliseconds: 800));
+      // Call the appropriate report API based on what's being reported
+      if (widget.reportedPostId != null) {
+        await reportRepository.reportPost(
+          postId: widget.reportedPostId!,
+          reportedUserId: widget.reportedUserId,
+          reason: _selectedReason!,
+          description: _descriptionController.text.trim().isEmpty
+              ? "No description provided"
+              : _descriptionController.text.trim(),
+        );
+      } else if (widget.reportedMessageId != null) {
+        await reportRepository.reportMessage(
+          messageId: widget.reportedMessageId!,
+          reportedUserId: widget.reportedUserId,
+          reason: _selectedReason!,
+          description: _descriptionController.text.trim().isEmpty
+              ? "No description provided"
+              : _descriptionController.text.trim(),
+        );
+      } else {
+        await reportRepository.reportUser(
+          reportedUserId: widget.reportedUserId,
+          reason: _selectedReason!,
+          description: _descriptionController.text.trim().isEmpty
+              ? null
+              : _descriptionController.text.trim(),
+        );
+      }
 
       if (mounted) {
         Fluttertoast.showToast(
@@ -64,8 +92,9 @@ class _ReportDialogState extends State<ReportDialog> {
     } catch (e) {
       if (mounted) {
         Fluttertoast.showToast(
-          msg: 'Failed to submit report. Please try again.',
+          msg: e.toString().replaceAll('Exception: ', ''),
           backgroundColor: Colors.red,
+          toastLength: Toast.LENGTH_LONG,
         );
       }
     } finally {
