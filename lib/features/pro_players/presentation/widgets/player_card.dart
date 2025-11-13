@@ -45,89 +45,76 @@ class _PlayerCardState extends State<PlayerCard> {
 
   @override
   Widget build(BuildContext context) {
-    const cardWidth = 322.0;
     return Container(
-      width: cardWidth,
-      margin: const EdgeInsets.symmetric(vertical: 12, horizontal: 6),
+      height: 540,
       decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(28),
+        borderRadius: BorderRadius.circular(12),
         gradient: LinearGradient(
           begin: Alignment.topCenter,
           end: Alignment.bottomCenter,
-          colors: [
-            widget.primaryColor.withValues(alpha: 0.92),
-            widget.secondaryColor.withValues(alpha: 0.96),
-          ],
+          colors: [widget.primaryColor, widget.secondaryColor],
         ),
-        border: Border.all(color: Colors.white.withOpacity(0.12), width: 1.8),
+        border: Border.all(
+          color: widget.primaryColor.withValues(alpha: 00.4),
+          width: 3,
+        ),
         boxShadow: [
           BoxShadow(
-            color: widget.primaryColor.withOpacity(0.35),
-            blurRadius: 24,
-            offset: const Offset(0, 16),
+            color: Colors.black.withValues(alpha: 00.2),
+            blurRadius: 20,
+            offset: const Offset(0, 10),
           ),
         ],
       ),
       child: ClipRRect(
-        borderRadius: BorderRadius.circular(27),
-        child: Container(
-          decoration: BoxDecoration(
-            gradient: LinearGradient(
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-              colors: [
-                widget.primaryColor.withOpacity(0.35),
-                widget.secondaryColor.withOpacity(0.75),
-              ],
-            ),
-          ),
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 20),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                // ---- PageView -------------------------------------------------
-                Expanded(
-                  child: PageView(
-                    controller: _pageController,
-                    onPageChanged: (i) => setState(() => _currentPage = i),
-                    children: [
-                      _ProfileView(
-                        player: widget.player,
-                        primaryColor: widget.primaryColor,
-                        accentColor: widget.accentColor,
-                      ),
-                      _ShotsAndStatesView(
-                        player: widget.player,
-                        primaryColor: widget.primaryColor,
-                        accentColor: widget.accentColor,
-                        secondaryColor: widget.secondaryColor,
-                        numberFormatter: _formatNumber,
-                        currentPage: _currentPage,
-                        onPageChanged: (i) {
-                          print('Changing to page $i');
-                          setState(() => _currentPage = i);
-                          _pageController.animateToPage(
-                            i + 1,
-                            duration: const Duration(milliseconds: 260),
-                            curve: Curves.easeInOut,
-                          );
-                        },
-                      ),
-                    ],
-                  ),
+        borderRadius: BorderRadius.circular(12),
+        child: Padding(
+          padding: const EdgeInsets.all(12),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              // ---- PageView -------------------------------------------------
+              Expanded(
+                child: PageView(
+                  controller: _pageController,
+                  onPageChanged: (i) => setState(() => _currentPage = i),
+                  children: [
+                    _ProfileView(
+                      player: widget.player,
+                      primaryColor: widget.primaryColor,
+                      accentColor: widget.accentColor,
+                    ),
+                    _ShotsAndStatesView(
+                      player: widget.player,
+                      primaryColor: widget.primaryColor,
+                      accentColor: widget.accentColor,
+                      secondaryColor: widget.secondaryColor,
+                      numberFormatter: _formatNumber,
+                      currentPage: _currentPage,
+                      onPageChanged: (i) {
+                        setState(() => _currentPage = i);
+                        _pageController.animateToPage(
+                          i,
+                          duration: const Duration(milliseconds: 260),
+                          curve: Curves.easeInOut,
+                        );
+                      },
+                    ),
+                  ],
                 ),
-                const SizedBox(height: 18),
+              ),
+              const SizedBox(height: 20),
 
-                // ---- Player name + meta --------------------------------------
-                _buildPlayerNameSection(),
-                const SizedBox(height: 16),
-
-                // ---- Follow / Collect ----------------------------------------
-                _buildActionRow(),
-                const SizedBox(height: 18),
-              ],
-            ),
+              // ---- Player name + meta + Follow / Collect--------------------------------------
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Expanded(child: _buildPlayerNameSection()),
+                  const SizedBox(width: 12),
+                  _buildActionColumn(),
+                ],
+              ),
+            ],
           ),
         ),
       ),
@@ -140,80 +127,57 @@ class _PlayerCardState extends State<PlayerCard> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-          widget.player.name.toUpperCase(),
-          style: const TextStyle(
-            color: Colors.white,
-            fontSize: 24,
-            fontWeight: FontWeight.w800,
-            letterSpacing: 1.2,
-          ),
-          maxLines: 1,
-          overflow: TextOverflow.ellipsis,
+        Row(
+          children: [
+            Expanded(
+              child: Text(
+                widget.player.name.toUpperCase(),
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontSize: 22,
+                  fontWeight: FontWeight.w900,
+                  letterSpacing: 0.8,
+                ),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+              ),
+            ),
+          ],
         ),
-        const SizedBox(height: 6),
+        const SizedBox(height: 8),
         AnimatedSwitcher(
           duration: const Duration(milliseconds: 220),
           switchInCurve: Curves.easeOut,
           switchOutCurve: Curves.easeIn,
           child: _currentPage == 0
               ? Row(
-                  key: const ValueKey('shots-meta'),
                   children: [
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 10,
-                        vertical: 4,
-                      ),
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(14),
-                        color: Colors.white.withOpacity(0.12),
-                        border: Border.all(
-                          color: Colors.white.withOpacity(0.24),
-                        ),
-                      ),
-                      child: Text(
-                        levelText,
-                        style: const TextStyle(
-                          color: Colors.white,
-                          fontSize: 12,
-                          fontWeight: FontWeight.w600,
-                        ),
+                    Text(
+                      key: const ValueKey('level-meta'),
+                      levelText,
+                      style: TextStyle(
+                        color: Colors.white.withValues(alpha: 0.85),
+                        fontSize: 14,
+                        fontWeight: FontWeight.w600,
                       ),
                     ),
-                    const SizedBox(width: 10),
-                    GestureDetector(
-                      onTap: widget.onTap,
-                      child: Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 14,
-                          vertical: 5,
-                        ),
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(14),
-                          color: widget.accentColor.withOpacity(0.15),
-                          border: Border.all(
-                            color: widget.accentColor.withOpacity(0.45),
-                          ),
-                        ),
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Icon(
-                              Icons.info_outline,
-                              color: widget.accentColor,
-                              size: 16,
-                            ),
-                            const SizedBox(width: 6),
-                            Text(
-                              'Details',
-                              style: TextStyle(
-                                color: widget.accentColor,
-                                fontSize: 12,
-                                fontWeight: FontWeight.w600,
-                              ),
-                            ),
-                          ],
+                    const SizedBox(width: 8),
+                    Container(
+                      key: const ValueKey('shots-meta'),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 8,
+                        vertical: 2,
+                      ),
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(4),
+                        color: widget.accentColor,
+                      ),
+                      child: Text(
+                        "Details",
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 8,
+                          fontWeight: FontWeight.w500,
                         ),
                       ),
                     ),
@@ -222,28 +186,19 @@ class _PlayerCardState extends State<PlayerCard> {
               : Row(
                   key: const ValueKey('stats-meta'),
                   children: [
-                    Icon(Icons.bolt, size: 18, color: widget.accentColor),
+                    Icon(Icons.bolt, size: 16, color: widget.accentColor),
                     const SizedBox(width: 8),
                     Expanded(
                       child: ClipRRect(
                         borderRadius: BorderRadius.circular(12),
                         child: LinearProgressIndicator(
                           value: _levelProgress(widget.player.xp),
-                          minHeight: 10,
-                          backgroundColor: Colors.white.withOpacity(0.1),
+                          minHeight: 6,
+                          backgroundColor: Colors.white.withValues(alpha: 00.1),
                           valueColor: AlwaysStoppedAnimation<Color>(
                             widget.accentColor,
                           ),
                         ),
-                      ),
-                    ),
-                    const SizedBox(width: 12),
-                    Text(
-                      levelText,
-                      style: const TextStyle(
-                        color: Colors.white,
-                        fontSize: 12,
-                        fontWeight: FontWeight.w600,
                       ),
                     ),
                   ],
@@ -254,79 +209,86 @@ class _PlayerCardState extends State<PlayerCard> {
   }
 
   // ----------------------------------------------------------------------
-  Widget _buildActionRow() {
-    return Row(
-      children: [
-        Expanded(child: _buildFollowButton()),
-        const SizedBox(width: 12),
-        Expanded(child: _buildCollectButton()),
-      ],
+  Widget _buildActionColumn() {
+    return Padding(
+      padding: const EdgeInsets.all(8.0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.end,
+        children: [
+          _buildFollowButton(),
+          const SizedBox(height: 12),
+          _buildCollectButton(),
+        ],
+      ),
     );
   }
 
   Widget _buildFollowButton() {
     final isFollowed = widget.player.isFollowed;
-    return ElevatedButton(
-      onPressed: widget.isLoading ? null : widget.onFollow,
-      style: ElevatedButton.styleFrom(
-        backgroundColor: isFollowed
-            ? widget.accentColor.withOpacity(0.35)
-            : widget.accentColor,
-        foregroundColor: Colors.white,
-        elevation: 0,
-        padding: const EdgeInsets.symmetric(vertical: 14),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-      ),
-      child: widget.isLoading
-          ? const SizedBox(
-              height: 18,
-              width: 18,
-              child: CircularProgressIndicator(
-                strokeWidth: 2,
-                valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
-              ),
-            )
-          : Row(
-              mainAxisSize: MainAxisSize.min,
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Icon(
-                  isFollowed ? Icons.check : Icons.person_add_alt_1,
-                  size: 18,
+    return SizedBox(
+      height: 22, // slightly smaller
+      child: ElevatedButton(
+        onPressed: widget.isLoading ? null : widget.onFollow,
+        style: ElevatedButton.styleFrom(
+          backgroundColor: widget.accentColor,
+          foregroundColor: Colors.white,
+          elevation: 0,
+          padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(4)),
+        ),
+        child: widget.isLoading
+            ? const SizedBox(
+                height: 8,
+                width: 8,
+                child: CircularProgressIndicator(
+                  strokeWidth: 2,
+                  valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
                 ),
-                const SizedBox(width: 8),
-                Text(
-                  isFollowed ? 'Following' : 'Follow',
-                  style: const TextStyle(
-                    fontWeight: FontWeight.w700,
-                    fontSize: 14,
+              )
+            : Row(
+                mainAxisSize: MainAxisSize.min,
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  const Icon(Icons.star, size: 10),
+                  const SizedBox(width: 6),
+                  Text(
+                    isFollowed ? 'Following' : 'Follow',
+                    style: const TextStyle(
+                      fontWeight: FontWeight.w700,
+                      fontSize: 10,
+                    ),
                   ),
-                ),
-              ],
-            ),
+                ],
+              ),
+      ),
     );
   }
 
   Widget _buildCollectButton() {
-    return OutlinedButton(
-      onPressed: widget.onCollect ?? () {},
-      style: OutlinedButton.styleFrom(
-        foregroundColor: Colors.white,
-        side: BorderSide(color: Colors.white.withOpacity(0.55)),
-        padding: const EdgeInsets.symmetric(vertical: 14),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-      ),
-      child: const Row(
-        mainAxisAlignment: MainAxisAlignment.center,
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Icon(Icons.collections_bookmark_outlined, size: 18),
-          SizedBox(width: 8),
-          Text(
-            'Collect',
-            style: TextStyle(fontWeight: FontWeight.w700, fontSize: 14),
-          ),
-        ],
+    return SizedBox(
+      height: 22,
+      child: ElevatedButton(
+        onPressed: widget.onCollect ?? () {},
+        style: ElevatedButton.styleFrom(
+          backgroundColor: Colors.white.withValues(alpha: 00.18),
+          foregroundColor: Colors.white,
+          elevation: 0,
+          padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
+          minimumSize: const Size(0, 36),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(4)),
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: const [
+            Icon(Icons.favorite_border, size: 10),
+            SizedBox(width: 6),
+            Text(
+              'Collect',
+              style: TextStyle(fontWeight: FontWeight.w700, fontSize: 10),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -368,29 +330,30 @@ class _ProfileView extends StatelessWidget {
       builder: (context, constraints) {
         return Container(
           decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(26),
-            border: Border.all(color: Colors.white.withOpacity(0.08)),
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(
+              color: Colors.white.withValues(alpha: 0.4),
+              width: 2,
+            ),
           ),
           child: ClipRRect(
-            borderRadius: BorderRadius.circular(24),
-            child: Stack(
-              fit: StackFit.expand,
-              children: [_buildPrimaryImage()],
-            ),
+            borderRadius: BorderRadius.circular(12),
+            child: Stack(fit: StackFit.expand, children: [_buildShotsImage()]),
           ),
         );
       },
     );
   }
 
-  Widget _buildPrimaryImage() {
+  Widget _buildShotsImage() {
     if (player.profilePictureUrl.isEmpty) {
       return DecoratedBox(
         decoration: BoxDecoration(
+          border: Border.all(color: Colors.white.withValues(alpha: 0.4)),
           gradient: LinearGradient(
             colors: [
-              primaryColor.withOpacity(0.65),
-              accentColor.withOpacity(0.45),
+              primaryColor.withValues(alpha: 0.65),
+              accentColor.withValues(alpha: 0.45),
             ],
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
@@ -408,12 +371,12 @@ class _ProfileView extends StatelessWidget {
         Image.network(
           player.profilePictureUrl,
           fit: BoxFit.cover,
-          errorBuilder: (_, __, ___) => DecoratedBox(
+          errorBuilder: (_, _, _) => DecoratedBox(
             decoration: BoxDecoration(
               gradient: LinearGradient(
                 colors: [
-                  primaryColor.withOpacity(0.65),
-                  accentColor.withOpacity(0.45),
+                  primaryColor.withValues(alpha: 0.65),
+                  accentColor.withValues(alpha: 0.45),
                 ],
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
@@ -428,7 +391,10 @@ class _ProfileView extends StatelessWidget {
           child: DecoratedBox(
             decoration: BoxDecoration(
               gradient: LinearGradient(
-                colors: [Colors.transparent, Colors.black.withOpacity(0.35)],
+                colors: [
+                  Colors.transparent,
+                  Colors.black.withValues(alpha: 0.35),
+                ],
                 begin: Alignment.topCenter,
                 end: Alignment.bottomCenter,
               ),
@@ -468,21 +434,24 @@ class _ShotsAndStatesView extends StatelessWidget {
       builder: (context, constraints) {
         return Container(
           decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(26),
-            border: Border.all(color: Colors.white.withOpacity(0.08)),
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(
+              color: Colors.white.withValues(alpha: 00.5),
+              width: 2,
+            ),
           ),
           child: ClipRRect(
-            borderRadius: BorderRadius.circular(24),
+            borderRadius: BorderRadius.circular(12),
             child: Stack(
               fit: StackFit.expand,
               children: [
                 // Background image (same as profile)
-                if (currentPage == 0) _buildPrimaryImage(),
+                if (currentPage == 1) _buildShotsImage(),
 
                 // Content (StatsView)
-                if (currentPage == 1)
+                if (currentPage == 2)
                   Padding(
-                    padding: const EdgeInsets.only(bottom: 64),
+                    padding: const EdgeInsets.only(bottom: 48),
                     child: StatsView(
                       player: player,
                       primaryColor: primaryColor,
@@ -494,9 +463,9 @@ class _ShotsAndStatesView extends StatelessWidget {
 
                 // Segment control at the bottom
                 Positioned(
-                  left: 20,
-                  right: 20,
-                  bottom: 22,
+                  left: 10,
+                  right: 10,
+                  bottom: 10,
                   child: _segmentControl(),
                 ),
               ],
@@ -507,14 +476,15 @@ class _ShotsAndStatesView extends StatelessWidget {
     );
   }
 
-  Widget _buildPrimaryImage() {
+  Widget _buildShotsImage() {
     if (player.profilePictureUrl.isEmpty) {
       return DecoratedBox(
         decoration: BoxDecoration(
+          border: Border.all(color: Colors.white.withValues(alpha: 0.1)),
           gradient: LinearGradient(
             colors: [
-              primaryColor.withOpacity(0.65),
-              accentColor.withOpacity(0.45),
+              primaryColor.withValues(alpha: 0.65),
+              accentColor.withValues(alpha: 0.45),
             ],
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
@@ -536,8 +506,8 @@ class _ShotsAndStatesView extends StatelessWidget {
             decoration: BoxDecoration(
               gradient: LinearGradient(
                 colors: [
-                  primaryColor.withOpacity(0.65),
-                  accentColor.withOpacity(0.45),
+                  primaryColor.withValues(alpha: 00.65),
+                  accentColor.withValues(alpha: 00.45),
                 ],
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
@@ -552,7 +522,10 @@ class _ShotsAndStatesView extends StatelessWidget {
           child: DecoratedBox(
             decoration: BoxDecoration(
               gradient: LinearGradient(
-                colors: [Colors.transparent, Colors.black.withOpacity(0.35)],
+                colors: [
+                  Colors.transparent,
+                  Colors.black.withValues(alpha: 00.35),
+                ],
                 begin: Alignment.topCenter,
                 end: Alignment.bottomCenter,
               ),
@@ -565,14 +538,14 @@ class _ShotsAndStatesView extends StatelessWidget {
 
   Widget _segmentControl() {
     return Container(
-      height: 42,
+      height: 38,
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(22),
-        color: Colors.white.withOpacity(0.2),
-        border: Border.all(color: Colors.white.withOpacity(0.4)),
+        color: Colors.white.withValues(alpha: 0.2),
+        border: Border.all(color: Colors.white.withValues(alpha: 0.4)),
       ),
       child: Row(
-        children: [_segmentButton('Shots', 0), _segmentButton('Stats', 1)],
+        children: [_segmentButton('Shots', 1), _segmentButton('States', 2)],
       ),
     );
   }
@@ -586,16 +559,19 @@ class _ShotsAndStatesView extends StatelessWidget {
           duration: const Duration(milliseconds: 240),
           curve: Curves.easeInOut,
           alignment: Alignment.center,
+          margin: const EdgeInsets.all(3),
           decoration: BoxDecoration(
             color: isActive ? Colors.white : Colors.transparent,
-            borderRadius: BorderRadius.circular(22),
+            borderRadius: BorderRadius.circular(20),
           ),
           child: Text(
             label,
             style: TextStyle(
-              fontSize: 13,
+              fontSize: 14,
               fontWeight: FontWeight.w700,
-              color: isActive ? primaryColor : Colors.white.withOpacity(0.85),
+              color: isActive
+                  ? primaryColor.withValues(alpha: 0.85)
+                  : Colors.white.withValues(alpha: 0.75),
             ),
           ),
         ),
@@ -633,9 +609,8 @@ class StatsView extends StatelessWidget {
     final bestScore = player.stats.highGame.toString();
     final favoriteBrands = player.favoriteBrands.take(3).toList();
 
-    return SingleChildScrollView(
-      physics: const BouncingScrollPhysics(),
-      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 20),
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
@@ -659,7 +634,7 @@ class StatsView extends StatelessWidget {
               ),
             ],
           ),
-          const SizedBox(height: 14),
+          const SizedBox(height: 8),
 
           // ---- Info cards -------------------------------------------------
           Row(
@@ -667,11 +642,20 @@ class StatsView extends StatelessWidget {
               Expanded(
                 child: _InfoCard(
                   title: 'Home Center',
-                  child: Text(
-                    'The Goodnight',
-                    style: TextStyle(
-                      color: primaryColor,
-                      fontWeight: FontWeight.w700,
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 8.0,
+                      vertical: 16,
+                    ),
+                    child: Text(
+                      'The Goodnight',
+                      style: const TextStyle(
+                        color: Color(0xFF2D3E1F),
+                        fontWeight: FontWeight.w700,
+                        fontSize: 13,
+                      ),
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
                     ),
                   ),
                 ),
@@ -681,28 +665,21 @@ class StatsView extends StatelessWidget {
                 child: _InfoCard(
                   title: 'Favorite Brands',
                   child: favoriteBrands.isEmpty
-                      ? Row(
-                          children: [
-                            _BrandTag(label: 'Storm', accentColor: accentColor),
-                            const SizedBox(width: 6),
-                            _BrandTag(
-                              label: 'Brunswick',
-                              accentColor: accentColor,
-                            ),
-                          ],
-                        )
-                      : Wrap(
-                          spacing: 6,
-                          runSpacing: 6,
-                          children: favoriteBrands
-                              .map(
-                                (b) => _BrandTag(
-                                  label: b.name,
-                                  accentColor: accentColor,
-                                  logoUrl: b.logoUrl,
-                                ),
-                              )
-                              .toList(),
+                      ? _BrandTag(label: 'Storm', accentColor: accentColor)
+                      : SingleChildScrollView(
+                          scrollDirection: Axis.horizontal,
+                          child: Row(
+                            spacing: 4,
+                            children: favoriteBrands
+                                .map(
+                                  (b) => _BrandTag(
+                                    label: b.name,
+                                    accentColor: accentColor,
+                                    logoUrl: b.logoUrl,
+                                  ),
+                                )
+                                .toList(),
+                          ),
                         ),
                 ),
               ),
@@ -710,32 +687,69 @@ class StatsView extends StatelessWidget {
           ),
           const SizedBox(height: 18),
 
-          // ---- Metric tiles ------------------------------------------------
-          Wrap(
-            spacing: 12,
-            runSpacing: 12,
+          // ---- Metric tiles grid -------------------------------------------
+          Row(
             children: [
-              _MetricTile(
-                label: 'Tournament',
-                value: '25',
-                icon: Icons.emoji_events_outlined,
+              Expanded(
+                child: _MetricTile(
+                  label: 'Tournament',
+                  value: '25',
+                  icon: Icons.emoji_events_outlined,
+                  accentColor: accentColor,
+                ),
               ),
-              _MetricTile(
-                label: 'Win',
-                value: '21',
-                icon: Icons.military_tech_outlined,
+              const SizedBox(width: 10),
+              Expanded(
+                child: _MetricTile(
+                  label: 'Win',
+                  value: '21',
+                  icon: Icons.military_tech_outlined,
+                  accentColor: accentColor,
+                ),
               ),
-              _MetricTile(label: 'Rank', value: '12', icon: Icons.star_border),
-              _MetricTile(label: 'Win Rate', value: '95%', icon: Icons.speed),
-              _MetricTile(
-                label: 'Best Score',
-                value: bestScore,
-                icon: Icons.scoreboard_outlined,
+            ],
+          ),
+          const SizedBox(height: 10),
+          Row(
+            children: [
+              Expanded(
+                child: _MetricTile(
+                  label: 'Rank',
+                  value: '12',
+                  icon: Icons.star_border,
+                  accentColor: accentColor,
+                ),
               ),
-              _MetricTile(
-                label: 'Streak',
-                value: '15',
-                icon: Icons.local_fire_department_outlined,
+              const SizedBox(width: 10),
+              Expanded(
+                child: _MetricTile(
+                  label: 'Win Rate',
+                  value: '95%',
+                  icon: Icons.speed,
+                  accentColor: accentColor,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 10),
+          Row(
+            children: [
+              Expanded(
+                child: _MetricTile(
+                  label: 'Best Score',
+                  value: bestScore,
+                  icon: Icons.scoreboard_outlined,
+                  accentColor: accentColor,
+                ),
+              ),
+              const SizedBox(width: 10),
+              Expanded(
+                child: _MetricTile(
+                  label: 'Streak',
+                  value: '15',
+                  icon: Icons.local_fire_department_outlined,
+                  accentColor: accentColor,
+                ),
               ),
             ],
           ),
@@ -762,37 +776,28 @@ class _StatSummaryTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 18),
-      decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.18),
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: Colors.white.withOpacity(0.24)),
-      ),
-      child: Column(
-        crossAxisAlignment: alignRight
-            ? CrossAxisAlignment.end
-            : CrossAxisAlignment.start,
-        children: [
-          Text(
-            value,
-            style: const TextStyle(
-              fontSize: 22,
-              fontWeight: FontWeight.w800,
-              color: Colors.white,
-            ),
+    return Column(
+      crossAxisAlignment: alignRight
+          ? CrossAxisAlignment.end
+          : CrossAxisAlignment.start,
+      children: [
+        Text(
+          value,
+          style: const TextStyle(
+            fontSize: 22,
+            fontWeight: FontWeight.w800,
+            color: Colors.white,
           ),
-          const SizedBox(height: 6),
-          Text(
-            label,
-            style: TextStyle(
-              color: Colors.white.withOpacity(0.72),
-              fontWeight: FontWeight.w600,
-              fontSize: 12,
-            ),
+        ),
+        Text(
+          label,
+          style: TextStyle(
+            color: Colors.white.withValues(alpha: 00.8),
+            fontWeight: FontWeight.w600,
+            fontSize: 13,
           ),
-        ],
-      ),
+        ),
+      ],
     );
   }
 }
@@ -805,29 +810,28 @@ class _InfoCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 16),
-      decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.12),
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: Colors.white.withOpacity(0.2)),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Text(
-            title,
-            style: TextStyle(
-              color: Colors.white.withOpacity(0.74),
-              fontSize: 12,
-              fontWeight: FontWeight.w600,
-            ),
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Text(
+          title,
+          style: TextStyle(
+            color: Colors.white.withValues(alpha: 0.8),
+            fontSize: 11,
+            fontWeight: FontWeight.w600,
           ),
-          const SizedBox(height: 10),
-          child,
-        ],
-      ),
+        ),
+        const SizedBox(height: 10),
+        Container(
+          width: double.infinity,
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(8),
+          ),
+          child: child,
+        ),
+      ],
     );
   }
 }
@@ -845,43 +849,31 @@ class _BrandTag extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(12),
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          if (logoUrl != null && logoUrl!.isNotEmpty)
-            Padding(
-              padding: const EdgeInsets.only(right: 6),
-              child: Image.network(
-                logoUrl!,
-                height: 16,
-                width: 16,
-                fit: BoxFit.contain,
-                errorBuilder: (_, __, ___) =>
-                    Icon(Icons.brightness_1, size: 10, color: accentColor),
+    return (logoUrl != null && logoUrl!.isNotEmpty)
+        ? Padding(
+            padding: const EdgeInsets.only(right: 5),
+            child: Image.network(
+              logoUrl!,
+              height: 48,
+              width: 48,
+              fit: BoxFit.contain,
+              errorBuilder: (_, _, _) => const SizedBox(width: 48, height: 48),
+            ),
+          )
+        : const SizedBox(
+            width: 48,
+            height: 48,
+            child: Center(
+              child: Text(
+                "No Fav Brand",
+                style: TextStyle(
+                  fontWeight: FontWeight.w800,
+                  fontSize: 15,
+                  color: Colors.black54,
+                ),
               ),
-            )
-          else
-            Padding(
-              padding: const EdgeInsets.only(right: 6),
-              child: Icon(Icons.brightness_1, size: 10, color: accentColor),
             ),
-          Text(
-            label,
-            style: TextStyle(
-              color: accentColor.darken(0.15),
-              fontWeight: FontWeight.w700,
-              fontSize: 11,
-            ),
-          ),
-        ],
-      ),
-    );
+          );
   }
 }
 
@@ -889,62 +881,59 @@ class _MetricTile extends StatelessWidget {
   final String label;
   final String value;
   final IconData icon;
+  final Color accentColor;
 
   const _MetricTile({
     required this.label,
     required this.value,
     required this.icon,
+    required this.accentColor,
   });
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      width: 110,
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
-      decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.1),
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: Colors.white.withOpacity(0.16)),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Icon(icon, color: Colors.white.withOpacity(0.85), size: 20),
-          const SizedBox(height: 12),
-          Text(
-            value,
-            style: const TextStyle(
-              color: Colors.white,
-              fontWeight: FontWeight.w800,
-              fontSize: 18,
-            ),
-          ),
-          const SizedBox(height: 6),
-          Text(
-            label,
-            style: TextStyle(
-              color: Colors.white.withOpacity(0.75),
-              fontSize: 12,
-              fontWeight: FontWeight.w600,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                label,
+                style: TextStyle(
+                  color: Colors.white.withValues(alpha: 0.7),
+                  fontSize: 11,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+              const SizedBox(height: 4),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 4),
 
-// --------------------------------------------------------------------------
-// Color helper (unchanged)
-// --------------------------------------------------------------------------
-extension on Color {
-  Color darken(double amount) {
-    final factor = 1 - amount;
-    return Color.fromARGB(
-      alpha,
-      (red * factor).round().clamp(0, 255),
-      (green * factor).round().clamp(0, 255),
-      (blue * factor).round().clamp(0, 255),
+                decoration: const BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.all(Radius.circular(6)),
+                ),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      value,
+                      style: TextStyle(
+                        color: accentColor,
+                        fontWeight: FontWeight.w900,
+                        fontSize: 18,
+                      ),
+                    ),
+                    Icon(icon, color: accentColor, size: 22),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
+      ],
     );
   }
 }

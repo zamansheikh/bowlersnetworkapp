@@ -186,13 +186,14 @@ class _ProPlayersPageState extends State<ProPlayersPage> {
       return _buildEmptyView();
     }
 
-    return CustomScrollView(
-      slivers: [
-        // Header Section
-        SliverToBoxAdapter(
-          child: Container(
+    return SingleChildScrollView(
+      padding: const EdgeInsets.symmetric(horizontal: 24.0),
+      child: Column(
+        children: [
+          const SizedBox(height: 24),
+          // Header Section
+          Container(
             padding: const EdgeInsets.all(24),
-            margin: const EdgeInsets.all(16),
             decoration: BoxDecoration(
               gradient: LinearGradient(
                 begin: Alignment.topLeft,
@@ -258,38 +259,38 @@ class _ProPlayersPageState extends State<ProPlayersPage> {
               ],
             ),
           ),
-        ),
-
-        // Players Grid
-        SliverPadding(
-          padding: const EdgeInsets.symmetric(horizontal: 16),
-          sliver: SliverGrid(
-            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-              crossAxisCount: 1,
-              childAspectRatio: 0.67, // Width/Height ratio for cards
-              mainAxisSpacing: 16,
-            ),
-            delegate: SliverChildBuilderDelegate((context, index) {
+          const SizedBox(height: 24),
+          // Players Grid
+          ListView.builder(
+            shrinkWrap: true,
+            physics: const NeverScrollableScrollPhysics(),
+            itemCount: players.length,
+            itemBuilder: (context, index) {
               final player = players[index];
               final theme = _colorThemes[index % _colorThemes.length];
 
-              return Center(
-                child: PlayerCard(
-                  player: player,
-                  primaryColor: theme['primary']!,
-                  secondaryColor: theme['secondary']!,
-                  accentColor: theme['accent']!,
-                  onTap: () => _navigateToPlayerDetail(player),
-                  onFollow: () => _toggleFollow(player),
-                ),
+              return Column(
+                children: [
+                  Center(
+                    child: PlayerCard(
+                      player: player,
+                      primaryColor: theme['primary']!,
+                      secondaryColor: theme['secondary']!,
+                      accentColor: theme['accent']!,
+                      onTap: () => _navigateToPlayerDetail(player),
+                      onFollow: () => _toggleFollow(player),
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                ],
               );
-            }, childCount: players.length),
+            },
           ),
-        ),
 
-        // Bottom Padding
-        const SliverToBoxAdapter(child: SizedBox(height: 32)),
-      ],
+          // Bottom Padding
+          const SizedBox(height: 32),
+        ],
+      ),
     );
   }
 

@@ -20,7 +20,7 @@ class HelpCenterPage extends StatelessWidget {
           child: Container(
             margin: EdgeInsets.all(8.w),
             decoration: BoxDecoration(
-              color: Colors.white.withOpacity(0.2),
+              color: Colors.white.withValues(alpha: 00.2),
               borderRadius: BorderRadius.circular(8.r),
             ),
             child: Icon(
@@ -44,7 +44,7 @@ class HelpCenterPage extends StatelessWidget {
                 gradient: LinearGradient(
                   colors: [
                     AppColors.primaryLimeGreen,
-                    AppColors.primaryLimeGreen.withOpacity(0.8),
+                    AppColors.primaryLimeGreen.withValues(alpha: 00.8),
                   ],
                   begin: Alignment.topLeft,
                   end: Alignment.bottomRight,
@@ -67,7 +67,7 @@ class HelpCenterPage extends StatelessWidget {
                     'Your safety and our community safety is our top priority',
                     style: TextStyle(
                       fontSize: 14.sp,
-                      color: Colors.white.withOpacity(0.9),
+                      color: Colors.white.withValues(alpha: 00.9),
                     ),
                   ),
                 ],

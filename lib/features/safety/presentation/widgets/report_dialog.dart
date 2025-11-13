@@ -270,7 +270,7 @@ class _ReportDialogState extends State<ReportDialog> {
           ),
           borderRadius: BorderRadius.circular(8.r),
           color: isSelected
-              ? AppColors.primaryLimeGreen.withOpacity(0.1)
+              ? AppColors.primaryLimeGreen.withValues(alpha: 00.1)
               : Colors.transparent,
         ),
         child: Row(
