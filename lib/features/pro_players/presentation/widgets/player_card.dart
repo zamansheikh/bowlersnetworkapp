@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../../domain/entities/pro_player.dart';
 
 class PlayerCard extends StatefulWidget {
@@ -45,76 +46,80 @@ class _PlayerCardState extends State<PlayerCard> {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      height: 540,
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(12),
-        gradient: LinearGradient(
-          begin: Alignment.topCenter,
-          end: Alignment.bottomCenter,
-          colors: [widget.primaryColor, widget.secondaryColor],
-        ),
-        border: Border.all(
-          color: widget.primaryColor.withValues(alpha: 00.4),
-          width: 3,
-        ),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 00.2),
-            blurRadius: 20,
-            offset: const Offset(0, 10),
+    return GestureDetector(
+      behavior: HitTestBehavior.translucent,
+      onTap: widget.onTap,
+      child: Container(
+        height: 540.h,
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(12.r),
+          gradient: LinearGradient(
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+            colors: [widget.primaryColor, widget.secondaryColor],
           ),
-        ],
-      ),
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(12),
-        child: Padding(
-          padding: const EdgeInsets.all(12),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              // ---- PageView -------------------------------------------------
-              Expanded(
-                child: PageView(
-                  controller: _pageController,
-                  onPageChanged: (i) => setState(() => _currentPage = i),
+          border: Border.all(
+            color: widget.primaryColor.withValues(alpha: 00.4),
+            width: 3.w,
+          ),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withValues(alpha: 00.2),
+              blurRadius: 20.r,
+              offset: Offset(0, 10.h),
+            ),
+          ],
+        ),
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(12.r),
+          child: Padding(
+            padding: EdgeInsets.all(12.w),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                // ---- PageView -------------------------------------------------
+                Expanded(
+                  child: PageView(
+                    controller: _pageController,
+                    onPageChanged: (i) => setState(() => _currentPage = i),
+                    children: [
+                      _ProfileView(
+                        player: widget.player,
+                        primaryColor: widget.primaryColor,
+                        accentColor: widget.accentColor,
+                      ),
+                      _ShotsAndStatesView(
+                        player: widget.player,
+                        primaryColor: widget.primaryColor,
+                        accentColor: widget.accentColor,
+                        secondaryColor: widget.secondaryColor,
+                        numberFormatter: _formatNumber,
+                        currentPage: _currentPage,
+                        onPageChanged: (i) {
+                          setState(() => _currentPage = i);
+                          _pageController.animateToPage(
+                            i,
+                            duration: const Duration(milliseconds: 260),
+                            curve: Curves.easeInOut,
+                          );
+                        },
+                      ),
+                    ],
+                  ),
+                ),
+                SizedBox(height: 20.h),
+
+                // ---- Player name + meta + Follow / Collect--------------------------------------
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    _ProfileView(
-                      player: widget.player,
-                      primaryColor: widget.primaryColor,
-                      accentColor: widget.accentColor,
-                    ),
-                    _ShotsAndStatesView(
-                      player: widget.player,
-                      primaryColor: widget.primaryColor,
-                      accentColor: widget.accentColor,
-                      secondaryColor: widget.secondaryColor,
-                      numberFormatter: _formatNumber,
-                      currentPage: _currentPage,
-                      onPageChanged: (i) {
-                        setState(() => _currentPage = i);
-                        _pageController.animateToPage(
-                          i,
-                          duration: const Duration(milliseconds: 260),
-                          curve: Curves.easeInOut,
-                        );
-                      },
-                    ),
+                    Expanded(child: _buildPlayerNameSection()),
+                    SizedBox(width: 12.w),
+                    _buildActionColumn(),
                   ],
                 ),
-              ),
-              const SizedBox(height: 20),
-
-              // ---- Player name + meta + Follow / Collect--------------------------------------
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Expanded(child: _buildPlayerNameSection()),
-                  const SizedBox(width: 12),
-                  _buildActionColumn(),
-                ],
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       ),
@@ -132,11 +137,11 @@ class _PlayerCardState extends State<PlayerCard> {
             Expanded(
               child: Text(
                 widget.player.name.toUpperCase(),
-                style: const TextStyle(
+                style: TextStyle(
                   color: Colors.white,
-                  fontSize: 22,
+                  fontSize: 22.sp,
                   fontWeight: FontWeight.w900,
-                  letterSpacing: 0.8,
+                  letterSpacing: 0.8.w,
                 ),
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
@@ -144,7 +149,7 @@ class _PlayerCardState extends State<PlayerCard> {
             ),
           ],
         ),
-        const SizedBox(height: 8),
+        SizedBox(height: 8.h),
         AnimatedSwitcher(
           duration: const Duration(milliseconds: 220),
           switchInCurve: Curves.easeOut,
@@ -157,26 +162,26 @@ class _PlayerCardState extends State<PlayerCard> {
                       levelText,
                       style: TextStyle(
                         color: Colors.white.withValues(alpha: 0.85),
-                        fontSize: 14,
+                        fontSize: 14.sp,
                         fontWeight: FontWeight.w600,
                       ),
                     ),
-                    const SizedBox(width: 8),
+                    SizedBox(width: 8.w),
                     Container(
                       key: const ValueKey('shots-meta'),
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 8,
-                        vertical: 2,
+                      padding: EdgeInsets.symmetric(
+                        horizontal: 8.w,
+                        vertical: 2.h,
                       ),
                       decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(4),
+                        borderRadius: BorderRadius.circular(4.r),
                         color: widget.accentColor,
                       ),
                       child: Text(
                         "Details",
                         style: TextStyle(
                           color: Colors.white,
-                          fontSize: 8,
+                          fontSize: 8.sp,
                           fontWeight: FontWeight.w500,
                         ),
                       ),
@@ -186,14 +191,14 @@ class _PlayerCardState extends State<PlayerCard> {
               : Row(
                   key: const ValueKey('stats-meta'),
                   children: [
-                    Icon(Icons.bolt, size: 16, color: widget.accentColor),
-                    const SizedBox(width: 8),
+                    Icon(Icons.bolt, size: 16.sp, color: widget.accentColor),
+                    SizedBox(width: 8.w),
                     Expanded(
                       child: ClipRRect(
-                        borderRadius: BorderRadius.circular(12),
+                        borderRadius: BorderRadius.circular(12.r),
                         child: LinearProgressIndicator(
                           value: _levelProgress(widget.player.xp),
-                          minHeight: 6,
+                          minHeight: 6.h,
                           backgroundColor: Colors.white.withValues(alpha: 00.1),
                           valueColor: AlwaysStoppedAnimation<Color>(
                             widget.accentColor,
@@ -211,12 +216,12 @@ class _PlayerCardState extends State<PlayerCard> {
   // ----------------------------------------------------------------------
   Widget _buildActionColumn() {
     return Padding(
-      padding: const EdgeInsets.all(8.0),
+      padding: EdgeInsets.all(8.w),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.end,
         children: [
           _buildFollowButton(),
-          const SizedBox(height: 12),
+          SizedBox(height: 12.h),
           _buildCollectButton(),
         ],
       ),
@@ -226,22 +231,24 @@ class _PlayerCardState extends State<PlayerCard> {
   Widget _buildFollowButton() {
     final isFollowed = widget.player.isFollowed;
     return SizedBox(
-      height: 22, // slightly smaller
+      height: 22.h,
       child: ElevatedButton(
         onPressed: widget.isLoading ? null : widget.onFollow,
         style: ElevatedButton.styleFrom(
           backgroundColor: widget.accentColor,
           foregroundColor: Colors.white,
           elevation: 0,
-          padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(4)),
+          padding: EdgeInsets.symmetric(horizontal: 4.w, vertical: 2.h),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(4.r),
+          ),
         ),
         child: widget.isLoading
-            ? const SizedBox(
-                height: 8,
-                width: 8,
+            ? SizedBox(
+                height: 8.h,
+                width: 8.w,
                 child: CircularProgressIndicator(
-                  strokeWidth: 2,
+                  strokeWidth: 2.w,
                   valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
                 ),
               )
@@ -249,13 +256,13 @@ class _PlayerCardState extends State<PlayerCard> {
                 mainAxisSize: MainAxisSize.min,
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  const Icon(Icons.star, size: 10),
-                  const SizedBox(width: 6),
+                  Icon(Icons.star, size: 10.sp),
+                  SizedBox(width: 6.w),
                   Text(
                     isFollowed ? 'Following' : 'Follow',
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontWeight: FontWeight.w700,
-                      fontSize: 10,
+                      fontSize: 10.sp,
                     ),
                   ),
                 ],
@@ -266,26 +273,28 @@ class _PlayerCardState extends State<PlayerCard> {
 
   Widget _buildCollectButton() {
     return SizedBox(
-      height: 22,
+      height: 22.h,
       child: ElevatedButton(
         onPressed: widget.onCollect ?? () {},
         style: ElevatedButton.styleFrom(
           backgroundColor: Colors.white.withValues(alpha: 00.18),
           foregroundColor: Colors.white,
           elevation: 0,
-          padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
-          minimumSize: const Size(0, 36),
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(4)),
+          padding: EdgeInsets.symmetric(horizontal: 4.w, vertical: 2.h),
+          minimumSize: Size(0, 36.h),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(4.r),
+          ),
         ),
         child: Row(
           mainAxisSize: MainAxisSize.min,
           mainAxisAlignment: MainAxisAlignment.center,
-          children: const [
-            Icon(Icons.favorite_border, size: 10),
-            SizedBox(width: 6),
+          children: [
+            Icon(Icons.favorite_border, size: 10.sp),
+            SizedBox(width: 6.w),
             Text(
               'Collect',
-              style: TextStyle(fontWeight: FontWeight.w700, fontSize: 10),
+              style: TextStyle(fontWeight: FontWeight.w700, fontSize: 10.sp),
             ),
           ],
         ),
@@ -330,14 +339,14 @@ class _ProfileView extends StatelessWidget {
       builder: (context, constraints) {
         return Container(
           decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(12),
+            borderRadius: BorderRadius.circular(12.r),
             border: Border.all(
               color: Colors.white.withValues(alpha: 0.4),
-              width: 2,
+              width: 2.w,
             ),
           ),
           child: ClipRRect(
-            borderRadius: BorderRadius.circular(12),
+            borderRadius: BorderRadius.circular(12.r),
             child: Stack(fit: StackFit.expand, children: [_buildShotsImage()]),
           ),
         );
@@ -434,10 +443,10 @@ class _ShotsAndStatesView extends StatelessWidget {
       builder: (context, constraints) {
         return Container(
           decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(12),
+            borderRadius: BorderRadius.circular(12.r),
             border: Border.all(
               color: Colors.white.withValues(alpha: 00.5),
-              width: 2,
+              width: 2.w,
             ),
           ),
           child: ClipRRect(
@@ -451,7 +460,7 @@ class _ShotsAndStatesView extends StatelessWidget {
                 // Content (StatsView)
                 if (currentPage == 2)
                   Padding(
-                    padding: const EdgeInsets.only(bottom: 48),
+                    padding: EdgeInsets.only(bottom: 48.h),
                     child: StatsView(
                       player: player,
                       primaryColor: primaryColor,
@@ -463,9 +472,9 @@ class _ShotsAndStatesView extends StatelessWidget {
 
                 // Segment control at the bottom
                 Positioned(
-                  left: 10,
-                  right: 10,
-                  bottom: 10,
+                  left: 10.w,
+                  right: 10.w,
+                  bottom: 10.h,
                   child: _segmentControl(),
                 ),
               ],
@@ -538,9 +547,9 @@ class _ShotsAndStatesView extends StatelessWidget {
 
   Widget _segmentControl() {
     return Container(
-      height: 38,
+      height: 38.h,
       decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(22),
+        borderRadius: BorderRadius.circular(22.r),
         color: Colors.white.withValues(alpha: 0.2),
         border: Border.all(color: Colors.white.withValues(alpha: 0.4)),
       ),
@@ -559,15 +568,15 @@ class _ShotsAndStatesView extends StatelessWidget {
           duration: const Duration(milliseconds: 240),
           curve: Curves.easeInOut,
           alignment: Alignment.center,
-          margin: const EdgeInsets.all(3),
+          margin: EdgeInsets.all(3.w),
           decoration: BoxDecoration(
             color: isActive ? Colors.white : Colors.transparent,
-            borderRadius: BorderRadius.circular(20),
+            borderRadius: BorderRadius.circular(20.r),
           ),
           child: Text(
             label,
             style: TextStyle(
-              fontSize: 14,
+              fontSize: 14.sp,
               fontWeight: FontWeight.w700,
               color: isActive
                   ? primaryColor.withValues(alpha: 0.85)
@@ -610,7 +619,7 @@ class StatsView extends StatelessWidget {
     final favoriteBrands = player.favoriteBrands.take(3).toList();
 
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+      padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 16.h),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
@@ -624,7 +633,7 @@ class StatsView extends StatelessWidget {
                   alignRight: false,
                 ),
               ),
-              const SizedBox(width: 12),
+              SizedBox(width: 12.w),
               Expanded(
                 child: _StatSummaryTile(
                   label: 'Followers',
@@ -643,16 +652,16 @@ class StatsView extends StatelessWidget {
                 child: _InfoCard(
                   title: 'Home Center',
                   child: Padding(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 8.0,
-                      vertical: 16,
+                    padding: EdgeInsets.symmetric(
+                      horizontal: 8.w,
+                      vertical: 16.h,
                     ),
                     child: Text(
                       'The Goodnight',
-                      style: const TextStyle(
+                      style: TextStyle(
                         color: Color(0xFF2D3E1F),
                         fontWeight: FontWeight.w700,
-                        fontSize: 13,
+                        fontSize: 13.sp,
                       ),
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
@@ -685,7 +694,7 @@ class StatsView extends StatelessWidget {
               ),
             ],
           ),
-          const SizedBox(height: 18),
+          SizedBox(height: 18.h),
 
           // ---- Metric tiles grid -------------------------------------------
           Row(
@@ -783,8 +792,8 @@ class _StatSummaryTile extends StatelessWidget {
       children: [
         Text(
           value,
-          style: const TextStyle(
-            fontSize: 22,
+          style: TextStyle(
+            fontSize: 22.sp,
             fontWeight: FontWeight.w800,
             color: Colors.white,
           ),
@@ -794,7 +803,7 @@ class _StatSummaryTile extends StatelessWidget {
           style: TextStyle(
             color: Colors.white.withValues(alpha: 00.8),
             fontWeight: FontWeight.w600,
-            fontSize: 13,
+            fontSize: 13.sp,
           ),
         ),
       ],
@@ -818,16 +827,16 @@ class _InfoCard extends StatelessWidget {
           title,
           style: TextStyle(
             color: Colors.white.withValues(alpha: 0.8),
-            fontSize: 11,
+            fontSize: 11.sp,
             fontWeight: FontWeight.w600,
           ),
         ),
-        const SizedBox(height: 10),
+        SizedBox(height: 10.h),
         Container(
           width: double.infinity,
           decoration: BoxDecoration(
             color: Colors.white,
-            borderRadius: BorderRadius.circular(8),
+            borderRadius: BorderRadius.circular(8.r),
           ),
           child: child,
         ),
@@ -851,24 +860,27 @@ class _BrandTag extends StatelessWidget {
   Widget build(BuildContext context) {
     return (logoUrl != null && logoUrl!.isNotEmpty)
         ? Padding(
-            padding: const EdgeInsets.only(right: 5),
-            child: Image.network(
-              logoUrl!,
-              height: 48,
-              width: 48,
-              fit: BoxFit.contain,
-              errorBuilder: (_, _, _) => const SizedBox(width: 48, height: 48),
+            padding: EdgeInsets.symmetric(horizontal: 5.w, vertical: 3.h),
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(8.r),
+              child: Image.network(
+                logoUrl!,
+                height: 42.h,
+                width: 42.w,
+                fit: BoxFit.contain,
+                errorBuilder: (_, _, _) => SizedBox(width: 42.w, height: 42.h),
+              ),
             ),
           )
-        : const SizedBox(
-            width: 48,
-            height: 48,
+        : SizedBox(
+            width: 42.w,
+            height: 42.h,
             child: Center(
               child: Text(
                 "No Fav Brand",
                 style: TextStyle(
                   fontWeight: FontWeight.w800,
-                  fontSize: 15,
+                  fontSize: 15.sp,
                   color: Colors.black54,
                 ),
               ),
@@ -903,17 +915,17 @@ class _MetricTile extends StatelessWidget {
                 label,
                 style: TextStyle(
                   color: Colors.white.withValues(alpha: 0.7),
-                  fontSize: 11,
+                  fontSize: 11.sp,
                   fontWeight: FontWeight.w600,
                 ),
               ),
-              const SizedBox(height: 4),
+              SizedBox(height: 4.h),
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 4),
+                padding: EdgeInsets.symmetric(horizontal: 6.w, vertical: 4.h),
 
-                decoration: const BoxDecoration(
+                decoration: BoxDecoration(
                   color: Colors.white,
-                  borderRadius: BorderRadius.all(Radius.circular(6)),
+                  borderRadius: BorderRadius.all(Radius.circular(6.r)),
                 ),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -923,10 +935,10 @@ class _MetricTile extends StatelessWidget {
                       style: TextStyle(
                         color: accentColor,
                         fontWeight: FontWeight.w900,
-                        fontSize: 18,
+                        fontSize: 18.sp,
                       ),
                     ),
-                    Icon(icon, color: accentColor, size: 22),
+                    Icon(icon, color: accentColor, size: 22.sp),
                   ],
                 ),
               ),

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
 import '../../../../core/di/injection.dart';
 import '../../../../core/constants/colors.dart';
@@ -90,14 +91,14 @@ class _ProPlayersPageState extends State<ProPlayersPage> {
             margin: EdgeInsets.all(AppSpacing.sm),
             decoration: BoxDecoration(
               color: AppColors.gray50,
-              borderRadius: BorderRadius.circular(12),
+              borderRadius: BorderRadius.circular(12.r),
               border: Border.all(color: AppColors.gray200),
             ),
             child: IconButton(
               icon: const Icon(Icons.arrow_back_ios_rounded),
               onPressed: () => context.pop(),
               color: AppColors.gray700,
-              iconSize: 18,
+              iconSize: 18.sp,
             ),
           ),
           title: Text(
@@ -112,7 +113,7 @@ class _ProPlayersPageState extends State<ProPlayersPage> {
               margin: EdgeInsets.only(right: AppSpacing.md),
               decoration: BoxDecoration(
                 color: AppColors.primaryLimeGreen.withValues(alpha: 0.1),
-                borderRadius: BorderRadius.circular(12),
+                borderRadius: BorderRadius.circular(12.r),
                 border: Border.all(
                   color: AppColors.primaryLimeGreen.withValues(alpha: 0.3),
                 ),
@@ -121,7 +122,7 @@ class _ProPlayersPageState extends State<ProPlayersPage> {
                 icon: const Icon(Icons.refresh_rounded),
                 onPressed: () => _cubit.loadProPlayers(),
                 color: AppColors.primaryLimeGreen,
-                iconSize: 20,
+                iconSize: 20.sp,
                 tooltip: 'Refresh',
               ),
             ),
@@ -164,17 +165,17 @@ class _ProPlayersPageState extends State<ProPlayersPage> {
   }
 
   Widget _buildLoadingView() {
-    return const Center(
+    return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           CircularProgressIndicator(
             valueColor: AlwaysStoppedAnimation<Color>(Color(0xFF8BC342)),
           ),
-          SizedBox(height: 16),
+          SizedBox(height: 16.h),
           Text(
             'Loading professional bowlers...',
-            style: TextStyle(fontSize: 16, color: Colors.grey),
+            style: TextStyle(fontSize: 16.sp, color: Colors.grey),
           ),
         ],
       ),
@@ -187,13 +188,13 @@ class _ProPlayersPageState extends State<ProPlayersPage> {
     }
 
     return SingleChildScrollView(
-      padding: const EdgeInsets.symmetric(horizontal: 24.0),
+      padding: EdgeInsets.symmetric(horizontal: 24.w),
       child: Column(
         children: [
-          const SizedBox(height: 24),
+          SizedBox(height: 24.h),
           // Header Section
           Container(
-            padding: const EdgeInsets.all(24),
+            padding: EdgeInsets.all(24.w),
             decoration: BoxDecoration(
               gradient: LinearGradient(
                 begin: Alignment.topLeft,
@@ -203,10 +204,10 @@ class _ProPlayersPageState extends State<ProPlayersPage> {
                   Colors.white,
                 ],
               ),
-              borderRadius: BorderRadius.circular(20),
+              borderRadius: BorderRadius.circular(20.r),
               border: Border.all(
                 color: const Color(0xFF8BC342).withValues(alpha: 0.2),
-                width: 1,
+                width: 1.w,
               ),
             ),
             child: Column(
@@ -216,35 +217,35 @@ class _ProPlayersPageState extends State<ProPlayersPage> {
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     Container(
-                      padding: const EdgeInsets.all(12),
+                      padding: EdgeInsets.all(12.w),
                       decoration: BoxDecoration(
                         color: const Color(0xFF8BC342).withValues(alpha: 0.1),
-                        borderRadius: BorderRadius.circular(12),
+                        borderRadius: BorderRadius.circular(12.r),
                       ),
-                      child: const Icon(
+                      child: Icon(
                         Icons.star,
                         color: Color(0xFF8BC342),
-                        size: 32,
+                        size: 32.sp,
                       ),
                     ),
-                    const SizedBox(width: 12),
-                    const Text(
+                    SizedBox(width: 12.w),
+                    Text(
                       'Professional Bowlers',
                       style: TextStyle(
-                        fontSize: 28,
+                        fontSize: 28.sp,
                         fontWeight: FontWeight.bold,
                         color: Color(0xFF385019),
                       ),
                     ),
                   ],
                 ),
-                const SizedBox(height: 12),
+                SizedBox(height: 12.h),
                 Text(
                   'Connect with professional bowlers from around the community',
-                  style: TextStyle(fontSize: 16, color: Colors.grey[600]),
+                  style: TextStyle(fontSize: 16.sp, color: Colors.grey[600]),
                   textAlign: TextAlign.center,
                 ),
-                const SizedBox(height: 16),
+                SizedBox(height: 16.h),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
@@ -252,14 +253,14 @@ class _ProPlayersPageState extends State<ProPlayersPage> {
                       '${players.length} Pro Players',
                       Icons.people,
                     ),
-                    const SizedBox(width: 12),
+                    SizedBox(width: 12.w),
                     _buildStatChip('Verified Profiles', Icons.verified),
                   ],
                 ),
               ],
             ),
           ),
-          const SizedBox(height: 24),
+          SizedBox(height: 24.h),
           // Players Grid
           ListView.builder(
             shrinkWrap: true,
@@ -281,14 +282,14 @@ class _ProPlayersPageState extends State<ProPlayersPage> {
                       onFollow: () => _toggleFollow(player),
                     ),
                   ),
-                  const SizedBox(height: 16),
+                  SizedBox(height: 16.h),
                 ],
               );
             },
           ),
 
           // Bottom Padding
-          const SizedBox(height: 32),
+          SizedBox(height: 32.h),
         ],
       ),
     );
@@ -296,24 +297,24 @@ class _ProPlayersPageState extends State<ProPlayersPage> {
 
   Widget _buildStatChip(String text, IconData icon) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+      padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 6.h),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(20),
+        borderRadius: BorderRadius.circular(20.r),
         border: Border.all(
           color: const Color(0xFF8BC342).withValues(alpha: 0.3),
-          width: 1,
+          width: 1.w,
         ),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(icon, size: 16, color: const Color(0xFF8BC342)),
-          const SizedBox(width: 6),
+          Icon(icon, size: 16.sp, color: const Color(0xFF8BC342)),
+          SizedBox(width: 6.w),
           Text(
             text,
-            style: const TextStyle(
-              fontSize: 12,
+            style: TextStyle(
+              fontSize: 12.sp,
               color: Color(0xFF385019),
               fontWeight: FontWeight.w500,
             ),
@@ -326,39 +327,35 @@ class _ProPlayersPageState extends State<ProPlayersPage> {
   Widget _buildErrorView(String message) {
     return Center(
       child: Padding(
-        padding: const EdgeInsets.all(32),
+        padding: EdgeInsets.all(32.w),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Container(
-              padding: const EdgeInsets.all(24),
+              padding: EdgeInsets.all(24.w),
               decoration: BoxDecoration(
                 color: Colors.red.withValues(alpha: 0.1),
-                borderRadius: BorderRadius.circular(20),
+                borderRadius: BorderRadius.circular(20.r),
               ),
-              child: const Icon(
-                Icons.error_outline,
-                size: 64,
-                color: Colors.red,
-              ),
+              child: Icon(Icons.error_outline, size: 64.sp, color: Colors.red),
             ),
-            const SizedBox(height: 24),
-            const Text(
+            SizedBox(height: 24.h),
+            Text(
               'Oops! Something went wrong',
               style: TextStyle(
-                fontSize: 24,
+                fontSize: 24.sp,
                 fontWeight: FontWeight.bold,
                 color: Colors.red,
               ),
               textAlign: TextAlign.center,
             ),
-            const SizedBox(height: 12),
+            SizedBox(height: 12.h),
             Text(
               message,
-              style: TextStyle(fontSize: 16, color: Colors.grey[600]),
+              style: TextStyle(fontSize: 16.sp, color: Colors.grey[600]),
               textAlign: TextAlign.center,
             ),
-            const SizedBox(height: 24),
+            SizedBox(height: 24.h),
             ElevatedButton.icon(
               onPressed: () => _cubit.loadProPlayers(),
               icon: const Icon(Icons.refresh),
@@ -366,12 +363,9 @@ class _ProPlayersPageState extends State<ProPlayersPage> {
               style: ElevatedButton.styleFrom(
                 backgroundColor: const Color(0xFF8BC342),
                 foregroundColor: Colors.white,
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 24,
-                  vertical: 12,
-                ),
+                padding: EdgeInsets.symmetric(horizontal: 24.w, vertical: 12.h),
                 shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(24),
+                  borderRadius: BorderRadius.circular(24.r),
                 ),
               ),
             ),
@@ -384,39 +378,39 @@ class _ProPlayersPageState extends State<ProPlayersPage> {
   Widget _buildEmptyView() {
     return Center(
       child: Padding(
-        padding: const EdgeInsets.all(32),
+        padding: EdgeInsets.all(32.w),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Container(
-              padding: const EdgeInsets.all(24),
+              padding: EdgeInsets.all(24.w),
               decoration: BoxDecoration(
                 color: const Color(0xFF8BC342).withValues(alpha: 0.1),
-                borderRadius: BorderRadius.circular(20),
+                borderRadius: BorderRadius.circular(20.r),
               ),
-              child: const Icon(
+              child: Icon(
                 Icons.star_outline,
-                size: 64,
+                size: 64.sp,
                 color: Color(0xFF8BC342),
               ),
             ),
-            const SizedBox(height: 24),
-            const Text(
+            SizedBox(height: 24.h),
+            Text(
               'No Pro Players Found',
               style: TextStyle(
-                fontSize: 24,
+                fontSize: 24.sp,
                 fontWeight: FontWeight.bold,
                 color: Color(0xFF385019),
               ),
               textAlign: TextAlign.center,
             ),
-            const SizedBox(height: 12),
+            SizedBox(height: 12.h),
             Text(
               'Check back later for professional bowlers to connect with.',
-              style: TextStyle(fontSize: 16, color: Colors.grey[600]),
+              style: TextStyle(fontSize: 16.sp, color: Colors.grey[600]),
               textAlign: TextAlign.center,
             ),
-            const SizedBox(height: 24),
+            SizedBox(height: 24.h),
             ElevatedButton.icon(
               onPressed: () => _cubit.loadProPlayers(),
               icon: const Icon(Icons.refresh),
@@ -424,12 +418,9 @@ class _ProPlayersPageState extends State<ProPlayersPage> {
               style: ElevatedButton.styleFrom(
                 backgroundColor: const Color(0xFF8BC342),
                 foregroundColor: Colors.white,
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 24,
-                  vertical: 12,
-                ),
+                padding: EdgeInsets.symmetric(horizontal: 24.w, vertical: 12.h),
                 shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(24),
+                  borderRadius: BorderRadius.circular(24.r),
                 ),
               ),
             ),
