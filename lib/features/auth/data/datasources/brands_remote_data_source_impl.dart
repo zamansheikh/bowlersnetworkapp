@@ -49,9 +49,11 @@ class BrandsRemoteDataSourceImpl implements BrandsRemoteDataSource {
     // Add logging interceptor
     _dio.interceptors.add(
       LogInterceptor(
-        requestBody: true,
-        responseBody: true,
-        logPrint: (object) => debugPrint('[Brands API] $object'),
+        // requestBody: true,
+        // responseBody: true,
+        requestHeader: true,
+        error: true,
+        // logPrint: (object) => debugPrint('[Brands API] $object'),
       ),
     );
   }

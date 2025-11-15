@@ -60,9 +60,11 @@ class EventsRemoteDataSourceImpl implements EventsRemoteDataSource {
     // Add logging interceptor
     _dio.interceptors.add(
       LogInterceptor(
-        requestBody: true,
-        responseBody: true,
-        logPrint: (object) => debugPrint('[Events API] $object'),
+        requestHeader: true,
+        error: true,
+        // requestBody: true,
+        // responseBody: true,
+        // logPrint: (object) => debugPrint('[Events API] $object'),
       ),
     );
   }

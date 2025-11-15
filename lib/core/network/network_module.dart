@@ -22,7 +22,7 @@ abstract class NetworkModule {
     // Add interceptors
     dio.interceptors.add(
       LogInterceptor(
-        requestBody: true,
+        // requestBody: true,
         responseBody: true,
         error: true,
         requestHeader: true,
@@ -30,16 +30,29 @@ abstract class NetworkModule {
       ),
     );
 
-    // Add Bearer token auth interceptor
+    // Add Bearer token auth interceptor using QueuedInterceptorsWrapper for proper async handling
     dio.interceptors.add(
-      InterceptorsWrapper(
+      QueuedInterceptorsWrapper(
         onRequest: (options, handler) async {
-          // Get token from SharedPreferences
-          final prefs = await SharedPreferences.getInstance();
-          final token = prefs.getString('auth_token');
+          try {
+            // Get token from SharedPreferences using the correct key from AppConstants
+            final prefs = await SharedPreferences.getInstance();
+            final token = prefs.getString(AppConstants.tokenKey);
 
-          if (token != null && token.isNotEmpty) {
-            options.headers['Authorization'] = 'Bearer $token';
+            print(
+              '✅ Auth token from prefs: ${token != null ? 'FOUND' : 'NOT FOUND'}',
+            );
+
+            if (token != null && token.isNotEmpty) {
+              options.headers['Authorization'] = 'Bearer $token';
+              print('✅ Authorization header set: Bearer $token');
+            } else {
+              print(
+                '⚠️ No auth token found in SharedPreferences with key: ${AppConstants.tokenKey}',
+              );
+            }
+          } catch (e) {
+            print('❌ Error getting auth token: $e');
           }
 
           return handler.next(options);
@@ -47,8 +60,7 @@ abstract class NetworkModule {
         onError: (error, handler) {
           // Handle 401 errors
           if (error.response?.statusCode == 401) {
-            // Token expired or invalid
-            print('Auth token expired');
+            print('❌ Authentication failed - 401 response');
           }
           return handler.next(error);
         },

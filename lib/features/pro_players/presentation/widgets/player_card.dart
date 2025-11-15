@@ -88,7 +88,7 @@ class _PlayerCardState extends State<PlayerCard> {
                         primaryColor: widget.primaryColor,
                         accentColor: widget.accentColor,
                       ),
-                      _ShotsAndStatesView(
+                      _ShotsAndStatsView(
                         player: widget.player,
                         primaryColor: widget.primaryColor,
                         accentColor: widget.accentColor,
@@ -418,7 +418,7 @@ class _ProfileView extends StatelessWidget {
 // --------------------------------------------------------------------------
 // Shots & Stats view (page 1)
 // --------------------------------------------------------------------------
-class _ShotsAndStatesView extends StatelessWidget {
+class _ShotsAndStatsView extends StatelessWidget {
   final ProPlayer player;
   final Color primaryColor;
   final Color accentColor;
@@ -427,7 +427,7 @@ class _ShotsAndStatesView extends StatelessWidget {
   final int currentPage;
   final ValueChanged<int> onPageChanged;
 
-  const _ShotsAndStatesView({
+  const _ShotsAndStatsView({
     required this.player,
     required this.primaryColor,
     required this.accentColor,
@@ -554,7 +554,7 @@ class _ShotsAndStatesView extends StatelessWidget {
         border: Border.all(color: Colors.white.withValues(alpha: 0.4)),
       ),
       child: Row(
-        children: [_segmentButton('Shots', 1), _segmentButton('States', 2)],
+        children: [_segmentButton('Shots', 1), _segmentButton('Stats', 2)],
       ),
     );
   }

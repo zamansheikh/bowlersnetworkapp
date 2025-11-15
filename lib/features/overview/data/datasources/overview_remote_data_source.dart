@@ -57,8 +57,8 @@ class OverviewRemoteDataSourceImpl implements OverviewRemoteDataSource {
     // Add logging interceptor for debugging
     _dio.interceptors.add(
       LogInterceptor(
-        requestBody: true,
-        responseBody: true,
+        // requestBody: true,
+        // responseBody: true,
         error: true,
         requestHeader: true,
         responseHeader: false,

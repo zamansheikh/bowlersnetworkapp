@@ -55,10 +55,10 @@ class ProPlayersRemoteDataSourceImpl implements ProPlayersRemoteDataSource {
     // Add logging interceptor
     _dio.interceptors.add(
       LogInterceptor(
-        requestBody: true,
-        responseBody: true,
+        // requestBody: true,
+        // responseBody: true,
         error: true,
-        requestHeader: true,
+        // requestHeader: true,
         responseHeader: false,
       ),
     );

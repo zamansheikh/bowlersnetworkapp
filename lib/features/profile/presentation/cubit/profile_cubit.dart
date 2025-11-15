@@ -59,9 +59,11 @@ class ProfileCubit extends Cubit<ProfileState> {
     // Add logging interceptor
     _dio.interceptors.add(
       LogInterceptor(
-        requestBody: true,
-        responseBody: true,
+        // requestBody: true,
+        // responseBody: true,
         logPrint: (object) => debugPrint('[Profile API] $object'),
+        // requestHeader: true,
+        error: true,
       ),
     );
   }

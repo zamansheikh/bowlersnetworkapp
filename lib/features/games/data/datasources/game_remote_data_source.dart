@@ -45,12 +45,12 @@ class GameRemoteDataSourceImpl implements GameRemoteDataSource {
     try {
       final response = await _dio.get(
         '$_baseUrl/games',
-        queryParameters: {
-          'skip': skip,
-          'limit': limit,
-          'sortBy': sortBy,
-          'order': order,
-        },
+        // queryParameters: {
+        //   'skip': skip,
+        //   'limit': limit,
+        //   'sortBy': sortBy,
+        //   'order': order,
+        // },
       );
       final List<dynamic> gamesList = response.data['data'] ?? [];
       return gamesList
@@ -103,7 +103,8 @@ class GameRemoteDataSourceImpl implements GameRemoteDataSource {
   Future<SyncResult> syncBulk(List<SyncItem> games) async {
     try {
       final response = await _dio.post(
-        '$_baseUrl/games/sync/bulk',
+        // '$_baseUrl/games/sync/bulk',
+        '$_baseUrl/games',
         data: {'games': games.map((g) => g.toJson()).toList()},
       );
       return SyncResult.fromJson(response.data);
