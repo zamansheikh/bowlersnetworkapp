@@ -9,9 +9,12 @@
 // coverage:ignore-file
 
 // ignore_for_file: no_leading_underscores_for_library_prefixes
+import 'package:bowlersnetworkapp/core/di/connectivity_module.dart' as _i53;
 import 'package:bowlersnetworkapp/core/di/prefs_module.dart' as _i47;
 import 'package:bowlersnetworkapp/core/network/network_info.dart' as _i149;
 import 'package:bowlersnetworkapp/core/network/network_module.dart' as _i516;
+import 'package:bowlersnetworkapp/core/services/game_sync_manager.dart'
+    as _i127;
 import 'package:bowlersnetworkapp/features/auth/data/datasources/auth_remote_data_source.dart'
     as _i1073;
 import 'package:bowlersnetworkapp/features/auth/data/datasources/brands_remote_data_source.dart'
@@ -56,6 +59,8 @@ import 'package:bowlersnetworkapp/features/events/presentation/cubit/events_cubi
     as _i415;
 import 'package:bowlersnetworkapp/features/games/data/datasources/game_local_data_source.dart'
     as _i847;
+import 'package:bowlersnetworkapp/features/games/data/datasources/game_remote_data_source.dart'
+    as _i768;
 import 'package:bowlersnetworkapp/features/games/data/repositories/game_repository_impl.dart'
     as _i26;
 import 'package:bowlersnetworkapp/features/games/domain/repositories/game_repository.dart'
@@ -130,6 +135,7 @@ import 'package:bowlersnetworkapp/features/tournaments/domain/usecases/tournamen
     as _i13;
 import 'package:bowlersnetworkapp/features/tournaments/presentation/bloc/tournament_cubit.dart'
     as _i849;
+import 'package:connectivity_plus/connectivity_plus.dart' as _i895;
 import 'package:dio/dio.dart' as _i361;
 import 'package:get_it/get_it.dart' as _i174;
 import 'package:injectable/injectable.dart' as _i526;
@@ -143,12 +149,14 @@ extension GetItInjectableX on _i174.GetIt {
   }) async {
     final gh = _i526.GetItHelper(this, environment, environmentFilter);
     final prefsModule = _$PrefsModule();
+    final connectivityModule = _$ConnectivityModule();
     final networkModule = _$NetworkModule();
     await gh.factoryAsync<_i460.SharedPreferences>(
       () => prefsModule.prefs,
       preResolve: true,
     );
     gh.factory<_i229.HomeBloc>(() => _i229.HomeBloc());
+    gh.singleton<_i895.Connectivity>(() => connectivityModule.connectivity);
     gh.lazySingleton<_i361.Dio>(() => networkModule.dio);
     gh.factory<_i965.ReportRepository>(
       () => _i965.ReportRepositoryImpl(gh<_i460.SharedPreferences>()),
@@ -178,8 +186,8 @@ extension GetItInjectableX on _i174.GetIt {
     gh.factory<_i813.FeedCubit>(
       () => _i813.FeedCubit(repository: gh<_i535.FeedRepository>()),
     );
-    gh.lazySingleton<_i201.GameRepository>(
-      () => _i26.GameRepositoryImpl(gh<_i847.GameLocalDataSource>()),
+    gh.lazySingleton<_i768.GameRemoteDataSource>(
+      () => _i768.GameRemoteDataSourceImpl(gh<_i361.Dio>()),
     );
     gh.lazySingleton<_i1073.AuthRemoteDataSource>(
       () => _i1073.AuthRemoteDataSourceImpl(gh<_i361.Dio>()),
@@ -204,6 +212,12 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i460.SharedPreferences>(),
       ),
     );
+    gh.lazySingleton<_i201.GameRepository>(
+      () => _i26.GameRepositoryImpl(
+        gh<_i847.GameLocalDataSource>(),
+        gh<_i768.GameRemoteDataSource>(),
+      ),
+    );
     gh.lazySingleton<_i1062.ProPlayersRepository>(
       () => _i290.ProPlayersRepositoryImpl(
         gh<_i607.ProPlayersRemoteDataSource>(),
@@ -211,9 +225,6 @@ extension GetItInjectableX on _i174.GetIt {
     );
     gh.factory<_i166.AddScoreBloc>(
       () => _i166.AddScoreBloc(gh<_i201.GameRepository>()),
-    );
-    gh.factory<_i188.GamesListBloc>(
-      () => _i188.GamesListBloc(gh<_i201.GameRepository>()),
     );
     gh.lazySingleton<_i599.MessagesRepository>(
       () => _i528.MessagesRepositoryImpl(gh<_i154.MessagesRemoteDataSource>()),
@@ -296,6 +307,13 @@ extension GetItInjectableX on _i174.GetIt {
         prefs: gh<_i460.SharedPreferences>(),
       ),
     );
+    gh.singleton<_i127.GameSyncManager>(
+      () => _i127.GameSyncManager(
+        gh<_i847.GameLocalDataSource>(),
+        gh<_i768.GameRemoteDataSource>(),
+        gh<_i895.Connectivity>(),
+      ),
+    );
     gh.factory<_i146.MessagesCubit>(
       () => _i146.MessagesCubit(gh<_i599.MessagesRepository>()),
     );
@@ -370,6 +388,12 @@ extension GetItInjectableX on _i174.GetIt {
     );
     gh.factory<_i116.GetTournaments>(
       () => _i116.GetTournaments(gh<_i924.EventsRepository>()),
+    );
+    gh.factory<_i188.GamesListBloc>(
+      () => _i188.GamesListBloc(
+        gh<_i201.GameRepository>(),
+        gh<_i127.GameSyncManager>(),
+      ),
     );
     gh.factory<_i746.GetUserTeamsUseCase>(
       () => _i746.GetUserTeamsUseCase(repository: gh<_i200.TeamsRepository>()),
@@ -448,5 +472,7 @@ extension GetItInjectableX on _i174.GetIt {
 }
 
 class _$PrefsModule extends _i47.PrefsModule {}
+
+class _$ConnectivityModule extends _i53.ConnectivityModule {}
 
 class _$NetworkModule extends _i516.NetworkModule {}

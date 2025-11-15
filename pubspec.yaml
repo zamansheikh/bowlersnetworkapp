@@ -71,6 +71,7 @@ dependencies:
   
   # Package Info
   package_info_plus: ^9.0.0
+  connectivity_plus: ^7.0.0
 
 dev_dependencies:
   flutter_test:

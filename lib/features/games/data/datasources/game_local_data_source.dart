@@ -10,6 +10,9 @@ abstract class GameLocalDataSource {
   Future<void> updateGame(BowlingGameModel game);
   Future<void> deleteGame(String id);
   Future<BowlingGameModel?> getGameById(String id);
+  Future<List<BowlingGameModel>> getPendingGames();
+  Future<void> updateGameAfterSync(String localId, String backendId);
+  Future<void> markSyncFailed(String gameId, String error);
 }
 
 @LazySingleton(as: GameLocalDataSource)
@@ -70,6 +73,64 @@ class GameLocalDataSourceImpl implements GameLocalDataSource {
       return games.firstWhere((game) => game.id == id);
     } catch (e) {
       return null;
+    }
+  }
+
+  @override
+  Future<List<BowlingGameModel>> getPendingGames() async {
+    final games = await getAllGames();
+    return games.where((g) => g.syncStatus == 'pending_sync').toList();
+  }
+
+  @override
+  Future<void> updateGameAfterSync(String localId, String backendId) async {
+    final games = await getAllGames();
+    final index = games.indexWhere((g) => g.id == localId);
+    if (index != -1) {
+      final game = games[index];
+      games[index] = BowlingGameModel(
+        id: game.id,
+        frames: game.frames,
+        totalScore: game.totalScore,
+        date: game.date,
+        isComplete: game.isComplete,
+        handPreference: game.handPreference,
+        oilPattern: game.oilPattern,
+        laneCondition: game.laneCondition,
+        gameType: game.gameType,
+        laneNumber: game.laneNumber,
+        backendId: backendId,
+        syncStatus: 'synced',
+        syncedAt: DateTime.now(),
+        syncError: null,
+      );
+      await _saveGames(games);
+    }
+  }
+
+  @override
+  Future<void> markSyncFailed(String gameId, String error) async {
+    final games = await getAllGames();
+    final index = games.indexWhere((g) => g.id == gameId);
+    if (index != -1) {
+      final game = games[index];
+      games[index] = BowlingGameModel(
+        id: game.id,
+        frames: game.frames,
+        totalScore: game.totalScore,
+        date: game.date,
+        isComplete: game.isComplete,
+        handPreference: game.handPreference,
+        oilPattern: game.oilPattern,
+        laneCondition: game.laneCondition,
+        gameType: game.gameType,
+        laneNumber: game.laneNumber,
+        backendId: game.backendId,
+        syncStatus: 'pending_sync',
+        syncedAt: game.syncedAt,
+        syncError: error,
+      );
+      await _saveGames(games);
     }
   }
 

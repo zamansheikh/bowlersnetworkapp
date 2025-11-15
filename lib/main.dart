@@ -6,6 +6,7 @@ import 'package:go_router/go_router.dart';
 import 'package:mapbox_maps_flutter/mapbox_maps_flutter.dart' as mapbox;
 import 'core/di/injection.dart';
 import 'core/router/app_router.dart';
+import 'core/services/game_sync_manager.dart';
 import 'core/theme/app_theme.dart';
 import 'core/constants/strings.dart';
 import 'core/constants/constants.dart';
@@ -42,6 +43,11 @@ class _MyAppState extends State<MyApp> {
     super.initState();
     authCubit = getIt<AuthCubit>();
     router = AppRouter.create(authCubit);
+
+    // Initialize game sync
+    final syncManager = getIt<GameSyncManager>();
+    // Trigger sync when app starts
+    syncManager.syncPendingGames();
   }
 
   @override

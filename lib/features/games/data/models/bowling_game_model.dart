@@ -17,6 +17,10 @@ class BowlingGameModel {
   final LaneCondition laneCondition;
   final GameType gameType;
   final String? laneNumber;
+  final String? backendId; // Server-assigned ID after sync
+  final String syncStatus; // pending_sync, synced
+  final DateTime? syncedAt;
+  final String? syncError;
 
   BowlingGameModel({
     required this.id,
@@ -29,6 +33,10 @@ class BowlingGameModel {
     required this.laneCondition,
     required this.gameType,
     this.laneNumber,
+    this.backendId,
+    this.syncStatus = 'pending_sync',
+    this.syncedAt,
+    this.syncError,
   });
 
   // Convert from entity
@@ -44,6 +52,7 @@ class BowlingGameModel {
       laneCondition: entity.laneCondition,
       gameType: entity.gameType,
       laneNumber: entity.laneNumber,
+      syncStatus: 'pending_sync',
     );
   }
 
@@ -76,6 +85,10 @@ class BowlingGameModel {
       'laneCondition': laneCondition.toJson(),
       'gameType': gameType.toJson(),
       'laneNumber': laneNumber,
+      'backendId': backendId,
+      'syncStatus': syncStatus,
+      'syncedAt': syncedAt?.toIso8601String(),
+      'syncError': syncError,
     };
   }
 
@@ -90,17 +103,23 @@ class BowlingGameModel {
       isComplete: json['isComplete'] as bool? ?? false,
       handPreference: json['handPreference'] != null
           ? HandPreference.fromJson(json['handPreference'] as String)
-          : HandPreference.right, // Default for backward compatibility
+          : HandPreference.right,
       oilPattern: json['oilPattern'] != null
           ? OilPattern.fromJson(json['oilPattern'] as String)
-          : OilPattern.house, // Default
+          : OilPattern.house,
       laneCondition: json['laneCondition'] != null
           ? LaneCondition.fromJson(json['laneCondition'] as String)
-          : LaneCondition.medium, // Default
+          : LaneCondition.medium,
       gameType: json['gameType'] != null
           ? GameType.fromJson(json['gameType'] as String)
-          : GameType.practice, // Default
+          : GameType.practice,
       laneNumber: json['laneNumber'] as String?,
+      backendId: json['backendId'] as String?,
+      syncStatus: json['syncStatus'] as String? ?? 'pending_sync',
+      syncedAt: json['syncedAt'] != null
+          ? DateTime.parse(json['syncedAt'] as String)
+          : null,
+      syncError: json['syncError'] as String?,
     );
   }
 }
@@ -108,13 +127,19 @@ class BowlingGameModel {
 class FrameModel {
   final int number;
   final List<ThrowModel> throws;
+  final bool isPocketHit;
 
-  FrameModel({required this.number, required this.throws});
+  FrameModel({
+    required this.number,
+    required this.throws,
+    this.isPocketHit = false,
+  });
 
   factory FrameModel.fromEntity(FrameEntity entity) {
     return FrameModel(
       number: entity.number,
       throws: entity.throws.map((t) => ThrowModel.fromEntity(t)).toList(),
+      isPocketHit: entity.isPocketHit,
     );
   }
 
@@ -122,11 +147,16 @@ class FrameModel {
     return FrameEntity(
       number: number,
       throws: throws.map((t) => t.toEntity()).toList(),
+      isPocketHit: isPocketHit,
     );
   }
 
   Map<String, dynamic> toJson() {
-    return {'number': number, 'throws': throws.map((t) => t.toJson()).toList()};
+    return {
+      'number': number,
+      'throws': throws.map((t) => t.toJson()).toList(),
+      'isPocketHit': isPocketHit,
+    };
   }
 
   factory FrameModel.fromJson(Map<String, dynamic> json) {
@@ -135,6 +165,7 @@ class FrameModel {
       throws: (json['throws'] as List)
           .map((t) => ThrowModel.fromJson(t as Map<String, dynamic>))
           .toList(),
+      isPocketHit: json['isPocketHit'] as bool? ?? false,
     );
   }
 }

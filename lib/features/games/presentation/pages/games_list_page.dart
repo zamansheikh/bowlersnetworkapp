@@ -45,6 +45,31 @@ class GamesListView extends StatelessWidget {
           foregroundColor: Colors.white,
           elevation: 0,
           actions: [
+            BlocBuilder<GamesListBloc, GamesListState>(
+              builder: (context, state) {
+                final isSyncing = state is GamesListLoaded && state.isSyncing;
+                return IconButton(
+                  icon: isSyncing
+                      ? const SizedBox(
+                          width: 24,
+                          height: 24,
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2,
+                            valueColor: AlwaysStoppedAnimation<Color>(
+                              Colors.white,
+                            ),
+                          ),
+                        )
+                      : const Icon(Icons.cloud_upload_outlined),
+                  tooltip: 'Sync games',
+                  onPressed: isSyncing
+                      ? null
+                      : () {
+                          context.read<GamesListBloc>().add(SyncGames());
+                        },
+                );
+              },
+            ),
             IconButton(
               icon: const Icon(Icons.settings_outlined),
               tooltip: 'Game settings',
@@ -165,15 +190,52 @@ class GamesListView extends StatelessWidget {
 
               return ListView.builder(
                 padding: const EdgeInsets.all(16),
-                itemCount: state.games.length,
+                itemCount:
+                    state.games.length + (state.syncError != null ? 1 : 0),
                 itemBuilder: (context, index) {
-                  final game = state.games[index];
+                  // Show sync error at top
+                  if (state.syncError != null && index == 0) {
+                    return Container(
+                      margin: const EdgeInsets.only(bottom: 16),
+                      padding: const EdgeInsets.all(12),
+                      decoration: BoxDecoration(
+                        color: Colors.red.withValues(alpha: 0.1),
+                        border: Border.all(
+                          color: Colors.red.withValues(alpha: 0.3),
+                        ),
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: Row(
+                        children: [
+                          Icon(
+                            Icons.warning_outlined,
+                            color: Colors.red[400],
+                            size: 20,
+                          ),
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: Text(
+                              state.syncError ?? '',
+                              style: TextStyle(
+                                fontSize: 12,
+                                color: Colors.red[600],
+                                fontWeight: FontWeight.w500,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    );
+                  }
+
+                  final gameIndex = state.syncError != null ? index - 1 : index;
+                  final game = state.games[gameIndex];
                   final dateFormat = DateFormat('MMM dd, yyyy - hh:mm a');
 
                   return _buildGameCard(
                     context,
                     game,
-                    state.games.length - index,
+                    state.games.length - gameIndex,
                     dateFormat,
                   );
                 },

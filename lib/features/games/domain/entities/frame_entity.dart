@@ -7,18 +7,19 @@ import 'throw_entity.dart';
 class FrameEntity extends Equatable {
   final int number;
   final List<ThrowEntity> throws;
+  final bool isPocketHit;
 
   const FrameEntity({
     required this.number,
     this.throws = const [],
+    this.isPocketHit = false,
   });
 
-  FrameEntity copyWith({
-    List<ThrowEntity>? throws,
-  }) {
+  FrameEntity copyWith({List<ThrowEntity>? throws, bool? isPocketHit}) {
     return FrameEntity(
       number: number,
       throws: throws ?? this.throws,
+      isPocketHit: isPocketHit ?? this.isPocketHit,
     );
   }
 
@@ -35,7 +36,8 @@ class FrameEntity extends Equatable {
       if (throws.first.pinsKnocked == 10) {
         return 'X';
       }
-      if (throws.length >= 2 && throws[0].pinsKnocked + throws[1].pinsKnocked == 10) {
+      if (throws.length >= 2 &&
+          throws[0].pinsKnocked + throws[1].pinsKnocked == 10) {
         return '${symbols[0]} /';
       }
     } else {
@@ -43,13 +45,15 @@ class FrameEntity extends Equatable {
       if (throws[0].pinsKnocked == 10) symbols[0] = 'X';
       if (throws.length >= 2) {
         if (throws[1].pinsKnocked == 10) symbols[1] = 'X';
-        if (throws[0].pinsKnocked + throws[1].pinsKnocked == 10 && throws[0].pinsKnocked != 10) {
+        if (throws[0].pinsKnocked + throws[1].pinsKnocked == 10 &&
+            throws[0].pinsKnocked != 10) {
           symbols[1] = '/';
         }
       }
       if (throws.length >= 3) {
         if (throws[2].pinsKnocked == 10) symbols[2] = 'X';
-        if (throws[1].pinsKnocked + throws[2].pinsKnocked == 10 && throws[1].pinsKnocked != 10) {
+        if (throws[1].pinsKnocked + throws[2].pinsKnocked == 10 &&
+            throws[1].pinsKnocked != 10) {
           symbols[2] = '/';
         }
       }
@@ -59,5 +63,5 @@ class FrameEntity extends Equatable {
   }
 
   @override
-  List<Object> get props => [number, throws];
+  List<Object> get props => [number, throws, isPocketHit];
 }

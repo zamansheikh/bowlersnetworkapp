@@ -17,3 +17,5 @@ class DeleteGame extends GamesListEvent {
   @override
   List<Object> get props => [gameId];
 }
+
+class SyncGames extends GamesListEvent {}

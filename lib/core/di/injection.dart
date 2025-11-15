@@ -3,6 +3,7 @@ import 'package:injectable/injectable.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../../features/games/domain/services/game_settings_service.dart';
 import '../../features/games/domain/services/pin_settings_service.dart';
+import 'connectivity_module.dart';
 import 'injection.config.dart';
 
 final getIt = GetIt.instance;
@@ -10,6 +11,7 @@ final getIt = GetIt.instance;
 @InjectableInit()
 Future<void> configureDependencies() async {
   await getIt.init();
+
   if (!getIt.isRegistered<PinSettingsService>()) {
     getIt.registerLazySingleton<PinSettingsService>(
       () => PinSettingsService(getIt<SharedPreferences>()),

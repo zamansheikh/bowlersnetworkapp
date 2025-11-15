@@ -15,11 +15,25 @@ class GamesListLoading extends GamesListState {}
 
 class GamesListLoaded extends GamesListState {
   final List<BowlingGameEntity> games;
+  final bool isSyncing;
+  final String? syncError;
 
-  GamesListLoaded(this.games);
+  GamesListLoaded(this.games, {this.isSyncing = false, this.syncError});
+
+  GamesListLoaded copyWith({
+    List<BowlingGameEntity>? games,
+    bool? isSyncing,
+    String? syncError,
+  }) {
+    return GamesListLoaded(
+      games ?? this.games,
+      isSyncing: isSyncing ?? this.isSyncing,
+      syncError: syncError ?? this.syncError,
+    );
+  }
 
   @override
-  List<Object> get props => [games];
+  List<Object> get props => [games, isSyncing, syncError ?? ''];
 }
 
 class GamesListError extends GamesListState {
