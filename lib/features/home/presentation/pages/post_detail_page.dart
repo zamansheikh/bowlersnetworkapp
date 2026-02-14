@@ -1,13 +1,14 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import '../../../../core/constants/colors.dart';
-import '../cubit/feed_cubit.dart';
-import '../widgets/feed_post_card.dart';
-import '../widgets/comments_section.dart';
+import '../../data/models/feed_v3_post.dart';
+import '../../data/repositories/feed_v3_repository.dart';
+import '../widgets/feed_v3_post_card.dart';
+import '../widgets/feed_v3_comments_section.dart';
+import '../../../../core/di/injection.dart';
 
 class PostDetailPage extends StatefulWidget {
-  final String postId;
+  final int postId;
 
   const PostDetailPage({super.key, required this.postId});
 
@@ -16,312 +17,139 @@ class PostDetailPage extends StatefulWidget {
 }
 
 class _PostDetailPageState extends State<PostDetailPage> {
+  final _repository = getIt<FeedV3Repository>();
+  FeedV3Post? _post;
+  bool _isLoading = true;
+  String? _error;
+
   @override
   void initState() {
     super.initState();
-    // Use existing FeedCubit and load post details
-    context.read<FeedCubit>().loadPostDetails(widget.postId);
+    _loadPost();
   }
 
-  @override
-  Widget build(BuildContext context) {
-    return PostDetailView(postId: widget.postId);
-  }
-}
-
-class PostDetailView extends StatefulWidget {
-  final String postId;
-
-  const PostDetailView({super.key, required this.postId});
-
-  @override
-  State<PostDetailView> createState() => _PostDetailViewState();
-}
-
-class _PostDetailViewState extends State<PostDetailView> {
-  final TextEditingController _commentController = TextEditingController();
-  bool _isAddingComment = false;
-  String? _replyToCommentId;
-  final TextEditingController _replyController = TextEditingController();
-  bool _isAddingReply = false;
-
-  @override
-  void dispose() {
-    _commentController.dispose();
-    _replyController.dispose();
-    super.dispose();
-  }
-
-  void _handleAddComment() async {
-    if (_commentController.text.trim().isEmpty || _isAddingComment) return;
-
-    setState(() {
-      _isAddingComment = true;
-    });
-
+  Future<void> _loadPost() async {
     try {
-      await context.read<FeedCubit>().addCommentToPost(
-        widget.postId,
-        _commentController.text.trim(),
-      );
-      _commentController.clear();
-
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Comment added successfully!'),
-            backgroundColor: AppColors.success,
-          ),
-        );
-      }
-    } catch (error) {
-      if (mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(const SnackBar(content: Text('Failed to add comment')));
-      }
-    } finally {
-      if (mounted) {
-        setState(() {
-          _isAddingComment = false;
-        });
-      }
-    }
-  }
-
-  void _handleAddReply(String commentId) async {
-    if (_replyController.text.trim().isEmpty || _isAddingReply) return;
-
-    setState(() {
-      _isAddingReply = true;
-    });
-
-    try {
-      await context.read<FeedCubit>().addReply(
-        commentId,
-        _replyController.text.trim(),
-      );
-      _replyController.clear();
+      final post = await _repository.getPost(widget.postId);
       setState(() {
-        _replyToCommentId = null;
+        _post = post;
+        _isLoading = false;
       });
-
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Reply added successfully!'),
-            backgroundColor: AppColors.success,
-          ),
-        );
-      }
-    } catch (error) {
-      if (mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(const SnackBar(content: Text('Failed to add reply')));
-      }
-    } finally {
-      if (mounted) {
-        setState(() {
-          _isAddingReply = false;
-        });
-      }
+    } catch (e) {
+      setState(() {
+        _error = e.toString();
+        _isLoading = false;
+      });
     }
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.surface,
+      backgroundColor: AppColors.background,
       appBar: AppBar(
         backgroundColor: AppColors.white,
         elevation: 0,
+        scrolledUnderElevation: 1,
+        surfaceTintColor: AppColors.white,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: AppColors.black),
-          onPressed: () {
-            // Return to feed state when going back
-            context.read<FeedCubit>().returnToFeed();
-            context.pop();
-          },
+          icon: const Icon(Icons.arrow_back, color: AppColors.gray900),
+          onPressed: () => context.pop(),
         ),
         title: const Text(
           'Post',
-          style: TextStyle(color: AppColors.black, fontWeight: FontWeight.w600),
+          style: TextStyle(
+            color: AppColors.gray900,
+            fontWeight: FontWeight.w600,
+            fontSize: 18,
+          ),
         ),
       ),
-      body: BlocConsumer<FeedCubit, FeedState>(
-        listener: (context, state) {
-          if (state is CommentAddError) {
-            ScaffoldMessenger.of(
-              context,
-            ).showSnackBar(SnackBar(content: Text(state.message)));
-          } else if (state is ReplyAddError) {
-            ScaffoldMessenger.of(
-              context,
-            ).showSnackBar(SnackBar(content: Text(state.message)));
-          }
-        },
-        builder: (context, state) {
-          if (state is FeedLoading) {
-            return const Center(
-              child: CircularProgressIndicator(
-                color: AppColors.primaryLimeGreen,
+      body: _buildBody(),
+    );
+  }
+
+  Widget _buildBody() {
+    if (_isLoading) {
+      return const Center(
+        child: CircularProgressIndicator(color: AppColors.primaryLimeGreen),
+      );
+    }
+
+    if (_error != null) {
+      return Center(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Icon(Icons.error_outline, size: 48, color: AppColors.error),
+            const SizedBox(height: 12),
+            Text(_error!, style: const TextStyle(color: AppColors.gray600)),
+            const SizedBox(height: 16),
+            ElevatedButton(
+              onPressed: () {
+                setState(() {
+                  _isLoading = true;
+                  _error = null;
+                });
+                _loadPost();
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: AppColors.primaryLimeGreen,
               ),
-            );
-          }
+              child: const Text('Retry'),
+            ),
+          ],
+        ),
+      );
+    }
 
-          if (state is FeedError) {
-            return Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  const Icon(
-                    Icons.error_outline,
-                    size: 64,
-                    color: AppColors.error,
-                  ),
-                  const SizedBox(height: 16),
-                  Text(
-                    'Failed to load post',
-                    style: Theme.of(
-                      context,
-                    ).textTheme.titleLarge?.copyWith(color: AppColors.error),
-                  ),
-                  const SizedBox(height: 8),
-                  Text(
-                    state.message,
-                    style: Theme.of(
-                      context,
-                    ).textTheme.bodyMedium?.copyWith(color: AppColors.gray),
-                    textAlign: TextAlign.center,
-                  ),
-                  const SizedBox(height: 24),
-                  ElevatedButton(
-                    onPressed: () => context.read<FeedCubit>().loadPostDetails(
-                      widget.postId,
-                    ),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: AppColors.primaryLimeGreen,
-                      foregroundColor: AppColors.white,
-                    ),
-                    child: const Text('Retry'),
-                  ),
-                ],
-              ),
-            );
-          }
+    if (_post == null) {
+      return const Center(child: Text('Post not found'));
+    }
 
-          if (state is PostDetailLoaded) {
-            final post = state.post;
-            return Column(
-              children: [
-                // Post content
-                Expanded(
-                  child: SingleChildScrollView(
-                    padding: const EdgeInsets.all(16),
-                    child: Column(
-                      children: [
-                        // Post card
-                        FeedPostCard(
-                          post: post,
-                          postIndex: 0,
-                          onPostUpdate: () => context
-                              .read<FeedCubit>()
-                              .loadPostDetails(widget.postId),
-                        ),
-                        const SizedBox(height: 24),
+    return RefreshIndicator(
+      onRefresh: _loadPost,
+      color: AppColors.primaryLimeGreen,
+      child: SingleChildScrollView(
+        physics: const AlwaysScrollableScrollPhysics(),
+        child: Column(
+          children: [
+            // Post card (no tap navigation since we're already on the detail)
+            FeedV3PostCard(
+              post: _post!,
+              onLike: () async {
+                try {
+                  await _repository.toggleLike(_post!.id);
+                  setState(() {
+                    _post = _post!.copyWith(
+                      hasLiked: !_post!.hasLiked,
+                      likesCount:
+                          _post!.likesCount + (_post!.hasLiked ? -1 : 1),
+                    );
+                  });
+                } catch (_) {}
+              },
+              onPollVote: (optionId) async {
+                try {
+                  await _repository.vote(_post!.id, [optionId]);
+                  _loadPost(); // Refresh to get updated poll data
+                } catch (_) {}
+              },
+            ),
 
-                        // Comments section
-                        CommentsSection(
-                          post: post,
-                          onReplyTap: (commentId) {
-                            setState(() {
-                              _replyToCommentId = _replyToCommentId == commentId
-                                  ? null
-                                  : commentId;
-                            });
-                          },
-                          replyToCommentId: _replyToCommentId,
-                          replyController: _replyController,
-                          isAddingReply: _isAddingReply,
-                          onAddReply: _handleAddReply,
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
+            // Comments section (expanded by default on detail page)
+            FeedV3CommentsSection(
+              postId: widget.postId,
+              repository: _repository,
+              pageSize: 20,
+              onCommentAdded: () {
+                _loadPost(); // Refresh comment count
+              },
+            ),
 
-                // Comment input
-                Container(
-                  padding: const EdgeInsets.all(16),
-                  decoration: const BoxDecoration(
-                    color: AppColors.white,
-                    border: Border(
-                      top: BorderSide(color: AppColors.lightGray, width: 1),
-                    ),
-                  ),
-                  child: Row(
-                    children: [
-                      Expanded(
-                        child: TextField(
-                          controller: _commentController,
-                          decoration: InputDecoration(
-                            hintText: 'Write a comment...',
-                            hintStyle: const TextStyle(color: AppColors.gray),
-                            filled: true,
-                            fillColor: AppColors.lightGray,
-                            border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(24),
-                              borderSide: BorderSide.none,
-                            ),
-                            contentPadding: const EdgeInsets.symmetric(
-                              horizontal: 16,
-                              vertical: 12,
-                            ),
-                          ),
-                          maxLines: null,
-                          textCapitalization: TextCapitalization.sentences,
-                        ),
-                      ),
-                      const SizedBox(width: 12),
-                      GestureDetector(
-                        onTap: _isAddingComment ? null : _handleAddComment,
-                        child: Container(
-                          width: 44,
-                          height: 44,
-                          decoration: BoxDecoration(
-                            color:
-                                _commentController.text.trim().isNotEmpty &&
-                                    !_isAddingComment
-                                ? AppColors.primaryLimeGreen
-                                : AppColors.gray,
-                            borderRadius: BorderRadius.circular(22),
-                          ),
-                          child: _isAddingComment
-                              ? const SizedBox(
-                                  width: 20,
-                                  height: 20,
-                                  child: CircularProgressIndicator(
-                                    strokeWidth: 2,
-                                    color: AppColors.white,
-                                  ),
-                                )
-                              : const Icon(
-                                  Icons.send,
-                                  color: AppColors.white,
-                                  size: 20,
-                                ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ],
-            );
-          }
-
-          return const Center(child: Text('No post found'));
-        },
+            const SizedBox(height: 32),
+          ],
+        ),
       ),
     );
   }

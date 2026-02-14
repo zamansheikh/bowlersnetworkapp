@@ -73,6 +73,8 @@ import 'package:bowlersnetworkapp/features/home/data/datasources/user_remote_dat
     as _i528;
 import 'package:bowlersnetworkapp/features/home/data/repositories/feed_repository.dart'
     as _i535;
+import 'package:bowlersnetworkapp/features/home/data/repositories/feed_v3_repository.dart'
+    as _i46;
 import 'package:bowlersnetworkapp/features/home/data/repositories/user_repository_impl.dart'
     as _i224;
 import 'package:bowlersnetworkapp/features/home/domain/repositories/user_repository.dart'
@@ -83,6 +85,8 @@ import 'package:bowlersnetworkapp/features/home/presentation/bloc/home_bloc.dart
     as _i229;
 import 'package:bowlersnetworkapp/features/home/presentation/cubit/feed_cubit.dart'
     as _i813;
+import 'package:bowlersnetworkapp/features/home/presentation/cubit/feed_v3_cubit.dart'
+    as _i409;
 import 'package:bowlersnetworkapp/features/messages/data/datasources/messages_remote_data_source.dart'
     as _i154;
 import 'package:bowlersnetworkapp/features/messages/data/repositories/messages_repository_impl.dart'
@@ -158,76 +162,49 @@ extension GetItInjectableX on _i174.GetIt {
     gh.factory<_i229.HomeBloc>(() => _i229.HomeBloc());
     gh.singleton<_i895.Connectivity>(() => connectivityModule.connectivity);
     gh.lazySingleton<_i361.Dio>(() => networkModule.dio);
-    gh.factory<_i965.ReportRepository>(
-      () => _i965.ReportRepositoryImpl(gh<_i460.SharedPreferences>()),
-    );
     gh.lazySingleton<_i528.UserRemoteDataSource>(
       () => _i528.UserRemoteDataSourceImpl(),
     );
-    gh.lazySingleton<_i607.ProPlayersRemoteDataSource>(
-      () => _i607.ProPlayersRemoteDataSourceImpl(gh<_i460.SharedPreferences>()),
-    );
     gh.lazySingleton<_i149.NetworkInfo>(() => _i149.NetworkInfoImpl());
-    gh.factory<_i535.FeedRepository>(
-      () => _i535.FeedRepository(gh<_i460.SharedPreferences>()),
-    );
-    gh.factory<_i341.ProfileCubit>(
-      () => _i341.ProfileCubit(gh<_i460.SharedPreferences>()),
-    );
-    gh.lazySingleton<_i946.OverviewRemoteDataSource>(
-      () => _i946.OverviewRemoteDataSourceImpl(gh<_i460.SharedPreferences>()),
-    );
-    gh.lazySingleton<_i394.BrandsRemoteDataSource>(
-      () => _i483.BrandsRemoteDataSourceImpl(gh<_i460.SharedPreferences>()),
-    );
-    gh.lazySingleton<_i847.GameLocalDataSource>(
-      () => _i847.GameLocalDataSourceImpl(gh<_i460.SharedPreferences>()),
-    );
-    gh.factory<_i813.FeedCubit>(
-      () => _i813.FeedCubit(repository: gh<_i535.FeedRepository>()),
-    );
-    gh.lazySingleton<_i768.GameRemoteDataSource>(
-      () => _i768.GameRemoteDataSourceImpl(gh<_i361.Dio>()),
-    );
-    gh.lazySingleton<_i1073.AuthRemoteDataSource>(
-      () => _i1073.AuthRemoteDataSourceImpl(gh<_i361.Dio>()),
-    );
-    gh.lazySingleton<_i154.MessagesRemoteDataSource>(
-      () => _i154.MessagesRemoteDataSourceImpl(gh<_i460.SharedPreferences>()),
-    );
-    gh.lazySingleton<_i421.EventsRemoteDataSource>(
-      () => _i154.EventsRemoteDataSourceImpl(gh<_i460.SharedPreferences>()),
-    );
-    gh.lazySingleton<_i659.OverviewRepository>(
-      () => _i659.OverviewRepositoryImpl(gh<_i946.OverviewRemoteDataSource>()),
-    );
     gh.lazySingleton<_i637.UserRepository>(
       () => _i224.UserRepositoryImpl(
         remoteDataSource: gh<_i528.UserRemoteDataSource>(),
       ),
     );
-    gh.factory<_i391.TeamsRemoteDataSource>(
-      () => _i628.TeamsRemoteDataSourceImpl(
-        gh<_i361.Dio>(),
-        gh<_i460.SharedPreferences>(),
-      ),
+    gh.lazySingleton<_i1073.AuthRemoteDataSource>(
+      () => _i1073.AuthRemoteDataSourceImpl(gh<_i361.Dio>()),
     );
-    gh.lazySingleton<_i201.GameRepository>(
-      () => _i26.GameRepositoryImpl(
-        gh<_i847.GameLocalDataSource>(),
-        gh<_i768.GameRemoteDataSource>(),
-      ),
+    gh.lazySingleton<_i46.FeedV3Repository>(
+      () => _i46.FeedV3Repository(gh<_i361.Dio>()),
+    );
+    gh.factory<_i409.FeedV3Cubit>(
+      () => _i409.FeedV3Cubit(gh<_i46.FeedV3Repository>()),
+    );
+    gh.lazySingleton<_i768.GameRemoteDataSource>(
+      () => _i768.GameRemoteDataSourceImpl(gh<_i361.Dio>()),
+    );
+    gh.lazySingleton<_i607.ProPlayersRemoteDataSource>(
+      () => _i607.ProPlayersRemoteDataSourceImpl(gh<_i460.SharedPreferences>()),
+    );
+    gh.factory<_i965.ReportRepository>(
+      () => _i965.ReportRepositoryImpl(gh<_i460.SharedPreferences>()),
     );
     gh.lazySingleton<_i1062.ProPlayersRepository>(
       () => _i290.ProPlayersRepositoryImpl(
         gh<_i607.ProPlayersRemoteDataSource>(),
       ),
     );
-    gh.factory<_i166.AddScoreBloc>(
-      () => _i166.AddScoreBloc(gh<_i201.GameRepository>()),
+    gh.lazySingleton<_i946.OverviewRemoteDataSource>(
+      () => _i946.OverviewRemoteDataSourceImpl(gh<_i460.SharedPreferences>()),
     );
-    gh.lazySingleton<_i599.MessagesRepository>(
-      () => _i528.MessagesRepositoryImpl(gh<_i154.MessagesRemoteDataSource>()),
+    gh.factory<_i535.FeedRepository>(
+      () => _i535.FeedRepository(gh<_i460.SharedPreferences>()),
+    );
+    gh.factory<_i341.ProfileCubit>(
+      () => _i341.ProfileCubit(gh<_i460.SharedPreferences>()),
+    );
+    gh.factory<_i813.FeedCubit>(
+      () => _i813.FeedCubit(repository: gh<_i535.FeedRepository>()),
     );
     gh.factory<_i829.TournamentRemoteDataSource>(
       () => _i333.TournamentRemoteDataSourceImpl(
@@ -235,9 +212,63 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i460.SharedPreferences>(),
       ),
     );
+    gh.lazySingleton<_i394.BrandsRemoteDataSource>(
+      () => _i483.BrandsRemoteDataSourceImpl(gh<_i460.SharedPreferences>()),
+    );
+    gh.lazySingleton<_i847.GameLocalDataSource>(
+      () => _i847.GameLocalDataSourceImpl(gh<_i460.SharedPreferences>()),
+    );
+    gh.factory<_i391.TeamsRemoteDataSource>(
+      () => _i628.TeamsRemoteDataSourceImpl(
+        gh<_i361.Dio>(),
+        gh<_i460.SharedPreferences>(),
+      ),
+    );
+    gh.factory<_i450.GetUsers>(
+      () => _i450.GetUsers(gh<_i637.UserRepository>()),
+    );
+    gh.lazySingleton<_i154.MessagesRemoteDataSource>(
+      () => _i154.MessagesRemoteDataSourceImpl(gh<_i460.SharedPreferences>()),
+    );
+    gh.lazySingleton<_i994.AuthRepository>(
+      () => _i359.AuthRepositoryImpl(
+        remote: gh<_i1073.AuthRemoteDataSource>(),
+        prefs: gh<_i460.SharedPreferences>(),
+      ),
+    );
+    gh.lazySingleton<_i421.EventsRemoteDataSource>(
+      () => _i154.EventsRemoteDataSourceImpl(gh<_i460.SharedPreferences>()),
+    );
+    gh.singleton<_i127.GameSyncManager>(
+      () => _i127.GameSyncManager(
+        gh<_i847.GameLocalDataSource>(),
+        gh<_i768.GameRemoteDataSource>(),
+        gh<_i895.Connectivity>(),
+      ),
+    );
     gh.lazySingleton<_i924.EventsRepository>(
       () => _i686.EventsRepositoryImpl(
         remoteDataSource: gh<_i421.EventsRemoteDataSource>(),
+      ),
+    );
+    gh.factory<_i74.GetProPlayers>(
+      () => _i74.GetProPlayers(gh<_i1062.ProPlayersRepository>()),
+    );
+    gh.factory<_i74.GetProPlayerById>(
+      () => _i74.GetProPlayerById(gh<_i1062.ProPlayersRepository>()),
+    );
+    gh.factory<_i74.FollowPlayer>(
+      () => _i74.FollowPlayer(gh<_i1062.ProPlayersRepository>()),
+    );
+    gh.factory<_i74.UnfollowPlayer>(
+      () => _i74.UnfollowPlayer(gh<_i1062.ProPlayersRepository>()),
+    );
+    gh.lazySingleton<_i659.OverviewRepository>(
+      () => _i659.OverviewRepositoryImpl(gh<_i946.OverviewRemoteDataSource>()),
+    );
+    gh.factory<_i334.TournamentRepository>(
+      () => _i937.TournamentRepositoryImpl(
+        remoteDataSource: gh<_i829.TournamentRemoteDataSource>(),
       ),
     );
     gh.factory<_i200.TeamsRepository>(
@@ -245,13 +276,64 @@ extension GetItInjectableX on _i174.GetIt {
         remoteDataSource: gh<_i391.TeamsRemoteDataSource>(),
       ),
     );
-    gh.factory<_i334.TournamentRepository>(
-      () => _i937.TournamentRepositoryImpl(
-        remoteDataSource: gh<_i829.TournamentRemoteDataSource>(),
+    gh.lazySingleton<_i599.MessagesRepository>(
+      () => _i528.MessagesRepositoryImpl(gh<_i154.MessagesRemoteDataSource>()),
+    );
+    gh.factory<_i762.CreateUser>(
+      () => _i762.CreateUser(gh<_i994.AuthRepository>()),
+    );
+    gh.factory<_i298.GetProfile>(
+      () => _i298.GetProfile(gh<_i994.AuthRepository>()),
+    );
+    gh.factory<_i459.Login>(() => _i459.Login(gh<_i994.AuthRepository>()));
+    gh.factory<_i182.SendVerificationCode>(
+      () => _i182.SendVerificationCode(gh<_i994.AuthRepository>()),
+    );
+    gh.factory<_i920.ValidateSignupData>(
+      () => _i920.ValidateSignupData(gh<_i994.AuthRepository>()),
+    );
+    gh.factory<_i546.VerifyEmail>(
+      () => _i546.VerifyEmail(gh<_i994.AuthRepository>()),
+    );
+    gh.lazySingleton<_i201.GameRepository>(
+      () => _i26.GameRepositoryImpl(
+        gh<_i847.GameLocalDataSource>(),
+        gh<_i768.GameRemoteDataSource>(),
       ),
     );
-    gh.factory<_i450.GetUsers>(
-      () => _i450.GetUsers(gh<_i637.UserRepository>()),
+    gh.factory<_i384.SignupCubit>(
+      () => _i384.SignupCubit(
+        gh<_i920.ValidateSignupData>(),
+        gh<_i182.SendVerificationCode>(),
+        gh<_i546.VerifyEmail>(),
+        gh<_i762.CreateUser>(),
+        gh<_i459.Login>(),
+        gh<_i298.GetProfile>(),
+      ),
+    );
+    gh.factory<_i605.ProfileCompletionCubit>(
+      () => _i605.ProfileCompletionCubit(
+        gh<_i394.BrandsRemoteDataSource>(),
+        gh<_i994.AuthRepository>(),
+      ),
+    );
+    gh.factory<_i565.ProPlayersCubit>(
+      () => _i565.ProPlayersCubit(
+        gh<_i74.GetProPlayers>(),
+        gh<_i74.GetProPlayerById>(),
+        gh<_i74.FollowPlayer>(),
+        gh<_i74.UnfollowPlayer>(),
+        gh<_i607.ProPlayersRemoteDataSource>(),
+      ),
+    );
+    gh.factory<_i956.GetCalendarEvents>(
+      () => _i956.GetCalendarEvents(gh<_i924.EventsRepository>()),
+    );
+    gh.factory<_i116.GetTournaments>(
+      () => _i116.GetTournaments(gh<_i924.EventsRepository>()),
+    );
+    gh.factory<_i146.MessagesCubit>(
+      () => _i146.MessagesCubit(gh<_i599.MessagesRepository>()),
     );
     gh.factory<_i13.GetTournamentsUseCase>(
       () => _i13.GetTournamentsUseCase(
@@ -301,57 +383,10 @@ extension GetItInjectableX on _i174.GetIt {
     gh.factory<_i547.OverviewCubit>(
       () => _i547.OverviewCubit(gh<_i659.OverviewRepository>()),
     );
-    gh.lazySingleton<_i994.AuthRepository>(
-      () => _i359.AuthRepositoryImpl(
-        remote: gh<_i1073.AuthRemoteDataSource>(),
-        prefs: gh<_i460.SharedPreferences>(),
-      ),
-    );
-    gh.singleton<_i127.GameSyncManager>(
-      () => _i127.GameSyncManager(
-        gh<_i847.GameLocalDataSource>(),
-        gh<_i768.GameRemoteDataSource>(),
-        gh<_i895.Connectivity>(),
-      ),
-    );
-    gh.factory<_i146.MessagesCubit>(
-      () => _i146.MessagesCubit(gh<_i599.MessagesRepository>()),
-    );
-    gh.factory<_i849.TournamentCubit>(
-      () => _i849.TournamentCubit(
-        getTournaments: gh<_i13.GetTournamentsUseCase>(),
-        getTournamentById: gh<_i13.GetTournamentByIdUseCase>(),
-        registerForTournament: gh<_i13.RegisterForTournamentUseCase>(),
-        unregisterFromTournament: gh<_i13.UnregisterFromTournamentUseCase>(),
-        registerSinglesForTournament:
-            gh<_i13.RegisterSinglesForTournamentUseCase>(),
-        registerTeamForTournament: gh<_i13.RegisterTeamForTournamentUseCase>(),
-        createTournament: gh<_i13.CreateTournamentUseCase>(),
-        getUserRegisteredTournaments:
-            gh<_i13.GetUserRegisteredTournamentsUseCase>(),
-        getAvailableTournaments: gh<_i13.GetAvailableTournamentsUseCase>(),
-      ),
-    );
-    gh.factory<_i762.CreateUser>(
-      () => _i762.CreateUser(gh<_i994.AuthRepository>()),
-    );
-    gh.factory<_i298.GetProfile>(
-      () => _i298.GetProfile(gh<_i994.AuthRepository>()),
-    );
-    gh.factory<_i459.Login>(() => _i459.Login(gh<_i994.AuthRepository>()));
-    gh.factory<_i182.SendVerificationCode>(
-      () => _i182.SendVerificationCode(gh<_i994.AuthRepository>()),
-    );
-    gh.factory<_i920.ValidateSignupData>(
-      () => _i920.ValidateSignupData(gh<_i994.AuthRepository>()),
-    );
-    gh.factory<_i546.VerifyEmail>(
-      () => _i546.VerifyEmail(gh<_i994.AuthRepository>()),
-    );
-    gh.factory<_i605.ProfileCompletionCubit>(
-      () => _i605.ProfileCompletionCubit(
-        gh<_i394.BrandsRemoteDataSource>(),
-        gh<_i994.AuthRepository>(),
+    gh.factory<_i415.EventsCubit>(
+      () => _i415.EventsCubit(
+        getTournaments: gh<_i116.GetTournaments>(),
+        getCalendarEvents: gh<_i956.GetCalendarEvents>(),
       ),
     );
     gh.factory<_i506.AuthCubit>(
@@ -359,40 +394,6 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i459.Login>(),
         gh<_i298.GetProfile>(),
         gh<_i994.AuthRepository>(),
-      ),
-    );
-    gh.factory<_i74.GetProPlayers>(
-      () => _i74.GetProPlayers(gh<_i1062.ProPlayersRepository>()),
-    );
-    gh.factory<_i74.GetProPlayerById>(
-      () => _i74.GetProPlayerById(gh<_i1062.ProPlayersRepository>()),
-    );
-    gh.factory<_i74.FollowPlayer>(
-      () => _i74.FollowPlayer(gh<_i1062.ProPlayersRepository>()),
-    );
-    gh.factory<_i74.UnfollowPlayer>(
-      () => _i74.UnfollowPlayer(gh<_i1062.ProPlayersRepository>()),
-    );
-    gh.factory<_i384.SignupCubit>(
-      () => _i384.SignupCubit(
-        gh<_i920.ValidateSignupData>(),
-        gh<_i182.SendVerificationCode>(),
-        gh<_i546.VerifyEmail>(),
-        gh<_i762.CreateUser>(),
-        gh<_i459.Login>(),
-        gh<_i298.GetProfile>(),
-      ),
-    );
-    gh.factory<_i956.GetCalendarEvents>(
-      () => _i956.GetCalendarEvents(gh<_i924.EventsRepository>()),
-    );
-    gh.factory<_i116.GetTournaments>(
-      () => _i116.GetTournaments(gh<_i924.EventsRepository>()),
-    );
-    gh.factory<_i188.GamesListBloc>(
-      () => _i188.GamesListBloc(
-        gh<_i201.GameRepository>(),
-        gh<_i127.GameSyncManager>(),
       ),
     );
     gh.factory<_i746.GetUserTeamsUseCase>(
@@ -438,19 +439,28 @@ extension GetItInjectableX on _i174.GetIt {
         repository: gh<_i200.TeamsRepository>(),
       ),
     );
-    gh.factory<_i415.EventsCubit>(
-      () => _i415.EventsCubit(
-        getTournaments: gh<_i116.GetTournaments>(),
-        getCalendarEvents: gh<_i956.GetCalendarEvents>(),
+    gh.factory<_i188.GamesListBloc>(
+      () => _i188.GamesListBloc(
+        gh<_i201.GameRepository>(),
+        gh<_i127.GameSyncManager>(),
       ),
     );
-    gh.factory<_i565.ProPlayersCubit>(
-      () => _i565.ProPlayersCubit(
-        gh<_i74.GetProPlayers>(),
-        gh<_i74.GetProPlayerById>(),
-        gh<_i74.FollowPlayer>(),
-        gh<_i74.UnfollowPlayer>(),
-        gh<_i607.ProPlayersRemoteDataSource>(),
+    gh.factory<_i166.AddScoreBloc>(
+      () => _i166.AddScoreBloc(gh<_i201.GameRepository>()),
+    );
+    gh.factory<_i849.TournamentCubit>(
+      () => _i849.TournamentCubit(
+        getTournaments: gh<_i13.GetTournamentsUseCase>(),
+        getTournamentById: gh<_i13.GetTournamentByIdUseCase>(),
+        registerForTournament: gh<_i13.RegisterForTournamentUseCase>(),
+        unregisterFromTournament: gh<_i13.UnregisterFromTournamentUseCase>(),
+        registerSinglesForTournament:
+            gh<_i13.RegisterSinglesForTournamentUseCase>(),
+        registerTeamForTournament: gh<_i13.RegisterTeamForTournamentUseCase>(),
+        createTournament: gh<_i13.CreateTournamentUseCase>(),
+        getUserRegisteredTournaments:
+            gh<_i13.GetUserRegisteredTournamentsUseCase>(),
+        getAvailableTournaments: gh<_i13.GetAvailableTournamentsUseCase>(),
       ),
     );
     gh.factory<_i317.TeamsCubit>(

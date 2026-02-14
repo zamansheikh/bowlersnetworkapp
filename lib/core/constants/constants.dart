@@ -3,8 +3,8 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 class AppConstants {
   // API
   static const String baseUrl = 'https://test.bowlersnetwork.com';
-  static const String loginEndpoint = '/api/amateur-login';
-  static const String userProfileEndpoint = '/api/user/profile';
+  static const String loginEndpoint = '/api/auth/login/amateurs';
+  static const String userProfileEndpoint = '/api/profile/data';
   static const String validateSignupDataEndpoint = '/api/validate-signup-data';
   static const String sendVerificationCodeEndpoint =
       '/api/send-verification-code';
@@ -24,5 +24,8 @@ class AppConstants {
   static const Duration longAnimation = Duration(milliseconds: 500);
 
   // Mapbox
-  static String mapboxAccessToken = dotenv.get('ACCESS_TOKEN', fallback: 'pk.your_mapbox_access_token');
+  static String mapboxAccessToken = dotenv.get(
+    'ACCESS_TOKEN',
+    fallback: 'pk.your_mapbox_access_token',
+  );
 }

@@ -189,7 +189,7 @@ class AppRouter {
           path: '/post/:id',
           name: 'post-detail',
           builder: (context, state) {
-            final postId = state.pathParameters['id']!;
+            final postId = int.tryParse(state.pathParameters['id'] ?? '') ?? 0;
             return PostDetailPage(postId: postId);
           },
         ),

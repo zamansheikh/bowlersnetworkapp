@@ -14,6 +14,7 @@ import 'features/home/presentation/bloc/home_bloc.dart';
 import 'features/auth/presentation/bloc/auth_cubit.dart';
 import 'features/auth/presentation/bloc/signup_cubit.dart';
 import 'features/home/presentation/cubit/feed_cubit.dart';
+import 'features/home/presentation/cubit/feed_v3_cubit.dart';
 import 'features/overview/presentation/cubit/overview_cubit.dart';
 import 'features/messages/presentation/cubit/messages_cubit.dart';
 import 'features/events/presentation/cubit/events_cubit.dart';
@@ -61,6 +62,7 @@ class _MyAppState extends State<MyApp> {
         BlocProvider<SignupCubit>(create: (_) => getIt<SignupCubit>()),
         // Provide FeedCubit globally to prevent recreation
         BlocProvider<FeedCubit>(create: (_) => getIt<FeedCubit>()),
+        BlocProvider<FeedV3Cubit>(create: (_) => getIt<FeedV3Cubit>()),
         BlocProvider<OverviewCubit>(
           create: (_) => getIt<OverviewCubit>()..loadOverviewData(),
         ),

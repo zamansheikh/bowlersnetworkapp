@@ -39,30 +39,56 @@ class UserModel extends User {
   });
 
   factory UserModel.fromJson(Map<String, dynamic> json) => UserModel(
-    id: (json['user_id'] as num).toInt(),
-    name: json['name'] as String,
-    email: json['email'] as String,
-    username: json['username'] as String,
-    firstName: json['first_name'] as String,
-    lastName: json['last_name'] as String,
-    profilePictureUrl: json['profile_picture_url'] as String,
-    introVideoUrl: json['intro_video_url'] as String,
-    coverPhotoUrl: json['cover_photo_url'] as String,
-    xp: (json['xp'] as num).toInt(),
-    level: (json['level'] as num).toInt(),
-    cardTheme: json['card_theme'] as String,
-    isPro: json['is_pro'] as bool,
+    id: ((json['user_id'] ?? json['id']) as num).toInt(),
+    name: json['name'] as String? ?? 'Unknown User',
+    email: json['email'] as String? ?? '',
+    username: json['username'] as String? ?? '',
+    firstName: json['first_name'] as String? ?? '',
+    lastName: json['last_name'] as String? ?? '',
+    profilePictureUrl:
+        (json['profile_media']?['profile_picture_url'] ??
+                json['profile_picture_url'])
+            as String? ??
+        '',
+    introVideoUrl:
+        (json['profile_media']?['intro_video_url'] ?? json['intro_video_url'])
+            as String? ??
+        '',
+    coverPhotoUrl:
+        (json['profile_media']?['cover_picture_url'] ?? json['cover_photo_url'])
+            as String? ??
+        '',
+    xp: (json['xp'] as num?)?.toInt() ?? 0,
+    level: (json['level'] as num?)?.toInt() ?? 0,
+    cardTheme: json['card_theme'] as String? ?? 'default',
+    isPro: (json['roles']?['is_pro'] ?? json['is_pro']) as bool? ?? false,
     sponsors: json.containsKey('sponsors')
         ? (json['sponsors'] as List<dynamic>)
               .map((e) => BrandModel.fromJson(e as Map<String, dynamic>))
               .toList()
         : const [],
-    followerCount: (json['follower_count'] as num).toInt(),
-    stats: StatsModel.fromJson(json['stats'] as Map<String, dynamic>),
-    favoriteBrands: (json['favorite_brands'] as List<dynamic>)
-        .map((e) => BrandModel.fromJson(e as Map<String, dynamic>))
-        .toList(),
-    isComplete: json['is_complete'] as bool,
+    followerCount:
+        (json['follow_info']?['follwers'] ??
+                json['follow_info']?['followers'] ??
+                json['follower_count'] as num?)
+            ?.toInt() ??
+        0,
+    stats: json['stats'] != null
+        ? StatsModel.fromJson(json['stats'] as Map<String, dynamic>)
+        : const StatsModel(
+            id: 0,
+            userId: 0,
+            averageScore: 0,
+            highGame: 0,
+            highSeries: 0,
+            experience: 0,
+          ),
+    favoriteBrands: json['favorite_brands'] != null
+        ? (json['favorite_brands'] as List<dynamic>)
+              .map((e) => BrandModel.fromJson(e as Map<String, dynamic>))
+              .toList()
+        : const [],
+    isComplete: json['is_complete'] as bool? ?? true,
   );
 
   Map<String, dynamic> toJson() => {

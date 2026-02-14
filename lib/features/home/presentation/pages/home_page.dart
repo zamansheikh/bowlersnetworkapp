@@ -2,12 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/svg.dart';
+import 'package:go_router/go_router.dart';
 import '../../../../core/constants/colors.dart';
 import '../../../../core/widgets/app_drawer.dart';
 import '../cubit/feed_cubit.dart';
+import '../cubit/feed_v3_cubit.dart';
 import '../widgets/create_post_section.dart';
-import '../widgets/feed_post_card.dart';
-import '../../data/models/feed_post.dart';
+import '../widgets/feed_v3_post_card.dart';
+import '../../data/models/feed_v3_post.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -17,22 +19,29 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
+  final _scrollController = ScrollController();
+
   @override
   void initState() {
     super.initState();
-    // Ensure we're in proper feed state when returning to home
-    final feedCubit = context.read<FeedCubit>();
-    feedCubit.returnToFeed();
+    // Load feed on init
+    context.read<FeedV3Cubit>().loadFeed();
+    // Infinite scroll
+    _scrollController.addListener(_onScroll);
   }
 
   @override
-  Widget build(BuildContext context) {
-    return const HomePageView();
+  void dispose() {
+    _scrollController.dispose();
+    super.dispose();
   }
-}
 
-class HomePageView extends StatelessWidget {
-  const HomePageView({super.key});
+  void _onScroll() {
+    if (_scrollController.position.pixels >=
+        _scrollController.position.maxScrollExtent - 200) {
+      context.read<FeedV3Cubit>().loadMore();
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -43,11 +52,10 @@ class HomePageView extends StatelessWidget {
         decoration: const BoxDecoration(gradient: AppColors.backgroundGradient),
         child: SafeArea(
           child: RefreshIndicator(
-            onRefresh: () async {
-              context.read<FeedCubit>().refreshFeed();
-            },
+            onRefresh: () => context.read<FeedV3Cubit>().refresh(),
             color: AppColors.primaryLimeGreen,
             child: CustomScrollView(
+              controller: _scrollController,
               slivers: [
                 // App Bar
                 SliverAppBar(
@@ -68,7 +76,7 @@ class HomePageView extends StatelessWidget {
                     ),
                   ),
                   title: Row(
-                    mainAxisAlignment:  MainAxisAlignment.start,
+                    mainAxisAlignment: MainAxisAlignment.start,
                     children: [
                       ClipRRect(
                         borderRadius: BorderRadius.circular(4.r),
@@ -92,75 +100,104 @@ class HomePageView extends StatelessWidget {
                   ),
                 ),
 
-                // Content
+                // Create Post Section
                 SliverToBoxAdapter(
                   child: Padding(
                     padding: EdgeInsets.symmetric(horizontal: 20.w),
                     child: Column(
                       children: [
                         SizedBox(height: 32.h),
-
-                        // Create Post Section
                         const CreatePostSection(),
-
-                        SizedBox(height: 20.h),
-
-                        // Feed Content
-                        BlocConsumer<FeedCubit, FeedState>(
-                          listener: (context, state) {
-                            if (state is PostCreateSuccess) {
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                const SnackBar(
-                                  content: Text('Post created successfully!'),
-                                  backgroundColor: AppColors.success,
-                                ),
-                              );
-                            } else if (state is PostCreateError) {
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                SnackBar(
-                                  content: Text(
-                                    'Failed to create post: ${state.message}',
-                                  ),
-                                  backgroundColor: AppColors.error,
-                                ),
-                              );
-                            }
-                          },
-                          builder: (context, state) {
-                            if (state is FeedLoading) {
-                              return _buildLoadingWidget();
-                            } else if (state is FeedError) {
-                              return _buildErrorWidget(state.message, context);
-                            } else if (state is FeedLoaded ||
-                                state is FeedRefreshing ||
-                                state is PostCreating ||
-                                state is PostCreateSuccess ||
-                                state is PostCreateError) {
-                              List<FeedPost> posts = [];
-                              bool isCreating = false;
-
-                              if (state is FeedLoaded) {
-                                posts = state.posts;
-                              } else if (state is FeedRefreshing) {
-                                posts = state.posts;
-                              } else if (state is PostCreating) {
-                                posts = state.posts;
-                                isCreating = true;
-                              } else if (state is PostCreateSuccess) {
-                                posts = state.posts;
-                              } else if (state is PostCreateError) {
-                                posts = state.posts;
-                              }
-
-                              return _buildFeedContent(posts, isCreating);
-                            }
-
-                            return _buildEmptyWidget();
-                          },
-                        ),
+                        SizedBox(height: 12.h),
                       ],
                     ),
                   ),
+                ),
+
+                // FeedV3 Content
+                BlocBuilder<FeedV3Cubit, FeedV3State>(
+                  builder: (context, state) {
+                    if (state is FeedV3Loading) {
+                      return const SliverFillRemaining(
+                        child: Center(
+                          child: CircularProgressIndicator(
+                            color: AppColors.primaryLimeGreen,
+                          ),
+                        ),
+                      );
+                    }
+
+                    if (state is FeedV3Error) {
+                      return SliverFillRemaining(
+                        child: _buildErrorWidget(state.message, context),
+                      );
+                    }
+
+                    if (state is FeedV3Loaded) {
+                      if (state.posts.isEmpty) {
+                        return const SliverFillRemaining(
+                          child: Center(
+                            child: Column(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Icon(
+                                  Icons.article_outlined,
+                                  size: 64,
+                                  color: AppColors.gray400,
+                                ),
+                                SizedBox(height: 16),
+                                Text(
+                                  'No posts yet',
+                                  style: TextStyle(
+                                    fontSize: 18,
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                ),
+                                SizedBox(height: 8),
+                                Text(
+                                  'Be the first to share something!',
+                                  style: TextStyle(color: AppColors.gray500),
+                                ),
+                              ],
+                            ),
+                          ),
+                        );
+                      }
+
+                      return SliverList(
+                        delegate: SliverChildBuilderDelegate((context, index) {
+                          // Loading more indicator
+                          if (index == state.posts.length) {
+                            return state.isLoadingMore
+                                ? const Padding(
+                                    padding: EdgeInsets.symmetric(vertical: 24),
+                                    child: Center(
+                                      child: CircularProgressIndicator(
+                                        strokeWidth: 2,
+                                        color: AppColors.primaryLimeGreen,
+                                      ),
+                                    ),
+                                  )
+                                : const SizedBox(height: 32);
+                          }
+
+                          final post = state.posts[index];
+                          return FeedV3PostCard(
+                            post: post,
+                            onTap: () => context.push('/post/${post.id}'),
+                            onLike: () =>
+                                context.read<FeedV3Cubit>().toggleLike(post.id),
+                            onPollVote: (optionId) => context
+                                .read<FeedV3Cubit>()
+                                .voteOnPoll(post.id, [optionId]),
+                            onComment: () => context.push('/post/${post.id}'),
+                          );
+                        }, childCount: state.posts.length + 1),
+                      );
+                    }
+
+                    return const SliverToBoxAdapter(child: SizedBox.shrink());
+                  },
                 ),
               ],
             ),
@@ -170,55 +207,28 @@ class HomePageView extends StatelessWidget {
     );
   }
 
-  Widget _buildLoadingWidget() {
-    return Container(
-      padding: EdgeInsets.symmetric(vertical: 60.h),
-      child: Center(
-        child: Column(
-          children: [
-            CircularProgressIndicator(
-              valueColor: AlwaysStoppedAnimation<Color>(
-                AppColors.primaryLimeGreen,
-              ),
-            ),
-            SizedBox(height: 16.h),
-            Text(
-              'Loading feed...',
-              style: TextStyle(color: AppColors.gray, fontSize: 16.sp),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
   Widget _buildErrorWidget(String message, BuildContext context) {
-    return Container(
-      padding: EdgeInsets.all(24.w),
-      child: Center(
+    return Center(
+      child: Padding(
+        padding: EdgeInsets.all(24.w),
         child: Column(
+          mainAxisSize: MainAxisSize.min,
           children: [
             Icon(Icons.error_outline, size: 64.w, color: AppColors.error),
             SizedBox(height: 16.h),
             Text(
               'Oops! Something went wrong',
-              style: TextStyle(
-                fontSize: 18.sp,
-                fontWeight: FontWeight.w600,
-                color: AppColors.black,
-              ),
+              style: TextStyle(fontSize: 18.sp, fontWeight: FontWeight.w600),
             ),
             SizedBox(height: 8.h),
             Text(
               message,
-              style: TextStyle(color: AppColors.gray, fontSize: 14.sp),
+              style: TextStyle(color: AppColors.gray500, fontSize: 14.sp),
               textAlign: TextAlign.center,
             ),
             SizedBox(height: 24.h),
             ElevatedButton(
-              onPressed: () {
-                context.read<FeedCubit>().loadFeed();
-              },
+              onPressed: () => context.read<FeedV3Cubit>().loadFeed(),
               style: ElevatedButton.styleFrom(
                 backgroundColor: AppColors.primaryLimeGreen,
                 foregroundColor: AppColors.black,
@@ -235,95 +245,6 @@ class HomePageView extends StatelessWidget {
           ],
         ),
       ),
-    );
-  }
-
-  Widget _buildEmptyWidget() {
-    return Container(
-      padding: const EdgeInsets.all(24),
-      child: const Center(
-        child: Column(
-          children: [
-            Icon(Icons.article_outlined, size: 64, color: AppColors.gray),
-            SizedBox(height: 16),
-            Text(
-              'No posts yet',
-              style: TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.w600,
-                color: AppColors.black,
-              ),
-            ),
-            SizedBox(height: 8),
-            Text(
-              'Be the first to share something!',
-              style: TextStyle(color: AppColors.gray, fontSize: 14),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildFeedContent(List<FeedPost> posts, bool isCreating) {
-    if (posts.isEmpty) {
-      return _buildEmptyWidget();
-    }
-
-    return Column(
-      children: [
-        // Show creating indicator
-        if (isCreating)
-          Container(
-            margin: EdgeInsets.only(bottom: 8.h),
-            padding: EdgeInsets.all(16.w),
-            decoration: BoxDecoration(
-              color: AppColors.info.withValues(alpha: 0.1),
-              borderRadius: BorderRadius.circular(12.r),
-              border: Border.all(color: AppColors.info.withValues(alpha: 0.3)),
-            ),
-            child: const Row(
-              children: [
-                SizedBox(
-                  width: 16,
-                  height: 16,
-                  child: CircularProgressIndicator(
-                    strokeWidth: 2,
-                    valueColor: AlwaysStoppedAnimation<Color>(AppColors.info),
-                  ),
-                ),
-                SizedBox(width: 12),
-                Text(
-                  'Creating your post...',
-                  style: TextStyle(
-                    color: AppColors.info,
-                    fontWeight: FontWeight.w500,
-                  ),
-                ),
-              ],
-            ),
-          ),
-
-        // Posts list
-        ListView.separated(
-          shrinkWrap: true,
-          physics: const NeverScrollableScrollPhysics(),
-          itemCount: posts.length,
-          separatorBuilder: (context, index) => SizedBox(height: 20.h),
-          itemBuilder: (context, index) {
-            return FeedPostCard(
-              post: posts[index],
-              postIndex: index,
-              onPostUpdate: () {
-                context.read<FeedCubit>().loadFeed();
-              },
-            );
-          },
-        ),
-
-        // Bottom spacing
-        SizedBox(height: 32.h),
-      ],
     );
   }
 }
