@@ -877,9 +877,15 @@ class _EventsPageState extends State<EventsPage> {
       return const SizedBox.shrink();
     }
 
-    final initialPoint = _resolveLocationToPoint(
-      eventsToDisplay.first.location,
-    );
+    final firstEvent = eventsToDisplay.first;
+    mapbox.Point initialPoint;
+    if (firstEvent.lat != null && firstEvent.lng != null) {
+      initialPoint = mapbox.Point(
+        coordinates: mapbox.Position(firstEvent.lng!, firstEvent.lat!),
+      );
+    } else {
+      initialPoint = _resolveLocationToPoint(firstEvent.location);
+    }
     final hasValidToken = _hasValidMapboxToken;
 
     return Container(
@@ -954,7 +960,6 @@ class _EventsPageState extends State<EventsPage> {
     // Get filtered tournaments based on search
     // ignore: use_build_context_synchronously
     final eventsCubit = context.read<EventsCubit>();
-    final filteredTournaments = eventsCubit.getFilteredTournaments();
 
     final eventsToDisplay = filteredEvents.isNotEmpty
         ? filteredEvents
@@ -964,40 +969,28 @@ class _EventsPageState extends State<EventsPage> {
 
     // Add event annotations
     for (final event in eventsToDisplay) {
-      final point = _resolveLocationToPoint(event.location);
+      mapbox.Point point;
+      if (event.lat != null && event.lng != null) {
+        point = mapbox.Point(
+          coordinates: mapbox.Position(event.lng!, event.lat!),
+        );
+      } else {
+        point = _resolveLocationToPoint(event.location);
+      }
+
+      // Determine style based on type
+      final isTournament = event.type == EventType.tournament;
+
       annotations.add(
         mapbox.PointAnnotationOptions(
           geometry: point,
           iconImage: 'marker-15',
-          iconSize: 1.2,
+          iconSize: isTournament ? 1.5 : 1.2,
           textField: event.title,
           textOffset: const [0, 1.2],
-          textColor: 0xFF212121,
+          textColor: isTournament ? 0xFF8BC342 : 0xFF212121,
         ),
       );
-    }
-
-    // Add tournament annotations
-    for (final tournament in filteredTournaments) {
-      if (tournament.lat != null && tournament.long != null) {
-        try {
-          final lat = double.parse(tournament.lat!);
-          final lng = double.parse(tournament.long!);
-          final point = mapbox.Point(coordinates: mapbox.Position(lng, lat));
-          annotations.add(
-            mapbox.PointAnnotationOptions(
-              geometry: point,
-              iconImage: 'marker-15',
-              iconSize: 1.5,
-              textField: tournament.name,
-              textOffset: const [0, 1.2],
-              textColor: 0xFF8BC342, // Green color for tournaments
-            ),
-          );
-        } catch (e) {
-          debugPrint('Error parsing tournament coordinates: $e');
-        }
-      }
     }
 
     if (annotations.isNotEmpty) {
@@ -1015,22 +1008,16 @@ class _EventsPageState extends State<EventsPage> {
         );
       } else if (eventsToDisplay.isNotEmpty) {
         // Otherwise center on first event
-        final firstPoint = _resolveLocationToPoint(
-          eventsToDisplay.first.location,
-        );
-        await map.setCamera(mapbox.CameraOptions(center: firstPoint, zoom: 9));
-      } else if (filteredTournaments.isNotEmpty &&
-          filteredTournaments.first.lat != null &&
-          filteredTournaments.first.long != null) {
-        // Or center on first tournament
-        try {
-          final lat = double.parse(filteredTournaments.first.lat!);
-          final lng = double.parse(filteredTournaments.first.long!);
-          final point = mapbox.Point(coordinates: mapbox.Position(lng, lat));
-          await map.setCamera(mapbox.CameraOptions(center: point, zoom: 9));
-        } catch (e) {
-          debugPrint('Error centering on tournament: $e');
+        final firstEvent = eventsToDisplay.first;
+        mapbox.Point firstPoint;
+        if (firstEvent.lat != null && firstEvent.lng != null) {
+          firstPoint = mapbox.Point(
+            coordinates: mapbox.Position(firstEvent.lng!, firstEvent.lat!),
+          );
+        } else {
+          firstPoint = _resolveLocationToPoint(firstEvent.location);
         }
+        await map.setCamera(mapbox.CameraOptions(center: firstPoint, zoom: 9));
       }
     }
   }
@@ -1155,146 +1142,165 @@ class _EventsPageState extends State<EventsPage> {
         color: Colors.white,
         borderRadius: BorderRadius.circular(16.r),
         border: Border.all(color: const Color(0xFFF0F0F0)),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.05),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
+          ),
+        ],
       ),
-      child: Padding(
-        padding: EdgeInsets.all(12.w),
-        child: Column(
-          children: [
-            // Header Row
-            Row(
-              children: [
-                Expanded(
-                  child: Row(
-                    children: [
-                      // Icon Container
-                      Container(
-                        width: 48.w,
-                        height: 48.h,
-                        decoration: BoxDecoration(
-                          color: const Color(
-                            0xFF3B82F6,
-                          ).withValues(alpha: 0.15),
-                          borderRadius: BorderRadius.circular(24.r),
-                        ),
-                        child: Icon(
-                          Icons.emoji_events,
-                          size: 24.sp,
-                          color: const Color(0xFF3B82F6),
-                        ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Flyer Image (if available)
+          if (event.flyerUrl != null && event.flyerUrl!.isNotEmpty)
+            ClipRRect(
+              borderRadius: BorderRadius.only(
+                topLeft: Radius.circular(16.r),
+                topRight: Radius.circular(16.r),
+              ),
+              child: Image.network(
+                event.flyerUrl!,
+                height: 180.h,
+                width: double.infinity,
+                fit: BoxFit.cover,
+                errorBuilder: (context, error, stackTrace) {
+                  return Container(
+                    height: 180.h,
+                    color: Colors.grey[200],
+                    child: Center(
+                      child: Icon(
+                        Icons.image_not_supported,
+                        size: 40.sp,
+                        color: Colors.grey[400],
                       ),
-
-                      SizedBox(width: 8.w),
-
-                      // Event Info
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              event.title,
-                              style: TextStyle(
-                                fontFamily: 'Poppins',
-                                fontWeight: FontWeight.w600,
-                                fontSize: 14.sp,
-                                color: Colors.black,
-                              ),
-                            ),
-                            SizedBox(height: 4.h),
-                            Text(
-                              _getEventTypeLabel(event.type),
-                              style: TextStyle(
-                                fontFamily: 'Poppins',
-                                fontSize: 12.sp,
-                                color: const Color(0xFF7D7D7D),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-
-                // Status Badge
-                Container(
-                  padding: EdgeInsets.symmetric(
-                    horizontal: 16.w,
-                    vertical: 8.h,
-                  ),
-                  decoration: BoxDecoration(
-                    color: statusColor.withValues(alpha: 0.15),
-                    borderRadius: BorderRadius.circular(25.r),
-                  ),
-                  child: Text(
-                    statusText,
-                    style: TextStyle(
-                      fontFamily: 'Poppins',
-                      fontWeight: FontWeight.w500,
-                      fontSize: 12.sp,
-                      color: statusColor,
                     ),
-                  ),
-                ),
-              ],
+                  );
+                },
+              ),
             ),
 
-            SizedBox(height: 12.h),
-
-            // Divider
-            Container(
-              width: double.infinity,
-              height: 1.h,
-              color: const Color(0xFFE8E9E6),
-            ),
-
-            SizedBox(height: 12.h),
-
-            // Details
-            Column(
+          Padding(
+            padding: EdgeInsets.all(16.w),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // Time Row
+                // Header Row
                 Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Icon(
-                      Icons.access_time,
-                      size: 24.sp,
-                      color: const Color(0xFF111B05),
+                    // Date Box
+                    Container(
+                      width: 50.w,
+                      height: 50.h,
+                      decoration: BoxDecoration(
+                        color: const Color(0xFFF4F9ED), // Light Lime
+                        borderRadius: BorderRadius.circular(12.r),
+                        border: Border.all(
+                          color: const Color(0xFF8BC342).withOpacity(0.3),
+                        ),
+                      ),
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Text(
+                            event.date.split('-').length > 2
+                                ? event.date.split('-')[2]
+                                : '01', // Day
+                            style: TextStyle(
+                              fontFamily: 'Poppins',
+                              fontWeight: FontWeight.bold,
+                              fontSize: 18.sp,
+                              color: const Color(0xFF8BC342),
+                            ),
+                          ),
+                          Text(
+                            event.date.split('-').length > 1
+                                ? _getMonthAbbreviation(
+                                    int.tryParse(event.date.split('-')[1]) ?? 1,
+                                  )
+                                : 'JAN', // Month
+                            style: TextStyle(
+                              fontFamily: 'Poppins',
+                              fontWeight: FontWeight.w600,
+                              fontSize: 10.sp,
+                              color: const Color(0xFF111B05),
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
-                    SizedBox(width: 8.w),
+
+                    SizedBox(width: 12.w),
+
+                    // Event Info
                     Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            event.title,
+                            maxLines: 2,
+                            overflow: TextOverflow.ellipsis,
+                            style: TextStyle(
+                              fontFamily: 'Poppins',
+                              fontWeight: FontWeight.w600,
+                              fontSize: 16.sp,
+                              color: const Color(0xFF111B05),
+                            ),
+                          ),
+                          SizedBox(height: 4.h),
+                          Text(
+                            _getEventTypeLabel(event.type),
+                            style: TextStyle(
+                              fontFamily: 'Poppins',
+                              fontSize: 12.sp,
+                              color: const Color(0xFF7D7D7D),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+
+                    // Status Badge
+                    Container(
+                      padding: EdgeInsets.symmetric(
+                        horizontal: 10.w,
+                        vertical: 4.h,
+                      ),
+                      decoration: BoxDecoration(
+                        color: statusColor.withOpacity(0.1),
+                        borderRadius: BorderRadius.circular(20.r),
+                      ),
                       child: Text(
-                        '${event.time} - ${event.endTime ?? event.time}',
+                        statusText,
                         style: TextStyle(
                           fontFamily: 'Poppins',
                           fontWeight: FontWeight.w500,
-                          fontSize: 14.sp,
-                          color: Colors.grey,
+                          fontSize: 10.sp,
+                          color: statusColor,
                         ),
                       ),
                     ),
                   ],
                 ),
 
-                SizedBox(height: 12.h),
+                SizedBox(height: 16.h),
 
-                // Location Row
+                // Details Grid
                 Row(
                   children: [
-                    Icon(
-                      Icons.location_on,
-                      size: 24.sp,
-                      color: const Color(0xFF111B05),
-                    ),
-                    SizedBox(width: 8.w),
                     Expanded(
-                      child: Text(
+                      child: _buildEventDetailItem(
+                        Icons.access_time_rounded,
+                        '${event.time}',
+                      ),
+                    ),
+                    Expanded(
+                      child: _buildEventDetailItem(
+                        Icons.location_on_rounded,
                         event.location,
-                        style: TextStyle(
-                          fontFamily: 'Poppins',
-                          fontWeight: FontWeight.w500,
-                          fontSize: 14.sp,
-                          color: Colors.grey,
-                        ),
                       ),
                     ),
                   ],
@@ -1302,34 +1308,134 @@ class _EventsPageState extends State<EventsPage> {
 
                 SizedBox(height: 12.h),
 
-                // Fee Row
                 Row(
                   children: [
-                    Icon(
-                      Icons.attach_money,
-                      size: 24.sp,
-                      color: const Color(0xFF111B05),
-                    ),
-                    SizedBox(width: 8.w),
                     Expanded(
-                      child: Text(
-                        '\$${event.entryFee?.toStringAsFixed(0) ?? '0'} Entry Fee',
-                        style: TextStyle(
-                          fontFamily: 'Poppins',
-                          fontWeight: FontWeight.w500,
-                          fontSize: 14.sp,
-                          color: Colors.grey,
+                      child: _buildEventDetailItem(
+                        Icons.attach_money_rounded,
+                        event.entryFee != null
+                            ? '\$${event.entryFee!.toStringAsFixed(0)} Entry'
+                            : 'Free Entry',
+                      ),
+                    ),
+                    Expanded(
+                      child: _buildEventDetailItem(
+                        Icons.people_outline_rounded,
+                        '${event.totalInterested} Interested',
+                      ),
+                    ),
+                  ],
+                ),
+
+                SizedBox(height: 16.h),
+
+                // Action Buttons
+                Row(
+                  children: [
+                    Expanded(
+                      child: OutlinedButton.icon(
+                        onPressed: () {
+                          context.read<EventsCubit>().toggleInterest(event.id);
+                        },
+                        icon: Icon(
+                          event.isInterested ? Icons.star : Icons.star_border,
+                          size: 18.sp,
+                          color: event.isInterested
+                              ? const Color(0xFF8BC342)
+                              : Colors.grey,
                         ),
+                        label: Text(
+                          event.isInterested ? 'Interested' : 'Show Interest',
+                          style: TextStyle(
+                            color: event.isInterested
+                                ? const Color(0xFF8BC342)
+                                : Colors.grey[700],
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                        style: OutlinedButton.styleFrom(
+                          side: BorderSide(
+                            color: event.isInterested
+                                ? const Color(0xFF8BC342)
+                                : Colors.grey[300]!,
+                          ),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(8.r),
+                          ),
+                        ),
+                      ),
+                    ),
+                    SizedBox(width: 12.w),
+                    Expanded(
+                      child: ElevatedButton(
+                        onPressed: () {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                              content: Text('Event Details coming soon!'),
+                            ),
+                          );
+                        },
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: const Color(0xFF8BC342),
+                          foregroundColor: Colors.white,
+                          elevation: 0,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(8.r),
+                          ),
+                        ),
+                        child: const Text('View Details'),
                       ),
                     ),
                   ],
                 ),
               ],
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
+  }
+
+  Widget _buildEventDetailItem(IconData icon, String text) {
+    return Row(
+      children: [
+        Icon(icon, size: 16.sp, color: const Color(0xFF8BC342)),
+        SizedBox(width: 8.w),
+        Expanded(
+          child: Text(
+            text,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: TextStyle(
+              fontFamily: 'Poppins',
+              fontSize: 12.sp,
+              color: const Color(0xFF4A4A4A),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  String _getMonthAbbreviation(int month) {
+    const months = [
+      'JAN',
+      'FEB',
+      'MAR',
+      'APR',
+      'MAY',
+      'JUN',
+      'JUL',
+      'AUG',
+      'SEP',
+      'OCT',
+      'NOV',
+      'DEC',
+    ];
+    if (month >= 1 && month <= 12) {
+      return months[month - 1];
+    }
+    return 'JAN';
   }
 
   String _getEventTypeLabel(EventType type) {
@@ -1344,6 +1450,8 @@ class _EventsPageState extends State<EventsPage> {
         return 'Practice Sessions';
       case EventType.maintenance:
         return 'Maintenance';
+      case EventType.userEvent:
+        return 'Events';
     }
   }
 

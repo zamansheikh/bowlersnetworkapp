@@ -23,20 +23,42 @@ class ProPlayerModel extends ProPlayer {
   });
 
   factory ProPlayerModel.fromJson(Map<String, dynamic> json) {
+    // Extract nested roles object or use defaults
+    final roles = json['roles'] is Map<String, dynamic>
+        ? json['roles'] as Map<String, dynamic>
+        : <String, dynamic>{};
+
+    // Extract nested objects for Detail View compatibility
+    final profileMedia = json['profile_media'] as Map<String, dynamic>? ?? {};
+    final followInfo = json['follow_info'] as Map<String, dynamic>? ?? {};
+
     return ProPlayerModel(
       userId: (json['user_id'] as num).toInt(),
       username: json['username'] as String? ?? '',
       name: json['name'] as String? ?? '',
       firstName: json['first_name'] as String? ?? '',
       lastName: json['last_name'] as String? ?? '',
-      profilePictureUrl: json['profile_picture_url'] as String? ?? '',
-      introVideoUrl: json['intro_video_url'] as String? ?? '',
+      // Check both flat (List API) and nested (Detail API) structure
+      profilePictureUrl:
+          (json['profile_picture_url'] as String?) ??
+          (profileMedia['profile_picture_url'] as String?) ??
+          '',
+      // Check both flat (List API) and nested (Detail API) structure
+      introVideoUrl:
+          (json['intro_video_url'] as String?) ??
+          (profileMedia['intro_video_url'] as String?) ??
+          '',
       xp: (json['xp'] as num?)?.toInt() ?? 0,
       email: json['email'] as String? ?? '',
       level: (json['level'] as num?)?.toInt() ?? 1,
       cardTheme: json['card_theme'] as String? ?? '',
-      isPro: json['is_pro'] as bool? ?? false,
-      followerCount: (json['follower_count'] as num?)?.toInt() ?? 0,
+      // Map 'roles.is_pro' to 'isPro', fallback to false
+      isPro: roles['is_pro'] as bool? ?? false,
+      // Check both flat (List API) and nested (Detail API) structure
+      followerCount:
+          (json['follower_count'] as num?)?.toInt() ??
+          (followInfo['follwers'] as num?)?.toInt() ??
+          0,
       sponsors: json['sponsors'] != null
           ? (json['sponsors'] as List<dynamic>)
                 .map((e) => SponsorModel.fromJson(e as Map<String, dynamic>))
@@ -55,7 +77,11 @@ class ProPlayerModel extends ProPlayer {
       engagement: json['engagement'] != null
           ? EngagementModel.fromJson(json['engagement'] as Map<String, dynamic>)
           : const EngagementModel(likes: 0, comments: 0, shares: 0, views: 0),
-      isFollowed: json['is_followed'] as bool? ?? false,
+      // Map 'is_following' (web) or 'is_followed' (app legacy)
+      isFollowed:
+          (json['is_following'] as bool?) ??
+          (json['is_followed'] as bool?) ??
+          false,
       favoriteBrands: json['favorite_brands'] != null
           ? (json['favorite_brands'] as List<dynamic>)
                 .map((e) => BrandModel.fromJson(e as Map<String, dynamic>))

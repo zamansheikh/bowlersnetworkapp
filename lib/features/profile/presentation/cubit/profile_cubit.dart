@@ -73,27 +73,68 @@ class ProfileCubit extends Cubit<ProfileState> {
     emit(ProfileLoaded(isLoadingPosts: true));
 
     try {
-      debugPrint('👤 ProfileCubit: Making request to /api/user/posts');
-      final response = await _dio.get('/api/user/posts');
+      debugPrint('👤 ProfileCubit: Making request to /api/posts/v2');
+      final response = await _dio.get('/api/posts/v2');
       debugPrint(
         '👤 ProfileCubit: Response received - Status: ${response.statusCode}',
       );
 
-      if (response.data is Map<String, dynamic> &&
-          response.data['posts'] is List) {
-        final posts = (response.data['posts'] as List<dynamic>)
-            .map((e) => FeedPost.fromJson(e as Map<String, dynamic>))
-            .toList();
+      List<FeedPost> posts = [];
 
-        debugPrint(
-          '👤 ProfileCubit: Successfully parsed ${posts.length} posts',
-        );
-        emit(ProfileLoaded(posts: posts, isLoadingPosts: false));
+      if (response.data is List) {
+        posts = (response.data as List<dynamic>)
+            .map((e) {
+              try {
+                return FeedPost.fromJson(e as Map<String, dynamic>);
+              } catch (e) {
+                debugPrint('👤 ProfileCubit: Error parsing post: $e');
+                return null;
+              }
+            })
+            .whereType<FeedPost>()
+            .toList();
+      } else if (response.data is Map<String, dynamic> &&
+          response.data['data'] is List) {
+        posts = (response.data['data'] as List<dynamic>)
+            .map((e) {
+              try {
+                return FeedPost.fromJson(e as Map<String, dynamic>);
+              } catch (e) {
+                debugPrint('👤 ProfileCubit: Error parsing post: $e');
+                return null;
+              }
+            })
+            .whereType<FeedPost>()
+            .toList();
+      } else if (response.data is Map<String, dynamic> &&
+          response.data['posts'] is List) {
+        // Fallback for old structure if needed, though v2 should be list or data: []
+        posts = (response.data['posts'] as List<dynamic>)
+            .map((e) {
+              try {
+                return FeedPost.fromJson(e as Map<String, dynamic>);
+              } catch (e) {
+                debugPrint('👤 ProfileCubit: Error parsing post: $e');
+                return null;
+              }
+            })
+            .whereType<FeedPost>()
+            .toList();
       } else {
-        throw Exception(
-          'Invalid response format: expected Map with posts array',
+        debugPrint(
+          '👤 ProfileCubit: Unexpected response format: ${response.data}',
         );
+        // Handle empty or unexpected/error response gracefully if needed, or throw
+        // For now, assume empty list if structure doesn't match known patterns but is successful
+        if (response.statusCode == 200) {
+          posts = [];
+        } else {
+          throw Exception('Invalid response format');
+        }
       }
+
+      debugPrint('👤 ProfileCubit: Successfully parsed ${posts.length} posts');
+      emit(ProfileLoaded(posts: posts, isLoadingPosts: false));
     } catch (e) {
       debugPrint('👤 ProfileCubit: Error loading posts: $e');
       emit(

@@ -4,6 +4,7 @@ import 'package:injectable/injectable.dart';
 import '../../domain/entities/calendar_event.dart';
 import '../../domain/usecases/get_tournaments.dart';
 import '../../domain/usecases/get_calendar_events.dart';
+import '../../domain/usecases/toggle_interest.dart';
 import '../../../../core/utils/location_utils.dart';
 import 'events_state.dart';
 
@@ -11,9 +12,13 @@ import 'events_state.dart';
 class EventsCubit extends Cubit<EventsState> {
   final GetTournaments getTournaments;
   final GetCalendarEvents getCalendarEvents;
+  final ToggleInterest toggleInterestUseCase;
 
-  EventsCubit({required this.getTournaments, required this.getCalendarEvents})
-    : super(EventsInitial());
+  EventsCubit({
+    required this.getTournaments,
+    required this.getCalendarEvents,
+    required this.toggleInterestUseCase,
+  }) : super(EventsInitial());
 
   Future<void> loadEvents() async {
     try {
@@ -21,15 +26,15 @@ class EventsCubit extends Cubit<EventsState> {
 
       debugPrint('🏆 EventsCubit: Loading events...');
 
-      final tournaments = await getTournaments();
+      // final tournaments = await getTournaments();
       final events = await getCalendarEvents();
 
-      debugPrint('🏆 EventsCubit: Loaded ${tournaments.length} tournaments');
+      // debugPrint('🏆 EventsCubit: Loaded ${tournaments.length} tournaments');
       debugPrint('🏆 EventsCubit: Loaded ${events.length} events');
 
       emit(
         EventsLoaded(
-          tournaments: tournaments,
+          tournaments: [], // Tournaments are now part of events feed
           events: events,
           currentDate: DateTime.now(),
           searchMode: EventSearchMode.eventName,
@@ -247,6 +252,58 @@ class EventsCubit extends Cubit<EventsState> {
       }).length;
     }
     return 0;
+  }
+
+  Future<void> toggleInterest(String eventId) async {
+    if (state is! EventsLoaded) return;
+
+    final currentState = state as EventsLoaded;
+    final events = List<CalendarEvent>.from(currentState.events);
+    final index = events.indexWhere((e) => e.id == eventId);
+
+    if (index == -1) return;
+
+    final event = events[index];
+    final wasInterested = event.isInterested;
+
+    // Optimistic update
+    events[index] = CalendarEvent(
+      id: event.id,
+      title: event.title,
+      type: event.type,
+      date: event.date,
+      time: event.time,
+      endTime: event.endTime,
+      description: event.description,
+      location: event.location,
+      participants: event.participants,
+      maxParticipants: event.maxParticipants,
+      entryFee: event.entryFee,
+      prizePool: event.prizePool,
+      status: event.status,
+      priority: event.priority,
+      organizer: event.organizer,
+      registrationDeadline: event.registrationDeadline,
+      format: event.format,
+      gameType: event.gameType,
+      flyerUrl: event.flyerUrl,
+      isInterested: !wasInterested,
+      totalInterested: wasInterested
+          ? (event.totalInterested > 0 ? event.totalInterested - 1 : 0)
+          : event.totalInterested + 1,
+      organizerJson: event.organizerJson,
+      centerJson: event.centerJson,
+    );
+
+    emit(currentState.copyWith(events: events));
+
+    try {
+      await toggleInterestUseCase(eventId);
+    } catch (e) {
+      // Revert if failed
+      events[index] = event; // original event
+      emit(currentState.copyWith(events: events));
+    }
   }
 
   /// Get filtered tournaments based on search criteria

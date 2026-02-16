@@ -79,7 +79,7 @@ class ProPlayersRemoteDataSourceImpl implements ProPlayersRemoteDataSource {
   @override
   Future<List<ProPlayerModel>> getProPlayers() async {
     try {
-      final response = await _dio.get('/api/user/pro-player-public-profile');
+      final response = await _dio.get('/api/pros');
 
       if (response.data is List) {
         return (response.data as List<dynamic>)
@@ -96,7 +96,7 @@ class ProPlayersRemoteDataSourceImpl implements ProPlayersRemoteDataSource {
   @override
   Future<ProPlayerModel> getProPlayerById(String userId) async {
     try {
-      final response = await _dio.get('/api/user/profile/$userId');
+      final response = await _dio.get('/api/profile/$userId');
       return ProPlayerModel.fromJson(response.data as Map<String, dynamic>);
     } catch (e) {
       throw Exception('Failed to fetch pro player $userId: $e');
@@ -115,6 +115,11 @@ class ProPlayersRemoteDataSourceImpl implements ProPlayersRemoteDataSource {
       } else {
         throw Exception('Invalid response format: expected List');
       }
+    } on DioException catch (e) {
+      if (e.response?.statusCode == 404) {
+        return [];
+      }
+      throw Exception('Failed to fetch user posts: ${e.message}');
     } catch (e) {
       throw Exception('Failed to fetch user posts: $e');
     }

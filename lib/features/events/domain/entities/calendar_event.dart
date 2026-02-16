@@ -1,6 +1,6 @@
 import 'package:equatable/equatable.dart';
 
-enum EventType { tournament, league, special, practice, maintenance }
+enum EventType { tournament, league, special, practice, maintenance, userEvent }
 
 enum EventStatus { upcoming, ongoing, completed, cancelled }
 
@@ -25,6 +25,13 @@ class CalendarEvent extends Equatable {
   final String? registrationDeadline;
   final String? format;
   final String? gameType;
+  final String? flyerUrl;
+  final bool isInterested;
+  final int totalInterested;
+  final Map<String, dynamic>? organizerJson;
+  final Map<String, dynamic>? centerJson;
+  final double? lat;
+  final double? lng;
 
   const CalendarEvent({
     required this.id,
@@ -45,6 +52,13 @@ class CalendarEvent extends Equatable {
     this.registrationDeadline,
     this.format,
     this.gameType,
+    this.flyerUrl,
+    this.isInterested = false,
+    this.totalInterested = 0,
+    this.organizerJson,
+    this.centerJson,
+    this.lat,
+    this.lng,
   });
 
   @override
@@ -67,5 +81,12 @@ class CalendarEvent extends Equatable {
     registrationDeadline,
     format,
     gameType,
+    flyerUrl,
+    isInterested,
+    totalInterested,
+    organizerJson,
+    centerJson,
+    lat,
+    lng,
   ];
 }

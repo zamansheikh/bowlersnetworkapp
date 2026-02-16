@@ -55,6 +55,8 @@ import 'package:bowlersnetworkapp/features/events/domain/usecases/get_calendar_e
     as _i956;
 import 'package:bowlersnetworkapp/features/events/domain/usecases/get_tournaments.dart'
     as _i116;
+import 'package:bowlersnetworkapp/features/events/domain/usecases/toggle_interest.dart'
+    as _i853;
 import 'package:bowlersnetworkapp/features/events/presentation/cubit/events_cubit.dart'
     as _i415;
 import 'package:bowlersnetworkapp/features/games/data/datasources/game_local_data_source.dart'
@@ -332,6 +334,9 @@ extension GetItInjectableX on _i174.GetIt {
     gh.factory<_i116.GetTournaments>(
       () => _i116.GetTournaments(gh<_i924.EventsRepository>()),
     );
+    gh.lazySingleton<_i853.ToggleInterest>(
+      () => _i853.ToggleInterest(gh<_i924.EventsRepository>()),
+    );
     gh.factory<_i146.MessagesCubit>(
       () => _i146.MessagesCubit(gh<_i599.MessagesRepository>()),
     );
@@ -380,14 +385,15 @@ extension GetItInjectableX on _i174.GetIt {
         repository: gh<_i334.TournamentRepository>(),
       ),
     );
-    gh.factory<_i547.OverviewCubit>(
-      () => _i547.OverviewCubit(gh<_i659.OverviewRepository>()),
-    );
     gh.factory<_i415.EventsCubit>(
       () => _i415.EventsCubit(
         getTournaments: gh<_i116.GetTournaments>(),
         getCalendarEvents: gh<_i956.GetCalendarEvents>(),
+        toggleInterestUseCase: gh<_i853.ToggleInterest>(),
       ),
+    );
+    gh.factory<_i547.OverviewCubit>(
+      () => _i547.OverviewCubit(gh<_i659.OverviewRepository>()),
     );
     gh.factory<_i506.AuthCubit>(
       () => _i506.AuthCubit(

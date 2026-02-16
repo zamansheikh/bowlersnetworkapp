@@ -1,18 +1,8 @@
 import '../../domain/entities/user.dart';
 
 class UserModel extends User {
-  final String username;
-  final String firstName;
-  final String lastName;
-  final String profilePictureUrl;
-  final String introVideoUrl;
-  final String coverPhotoUrl;
-  final int xp;
-  final int level;
   final String cardTheme;
-  final bool isPro;
   final List<BrandModel> sponsors;
-  final int followerCount;
   final StatsModel stats;
   final List<BrandModel> favoriteBrands;
   final bool isComplete;
@@ -21,18 +11,26 @@ class UserModel extends User {
     required super.id,
     required super.name,
     required super.email,
-    required this.username,
-    required this.firstName,
-    required this.lastName,
-    required this.profilePictureUrl,
-    required this.introVideoUrl,
-    required this.coverPhotoUrl,
-    required this.xp,
-    required this.level,
+    required super.username,
+    required super.firstName,
+    required super.lastName,
+    required super.profilePictureUrl,
+    required super.introVideoUrl,
+    required super.coverPhotoUrl,
+    required super.xp,
+    required super.level,
+    required super.isPro,
+    required super.followerCount,
+    required super.followingCount,
+    super.bio,
+    super.gender,
+    super.birthDate,
+    super.age,
+    super.address,
+    super.homeCenter,
+    super.ballHandling,
     required this.cardTheme,
-    required this.isPro,
     this.sponsors = const [],
-    required this.followerCount,
     required this.stats,
     required this.favoriteBrands,
     required this.isComplete,
@@ -60,19 +58,27 @@ class UserModel extends User {
         '',
     xp: (json['xp'] as num?)?.toInt() ?? 0,
     level: (json['level'] as num?)?.toInt() ?? 0,
-    cardTheme: json['card_theme'] as String? ?? 'default',
     isPro: (json['roles']?['is_pro'] ?? json['is_pro']) as bool? ?? false,
-    sponsors: json.containsKey('sponsors')
-        ? (json['sponsors'] as List<dynamic>)
-              .map((e) => BrandModel.fromJson(e as Map<String, dynamic>))
-              .toList()
-        : const [],
     followerCount:
         (json['follow_info']?['follwers'] ??
                 json['follow_info']?['followers'] ??
                 json['follower_count'] as num?)
             ?.toInt() ??
         0,
+    followingCount: (json['follow_info']?['followings'] as num?)?.toInt() ?? 0,
+    bio: json['bio']?['content'] as String?,
+    gender: json['gender_data']?['role'] as String?,
+    birthDate: json['birthdate_data']?['date'] as String?,
+    age: (json['birthdate_data']?['age'] as num?)?.toInt(),
+    address: json['address_data']?['address_str'] as String?,
+    homeCenter: json['home_center_data']?['center']?['name'] as String?,
+    ballHandling: json['ball_handling_style']?['description'] as String?,
+    cardTheme: json['card_theme'] as String? ?? 'default',
+    sponsors: json.containsKey('sponsors')
+        ? (json['sponsors'] as List<dynamic>)
+              .map((e) => BrandModel.fromJson(e as Map<String, dynamic>))
+              .toList()
+        : const [],
     stats: json['stats'] != null
         ? StatsModel.fromJson(json['stats'] as Map<String, dynamic>)
         : const StatsModel(
@@ -103,10 +109,25 @@ class UserModel extends User {
     'cover_photo_url': coverPhotoUrl,
     'xp': xp,
     'level': level,
-    'card_theme': cardTheme,
     'is_pro': isPro,
-    'sponsors': sponsors.map((e) => e.toJson()).toList(),
     'follower_count': followerCount,
+    'following_count': followingCount,
+    'bio': bio != null ? {'content': bio} : null,
+    'gender_data': gender != null ? {'role': gender} : null,
+    'birthdate_data': birthDate != null
+        ? {'date': birthDate, 'age': age}
+        : null,
+    'address_data': address != null ? {'address_str': address} : null,
+    'home_center_data': homeCenter != null
+        ? {
+            'center': {'name': homeCenter},
+          }
+        : null,
+    'ball_handling_style': ballHandling != null
+        ? {'description': ballHandling}
+        : null,
+    'card_theme': cardTheme,
+    'sponsors': sponsors.map((e) => e.toJson()).toList(),
     'stats': stats.toJson(),
     'favorite_brands': favoriteBrands.map((e) => e.toJson()).toList(),
     'is_complete': isComplete,

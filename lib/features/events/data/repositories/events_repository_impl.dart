@@ -3,7 +3,6 @@ import '../../domain/entities/tournament.dart';
 import '../../domain/entities/calendar_event.dart';
 import '../../domain/repositories/events_repository.dart';
 import '../datasources/events_remote_data_source.dart';
-import '../models/calendar_event_model.dart';
 
 @LazySingleton(as: EventsRepository)
 class EventsRepositoryImpl implements EventsRepository {
@@ -24,13 +23,19 @@ class EventsRepositoryImpl implements EventsRepository {
   @override
   Future<List<CalendarEvent>> getCalendarEvents() async {
     try {
-      final tournaments = await getTournaments();
-      // Convert tournaments to calendar events
-      return tournaments
-          .map((tournament) => CalendarEventModel.fromTournament(tournament))
-          .toList();
+      final eventModels = await remoteDataSource.getEventsFeed();
+      return eventModels.map((model) => model.toEntity()).toList();
     } catch (e) {
       throw Exception('Failed to fetch calendar events: $e');
+    }
+  }
+
+  @override
+  Future<void> toggleInterest(String eventId) async {
+    try {
+      await remoteDataSource.toggleInterest(eventId);
+    } catch (e) {
+      throw Exception('Failed to toggle interest: $e');
     }
   }
 

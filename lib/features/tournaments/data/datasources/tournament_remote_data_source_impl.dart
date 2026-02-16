@@ -18,26 +18,85 @@ class TournamentRemoteDataSourceImpl implements TournamentRemoteDataSource {
   Future<List<Tournament>> getTournaments() async {
     try {
       debugPrint(
-        '🏆 TournamentDataSource: Fetching tournaments from /api/tournaments',
+        '🏆 TournamentDataSource: Fetching tournaments from /api/tournaments/v0',
       );
 
       final response = await _dio.get(
-        '/api/tournaments',
+        '/api/tournaments/v0',
         options: _getOptionsWithAuth(),
       );
 
       debugPrint(
         '🏆 TournamentDataSource: Response status: ${response.statusCode}',
       );
-      debugPrint('🏆 TournamentDataSource: Response data: ${response.data}');
 
       if (response.statusCode == 200) {
-        final List<dynamic> data = response.data as List<dynamic>;
-        final tournaments = data
-            .map(
-              (json) => TournamentModel.fromJson(json as Map<String, dynamic>),
-            )
-            .toList();
+        final dynamic responseData = response.data;
+        final List<dynamic> data;
+
+        if (responseData is List) {
+          data = responseData;
+        } else if (responseData is Map &&
+            responseData.containsKey('data') &&
+            responseData['data'] is List) {
+          data = responseData['data'];
+        } else {
+          // Fallback or empty if structure is completely different
+          data = [];
+          debugPrint(
+            '🏆 TournamentDataSource: Unexpected response structure: $responseData',
+          );
+        }
+
+        final tournaments = data.map((item) {
+          // Check if item has a nested 'data' object (common in v0/v1 Laravel resources sometimes)
+          // Based on web code: const tournamentData = item.data || item;
+          final tournamentData = (item is Map && item.containsKey('data'))
+              ? item['data']
+              : item;
+
+          // Helper to safely get values from either the top level or nested data
+          // Web code uses: item.id for ID, but tournamentData.name for name
+          final id = item['id'];
+
+          // Map fields manually to match TournamentModel structure if keys differ
+          // Web: name, startDate, time, director_name, note, numberOfParticipants, categories
+          // App Model expects: name, start_date, reg_deadline, etc.
+
+          return TournamentModel(
+            id: _parseInt(id) ?? 0,
+            name: tournamentData['name'] ?? '',
+            startDate: _parseDate(
+              tournamentData['startDate'] ?? tournamentData['start_date'],
+            ),
+            regDeadline: _parseDate(
+              tournamentData['regDeadline'] ?? tournamentData['reg_deadline'],
+            ), // Fallback empty if missing
+            address:
+                'Strike Zone Bowling Center', // Hardcoded in Web currently, can use item['center_id'] logic later
+            lat: null, // Web doesn't seem to use this from API yet
+            long: null,
+            regFee: _parseDouble(
+              tournamentData['entryFee'] ?? tournamentData['reg_fee'],
+            ),
+            accessType: tournamentData['accessType'] ?? 'public',
+            format: tournamentData['format'] ?? 'Standard',
+            alreadyEnrolled:
+                0, // Not explicitly in Web list parsing, might need separate check or it's false
+            participantsCount: _parseInt(
+              tournamentData['numberOfParticipants'] ??
+                  tournamentData['participants_count'],
+            ),
+            description:
+                tournamentData['note'] ?? tournamentData['description'],
+            status: 'draft', // Web defaults to 'draft'
+            tournamentType: 'Handicap', // Default
+            average: null,
+            percentage: null,
+            // Note: 'is_published' from item.is_published is available but not in current App Model constructor directly as a named parameter distinct from status/etc?
+            // The Model has 'status', we can use that.
+          );
+        }).toList();
 
         return tournaments.map((model) => model.toEntity()).toList();
       } else {
@@ -58,6 +117,37 @@ class TournamentRemoteDataSourceImpl implements TournamentRemoteDataSource {
       debugPrint('🏆 TournamentDataSource: Unexpected error: $e');
       throw Exception('Failed to load tournaments: $e');
     }
+  }
+
+  // Helper method to safely parse date
+  static String _parseDate(dynamic value) {
+    if (value == null || value.toString().isEmpty) {
+      // Return current date as fallback to prevent parsing errors
+      return DateTime.now().toIso8601String();
+    }
+    return value.toString();
+  }
+
+  // Helper method to safely parse double from various types
+  static double _parseDouble(dynamic value) {
+    if (value == null) return 0.0;
+    if (value is double) return value;
+    if (value is int) return value.toDouble();
+    if (value is String) {
+      return double.tryParse(value) ?? 0.0;
+    }
+    return 0.0;
+  }
+
+  // Helper method to safely parse int from various types
+  static int? _parseInt(dynamic value) {
+    if (value == null) return null;
+    if (value is int) return value;
+    if (value is double) return value.toInt();
+    if (value is String) {
+      return int.tryParse(value);
+    }
+    return null;
   }
 
   @override

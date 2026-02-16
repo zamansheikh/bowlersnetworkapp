@@ -4,6 +4,7 @@ import 'package:injectable/injectable.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../../../../core/constants/constants.dart';
 import '../models/tournament_model.dart';
+import '../models/calendar_event_model.dart';
 import 'events_remote_data_source.dart';
 
 @LazySingleton(as: EventsRemoteDataSource)
@@ -113,6 +114,60 @@ class EventsRemoteDataSourceImpl implements EventsRemoteDataSource {
     } catch (e) {
       debugPrint('🏆 EventsDataSource: Unexpected error: $e');
       throw Exception('Failed to load tournaments: $e');
+    }
+  }
+
+  @override
+  Future<List<CalendarEventModel>> getEventsFeed() async {
+    try {
+      debugPrint(
+        '🏆 EventsDataSource: Fetching events feed from /api/events/v1/feed',
+      );
+
+      final response = await _dio.get('/api/events/v1/feed');
+
+      debugPrint(
+        '🏆 EventsDataSource: Response status: ${response.statusCode}',
+      );
+      // debugPrint('🏆 EventsDataSource: Response data: ${response.data}');
+
+      if (response.statusCode == 200) {
+        final List<dynamic> data = response.data as List<dynamic>;
+        return data
+            .map(
+              (json) =>
+                  CalendarEventModel.fromJson(json as Map<String, dynamic>),
+            )
+            .toList();
+      } else {
+        throw Exception('Failed to load events feed: ${response.statusCode}');
+      }
+    } on DioException catch (e) {
+      debugPrint('🏆 EventsDataSource: Dio error: ${e.message}');
+      if (e.response != null) {
+        debugPrint('🏆 EventsDataSource: Error response: ${e.response?.data}');
+        throw Exception(
+          'Failed to load events feed: ${e.response?.statusCode} - ${e.response?.data}',
+        );
+      }
+      throw Exception('Network error: ${e.message}');
+    } catch (e) {
+      debugPrint('🏆 EventsDataSource: Unexpected error: $e');
+      throw Exception('Failed to load events feed: $e');
+    }
+  }
+
+  @override
+  Future<void> toggleInterest(String eventId) async {
+    try {
+      debugPrint('🏆 EventsDataSource: Toggling interest for event $eventId');
+      final response = await _dio.get('/api/events/v1/interest/$eventId');
+
+      if (response.statusCode != 200) {
+        throw Exception('Failed to toggle interest: ${response.statusCode}');
+      }
+    } on DioException catch (e) {
+      throw Exception('Network error toggling interest: ${e.message}');
     }
   }
 

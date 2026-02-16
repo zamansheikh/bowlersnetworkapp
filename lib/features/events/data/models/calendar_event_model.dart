@@ -22,7 +22,77 @@ class CalendarEventModel extends CalendarEvent {
     super.registrationDeadline,
     super.format,
     super.gameType,
+    super.flyerUrl,
+    super.isInterested,
+    super.totalInterested = 0,
+    super.organizerJson,
+    super.centerJson,
+    super.lat,
+    super.lng,
   });
+
+  factory CalendarEventModel.fromJson(Map<String, dynamic> json) {
+    // Parse event date time
+    final eventDateTime = DateTime.parse(json['event_datetime']);
+    final now = DateTime.now();
+    final isPast = eventDateTime.isBefore(now);
+
+    // Determine location string and coordinates
+    String locationStr = 'Unknown Location';
+    double? latitude;
+    double? longitude;
+
+    if (json['location'] != null) {
+      locationStr = json['location']['address_str'] ?? '';
+      latitude = double.tryParse(json['location']['lat']?.toString() ?? '');
+      longitude = double.tryParse(json['location']['long']?.toString() ?? '');
+    } else if (json['center'] != null) {
+      locationStr =
+          '${json['center']['name'] ?? ''}, ${json['center']['address'] ?? ''}';
+      latitude = double.tryParse(json['center']['lat']?.toString() ?? '');
+      longitude = double.tryParse(json['center']['long']?.toString() ?? '');
+    }
+
+    // Determine event type
+    EventType eventType = EventType.userEvent;
+    final meta = json['meta'];
+    if (meta != null && meta['event_type'] != null) {
+      final typeStr = meta['event_type'].toString().toLowerCase();
+      if (typeStr.contains('tournament')) {
+        eventType = EventType.tournament;
+      } else if (typeStr.contains('league')) {
+        eventType = EventType.league;
+      } else if (typeStr.contains('practice')) {
+        eventType = EventType.practice;
+      } else if (typeStr.contains('special')) {
+        eventType = EventType.special;
+      } else if (typeStr.contains('maintenance')) {
+        eventType = EventType.maintenance;
+      }
+    }
+
+    return CalendarEventModel(
+      id: json['event_id'].toString(),
+      title: json['title'] ?? '',
+      type: eventType,
+      date: DateFormat('yyyy-MM-dd').format(eventDateTime),
+      time: DateFormat('h:mm a').format(eventDateTime),
+      endTime: null, // Feed doesn't seem to have end time in this root
+      description: json['description'] ?? '',
+      location: locationStr,
+      participants: (json['total_interested'] as num?)?.toInt() ?? 0,
+      status: isPast ? EventStatus.completed : EventStatus.upcoming,
+      priority: EventPriority.medium,
+      organizer: json['user']?['name'] ?? 'Unknown',
+      flyerUrl: json['flyer_url'],
+      isInterested: json['is_interested'] as bool? ?? false,
+      totalInterested: (json['total_interested'] as num?)?.toInt() ?? 0,
+      organizerJson: json['user'],
+      centerJson: json['center'],
+      lat: latitude,
+      lng: longitude,
+    );
+  }
 
   // Convert Tournament to CalendarEvent
   factory CalendarEventModel.fromTournament(Tournament tournament) {
@@ -58,6 +128,8 @@ class CalendarEventModel extends CalendarEvent {
       )[0], // Extract date part
       format: tournament.format,
       gameType: 'Tournament',
+      lat: double.tryParse(tournament.lat ?? ''),
+      lng: double.tryParse(tournament.long ?? ''),
     );
   }
 

@@ -261,6 +261,8 @@ class CalendarWidget extends StatelessWidget {
         return Colors.green;
       case EventType.maintenance:
         return Colors.grey;
+      case EventType.userEvent:
+        return Colors.orange;
     }
   }
 }

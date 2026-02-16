@@ -408,35 +408,40 @@ class _UserProfilePageState extends State<UserProfilePage> {
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             // Name and email section
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  children: [
-                    Text(
-                      user.name,
-                      style: TextStyle(
-                        fontSize: 16.sp,
-                        fontWeight: FontWeight.w500,
-                        color: Colors.black,
-                        fontFamily: 'Poppins',
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      Flexible(
+                        child: Text(
+                          user.name,
+                          style: TextStyle(
+                            fontSize: 16.sp,
+                            fontWeight: FontWeight.w500,
+                            color: Colors.black,
+                            fontFamily: 'Poppins',
+                          ),
+                          overflow: TextOverflow.ellipsis,
+                        ),
                       ),
-                    ),
-                    SizedBox(width: 2.w),
-                    if (user.isPro)
-                      Icon(Icons.verified, color: Colors.blue, size: 16.sp),
-                  ],
-                ),
-                SizedBox(height: 2.h),
-                Text(
-                  user.email,
-                  style: TextStyle(
-                    fontSize: 12.sp,
-                    color: const Color(0xFF7D7D7D),
-                    fontFamily: 'Poppins',
+                      SizedBox(width: 4.w),
+                      if (user.isPro)
+                        Icon(Icons.verified, color: Colors.blue, size: 16.sp),
+                    ],
                   ),
-                ),
-              ],
+                  SizedBox(height: 2.h),
+                  Text(
+                    '@${user.username}',
+                    style: TextStyle(
+                      fontSize: 12.sp,
+                      color: const Color(0xFF7D7D7D),
+                      fontFamily: 'Poppins',
+                    ),
+                  ),
+                ],
+              ),
             ),
 
             // Followers and following stats
@@ -445,7 +450,7 @@ class _UserProfilePageState extends State<UserProfilePage> {
                 Column(
                   children: [
                     Text(
-                      '1.5k', // You can replace with actual data
+                      user.followerCount.toString(),
                       style: TextStyle(
                         fontSize: 14.sp,
                         fontWeight: FontWeight.w600,
@@ -467,7 +472,7 @@ class _UserProfilePageState extends State<UserProfilePage> {
                 Column(
                   children: [
                     Text(
-                      '0',
+                      user.followingCount.toString(),
                       style: TextStyle(
                         fontSize: 14.sp,
                         fontWeight: FontWeight.w600,
@@ -489,8 +494,121 @@ class _UserProfilePageState extends State<UserProfilePage> {
             ),
           ],
         ),
+
+        if (user.bio != null && user.bio!.isNotEmpty) ...[
+          SizedBox(height: 16.h),
+          Align(
+            alignment: Alignment.centerLeft,
+            child: Text(
+              user.bio!,
+              style: TextStyle(
+                fontSize: 14.sp,
+                color: Colors.black87,
+                height: 1.4,
+              ),
+            ),
+          ),
+        ],
+
+        SizedBox(height: 24.h),
+        _buildPersonalInfoSection(user),
       ],
     );
+  }
+
+  Widget _buildPersonalInfoSection(UserModel user) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          'Personal Information',
+          style: TextStyle(
+            fontSize: 16.sp,
+            fontWeight: FontWeight.w600,
+            color: Colors.black,
+          ),
+        ),
+        SizedBox(height: 12.h),
+        if (user.email.isNotEmpty)
+          _buildInfoRow(Icons.email_outlined, 'Email', user.email),
+        if (user.gender != null)
+          _buildInfoRow(Icons.person_outline, 'Gender', user.gender!),
+        if (user.birthDate != null)
+          _buildInfoRow(
+            Icons.cake_outlined,
+            'Date of Birth',
+            _formatDate(user.birthDate!),
+          ),
+        if (user.address != null)
+          _buildInfoRow(Icons.location_on_outlined, 'Location', user.address!),
+        if (user.homeCenter != null)
+          _buildInfoRow(
+            Icons.business_outlined,
+            'Home Center',
+            user.homeCenter!,
+          ),
+        if (user.ballHandling != null)
+          _buildInfoRow(
+            Icons.sports_baseball_outlined,
+            'Ball Handling',
+            user.ballHandling!,
+          ),
+      ],
+    );
+  }
+
+  Widget _buildInfoRow(IconData icon, String label, String value) {
+    return Padding(
+      padding: EdgeInsets.only(bottom: 12.h),
+      child: Row(
+        children: [
+          Icon(icon, size: 20.sp, color: Colors.grey),
+          SizedBox(width: 12.w),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  label,
+                  style: TextStyle(fontSize: 12.sp, color: Colors.grey),
+                ),
+                Text(
+                  value,
+                  style: TextStyle(
+                    fontSize: 14.sp,
+                    color: Colors.black87,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  String _formatDate(String dateStr) {
+    try {
+      final date = DateTime.parse(dateStr);
+      final months = [
+        'January',
+        'February',
+        'March',
+        'April',
+        'May',
+        'June',
+        'July',
+        'August',
+        'September',
+        'October',
+        'November',
+        'December',
+      ];
+      return '${months[date.month - 1]} ${date.day}, ${date.year}';
+    } catch (e) {
+      return dateStr;
+    }
   }
 
   Widget _buildStatsGrid(UserModel user) {

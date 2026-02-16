@@ -268,6 +268,8 @@ class EventDetailsWidget extends StatelessWidget {
         return 'Practice Sessions';
       case EventType.maintenance:
         return 'Maintenance';
+      case EventType.userEvent:
+        return 'Events';
     }
   }
 
@@ -283,6 +285,8 @@ class EventDetailsWidget extends StatelessWidget {
         return Colors.green;
       case EventType.maintenance:
         return Colors.grey;
+      case EventType.userEvent:
+        return Colors.orange;
     }
   }
 

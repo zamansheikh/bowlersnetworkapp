@@ -22,7 +22,7 @@ class UserRemoteDataSourceImpl implements UserRemoteDataSource {
     // Simulate API call
     await Future.delayed(const Duration(seconds: 1));
 
-    return const UserModel(
+    return  UserModel(
       id: 1,
       name: 'John Doe',
       email: 'john@example.com',
@@ -47,7 +47,7 @@ class UserRemoteDataSourceImpl implements UserRemoteDataSource {
         experience: 5,
       ), // Replace with appropriate default values if needed
       favoriteBrands: [],
-      isComplete: true,
+      isComplete: true, followingCount: 0,
     );
   }
 }
