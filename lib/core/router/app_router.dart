@@ -7,6 +7,7 @@ import '../../features/auth/presentation/pages/login_page.dart';
 import '../../features/auth/presentation/pages/reset_password_page.dart';
 import '../../features/auth/presentation/pages/signup_page.dart';
 import '../../features/auth/presentation/pages/splash_page.dart';
+import '../../features/onboarding/presentation/pages/onboarding_page.dart';
 import '../../features/profile/presentation/pages/profile_completion_wizard_page.dart';
 import '../../features/shell/presentation/pages/main_shell_page.dart';
 import '../di/injection.dart';
@@ -24,6 +25,11 @@ final GoRouter appRouter = GoRouter(
       path: '/splash',
       name: RouteNames.splash,
       builder: (_, _) => const SplashPage(),
+    ),
+    GoRoute(
+      path: '/onboarding',
+      name: 'onboarding',
+      builder: (_, _) => const OnboardingPage(),
     ),
 
     // Auth routes
@@ -68,7 +74,6 @@ final GoRouter appRouter = GoRouter(
         navigationShell: navigationShell,
       ),
       branches: [
-        // Home tab
         StatefulShellBranch(
           routes: [
             GoRoute(
@@ -78,7 +83,6 @@ final GoRouter appRouter = GoRouter(
             ),
           ],
         ),
-        // Media tab
         StatefulShellBranch(
           routes: [
             GoRoute(
@@ -88,7 +92,6 @@ final GoRouter appRouter = GoRouter(
             ),
           ],
         ),
-        // Score tab
         StatefulShellBranch(
           routes: [
             GoRoute(
@@ -98,7 +101,6 @@ final GoRouter appRouter = GoRouter(
             ),
           ],
         ),
-        // Messages tab
         StatefulShellBranch(
           routes: [
             GoRoute(
@@ -108,7 +110,6 @@ final GoRouter appRouter = GoRouter(
             ),
           ],
         ),
-        // Profile tab
         StatefulShellBranch(
           routes: [
             GoRoute(
@@ -130,16 +131,14 @@ Future<String?> _globalRedirect(BuildContext context, GoRouterState state) async
 
   final isAuthRoute = currentPath.startsWith('/auth');
   final isSplash = currentPath == '/splash';
+  final isOnboarding = currentPath == '/onboarding';
 
-  // Don't redirect splash — it handles its own navigation
-  if (isSplash) return null;
+  if (isSplash || isOnboarding) return null;
 
-  // Not authenticated -> go to login
   if (!hasToken && !isAuthRoute) {
     return '/auth/login';
   }
 
-  // Authenticated but on auth route -> go home
   if (hasToken && isAuthRoute) {
     return '/home';
   }
@@ -147,7 +146,6 @@ Future<String?> _globalRedirect(BuildContext context, GoRouterState state) async
   return null;
 }
 
-/// Temporary placeholder page for tabs not yet implemented
 class _PlaceholderPage extends StatelessWidget {
   final String title;
   const _PlaceholderPage({required this.title});
