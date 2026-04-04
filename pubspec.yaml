@@ -1,7 +1,7 @@
 name: bowlersnetworkapp
-description: "A new Flutter project."
-publish_to: 'none' # Remove this line if you wish to publish to pub.dev
-version: 1.0.5+1
+description: "BowlersNetwork - The ultimate bowling community app"
+publish_to: 'none'
+version: 1.0.5+7
 
 environment:
   sdk: ^3.9.0
@@ -10,16 +10,75 @@ dependencies:
   flutter:
     sdk: flutter
 
+  # State Management
+  flutter_bloc: ^9.1.1
+  equatable: ^2.0.8
+
+  # Dependency Injection
+  get_it: ^9.2.1
+  injectable: ^2.7.1+4
+
+  # Navigation
+  go_router: ^17.2.0
+
+  # Networking
+  dio: ^5.9.2
+  retrofit: ^4.9.2
+  json_annotation: ^4.11.0
+  web_socket_channel: ^3.0.3
+
+  # Functional Programming
+  dartz: ^0.10.1
+
+  # UI & Design
+  flutter_screenutil: ^5.9.3
+  cached_network_image: ^3.4.1
+  flutter_svg: ^2.2.4
+  shimmer: ^3.0.0
+  google_fonts: ^8.0.2
+  flutter_animate: ^4.5.2
+  smooth_page_indicator: ^2.0.1
+  pinput: ^6.0.2
+
+  # Utilities
+  intl: ^0.20.2
+  flutter_dotenv: ^6.0.0
+  url_launcher: ^6.3.2
+  shared_preferences: ^2.5.5
+  flutter_secure_storage: ^10.0.0
+
+  # Pagination
+  infinite_scroll_pagination: ^5.1.1
+
+  # Media
+  image_picker: ^1.2.1
+  video_player: ^2.11.1
+
+  # Location
+  permission_handler: ^12.0.1
+  geolocator: ^14.0.2
+
+  # Firebase
+  firebase_core: ^4.6.0
+  firebase_messaging: ^16.1.3
+
+  # Charts
+  fl_chart: ^1.2.0
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
-
   flutter_lints: ^6.0.0
+  build_runner: ^2.13.1
+  injectable_generator: ^2.12.1
+  json_serializable: ^6.13.1
+  retrofit_generator: ^10.2.3
+  bloc_test: ^10.0.0
+  mocktail: ^1.0.4
 
 flutter:
   uses-material-design: true
-
-  # To add assets to your application, add an assets section, like this:
   assets:
     - assets/icon/
+    - assets/splash/
+    - .env
