@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/extensions/date_extensions.dart';
-import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/theme/app_text_styles.dart';
 import '../../../../core/widgets/bn_avatar.dart';
 import '../../data/models/post_models.dart';
@@ -32,49 +31,85 @@ class PostCard extends StatelessWidget {
       color: AppColors.bgWhite,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisSize: MainAxisSize.min,
         children: [
-          _buildHeader(),
-          if (post.caption.isNotEmpty) _buildCaption(),
-          _buildTypeContent(),
-          _buildActions(),
-          _buildStats(),
-          const Divider(height: 1),
+          _Header(post: post, onMore: onMore),
+          if (post.caption.isNotEmpty)
+            Padding(
+              padding: const EdgeInsets.fromLTRB(16, 6, 16, 0),
+              child: Text(post.caption, style: AppTextStyles.bodyMedium),
+            ),
+          _TypeContent(post: post),
+          _ActionsBar(post: post, onReact: onReact, onComment: onComment, onSave: onSave, onShare: onShare),
         ],
       ),
     );
   }
+}
 
-  Widget _buildHeader() {
+// ── Header ──────────────────────────────────────────────
+
+class _Header extends StatelessWidget {
+  final PostModel post;
+  final VoidCallback? onMore;
+
+  const _Header({required this.post, this.onMore});
+
+  @override
+  Widget build(BuildContext context) {
     final createdAt = DateTime.tryParse(post.createdAt);
 
     return Padding(
-      padding: const EdgeInsets.fromLTRB(16, 12, 8, 0),
+      padding: const EdgeInsets.fromLTRB(16, 14, 8, 0),
       child: Row(
         children: [
           BnAvatar(
             imageUrl: post.author.profilePictureUrl.isNotEmpty ? post.author.profilePictureUrl : null,
             name: post.author.fullName,
-            size: 40,
+            size: 42,
             isPro: post.author.isPro,
             showBorder: post.author.isPro,
           ),
-          AppSpacing.horizontalMd,
+          const SizedBox(width: 10),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Row(
                   children: [
-                    Text(post.author.fullName, style: AppTextStyles.labelMedium.copyWith(color: AppColors.textPrimary)),
+                    Flexible(
+                      child: Text(
+                        post.author.fullName,
+                        style: AppTextStyles.labelMedium.copyWith(fontWeight: FontWeight.w600),
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ),
                     if (post.author.isPro) ...[
-                      AppSpacing.horizontalXs,
-                      const Icon(Icons.verified, size: 16, color: AppColors.navActive),
+                      const SizedBox(width: 4),
+                      const Icon(Icons.verified, size: 14, color: AppColors.navActive),
                     ],
                   ],
                 ),
-                Text(
-                  '${createdAt?.timeAgo ?? ''}${post.isEdited ? ' · Edited' : ''}',
-                  style: AppTextStyles.caption,
+                const SizedBox(height: 1),
+                Row(
+                  children: [
+                    Text(
+                      createdAt?.timeAgo ?? '',
+                      style: AppTextStyles.caption.copyWith(fontSize: 11),
+                    ),
+                    if (post.audience != 'public') ...[
+                      const SizedBox(width: 4),
+                      Icon(
+                        post.audience == 'followers' ? Icons.people_outline : Icons.lock_outline,
+                        size: 12,
+                        color: AppColors.textMuted,
+                      ),
+                    ],
+                    if (post.isEdited) ...[
+                      const SizedBox(width: 4),
+                      Text(' · Edited', style: AppTextStyles.caption.copyWith(fontSize: 11)),
+                    ],
+                  ],
                 ),
               ],
             ),
@@ -82,113 +117,155 @@ class PostCard extends StatelessWidget {
           if (onMore != null)
             IconButton(
               onPressed: onMore,
-              icon: const Icon(Icons.more_horiz, color: AppColors.textMuted),
-              visualDensity: VisualDensity.compact,
+              icon: const Icon(Icons.more_horiz, color: AppColors.textMuted, size: 22),
+              splashRadius: 20,
             ),
         ],
       ),
     );
   }
+}
 
-  Widget _buildCaption() {
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
-      child: Text(post.caption, style: AppTextStyles.bodyMedium),
-    );
-  }
+// ── Type-specific content ───────────────────────────────
 
-  Widget _buildTypeContent() {
+class _TypeContent extends StatelessWidget {
+  final PostModel post;
+  const _TypeContent({required this.post});
+
+  @override
+  Widget build(BuildContext context) {
     return switch (post.postType) {
-      'photo' => _buildPhotoContent(),
-      'video' => _buildVideoContent(),
-      'score' => _buildScoreContent(),
-      'poll' => _buildPollContent(),
-      'shared' => _buildSharedContent(),
-      _ => const SizedBox(height: 8),
+      'photo' => _PhotoContent(urls: post.mediaUrls),
+      'video' => _VideoContent(videoUrl: post.videoUrl, thumbnailUrl: post.thumbnailUrl),
+      'score' => _ScoreContent(post: post),
+      'poll' => _PollContent(post: post),
+      'shared' => _SharedContent(post: post),
+      _ => const SizedBox(height: 6),
     };
   }
+}
 
-  Widget _buildPhotoContent() {
-    final urls = post.mediaUrls;
+class _PhotoContent extends StatelessWidget {
+  final List<String> urls;
+  const _PhotoContent({required this.urls});
+
+  @override
+  Widget build(BuildContext context) {
     if (urls.isEmpty) return const SizedBox.shrink();
 
     return Padding(
       padding: const EdgeInsets.only(top: 10),
       child: urls.length == 1
-          ? CachedNetworkImage(imageUrl: urls[0], fit: BoxFit.cover, width: double.infinity, height: 300)
-          : SizedBox(
-              height: 240,
-              child: GridView.builder(
-                scrollDirection: Axis.horizontal,
-                padding: const EdgeInsets.symmetric(horizontal: 16),
-                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                  crossAxisCount: 1, mainAxisSpacing: 4,
-                ),
+          ? AspectRatio(
+              aspectRatio: 4 / 3,
+              child: CachedNetworkImage(imageUrl: urls[0], fit: BoxFit.cover),
+            )
+          : AspectRatio(
+              aspectRatio: 16 / 9,
+              child: PageView.builder(
                 itemCount: urls.length,
-                itemBuilder: (_, i) => ClipRRect(
-                  borderRadius: BorderRadius.circular(8),
-                  child: CachedNetworkImage(imageUrl: urls[i], fit: BoxFit.cover),
-                ),
+                itemBuilder: (_, i) => CachedNetworkImage(imageUrl: urls[i], fit: BoxFit.cover),
               ),
             ),
     );
   }
+}
 
-  Widget _buildVideoContent() {
-    final thumb = post.thumbnailUrl;
+class _VideoContent extends StatelessWidget {
+  final String? videoUrl;
+  final String? thumbnailUrl;
+  const _VideoContent({this.videoUrl, this.thumbnailUrl});
+
+  @override
+  Widget build(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.only(top: 10),
-      child: Stack(
-        alignment: Alignment.center,
-        children: [
-          if (thumb != null && thumb.isNotEmpty)
-            CachedNetworkImage(imageUrl: thumb, fit: BoxFit.cover, width: double.infinity, height: 240)
-          else
-            Container(height: 240, color: AppColors.bgSubtleGray),
-          Container(
-            width: 56, height: 56,
-            decoration: BoxDecoration(shape: BoxShape.circle, color: Colors.black.withValues(alpha: 0.6)),
-            child: const Icon(Icons.play_arrow_rounded, size: 36, color: Colors.white),
-          ),
-        ],
+      child: AspectRatio(
+        aspectRatio: 16 / 9,
+        child: Stack(
+          alignment: Alignment.center,
+          children: [
+            if (thumbnailUrl != null && thumbnailUrl!.isNotEmpty)
+              CachedNetworkImage(
+                imageUrl: thumbnailUrl!,
+                fit: BoxFit.cover,
+                width: double.infinity,
+                height: double.infinity,
+              )
+            else
+              Container(color: const Color(0xFF1a1a2e)),
+            // Play button
+            Container(
+              width: 56,
+              height: 56,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: Colors.black.withValues(alpha: 0.55),
+              ),
+              child: const Icon(Icons.play_arrow_rounded, size: 32, color: Colors.white),
+            ),
+          ],
+        ),
       ),
     );
   }
+}
 
-  Widget _buildScoreContent() {
+class _ScoreContent extends StatelessWidget {
+  final PostModel post;
+  const _ScoreContent({required this.post});
+
+  @override
+  Widget build(BuildContext context) {
     return Container(
       margin: const EdgeInsets.fromLTRB(16, 10, 16, 0),
-      padding: const EdgeInsets.all(20),
+      padding: const EdgeInsets.symmetric(vertical: 24, horizontal: 20),
       decoration: BoxDecoration(
         gradient: const LinearGradient(
-          colors: [AppColors.primary, AppColors.primaryDark],
-          begin: Alignment.topLeft, end: Alignment.bottomRight,
+          colors: [Color(0xFF8BC342), Color(0xFF5B9A26)],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
         ),
-        borderRadius: BorderRadius.circular(AppSpacing.radiusLg),
+        borderRadius: BorderRadius.circular(16),
       ),
       child: Column(
         children: [
-          Text('${post.totalScore ?? 0}', style: const TextStyle(fontSize: 48, fontWeight: FontWeight.w800, color: Colors.white)),
+          Text(
+            '${post.totalScore ?? 0}',
+            style: const TextStyle(fontSize: 52, fontWeight: FontWeight.w800, color: Colors.white, height: 1),
+          ),
+          const SizedBox(height: 8),
           if (post.gameType != null)
             Container(
-              margin: const EdgeInsets.only(top: 8),
-              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 4),
               decoration: BoxDecoration(
                 color: Colors.white.withValues(alpha: 0.2),
                 borderRadius: BorderRadius.circular(20),
               ),
-              child: Text(post.gameType!.toUpperCase(), style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: Colors.white, letterSpacing: 1)),
+              child: Text(
+                post.gameType!.toUpperCase(),
+                style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w700, color: Colors.white, letterSpacing: 1.2),
+              ),
             ),
           if (post.strikePercentage != null) ...[
-            const SizedBox(height: 8),
-            Text('${post.strikePercentage!.toStringAsFixed(1)}% Strikes', style: TextStyle(fontSize: 14, color: Colors.white.withValues(alpha: 0.85))),
+            const SizedBox(height: 10),
+            Text(
+              '${post.strikePercentage!.toStringAsFixed(1)}% Strikes',
+              style: TextStyle(fontSize: 14, color: Colors.white.withValues(alpha: 0.85), fontWeight: FontWeight.w500),
+            ),
           ],
         ],
       ),
     );
   }
+}
 
-  Widget _buildPollContent() {
+class _PollContent extends StatelessWidget {
+  final PostModel post;
+  const _PollContent({required this.post});
+
+  @override
+  Widget build(BuildContext context) {
     final options = post.pollOptions;
     final total = post.totalVotes;
 
@@ -196,146 +273,167 @@ class PostCard extends StatelessWidget {
       padding: const EdgeInsets.fromLTRB(16, 10, 16, 0),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisSize: MainAxisSize.min,
         children: [
           if (post.pollQuestion != null)
             Text(post.pollQuestion!, style: AppTextStyles.labelLarge),
-          AppSpacing.verticalSm,
+          const SizedBox(height: 10),
           ...options.map((opt) {
             final text = opt['text'] as String? ?? '';
             final count = opt['vote_count'] as int? ?? 0;
             final pct = total > 0 ? count / total : 0.0;
-            return Container(
-              margin: const EdgeInsets.only(bottom: 6),
-              child: Stack(
-                children: [
-                  Container(
-                    width: double.infinity, height: 44,
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(8),
-                      border: Border.all(color: AppColors.borderLight),
-                    ),
-                  ),
-                  FractionallySizedBox(
-                    widthFactor: pct,
-                    child: Container(
-                      height: 44,
+            return Padding(
+              padding: const EdgeInsets.only(bottom: 6),
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(8),
+                child: Stack(
+                  children: [
+                    Container(
+                      width: double.infinity,
+                      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
                       decoration: BoxDecoration(
-                        color: AppColors.primary.withValues(alpha: 0.12),
+                        border: Border.all(color: AppColors.borderLight),
                         borderRadius: BorderRadius.circular(8),
                       ),
-                    ),
-                  ),
-                  SizedBox(
-                    height: 44,
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 12),
                       child: Row(
                         children: [
                           Expanded(child: Text(text, style: AppTextStyles.bodySmall)),
-                          Text('${(pct * 100).toStringAsFixed(0)}%', style: AppTextStyles.labelSmall),
+                          Text('${(pct * 100).toStringAsFixed(0)}%', style: AppTextStyles.labelSmall.copyWith(color: AppColors.primary)),
                         ],
                       ),
                     ),
-                  ),
-                ],
+                    Positioned.fill(
+                      child: FractionallySizedBox(
+                        alignment: Alignment.centerLeft,
+                        widthFactor: pct,
+                        child: Container(
+                          decoration: BoxDecoration(
+                            color: AppColors.primary.withValues(alpha: 0.08),
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
               ),
             );
           }),
-          Text('$total votes${post.isPollClosed ? ' · Closed' : ''}', style: AppTextStyles.caption),
+          const SizedBox(height: 4),
+          Text(
+            '$total votes${post.isPollClosed ? ' · Closed' : ''}',
+            style: AppTextStyles.caption,
+          ),
         ],
       ),
     );
   }
+}
 
-  Widget _buildSharedContent() {
+class _SharedContent extends StatelessWidget {
+  final PostModel post;
+  const _SharedContent({required this.post});
+
+  @override
+  Widget build(BuildContext context) {
     final original = post.sharedOriginal;
     if (original == null) return const SizedBox.shrink();
+
     return Container(
       margin: const EdgeInsets.fromLTRB(16, 10, 16, 0),
       decoration: BoxDecoration(
         border: Border.all(color: AppColors.borderLight),
-        borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
+        borderRadius: BorderRadius.circular(12),
       ),
+      clipBehavior: Clip.antiAlias,
       child: PostCard(post: original),
     );
   }
+}
 
-  Widget _buildActions() {
+// ── Actions bar ─────────────────────────────────────────
+
+class _ActionsBar extends StatelessWidget {
+  final PostModel post;
+  final void Function(String)? onReact;
+  final VoidCallback? onComment;
+  final VoidCallback? onSave;
+  final VoidCallback? onShare;
+
+  const _ActionsBar({
+    required this.post,
+    this.onReact,
+    this.onComment,
+    this.onSave,
+    this.onShare,
+  });
+
+  @override
+  Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.fromLTRB(8, 4, 8, 0),
+      padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
       child: Row(
         children: [
           // React
-          _ActionButton(
-            icon: post.hasReacted ? Icons.favorite : Icons.favorite_border,
-            color: post.hasReacted ? AppColors.error : AppColors.textMuted,
-            label: '${post.likesCount > 0 ? post.likesCount : ''}',
+          _ActionBtn(
+            icon: post.hasReacted ? Icons.favorite_rounded : Icons.favorite_border_rounded,
+            label: post.likesCount > 0 ? '${post.likesCount}' : '',
+            color: post.hasReacted ? AppColors.error : null,
             onTap: () => onReact?.call(post.hasReacted ? post.reactionType ?? 'like' : 'like'),
-            onLongPress: () => _showReactionPicker(),
           ),
           // Comment
-          _ActionButton(
-            icon: Icons.chat_bubble_outline,
-            label: '${post.commentsCount > 0 ? post.commentsCount : ''}',
+          _ActionBtn(
+            icon: Icons.chat_bubble_outline_rounded,
+            label: post.commentsCount > 0 ? '${post.commentsCount}' : '',
             onTap: onComment,
           ),
           // Share
-          _ActionButton(
+          _ActionBtn(
             icon: Icons.share_outlined,
-            label: '${post.sharesCount > 0 ? post.sharesCount : ''}',
+            label: post.sharesCount > 0 ? '${post.sharesCount}' : '',
             onTap: onShare,
           ),
           const Spacer(),
-          // Save
+          // Bookmark
           IconButton(
+            onPressed: onSave,
             icon: Icon(
-              post.hasSaved ? Icons.bookmark : Icons.bookmark_border,
+              post.hasSaved ? Icons.bookmark_rounded : Icons.bookmark_border_rounded,
               color: post.hasSaved ? AppColors.primary : AppColors.textMuted,
               size: 22,
             ),
-            onPressed: onSave,
-            visualDensity: VisualDensity.compact,
+            splashRadius: 20,
           ),
         ],
       ),
     );
   }
-
-  Widget _buildStats() {
-    return const SizedBox(height: 4);
-  }
-
-  void _showReactionPicker() {
-    // Reactions: like, fire, strike, clap, wow — handled by long press
-  }
 }
 
-class _ActionButton extends StatelessWidget {
+class _ActionBtn extends StatelessWidget {
   final IconData icon;
-  final Color? color;
   final String label;
+  final Color? color;
   final VoidCallback? onTap;
-  final VoidCallback? onLongPress;
 
-  const _ActionButton({
-    required this.icon,
-    this.color,
-    this.label = '',
-    this.onTap,
-    this.onLongPress,
-  });
+  const _ActionBtn({required this.icon, this.label = '', this.color, this.onTap});
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      onLongPress: onLongPress,
-      child: TextButton.icon(
-        onPressed: onTap,
-        icon: Icon(icon, size: 20, color: color ?? AppColors.textMuted),
-        label: Text(label, style: AppTextStyles.caption.copyWith(color: color ?? AppColors.textMuted)),
-        style: TextButton.styleFrom(
-          visualDensity: VisualDensity.compact,
-          padding: const EdgeInsets.symmetric(horizontal: 8),
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(20),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(icon, size: 20, color: color ?? AppColors.textMuted),
+            if (label.isNotEmpty) ...[
+              const SizedBox(width: 4),
+              Text(label, style: AppTextStyles.caption.copyWith(color: color ?? AppColors.textMuted, fontWeight: FontWeight.w500)),
+            ],
+          ],
         ),
       ),
     );
