@@ -20,6 +20,9 @@ class RouteNames {
   static const String messages = 'messages';
   static const String profile = 'profile';
 
+  // Onboarding
+  static const String onboarding = 'onboarding';
+
   // Sub-routes
   static const String postDetail = 'post-detail';
   static const String createPost = 'create-post';

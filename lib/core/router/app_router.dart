@@ -7,7 +7,10 @@ import '../../features/auth/presentation/pages/login_page.dart';
 import '../../features/auth/presentation/pages/reset_password_page.dart';
 import '../../features/auth/presentation/pages/signup_page.dart';
 import '../../features/auth/presentation/pages/splash_page.dart';
+import '../../features/newsfeed/presentation/pages/create_post_page.dart';
+import '../../features/newsfeed/presentation/pages/home_feed_page.dart';
 import '../../features/onboarding/presentation/pages/onboarding_page.dart';
+import '../../features/profile/presentation/pages/my_profile_page.dart';
 import '../../features/profile/presentation/pages/profile_completion_wizard_page.dart';
 import '../../features/shell/presentation/pages/main_shell_page.dart';
 import '../di/injection.dart';
@@ -68,21 +71,31 @@ final GoRouter appRouter = GoRouter(
       builder: (_, _) => const ProfileCompletionWizardPage(),
     ),
 
+    // Full-screen routes (outside shell)
+    GoRoute(
+      path: '/create-post',
+      name: RouteNames.createPost,
+      parentNavigatorKey: _rootNavigatorKey,
+      builder: (_, _) => const CreatePostPage(),
+    ),
+
     // Main shell with bottom navigation
     StatefulShellRoute.indexedStack(
       builder: (_, _, navigationShell) => MainShellPage(
         navigationShell: navigationShell,
       ),
       branches: [
+        // Home tab
         StatefulShellBranch(
           routes: [
             GoRoute(
               path: '/home',
               name: RouteNames.home,
-              builder: (_, _) => const _PlaceholderPage(title: 'Home'),
+              builder: (_, _) => const HomeFeedPage(),
             ),
           ],
         ),
+        // Media tab
         StatefulShellBranch(
           routes: [
             GoRoute(
@@ -92,6 +105,7 @@ final GoRouter appRouter = GoRouter(
             ),
           ],
         ),
+        // Score tab
         StatefulShellBranch(
           routes: [
             GoRoute(
@@ -101,6 +115,7 @@ final GoRouter appRouter = GoRouter(
             ),
           ],
         ),
+        // Messages tab
         StatefulShellBranch(
           routes: [
             GoRoute(
@@ -110,12 +125,13 @@ final GoRouter appRouter = GoRouter(
             ),
           ],
         ),
+        // Profile tab
         StatefulShellBranch(
           routes: [
             GoRoute(
               path: '/profile',
               name: RouteNames.profile,
-              builder: (_, _) => const _PlaceholderPage(title: 'Profile'),
+              builder: (_, _) => const MyProfilePage(),
             ),
           ],
         ),
