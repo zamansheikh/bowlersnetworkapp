@@ -326,6 +326,146 @@ class _ProfileCompletionWizardPageState extends State<ProfileCompletionWizardPag
 
   // ── Address ──
 
+  bool _isGettingLocation = false;
+
+  Future<void> _handleGetLocation() async {
+    if (_isGettingLocation) return;
+    setState(() => _isGettingLocation = true);
+
+    try {
+      // 1. Check if location services are enabled
+      final serviceEnabled = await Geolocator.isLocationServiceEnabled();
+      if (!serviceEnabled) {
+        if (!mounted) return;
+        final shouldOpen = await showDialog<bool>(
+          context: context,
+          builder: (_) => AlertDialog(
+            title: const Text('Location Services Disabled'),
+            content: const Text('Please turn on location services to use this feature.'),
+            actions: [
+              TextButton(onPressed: () => Navigator.pop(context, false), child: const Text('Cancel')),
+              TextButton(onPressed: () => Navigator.pop(context, true), child: const Text('Open Settings')),
+            ],
+          ),
+        );
+        if (shouldOpen == true) await Geolocator.openLocationSettings();
+        return;
+      }
+
+      // 2. Check permission — show rationale first if needed
+      var perm = await Geolocator.checkPermission();
+      if (perm == LocationPermission.denied) {
+        if (!mounted) return;
+        final shouldRequest = await _showLocationRationale();
+        if (shouldRequest != true) return;
+        perm = await Geolocator.requestPermission();
+      }
+
+      if (perm == LocationPermission.denied) {
+        if (mounted) context.showErrorSnackBar('Location permission is required for this step');
+        return;
+      }
+      if (perm == LocationPermission.deniedForever) {
+        if (!mounted) return;
+        await showDialog(
+          context: context,
+          builder: (_) => AlertDialog(
+            title: const Text('Permission Required'),
+            content: const Text('Location permission was permanently denied. Please enable it from your device Settings > Apps > BowlersNetwork > Permissions.'),
+            actions: [
+              TextButton(onPressed: () => Navigator.pop(context), child: const Text('Cancel')),
+              TextButton(
+                onPressed: () { Navigator.pop(context); Geolocator.openAppSettings(); },
+                child: const Text('Open Settings'),
+              ),
+            ],
+          ),
+        );
+        return;
+      }
+
+      // 3. Get position — use last known first (fast), fall back to current
+      Position? pos = await Geolocator.getLastKnownPosition();
+      pos ??= await Geolocator.getCurrentPosition(
+        locationSettings: const LocationSettings(accuracy: LocationAccuracy.low),
+      );
+
+      if (!mounted) return;
+      final ok = await _cubit.updateAddress(
+        address: 'Current Location',
+        zipCode: '',
+        latitude: pos.latitude,
+        longitude: pos.longitude,
+      );
+      if (ok && mounted) _nextStep();
+    } catch (e) {
+      if (mounted) {
+        context.showErrorSnackBar('Could not get location. You can skip this step and add it later.');
+      }
+    } finally {
+      if (mounted) setState(() => _isGettingLocation = false);
+    }
+  }
+
+  Widget _rationaleRow(IconData icon, String text) {
+    return Row(
+      children: [
+        Icon(icon, size: 18, color: AppColors.primary),
+        const SizedBox(width: 10),
+        Expanded(child: Text(text, style: const TextStyle(fontSize: 14))),
+      ],
+    );
+  }
+
+  Future<bool?> _showLocationRationale() {
+    return showDialog<bool>(
+      context: context,
+      builder: (_) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        icon: Container(
+          width: 56, height: 56,
+          decoration: BoxDecoration(
+            shape: BoxShape.circle,
+            color: AppColors.primary.withValues(alpha: 0.1),
+          ),
+          child: const Icon(Icons.location_on_rounded, color: AppColors.primary, size: 28),
+        ),
+        title: const Text('Allow Location Access'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Text(
+              'BowlersNetwork uses your location to:',
+              style: TextStyle(fontWeight: FontWeight.w500),
+            ),
+            const SizedBox(height: 12),
+            _rationaleRow(Icons.place_outlined, 'Find bowling centers near you'),
+            const SizedBox(height: 8),
+            _rationaleRow(Icons.event_outlined, 'Show nearby events & tournaments'),
+            const SizedBox(height: 8),
+            _rationaleRow(Icons.people_outline, 'Connect with local bowlers'),
+            const SizedBox(height: 12),
+            Text(
+              'Your location is never shared publicly.',
+              style: TextStyle(fontSize: 12, color: AppColors.textMuted),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(context, false), child: const Text('Not Now')),
+          ElevatedButton(
+            onPressed: () => Navigator.pop(context, true),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: AppColors.primary,
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+            ),
+            child: const Text('Allow Location'),
+          ),
+        ],
+      ),
+    );
+  }
+
   Widget _buildAddressStep(ProfileWizardState state) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 24),
@@ -337,21 +477,9 @@ class _ProfileCompletionWizardPageState extends State<ProfileCompletionWizardPag
           Text('Find bowling centers and events near you', style: AppTextStyles.bodyMedium.copyWith(color: AppColors.textMuted), textAlign: TextAlign.center),
           const SizedBox(height: 40),
           BnButton(
-            text: 'Use My Current Location', icon: Icons.my_location_rounded, isLoading: state.isSaving,
-            onPressed: () async {
-              try {
-                var perm = await Geolocator.checkPermission();
-                if (perm == LocationPermission.denied) perm = await Geolocator.requestPermission();
-                if (perm == LocationPermission.denied || perm == LocationPermission.deniedForever) {
-                  if (mounted) context.showErrorSnackBar('Location permission denied');
-                  return;
-                }
-                final pos = await Geolocator.getCurrentPosition(locationSettings: const LocationSettings(accuracy: LocationAccuracy.medium));
-                if (await _cubit.updateAddress(address: 'Current Location', zipCode: '', latitude: pos.latitude, longitude: pos.longitude) && mounted) _nextStep();
-              } catch (_) {
-                if (mounted) context.showErrorSnackBar('Could not get location');
-              }
-            },
+            text: 'Use My Current Location', icon: Icons.my_location_rounded,
+            isLoading: _isGettingLocation || state.isSaving,
+            onPressed: _handleGetLocation,
           ),
           const SizedBox(height: 12),
           BnButton(text: 'Skip for Now', isOutlined: true, onPressed: _nextStep),
