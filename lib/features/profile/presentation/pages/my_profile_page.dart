@@ -1,6 +1,7 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:go_router/go_router.dart';
 
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/di/injection.dart';
@@ -61,7 +62,13 @@ class _MyProfilePageState extends State<MyProfilePage> with TickerProviderStateM
                 return [
                   // Cover + avatar + info — all in one sliver
                   SliverToBoxAdapter(
-                    child: _ProfileHeader(profile: profile),
+                    child: _ProfileHeader(
+                      profile: profile,
+                      onEdit: () async {
+                        final updated = await context.push<bool>('/edit-profile', extra: profile);
+                        if (updated == true) _bloc.add(const ProfileLoadRequested());
+                      },
+                    ),
                   ),
                   // Sticky tab bar
                   SliverOverlapAbsorber(
@@ -113,7 +120,8 @@ class _MyProfilePageState extends State<MyProfilePage> with TickerProviderStateM
 
 class _ProfileHeader extends StatelessWidget {
   final ProfileModel profile;
-  const _ProfileHeader({required this.profile});
+  final VoidCallback? onEdit;
+  const _ProfileHeader({required this.profile, this.onEdit});
 
   @override
   Widget build(BuildContext context) {
@@ -185,7 +193,7 @@ class _ProfileHeader extends StatelessWidget {
               Padding(
                 padding: const EdgeInsets.only(bottom: 8),
                 child: OutlinedButton(
-                  onPressed: () {},
+                  onPressed: onEdit,
                   style: OutlinedButton.styleFrom(
                     foregroundColor: AppColors.textPrimary,
                     side: const BorderSide(color: AppColors.borderLight),

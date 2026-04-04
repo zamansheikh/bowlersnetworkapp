@@ -20,6 +20,7 @@ abstract class ProfileRepository {
   Future<Either<Failure, void>> updateBio({required String content});
   Future<Either<Failure, void>> updateNickname({required String name});
   Future<Either<Failure, String>> uploadProfilePicture({required Uint8List fileBytes, required String fileName});
+  Future<Either<Failure, void>> updateCoverPicture({required String url});
   Future<Either<Failure, List<CenterModel>>> getCenters();
   Future<Either<Failure, bool>> toggleFollow(int userId);
 }

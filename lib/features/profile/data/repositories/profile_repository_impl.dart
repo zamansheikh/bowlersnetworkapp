@@ -111,6 +111,13 @@ class ProfileRepositoryImpl implements ProfileRepository {
   }
 
   @override
+  Future<Either<Failure, void>> updateCoverPicture({required String url}) async {
+    try { await _remote.updateCoverPicture(url: url); return const Right(null); }
+    on ServerException catch (e) { return Left(ServerFailure(e.message, statusCode: e.statusCode)); }
+    on NetworkException catch (e) { return Left(NetworkFailure(e.message)); }
+  }
+
+  @override
   Future<Either<Failure, List<CenterModel>>> getCenters() async {
     try { return Right(await _remote.getCenters()); }
     on ServerException catch (e) { return Left(ServerFailure(e.message, statusCode: e.statusCode)); }

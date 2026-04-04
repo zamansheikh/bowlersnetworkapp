@@ -10,6 +10,8 @@ import '../../features/auth/presentation/pages/splash_page.dart';
 import '../../features/newsfeed/presentation/pages/create_post_page.dart';
 import '../../features/newsfeed/presentation/pages/home_feed_page.dart';
 import '../../features/onboarding/presentation/pages/onboarding_page.dart';
+import '../../features/profile/data/models/profile_models.dart';
+import '../../features/profile/presentation/pages/edit_profile_page.dart';
 import '../../features/profile/presentation/pages/my_profile_page.dart';
 import '../../features/profile/presentation/pages/profile_completion_wizard_page.dart';
 import '../../features/shell/presentation/pages/main_shell_page.dart';
@@ -77,6 +79,14 @@ final GoRouter appRouter = GoRouter(
       name: RouteNames.createPost,
       parentNavigatorKey: _rootNavigatorKey,
       builder: (_, _) => const CreatePostPage(),
+    ),
+    GoRoute(
+      path: '/edit-profile',
+      name: RouteNames.editProfile,
+      parentNavigatorKey: _rootNavigatorKey,
+      builder: (_, state) => EditProfilePage(
+        profile: state.extra! as ProfileModel,
+      ),
     ),
 
     // Main shell with bottom navigation
