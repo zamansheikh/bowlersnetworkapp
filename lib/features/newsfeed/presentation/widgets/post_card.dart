@@ -6,6 +6,7 @@ import '../../../../core/extensions/date_extensions.dart';
 import '../../../../core/theme/app_text_styles.dart';
 import '../../../../core/widgets/bn_avatar.dart';
 import '../../data/models/post_models.dart';
+import 'feed_video_player.dart';
 
 class PostCard extends StatelessWidget {
   final PostModel post;
@@ -136,7 +137,10 @@ class _TypeContent extends StatelessWidget {
   Widget build(BuildContext context) {
     return switch (post.postType) {
       'photo' => _PhotoContent(urls: post.mediaUrls),
-      'video' => _VideoContent(videoUrl: post.videoUrl, thumbnailUrl: post.thumbnailUrl),
+      'video' => Padding(
+        padding: const EdgeInsets.only(top: 10),
+        child: FeedVideoPlayer(videoUrl: post.videoUrl ?? '', thumbnailUrl: post.thumbnailUrl),
+      ),
       'score' => _ScoreContent(post: post),
       'poll' => _PollContent(post: post),
       'shared' => _SharedContent(post: post),
@@ -167,46 +171,6 @@ class _PhotoContent extends StatelessWidget {
                 itemBuilder: (_, i) => CachedNetworkImage(imageUrl: urls[i], fit: BoxFit.cover),
               ),
             ),
-    );
-  }
-}
-
-class _VideoContent extends StatelessWidget {
-  final String? videoUrl;
-  final String? thumbnailUrl;
-  const _VideoContent({this.videoUrl, this.thumbnailUrl});
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.only(top: 10),
-      child: AspectRatio(
-        aspectRatio: 16 / 9,
-        child: Stack(
-          alignment: Alignment.center,
-          children: [
-            if (thumbnailUrl != null && thumbnailUrl!.isNotEmpty)
-              CachedNetworkImage(
-                imageUrl: thumbnailUrl!,
-                fit: BoxFit.cover,
-                width: double.infinity,
-                height: double.infinity,
-              )
-            else
-              Container(color: const Color(0xFF1a1a2e)),
-            // Play button
-            Container(
-              width: 56,
-              height: 56,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                color: Colors.black.withValues(alpha: 0.55),
-              ),
-              child: const Icon(Icons.play_arrow_rounded, size: 32, color: Colors.white),
-            ),
-          ],
-        ),
-      ),
     );
   }
 }

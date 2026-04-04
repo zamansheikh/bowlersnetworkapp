@@ -10,7 +10,7 @@ import '../../../../core/theme/app_text_styles.dart';
 import '../../../../core/widgets/bn_error_widget.dart';
 import '../../../../core/widgets/bn_loading_indicator.dart';
 import '../../../../core/widgets/bn_shimmer.dart';
-import '../../../shell/presentation/widgets/app_drawer.dart';
+import '../../../shell/presentation/pages/main_shell_page.dart';
 import '../../data/models/post_models.dart';
 import '../bloc/feed_bloc.dart';
 import '../widgets/post_card.dart';
@@ -52,13 +52,10 @@ class _HomeFeedPageState extends State<HomeFeedPage> {
       value: _feedBloc,
       child: Scaffold(
         backgroundColor: AppColors.bgLightGray,
-        drawer: const AppDrawer(),
         appBar: AppBar(
-          leading: Builder(
-            builder: (ctx) => IconButton(
-              icon: const Icon(Icons.menu_rounded, color: AppColors.textPrimary),
-              onPressed: () => Scaffold.of(ctx).openDrawer(),
-            ),
+          leading: IconButton(
+            icon: const Icon(Icons.menu_rounded, color: AppColors.textPrimary),
+            onPressed: () => shellScaffoldKey.currentState?.openDrawer(),
           ),
           title: Row(
             mainAxisSize: MainAxisSize.min,

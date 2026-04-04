@@ -2,6 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../../core/constants/app_colors.dart';
+import '../widgets/app_drawer.dart';
+
+/// Global key so child pages can open the shell-level drawer.
+final shellScaffoldKey = GlobalKey<ScaffoldState>();
 
 class MainShellPage extends StatelessWidget {
   final StatefulNavigationShell navigationShell;
@@ -11,6 +15,8 @@ class MainShellPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      key: shellScaffoldKey,
+      drawer: const AppDrawer(),
       body: navigationShell,
       bottomNavigationBar: Container(
         decoration: BoxDecoration(
