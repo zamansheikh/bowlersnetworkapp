@@ -12,7 +12,13 @@ class ApiConstants {
 class Endpoints {
   Endpoints._();
 
-  // Auth
-  
+  // Cloud / file upload
+  static const String uploadSinglepart =
+      '/api/cloud/upload/singlepart/requests/initiate';
+  static const String uploadMultipartInitiate =
+      '/api/cloud/upload/multipart/requests/initiate';
+  static const String uploadMultipartComplete =
+      '/api/cloud/upload/multipart/requests/complete';
 
+  // Auth (populated in Phase 1)
 }

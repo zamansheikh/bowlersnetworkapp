@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 
+import '../../l10n/generated/app_localizations.dart';
+import '../theme/app_theme_colors.dart';
+
 extension BuildContextExtensions on BuildContext {
   ThemeData get theme => Theme.of(this);
   TextTheme get textTheme => Theme.of(this).textTheme;
@@ -8,22 +11,16 @@ extension BuildContextExtensions on BuildContext {
   Size get screenSize => MediaQuery.sizeOf(this);
   double get screenWidth => MediaQuery.sizeOf(this).width;
   double get screenHeight => MediaQuery.sizeOf(this).height;
-  EdgeInsets get padding => MediaQuery.paddingOf(this);
+  EdgeInsets get viewPadding => MediaQuery.paddingOf(this);
   bool get isDark => Theme.of(this).brightness == Brightness.dark;
+  bool get isTablet => MediaQuery.sizeOf(this).width >= 600;
+  bool get reducedMotion => MediaQuery.of(this).disableAnimations;
 
-  void showSnackBar(String message, {bool isError = false}) {
-    ScaffoldMessenger.of(this).showSnackBar(
-      SnackBar(
-        content: Text(message),
-        backgroundColor: isError
-            ? Theme.of(this).colorScheme.error
-            : Theme.of(this).colorScheme.primary,
-        behavior: SnackBarBehavior.floating,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-        margin: const EdgeInsets.all(16),
-      ),
-    );
-  }
+  /// Semantic color tokens for the active theme. Always prefer this over
+  /// raw `AppColors.*` references inside widgets.
+  AppThemeColors get colors =>
+      Theme.of(this).extension<AppThemeColors>() ?? AppThemeColors.dark;
 
-  void showErrorSnackBar(String message) => showSnackBar(message, isError: true);
+  /// Generated localisation strings. `context.l10n.onboardingPage1Title`
+  AppLocalizations get l10n => AppLocalizations.of(this);
 }

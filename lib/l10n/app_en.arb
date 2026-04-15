@@ -1,0 +1,81 @@
+{
+  "@@locale": "en",
+
+  "appName": "BowlersNetwork",
+  "@appName": {
+    "description": "The application name"
+  },
+  "appTagline": "The ultimate bowling community",
+
+  "actionContinue": "Continue",
+  "actionNext": "Next",
+  "actionSkip": "Skip",
+  "actionBack": "Back",
+  "actionCancel": "Cancel",
+  "actionDone": "Done",
+  "actionRetry": "Try Again",
+  "actionGetStarted": "Get Started",
+  "actionLogin": "Log In",
+  "actionSignUp": "Sign Up",
+  "actionLogout": "Log Out",
+  "actionSave": "Save",
+  "actionDelete": "Delete",
+  "actionSearch": "Search",
+  "actionSeeAll": "See All",
+  "actionViewAll": "View All",
+
+  "commonLoading": "Loading…",
+  "commonSomethingWentWrong": "Something went wrong",
+  "commonNoConnection": "No internet connection",
+  "commonEmptyListTitle": "Nothing here yet",
+
+  "onboardingPage1Title": "Welcome to BowlersNetwork",
+  "onboardingPage1Description": "The home for every bowler — amateurs, pros, coaches, and fans. Connect, compete, and grow your game.",
+
+  "onboardingPage2Title": "Track Every Frame",
+  "onboardingPage2Description": "Log games frame-by-frame, analyse pin-leaves, and review your performance across centers, balls, and conditions.",
+
+  "onboardingPage3Title": "Join the Community",
+  "onboardingPage3Description": "Share posts, watch splits, discuss strategy, and follow your favourite pros — all in one place.",
+
+  "onboardingPage4Title": "Earn XP. Climb Ranks.",
+  "onboardingPage4Description": "Every game, post, and reaction earns XP. Level up, collect badges, and rise through the leaderboard.",
+
+  "loginTitle": "Welcome back",
+  "loginSubtitle": "Sign in to pick up where you left off.",
+  "loginEmailLabel": "Email or username",
+  "loginEmailHint": "you@example.com",
+  "loginPasswordLabel": "Password",
+  "loginPasswordHint": "••••••••",
+  "loginForgotPassword": "Forgot password?",
+  "loginNoAccount": "Don't have an account?",
+
+  "signupTitle": "Create your account",
+  "signupSubtitle": "Join the bowling community in under a minute.",
+  "signupAlreadyHaveAccount": "Already have an account?",
+
+  "homeTitle": "Home",
+  "homeGreeting": "Welcome, {name}",
+  "@homeGreeting": {
+    "description": "Greeting on the home screen with the user's display name",
+    "placeholders": {
+      "name": {
+        "type": "String",
+        "example": "Nahian"
+      }
+    }
+  },
+
+  "navHome": "Home",
+  "navNewsfeed": "Newsfeed",
+  "navGames": "Games",
+  "navMessages": "Messages",
+  "navProfile": "Profile",
+
+  "settingsTitle": "Settings",
+  "settingsAppearance": "Appearance",
+  "settingsThemeSystem": "System",
+  "settingsThemeLight": "Light",
+  "settingsThemeDark": "Dark",
+  "settingsLanguage": "Language"
+}
