@@ -10,6 +10,7 @@ class RouteNames {
   static const String login = '/login';
   static const String signup = '/signup';
   static const String consentPending = '/consent-pending';
+  static const String passwordRecovery = '/password-recovery';
 
   // Main app
   static const String home = '/';

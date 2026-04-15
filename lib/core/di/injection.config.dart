@@ -13,7 +13,39 @@ import 'package:dio/dio.dart' as _i361;
 import 'package:get_it/get_it.dart' as _i174;
 import 'package:injectable/injectable.dart' as _i526;
 
+import '../../features/auth/data/datasources/auth_remote_datasource.dart'
+    as _i161;
+import '../../features/auth/data/repositories/auth_repository_impl.dart'
+    as _i153;
+import '../../features/auth/domain/repositories/auth_repository.dart' as _i787;
+import '../../features/auth/domain/usecases/login_usecase.dart' as _i188;
+import '../../features/auth/domain/usecases/logout_usecase.dart' as _i48;
+import '../../features/auth/domain/usecases/password_recovery_usecases.dart'
+    as _i38;
+import '../../features/auth/domain/usecases/send_email_verification_usecase.dart'
+    as _i707;
+import '../../features/auth/domain/usecases/signup_usecase.dart' as _i57;
+import '../../features/auth/domain/usecases/validate_registration_usecase.dart'
+    as _i416;
+import '../../features/auth/presentation/bloc/auth_bloc.dart' as _i797;
+import '../../features/newsfeed/data/datasources/newsfeed_remote_datasource.dart'
+    as _i452;
+import '../../features/newsfeed/data/repositories/newsfeed_repository_impl.dart'
+    as _i306;
+import '../../features/newsfeed/domain/repositories/newsfeed_repository.dart'
+    as _i819;
+import '../../features/newsfeed/domain/usecases/feed_usecases.dart' as _i22;
+import '../../features/newsfeed/presentation/bloc/feed_bloc.dart' as _i920;
 import '../../features/onboarding/data/onboarding_storage.dart' as _i861;
+import '../../features/profile/data/datasources/profile_remote_datasource.dart'
+    as _i327;
+import '../../features/profile/data/repositories/profile_repository_impl.dart'
+    as _i334;
+import '../../features/profile/domain/repositories/profile_repository.dart'
+    as _i894;
+import '../../features/profile/domain/usecases/get_my_profile_usecase.dart'
+    as _i981;
+import '../../features/profile/presentation/bloc/profile_bloc.dart' as _i469;
 import '../localization/locale_cubit.dart' as _i960;
 import '../network/api_client.dart' as _i557;
 import '../services/cloud_upload_service.dart' as _i984;
@@ -47,6 +79,15 @@ extension GetItInjectableX on _i174.GetIt {
     gh.lazySingleton<_i861.OnboardingStorage>(
       () => _i861.OnboardingStorage(gh<_i744.LocalStorageService>()),
     );
+    gh.factory<_i161.AuthRemoteDatasource>(
+      () => _i161.AuthRemoteDatasource(gh<_i361.Dio>()),
+    );
+    gh.factory<_i452.NewsfeedRemoteDatasource>(
+      () => _i452.NewsfeedRemoteDatasource(gh<_i361.Dio>()),
+    );
+    gh.factory<_i327.ProfileRemoteDatasource>(
+      () => _i327.ProfileRemoteDatasource(gh<_i361.Dio>()),
+    );
     gh.lazySingleton<_i361.Dio>(
       () => networkModule.uploadDio(),
       instanceName: 'uploadDio',
@@ -55,6 +96,83 @@ extension GetItInjectableX on _i174.GetIt {
       () => _i984.CloudUploadService(
         gh<_i361.Dio>(),
         gh<_i361.Dio>(instanceName: 'uploadDio'),
+      ),
+    );
+    gh.lazySingleton<_i787.AuthRepository>(
+      () => _i153.AuthRepositoryImpl(
+        gh<_i161.AuthRemoteDatasource>(),
+        gh<_i666.SecureStorageService>(),
+        gh<_i744.LocalStorageService>(),
+      ),
+    );
+    gh.lazySingleton<_i819.NewsfeedRepository>(
+      () => _i306.NewsfeedRepositoryImpl(gh<_i452.NewsfeedRemoteDatasource>()),
+    );
+    gh.lazySingleton<_i894.ProfileRepository>(
+      () => _i334.ProfileRepositoryImpl(gh<_i327.ProfileRemoteDatasource>()),
+    );
+    gh.lazySingleton<_i188.LoginUseCase>(
+      () => _i188.LoginUseCase(gh<_i787.AuthRepository>()),
+    );
+    gh.lazySingleton<_i48.LogoutUseCase>(
+      () => _i48.LogoutUseCase(gh<_i787.AuthRepository>()),
+    );
+    gh.lazySingleton<_i38.InitiateRecoveryOtpUseCase>(
+      () => _i38.InitiateRecoveryOtpUseCase(gh<_i787.AuthRepository>()),
+    );
+    gh.lazySingleton<_i38.ValidateRecoveryOtpUseCase>(
+      () => _i38.ValidateRecoveryOtpUseCase(gh<_i787.AuthRepository>()),
+    );
+    gh.lazySingleton<_i38.ResetPasswordUseCase>(
+      () => _i38.ResetPasswordUseCase(gh<_i787.AuthRepository>()),
+    );
+    gh.lazySingleton<_i707.SendEmailVerificationUseCase>(
+      () => _i707.SendEmailVerificationUseCase(gh<_i787.AuthRepository>()),
+    );
+    gh.lazySingleton<_i57.SignupUseCase>(
+      () => _i57.SignupUseCase(gh<_i787.AuthRepository>()),
+    );
+    gh.lazySingleton<_i416.ValidateRegistrationUseCase>(
+      () => _i416.ValidateRegistrationUseCase(gh<_i787.AuthRepository>()),
+    );
+    gh.singleton<_i797.AuthBloc>(
+      () => _i797.AuthBloc(
+        gh<_i787.AuthRepository>(),
+        gh<_i188.LoginUseCase>(),
+        gh<_i57.SignupUseCase>(),
+        gh<_i48.LogoutUseCase>(),
+      ),
+    );
+    gh.lazySingleton<_i22.GetFeedUseCase>(
+      () => _i22.GetFeedUseCase(gh<_i819.NewsfeedRepository>()),
+    );
+    gh.lazySingleton<_i22.ReactToPostUseCase>(
+      () => _i22.ReactToPostUseCase(gh<_i819.NewsfeedRepository>()),
+    );
+    gh.lazySingleton<_i22.ToggleSavePostUseCase>(
+      () => _i22.ToggleSavePostUseCase(gh<_i819.NewsfeedRepository>()),
+    );
+    gh.lazySingleton<_i22.HidePostUseCase>(
+      () => _i22.HidePostUseCase(gh<_i819.NewsfeedRepository>()),
+    );
+    gh.factory<_i920.FeedBloc>(
+      () => _i920.FeedBloc(
+        gh<_i22.GetFeedUseCase>(),
+        gh<_i22.ReactToPostUseCase>(),
+        gh<_i22.ToggleSavePostUseCase>(),
+        gh<_i22.HidePostUseCase>(),
+      ),
+    );
+    gh.lazySingleton<_i981.GetMyProfileUseCase>(
+      () => _i981.GetMyProfileUseCase(gh<_i894.ProfileRepository>()),
+    );
+    gh.lazySingleton<_i981.CheckProfileCompletionUseCase>(
+      () => _i981.CheckProfileCompletionUseCase(gh<_i894.ProfileRepository>()),
+    );
+    gh.lazySingleton<_i469.ProfileBloc>(
+      () => _i469.ProfileBloc(
+        gh<_i981.GetMyProfileUseCase>(),
+        gh<_i981.CheckProfileCompletionUseCase>(),
       ),
     );
     return this;

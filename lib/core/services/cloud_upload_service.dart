@@ -69,13 +69,17 @@ class CloudUploadService {
       return Right(publicUrl);
     } on DioException catch (e) {
       final msg = _extractError(e);
-      return Left(ServerFailure(msg, statusCode: e.response?.statusCode));
+      return Left(
+        ServerFailure(messages: [msg], statusCode: e.response?.statusCode),
+      );
     } on ServerException catch (e) {
-      return Left(ServerFailure(e.message, statusCode: e.statusCode));
-    } on NetworkException catch (e) {
-      return Left(NetworkFailure(e.message));
+      return Left(
+        ServerFailure(messages: [e.message], statusCode: e.statusCode),
+      );
+    } on NetworkException catch (_) {
+      return const Left(NetworkFailure());
     } catch (e) {
-      return Left(ServerFailure('Upload failed: $e'));
+      return Left(ServerFailure(messages: ['Upload failed: $e']));
     }
   }
 

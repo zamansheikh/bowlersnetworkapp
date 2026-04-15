@@ -202,6 +202,30 @@ abstract class AppLocalizations {
   /// **'View All'**
   String get actionViewAll;
 
+  /// No description provided for @actionSend.
+  ///
+  /// In en, this message translates to:
+  /// **'Send'**
+  String get actionSend;
+
+  /// No description provided for @actionSubmit.
+  ///
+  /// In en, this message translates to:
+  /// **'Submit'**
+  String get actionSubmit;
+
+  /// No description provided for @actionVerify.
+  ///
+  /// In en, this message translates to:
+  /// **'Verify'**
+  String get actionVerify;
+
+  /// No description provided for @actionResend.
+  ///
+  /// In en, this message translates to:
+  /// **'Resend code'**
+  String get actionResend;
+
   /// No description provided for @commonLoading.
   ///
   /// In en, this message translates to:
@@ -322,6 +346,18 @@ abstract class AppLocalizations {
   /// **'Don\'t have an account?'**
   String get loginNoAccount;
 
+  /// No description provided for @loginCredentialRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter your email or username'**
+  String get loginCredentialRequired;
+
+  /// No description provided for @loginPasswordRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter your password'**
+  String get loginPasswordRequired;
+
   /// No description provided for @signupTitle.
   ///
   /// In en, this message translates to:
@@ -334,11 +370,203 @@ abstract class AppLocalizations {
   /// **'Join the bowling community in under a minute.'**
   String get signupSubtitle;
 
+  /// No description provided for @signupFirstNameLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'First name'**
+  String get signupFirstNameLabel;
+
+  /// No description provided for @signupLastNameLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Last name'**
+  String get signupLastNameLabel;
+
+  /// No description provided for @signupUsernameLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Username'**
+  String get signupUsernameLabel;
+
+  /// No description provided for @signupUsernameHint.
+  ///
+  /// In en, this message translates to:
+  /// **'4-12 characters, letters and numbers'**
+  String get signupUsernameHint;
+
+  /// No description provided for @signupEmailLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Email'**
+  String get signupEmailLabel;
+
+  /// No description provided for @signupPasswordLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Password'**
+  String get signupPasswordLabel;
+
+  /// No description provided for @signupPasswordHint.
+  ///
+  /// In en, this message translates to:
+  /// **'At least 8 characters'**
+  String get signupPasswordHint;
+
+  /// No description provided for @signupDobLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Date of birth'**
+  String get signupDobLabel;
+
+  /// No description provided for @signupIsCoachLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'I\'m a coach'**
+  String get signupIsCoachLabel;
+
+  /// No description provided for @signupParentEmailLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Parent\'s email'**
+  String get signupParentEmailLabel;
+
+  /// No description provided for @signupParentEmailHint.
+  ///
+  /// In en, this message translates to:
+  /// **'We\'ll email them for consent'**
+  String get signupParentEmailHint;
+
+  /// No description provided for @signupStepAccount.
+  ///
+  /// In en, this message translates to:
+  /// **'Account'**
+  String get signupStepAccount;
+
+  /// No description provided for @signupStepVerify.
+  ///
+  /// In en, this message translates to:
+  /// **'Verify email'**
+  String get signupStepVerify;
+
+  /// No description provided for @signupStepProfile.
+  ///
+  /// In en, this message translates to:
+  /// **'Your info'**
+  String get signupStepProfile;
+
+  /// No description provided for @signupVerificationCodeLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Verification code'**
+  String get signupVerificationCodeLabel;
+
+  /// No description provided for @signupVerificationSent.
+  ///
+  /// In en, this message translates to:
+  /// **'We sent a 6-digit code to {email}'**
+  String signupVerificationSent(String email);
+
   /// No description provided for @signupAlreadyHaveAccount.
   ///
   /// In en, this message translates to:
   /// **'Already have an account?'**
   String get signupAlreadyHaveAccount;
+
+  /// No description provided for @signupFieldRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'This field is required'**
+  String get signupFieldRequired;
+
+  /// No description provided for @signupPasswordTooShort.
+  ///
+  /// In en, this message translates to:
+  /// **'Password must be at least 8 characters'**
+  String get signupPasswordTooShort;
+
+  /// No description provided for @signupInvalidEmail.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter a valid email'**
+  String get signupInvalidEmail;
+
+  /// No description provided for @signupInvalidUsername.
+  ///
+  /// In en, this message translates to:
+  /// **'4-12 characters, letters, numbers, underscores'**
+  String get signupInvalidUsername;
+
+  /// No description provided for @signupMustBe13.
+  ///
+  /// In en, this message translates to:
+  /// **'You must be at least 13 years old'**
+  String get signupMustBe13;
+
+  /// No description provided for @consentPendingTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Waiting on parent consent'**
+  String get consentPendingTitle;
+
+  /// No description provided for @consentPendingDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'We emailed your parent for approval. Once they confirm, your account will unlock automatically.'**
+  String get consentPendingDescription;
+
+  /// No description provided for @consentPendingRefresh.
+  ///
+  /// In en, this message translates to:
+  /// **'Check again'**
+  String get consentPendingRefresh;
+
+  /// No description provided for @recoveryTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Reset your password'**
+  String get recoveryTitle;
+
+  /// No description provided for @recoverySubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter the email for your account and we\'ll send you a 6-digit code.'**
+  String get recoverySubtitle;
+
+  /// No description provided for @recoverySentTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Check your email'**
+  String get recoverySentTitle;
+
+  /// No description provided for @recoverySentDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'We sent a verification code to {email}.'**
+  String recoverySentDescription(String email);
+
+  /// No description provided for @recoveryNewPasswordLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'New password'**
+  String get recoveryNewPasswordLabel;
+
+  /// No description provided for @recoveryConfirmPasswordLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Confirm password'**
+  String get recoveryConfirmPasswordLabel;
+
+  /// No description provided for @recoveryPasswordMismatch.
+  ///
+  /// In en, this message translates to:
+  /// **'Passwords don\'t match'**
+  String get recoveryPasswordMismatch;
+
+  /// No description provided for @recoveryDone.
+  ///
+  /// In en, this message translates to:
+  /// **'Password updated — sign in with your new password.'**
+  String get recoveryDone;
 
   /// No description provided for @homeTitle.
   ///
@@ -346,7 +574,7 @@ abstract class AppLocalizations {
   /// **'Home'**
   String get homeTitle;
 
-  /// Greeting on the home screen with the user's display name
+  /// No description provided for @homeGreeting.
   ///
   /// In en, this message translates to:
   /// **'Welcome, {name}'**
@@ -381,6 +609,48 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Profile'**
   String get navProfile;
+
+  /// No description provided for @profileCompletionBannerTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Complete your profile'**
+  String get profileCompletionBannerTitle;
+
+  /// No description provided for @profileCompletionBannerHint.
+  ///
+  /// In en, this message translates to:
+  /// **'{percent}% done — finish your profile to unlock the app.'**
+  String profileCompletionBannerHint(int percent);
+
+  /// No description provided for @profileFollowers.
+  ///
+  /// In en, this message translates to:
+  /// **'Followers'**
+  String get profileFollowers;
+
+  /// No description provided for @profileFollowing.
+  ///
+  /// In en, this message translates to:
+  /// **'Following'**
+  String get profileFollowing;
+
+  /// No description provided for @profileFollow.
+  ///
+  /// In en, this message translates to:
+  /// **'Follow'**
+  String get profileFollow;
+
+  /// No description provided for @profileUnfollow.
+  ///
+  /// In en, this message translates to:
+  /// **'Following'**
+  String get profileUnfollow;
+
+  /// No description provided for @profileEdit.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit profile'**
+  String get profileEdit;
 
   /// No description provided for @settingsTitle.
   ///

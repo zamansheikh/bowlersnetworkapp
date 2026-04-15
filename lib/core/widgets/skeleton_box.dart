@@ -60,3 +60,60 @@ class SkeletonCircle extends StatelessWidget {
     );
   }
 }
+
+/// Card-shaped skeleton for list item placeholders. Matches the web's
+/// `rounded-[14px] border border-border-default bg-bg-surface p-5` pattern.
+class SkeletonCard extends StatelessWidget {
+  const SkeletonCard({super.key, this.height = 96});
+
+  final double height;
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = context.colors;
+    return Container(
+      padding: const EdgeInsets.all(AppSpacing.base),
+      decoration: BoxDecoration(
+        color: colors.bgSurface,
+        borderRadius: AppRadius.lgAll,
+        border: Border.all(color: colors.borderDefault),
+      ),
+      child: Shimmer.fromColors(
+        baseColor: colors.bgSurface,
+        highlightColor: colors.bgSurfaceHover,
+        period: AppDurations.shimmer,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Container(
+              width: 120,
+              height: 12,
+              decoration: BoxDecoration(
+                color: colors.bgSurfaceHover,
+                borderRadius: AppRadius.smAll,
+              ),
+            ),
+            const SizedBox(height: 10),
+            Container(
+              width: double.infinity,
+              height: 8,
+              decoration: BoxDecoration(
+                color: colors.bgSurfaceHover,
+                borderRadius: AppRadius.smAll,
+              ),
+            ),
+            const SizedBox(height: 8),
+            Container(
+              width: 180,
+              height: 8,
+              decoration: BoxDecoration(
+                color: colors.bgSurfaceHover,
+                borderRadius: AppRadius.smAll,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}

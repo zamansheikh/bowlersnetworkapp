@@ -19,8 +19,7 @@ class AppTextStyles {
     Color? color,
     List<FontFeature>? fontFeatures,
   }) {
-    // Geist + system fallback. google_fonts ships Geist as of v6+.
-    return GoogleFonts.inter(
+    return GoogleFonts.geist(
       fontSize: fontSize,
       fontWeight: fontWeight,
       letterSpacing: letterSpacing,
@@ -30,18 +29,45 @@ class AppTextStyles {
     );
   }
 
+  static TextStyle _mono({
+    double fontSize = 14,
+    FontWeight fontWeight = FontWeight.w500,
+    Color? color,
+  }) {
+    return GoogleFonts.geistMono(
+      fontSize: fontSize,
+      fontWeight: fontWeight,
+      color: color,
+      fontFeatures: const [FontFeature.tabularFigures()],
+    );
+  }
+
   // ---------------------------------------------------------------------------
-  // Uncolored primitives — color inherited from DefaultTextStyle / widget
+  // Display / Hero
   // ---------------------------------------------------------------------------
-  static TextStyle get pageTitle => _base(
-        fontSize: 26,
+  static TextStyle get displayHero => _base(
+        fontSize: 36,
         fontWeight: FontWeight.w700,
-        letterSpacing: -0.4,
+        letterSpacing: -1.08, // -0.03em × 36px
+        height: 1.1,
+      );
+
+  static TextStyle get pageTitle => _base(
+        fontSize: 28,
+        fontWeight: FontWeight.w700,
+        letterSpacing: -0.42, // -0.015em × 28px
         height: 1.2,
       );
 
-  static TextStyle get sectionTitle =>
-      _base(fontSize: 16, fontWeight: FontWeight.w600, height: 1.3);
+  // ---------------------------------------------------------------------------
+  // Section + card
+  // ---------------------------------------------------------------------------
+  static TextStyle get sectionTitle => _base(
+        fontSize: 18,
+        fontWeight: FontWeight.w700,
+        letterSpacing: -0.2,
+        height: 1.3,
+      );
 
   static TextStyle get cardTitle =>
       _base(fontSize: 15, fontWeight: FontWeight.w600, height: 1.35);
@@ -51,31 +77,38 @@ class AppTextStyles {
   static TextStyle get bodyMedium =>
       _base(fontSize: 14, fontWeight: FontWeight.w500, height: 1.5);
 
-  static TextStyle get bodySmall => _base(fontSize: 13, height: 1.5);
+  static TextStyle get bodySmall =>
+      _base(fontSize: 13, fontWeight: FontWeight.w500, height: 1.5);
 
   static TextStyle get secondary => _base(fontSize: 12, height: 1.4);
 
+  // ---------------------------------------------------------------------------
+  // Labels — uppercase, tracked out (matches web's `tracking-[0.04em]`)
+  // ---------------------------------------------------------------------------
   static TextStyle get label => _base(
         fontSize: 11,
         fontWeight: FontWeight.w600,
-        letterSpacing: 0.4,
+        letterSpacing: 0.44, // 0.04em × 11px
         height: 1.3,
       );
 
   static TextStyle get micro =>
       _base(fontSize: 10, fontWeight: FontWeight.w500, height: 1.3);
 
-  static TextStyle get number => _base(
-        fontSize: 14,
-        fontFeatures: const [FontFeature.tabularFigures()],
-      );
+  static TextStyle get nano =>
+      _base(fontSize: 9, fontWeight: FontWeight.w600, letterSpacing: 0.36);
 
-  static TextStyle get numberLarge => _base(
-        fontSize: 20,
-        fontWeight: FontWeight.w700,
-        fontFeatures: const [FontFeature.tabularFigures()],
-      );
+  // ---------------------------------------------------------------------------
+  // Tabular numbers (use geistMono so digit widths stay identical)
+  // ---------------------------------------------------------------------------
+  static TextStyle get number => _mono(fontSize: 14);
 
+  static TextStyle get numberLarge =>
+      _mono(fontSize: 24, fontWeight: FontWeight.w700);
+
+  // ---------------------------------------------------------------------------
+  // Button label
+  // ---------------------------------------------------------------------------
   static TextStyle get buttonLabel =>
       _base(fontSize: 13, fontWeight: FontWeight.w600, letterSpacing: 0.1);
 

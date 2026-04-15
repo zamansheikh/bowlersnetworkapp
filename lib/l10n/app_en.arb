@@ -23,6 +23,10 @@
   "actionSearch": "Search",
   "actionSeeAll": "See All",
   "actionViewAll": "View All",
+  "actionSend": "Send",
+  "actionSubmit": "Submit",
+  "actionVerify": "Verify",
+  "actionResend": "Resend code",
 
   "commonLoading": "Loading…",
   "commonSomethingWentWrong": "Something went wrong",
@@ -31,13 +35,10 @@
 
   "onboardingPage1Title": "Welcome to BowlersNetwork",
   "onboardingPage1Description": "The home for every bowler — amateurs, pros, coaches, and fans. Connect, compete, and grow your game.",
-
   "onboardingPage2Title": "Track Every Frame",
   "onboardingPage2Description": "Log games frame-by-frame, analyse pin-leaves, and review your performance across centers, balls, and conditions.",
-
   "onboardingPage3Title": "Join the Community",
   "onboardingPage3Description": "Share posts, watch splits, discuss strategy, and follow your favourite pros — all in one place.",
-
   "onboardingPage4Title": "Earn XP. Climb Ranks.",
   "onboardingPage4Description": "Every game, post, and reaction earns XP. Level up, collect badges, and rise through the leaderboard.",
 
@@ -49,20 +50,62 @@
   "loginPasswordHint": "••••••••",
   "loginForgotPassword": "Forgot password?",
   "loginNoAccount": "Don't have an account?",
+  "loginCredentialRequired": "Enter your email or username",
+  "loginPasswordRequired": "Enter your password",
 
   "signupTitle": "Create your account",
   "signupSubtitle": "Join the bowling community in under a minute.",
+  "signupFirstNameLabel": "First name",
+  "signupLastNameLabel": "Last name",
+  "signupUsernameLabel": "Username",
+  "signupUsernameHint": "4-12 characters, letters and numbers",
+  "signupEmailLabel": "Email",
+  "signupPasswordLabel": "Password",
+  "signupPasswordHint": "At least 8 characters",
+  "signupDobLabel": "Date of birth",
+  "signupIsCoachLabel": "I'm a coach",
+  "signupParentEmailLabel": "Parent's email",
+  "signupParentEmailHint": "We'll email them for consent",
+  "signupStepAccount": "Account",
+  "signupStepVerify": "Verify email",
+  "signupStepProfile": "Your info",
+  "signupVerificationCodeLabel": "Verification code",
+  "signupVerificationSent": "We sent a 6-digit code to {email}",
+  "@signupVerificationSent": {
+    "placeholders": {
+      "email": {"type": "String"}
+    }
+  },
   "signupAlreadyHaveAccount": "Already have an account?",
+  "signupFieldRequired": "This field is required",
+  "signupPasswordTooShort": "Password must be at least 8 characters",
+  "signupInvalidEmail": "Enter a valid email",
+  "signupInvalidUsername": "4-12 characters, letters, numbers, underscores",
+  "signupMustBe13": "You must be at least 13 years old",
+
+  "consentPendingTitle": "Waiting on parent consent",
+  "consentPendingDescription": "We emailed your parent for approval. Once they confirm, your account will unlock automatically.",
+  "consentPendingRefresh": "Check again",
+
+  "recoveryTitle": "Reset your password",
+  "recoverySubtitle": "Enter the email for your account and we'll send you a 6-digit code.",
+  "recoverySentTitle": "Check your email",
+  "recoverySentDescription": "We sent a verification code to {email}.",
+  "@recoverySentDescription": {
+    "placeholders": {
+      "email": {"type": "String"}
+    }
+  },
+  "recoveryNewPasswordLabel": "New password",
+  "recoveryConfirmPasswordLabel": "Confirm password",
+  "recoveryPasswordMismatch": "Passwords don't match",
+  "recoveryDone": "Password updated — sign in with your new password.",
 
   "homeTitle": "Home",
   "homeGreeting": "Welcome, {name}",
   "@homeGreeting": {
-    "description": "Greeting on the home screen with the user's display name",
     "placeholders": {
-      "name": {
-        "type": "String",
-        "example": "Nahian"
-      }
+      "name": {"type": "String"}
     }
   },
 
@@ -71,6 +114,19 @@
   "navGames": "Games",
   "navMessages": "Messages",
   "navProfile": "Profile",
+
+  "profileCompletionBannerTitle": "Complete your profile",
+  "profileCompletionBannerHint": "{percent}% done — finish your profile to unlock the app.",
+  "@profileCompletionBannerHint": {
+    "placeholders": {
+      "percent": {"type": "int"}
+    }
+  },
+  "profileFollowers": "Followers",
+  "profileFollowing": "Following",
+  "profileFollow": "Follow",
+  "profileUnfollow": "Following",
+  "profileEdit": "Edit profile",
 
   "settingsTitle": "Settings",
   "settingsAppearance": "Appearance",

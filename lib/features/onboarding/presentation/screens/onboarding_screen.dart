@@ -9,6 +9,7 @@ import '../../../../core/router/route_names.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/theme/app_text_styles.dart';
 import '../../../../core/widgets/app_button.dart';
+import '../../../../core/widgets/glow_blob.dart';
 import '../../../../l10n/generated/app_localizations.dart';
 import '../../data/onboarding_storage.dart';
 import '../widgets/onboarding_page.dart';
@@ -71,8 +72,8 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
       return;
     }
     _controller.nextPage(
-      duration: AppDurations.medium,
-      curve: Curves.easeOutCubic,
+      duration: AppDurations.long,
+      curve: BNCurves.spring,
     );
   }
 
@@ -80,66 +81,108 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   Widget build(BuildContext context) {
     final colors = context.colors;
     final l10n = context.l10n;
+    final pageAccent = _pages[_currentPage].accent;
 
     return Scaffold(
       backgroundColor: colors.bgPrimary,
-      body: SafeArea(
-        child: Column(
-          children: [
-            _TopBar(
-              onSkip: _isLast ? null : _finish,
-              skipLabel: l10n.actionSkip,
-            ),
-            Expanded(
-              child: PageView.builder(
-                controller: _controller,
-                itemCount: _pages.length,
-                onPageChanged: (i) => setState(() => _currentPage = i),
-                itemBuilder: (_, i) {
-                  final p = _pages[i];
-                  return OnboardingPage(
-                    index: i,
-                    icon: p.icon,
-                    accent: p.accent,
-                    title: p.title(l10n),
-                    description: p.description(l10n),
-                  );
-                },
-              ),
-            ),
-            Padding(
-              padding: const EdgeInsets.symmetric(
-                horizontal: AppSpacing.xl,
-                vertical: AppSpacing.base,
-              ),
-              child: Column(
-                children: [
-                  SmoothPageIndicator(
-                    controller: _controller,
-                    count: _pages.length,
-                    effect: ExpandingDotsEffect(
-                      activeDotColor: _pages[_currentPage].accent,
-                      dotColor: colors.borderStrong,
-                      dotHeight: 6,
-                      dotWidth: 6,
-                      expansionFactor: 4,
-                      spacing: 6,
+      body: Stack(
+        fit: StackFit.expand,
+        children: [
+          // Ambient blobs tinted to the current page's accent color.
+          IgnorePointer(
+            child: Stack(
+              children: [
+                Positioned(
+                  top: -120,
+                  right: -100,
+                  child: AnimatedSwitcher(
+                    duration: AppDurations.long,
+                    child: GlowBlob(
+                      key: ValueKey('orb-top-$_currentPage'),
+                      size: 340,
+                      color: pageAccent,
+                      opacity: 0.09,
                     ),
                   ),
-                  const SizedBox(height: AppSpacing.xl),
-                  AppButton(
-                    label: _isLast ? l10n.actionGetStarted : l10n.actionNext,
-                    onPressed: _next,
-                    expand: true,
-                    size: AppButtonSize.large,
-                    trailingIcon: _isLast ? null : Icons.arrow_forward_rounded,
+                ),
+                Positioned(
+                  bottom: -120,
+                  left: -80,
+                  child: AnimatedSwitcher(
+                    duration: AppDurations.long,
+                    child: GlowBlob(
+                      key: ValueKey('orb-bottom-$_currentPage'),
+                      size: 280,
+                      color: pageAccent,
+                      opacity: 0.05,
+                    ),
                   ),
-                  const SizedBox(height: AppSpacing.sm),
-                ],
-              ),
+                ),
+              ],
             ),
-          ],
-        ),
+          ),
+          SafeArea(
+            child: Column(
+              children: [
+                _TopBar(
+                  onSkip: _isLast ? null : _finish,
+                  skipLabel: l10n.actionSkip,
+                ),
+                Expanded(
+                  child: PageView.builder(
+                    controller: _controller,
+                    itemCount: _pages.length,
+                    onPageChanged: (i) => setState(() => _currentPage = i),
+                    itemBuilder: (_, i) {
+                      final p = _pages[i];
+                      return OnboardingPage(
+                        index: i,
+                        icon: p.icon,
+                        accent: p.accent,
+                        title: p.title(l10n),
+                        description: p.description(l10n),
+                      );
+                    },
+                  ),
+                ),
+                Padding(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: AppSpacing.xl,
+                    vertical: AppSpacing.base,
+                  ),
+                  child: Column(
+                    children: [
+                      SmoothPageIndicator(
+                        controller: _controller,
+                        count: _pages.length,
+                        effect: ExpandingDotsEffect(
+                          activeDotColor: pageAccent,
+                          dotColor: colors.borderStrong,
+                          dotHeight: 6,
+                          dotWidth: 6,
+                          expansionFactor: 4,
+                          spacing: 6,
+                        ),
+                      ),
+                      const SizedBox(height: AppSpacing.xl),
+                      AppButton(
+                        label: _isLast
+                            ? l10n.actionGetStarted
+                            : l10n.actionNext,
+                        onPressed: _next,
+                        expand: true,
+                        size: AppButtonSize.large,
+                        trailingIcon:
+                            _isLast ? null : Icons.arrow_forward_rounded,
+                      ),
+                      const SizedBox(height: AppSpacing.sm),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
       ),
     );
   }

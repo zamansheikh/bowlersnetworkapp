@@ -1,15 +1,20 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../../core/di/injection.dart';
 import '../../../../core/extensions/context_extensions.dart';
 import '../../../../core/router/route_names.dart';
-import '../../../../core/storage/secure_storage_service.dart';
 import '../../../../core/theme/app_spacing.dart';
-import '../../../../core/theme/app_text_styles.dart';
+import '../../../../core/widgets/bn_logo.dart';
+import '../../../../core/widgets/glow_blob.dart';
+import '../../../auth/presentation/bloc/auth_bloc.dart';
 import '../../../onboarding/data/onboarding_storage.dart';
+import '../../../profile/presentation/bloc/profile_bloc.dart';
 
+/// Shown at boot while we hydrate auth state. Once AuthBloc resolves, this
+/// routes to onboarding (first launch), login, profile (incomplete) or home.
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
 
@@ -21,88 +26,75 @@ class _SplashScreenState extends State<SplashScreen> {
   @override
   void initState() {
     super.initState();
-    _route();
+    context.read<AuthBloc>().add(const AuthStarted());
   }
 
-  Future<void> _route() async {
-    // Small delay so the splash animation plays at least once.
-    await Future.delayed(const Duration(milliseconds: 900));
+  Future<void> _handleTransition(AuthStatus status) async {
+    if (status == AuthStatus.unknown) return;
+
+    // Give the splash animation a moment on fast launches.
+    await Future.delayed(const Duration(milliseconds: 650));
     if (!mounted) return;
 
-    final onboarding = getIt<OnboardingStorage>();
-    final secure = getIt<SecureStorageService>();
-
-    final seen = await onboarding.hasSeenOnboarding();
-    if (!mounted) return;
-    if (!seen) {
-      context.go(RouteNames.onboarding);
+    if (status == AuthStatus.unauthenticated) {
+      final seen = await getIt<OnboardingStorage>().hasSeenOnboarding();
+      if (!mounted) return;
+      context.go(seen ? RouteNames.login : RouteNames.onboarding);
       return;
     }
 
-    final token = await secure.getToken();
-    if (!mounted) return;
-    if (token == null || token.isEmpty) {
-      context.go(RouteNames.login);
-    } else {
-      context.go(RouteNames.home);
+    if (status == AuthStatus.requiresConsent) {
+      context.go(RouteNames.consentPending);
+      return;
     }
+
+    context.read<ProfileBloc>().add(const ProfileLoadRequested());
+    context.go(RouteNames.home);
   }
 
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
-    return Scaffold(
-      backgroundColor: colors.bgPrimary,
-      body: Center(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
+
+    return BlocListener<AuthBloc, AuthState>(
+      listenWhen: (prev, next) => prev.status != next.status,
+      listener: (_, state) => _handleTransition(state.status),
+      child: Scaffold(
+        backgroundColor: colors.bgPrimary,
+        body: Stack(
+          fit: StackFit.expand,
           children: [
-            Container(
-              width: 96,
-              height: 96,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                gradient: RadialGradient(
-                  colors: [
-                    colors.accent.withValues(alpha: 0.18),
-                    Colors.transparent,
-                  ],
-                ),
-              ),
-              child: Icon(
-                Icons.sports_cricket_rounded,
-                size: 48,
-                color: colors.accent,
-              ),
-            )
-                .animate(onPlay: (c) => c.repeat(reverse: true))
-                .scale(
-                  begin: const Offset(0.96, 0.96),
-                  end: const Offset(1.04, 1.04),
-                  duration: 1200.ms,
-                  curve: Curves.easeInOut,
-                ),
-            const SizedBox(height: AppSpacing.lg),
-            Text.rich(
-              TextSpan(
+            const AmbientBackground(),
+            Center(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
                 children: [
-                  TextSpan(
-                    text: 'Bowlers',
-                    style: AppTextStyles.pageTitle.copyWith(
-                      color: colors.textPrimary,
-                      fontSize: 22,
-                    ),
-                  ),
-                  TextSpan(
-                    text: 'Network',
-                    style: AppTextStyles.pageTitle.copyWith(
-                      color: colors.accent,
-                      fontSize: 22,
-                    ),
-                  ),
+                  const BnLogoMark(size: 88)
+                      .animate(onPlay: (c) => c.repeat(reverse: true))
+                      .scale(
+                        begin: const Offset(0.96, 0.96),
+                        end: const Offset(1.06, 1.06),
+                        duration: 1400.ms,
+                        curve: Curves.easeInOut,
+                      ),
+                  const SizedBox(height: AppSpacing.lg),
+                  const BnWordmark(fontSize: 22)
+                      .animate()
+                      .fadeIn(
+                        duration: 600.ms,
+                        delay: 200.ms,
+                        curve: BNCurves.spring,
+                      )
+                      .moveY(
+                        begin: 6,
+                        end: 0,
+                        duration: 600.ms,
+                        delay: 200.ms,
+                        curve: BNCurves.spring,
+                      ),
                 ],
               ),
-            ).animate().fadeIn(duration: 600.ms, delay: 200.ms),
+            ),
           ],
         ),
       ),

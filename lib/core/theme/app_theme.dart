@@ -83,7 +83,7 @@ class AppTheme {
         modalBackgroundColor: tokens.bgSurfaceElevated,
         shape: const RoundedRectangleBorder(
           borderRadius: BorderRadius.vertical(
-            top: Radius.circular(AppRadius.lg),
+            top: Radius.circular(AppRadius.xl),
           ),
         ),
       ),
@@ -92,7 +92,7 @@ class AppTheme {
         surfaceTintColor: Colors.transparent,
         elevation: 0,
         shape: RoundedRectangleBorder(
-          borderRadius: AppRadius.lgAll,
+          borderRadius: AppRadius.xlAll,
           side: BorderSide(color: tokens.borderDefault),
         ),
         margin: EdgeInsets.zero,
@@ -102,7 +102,7 @@ class AppTheme {
         surfaceTintColor: Colors.transparent,
         elevation: 0,
         shape: RoundedRectangleBorder(
-          borderRadius: AppRadius.lgAll,
+          borderRadius: AppRadius.xlAll,
           side: BorderSide(color: tokens.borderDefault),
         ),
       ),
@@ -154,7 +154,7 @@ class AppTheme {
         surfaceTintColor: Colors.transparent,
         elevation: 0,
         shape: const RoundedRectangleBorder(
-          borderRadius: BorderRadius.horizontal(right: Radius.circular(AppRadius.lg)),
+          borderRadius: BorderRadius.horizontal(right: Radius.circular(AppRadius.xl)),
         ),
       ),
       progressIndicatorTheme: ProgressIndicatorThemeData(

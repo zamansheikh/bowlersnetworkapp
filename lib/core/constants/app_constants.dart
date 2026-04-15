@@ -22,6 +22,7 @@ class StorageKeys {
   static const String authToken = 'bn_auth_token';
   static const String userId = 'bn_user_id';
   static const String isPro = 'bn_is_pro';
+  static const String requiresConsent = 'bn_requires_consent';
 
   // Theme + locale
   static const String themeMode = 'bn_theme'; // light | dark | system
