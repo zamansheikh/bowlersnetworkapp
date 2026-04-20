@@ -1,6 +1,6 @@
 import 'dart:async';
 
-import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../features/auth/presentation/bloc/auth_bloc.dart';
@@ -8,9 +8,13 @@ import '../../features/auth/presentation/screens/consent_pending_screen.dart';
 import '../../features/auth/presentation/screens/login_screen.dart';
 import '../../features/auth/presentation/screens/password_recovery_screen.dart';
 import '../../features/auth/presentation/screens/signup_screen.dart';
+import '../../features/games/domain/entities/session.dart';
 import '../../features/games/presentation/screens/games_screen.dart';
+import '../../features/games/presentation/screens/session_detail_screen.dart';
 import '../../features/home/presentation/screens/home_screen.dart';
+import '../../features/messages/domain/entities/conversation.dart';
 import '../../features/messages/presentation/screens/messages_screen.dart';
+import '../../features/messages/presentation/screens/thread_screen.dart';
 import '../../features/newsfeed/presentation/screens/feed_screen.dart';
 import '../../features/onboarding/presentation/screens/onboarding_screen.dart';
 import '../../features/profile/presentation/screens/profile_screen.dart';
@@ -114,12 +118,40 @@ GoRouter buildAppRouter(AuthBloc authBloc) {
             GoRoute(
               path: RouteNames.games,
               builder: (_, _) => const GamesScreen(),
+              routes: [
+                GoRoute(
+                  path: 'sessions/:uid',
+                  builder: (context, state) {
+                    final session = state.extra as Session?;
+                    if (session == null) {
+                      return const Scaffold(
+                        body: Center(child: Text('Session not found')),
+                      );
+                    }
+                    return SessionDetailScreen(session: session);
+                  },
+                ),
+              ],
             ),
           ]),
           StatefulShellBranch(routes: [
             GoRoute(
               path: RouteNames.messages,
               builder: (_, _) => const MessagesScreen(),
+              routes: [
+                GoRoute(
+                  path: ':uid',
+                  builder: (context, state) {
+                    final c = state.extra as ConversationListItem?;
+                    if (c == null) {
+                      return const Scaffold(
+                        body: Center(child: Text('Conversation not found')),
+                      );
+                    }
+                    return ThreadScreen(conversation: c);
+                  },
+                ),
+              ],
             ),
           ]),
           StatefulShellBranch(routes: [

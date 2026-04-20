@@ -88,4 +88,32 @@ class Endpoints {
 
   // Reporting
   static const String report = '/api/report';
+
+  // Games
+  static const String gamesSessionsList = '/api/games/sessions/list';
+  static const String gamesSessionsCreate = '/api/games/sessions';
+  static const String gamesStats = '/api/games/stats';
+  static const String gamesEquipment = '/api/games/equipment';
+  static String gamesSessionDetail(String uid) =>
+      '/api/games/sessions/$uid';
+  static String gamesSessionDelete(String uid) =>
+      '/api/games/sessions/$uid/delete';
+  static String gamesSessionSubmitGame(String uid) =>
+      '/api/games/sessions/$uid/submit-game';
+  static String gameDetail(int gameId) => '/api/games/$gameId';
+  static String gameShared(int gameId) => '/api/games/shared/$gameId';
+
+  // Messages
+  static const String conversationsList = '/api/messages/conversations';
+  static String conversationDetail(String uid) =>
+      '/api/messages/conversations/$uid';
+  static String conversationMessages(String uid) =>
+      '/api/messages/conversations/$uid/messages';
+  static String conversationSend(String uid) =>
+      '/api/messages/conversations/$uid/messages/send';
+  static String conversationRead(String uid) =>
+      '/api/messages/conversations/$uid/read';
+  static const String createPrivateConversation = '/api/messages/private';
+  static const String createGroupConversation = '/api/messages/group';
+  static String deleteMessage(String uid) => '/api/messages/$uid/delete';
 }

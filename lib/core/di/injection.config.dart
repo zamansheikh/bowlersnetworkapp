@@ -28,6 +28,21 @@ import '../../features/auth/domain/usecases/signup_usecase.dart' as _i57;
 import '../../features/auth/domain/usecases/validate_registration_usecase.dart'
     as _i416;
 import '../../features/auth/presentation/bloc/auth_bloc.dart' as _i797;
+import '../../features/games/data/datasources/games_remote_datasource.dart'
+    as _i771;
+import '../../features/games/data/repositories/games_repository_impl.dart'
+    as _i438;
+import '../../features/games/domain/repositories/games_repository.dart'
+    as _i604;
+import '../../features/games/presentation/bloc/games_bloc.dart' as _i974;
+import '../../features/messages/data/datasources/messages_remote_datasource.dart'
+    as _i182;
+import '../../features/messages/data/repositories/messages_repository_impl.dart'
+    as _i20;
+import '../../features/messages/domain/repositories/messages_repository.dart'
+    as _i794;
+import '../../features/messages/presentation/bloc/conversations_bloc.dart'
+    as _i454;
 import '../../features/newsfeed/data/datasources/newsfeed_remote_datasource.dart'
     as _i452;
 import '../../features/newsfeed/data/repositories/newsfeed_repository_impl.dart'
@@ -86,6 +101,12 @@ extension GetItInjectableX on _i174.GetIt {
     gh.factory<_i161.AuthRemoteDatasource>(
       () => _i161.AuthRemoteDatasource(gh<_i361.Dio>()),
     );
+    gh.factory<_i771.GamesRemoteDatasource>(
+      () => _i771.GamesRemoteDatasource(gh<_i361.Dio>()),
+    );
+    gh.factory<_i182.MessagesRemoteDatasource>(
+      () => _i182.MessagesRemoteDatasource(gh<_i361.Dio>()),
+    );
     gh.factory<_i452.NewsfeedRemoteDatasource>(
       () => _i452.NewsfeedRemoteDatasource(gh<_i361.Dio>()),
     );
@@ -96,11 +117,17 @@ extension GetItInjectableX on _i174.GetIt {
       () => networkModule.uploadDio(),
       instanceName: 'uploadDio',
     );
+    gh.lazySingleton<_i794.MessagesRepository>(
+      () => _i20.MessagesRepositoryImpl(gh<_i182.MessagesRemoteDatasource>()),
+    );
     gh.lazySingleton<_i984.CloudUploadService>(
       () => _i984.CloudUploadService(
         gh<_i361.Dio>(),
         gh<_i361.Dio>(instanceName: 'uploadDio'),
       ),
+    );
+    gh.lazySingleton<_i604.GamesRepository>(
+      () => _i438.GamesRepositoryImpl(gh<_i771.GamesRemoteDatasource>()),
     );
     gh.lazySingleton<_i787.AuthRepository>(
       () => _i153.AuthRepositoryImpl(
@@ -109,8 +136,14 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i744.LocalStorageService>(),
       ),
     );
+    gh.factory<_i974.GamesBloc>(
+      () => _i974.GamesBloc(gh<_i604.GamesRepository>()),
+    );
     gh.lazySingleton<_i819.NewsfeedRepository>(
       () => _i306.NewsfeedRepositoryImpl(gh<_i452.NewsfeedRemoteDatasource>()),
+    );
+    gh.factory<_i454.ConversationsBloc>(
+      () => _i454.ConversationsBloc(gh<_i794.MessagesRepository>()),
     );
     gh.lazySingleton<_i894.ProfileRepository>(
       () => _i334.ProfileRepositoryImpl(gh<_i327.ProfileRemoteDatasource>()),
