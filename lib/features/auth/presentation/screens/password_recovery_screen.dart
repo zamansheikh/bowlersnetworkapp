@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:pinput/pinput.dart';
 
 import '../../../../core/di/injection.dart';
@@ -120,7 +121,7 @@ class _PasswordRecoveryScreenState extends State<PasswordRecoveryScreen> {
       backgroundColor: colors.bgPrimary,
       appBar: AppBar(
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back_rounded),
+          icon: const Icon(LucideIcons.arrowLeft),
           onPressed: () => context.pop(),
         ),
       ),

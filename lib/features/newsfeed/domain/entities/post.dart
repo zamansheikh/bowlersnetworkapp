@@ -1,15 +1,20 @@
 import 'package:equatable/equatable.dart';
 
-/// Reaction enum aligned with the backend's newsfeed reactions.
+/// Reaction enum aligned with the backend's newsfeed reactions. Mirrors the
+/// web frontend's 6 reactions — emoji + colored text variant.
 enum ReactionType {
-  like('like'),
-  fire('fire'),
-  strike('strike'),
-  clap('clap'),
-  wow('wow');
+  like('like', '❤️', 'Like', 0xFFEF4444),
+  fire('fire', '🔥', 'Fire', 0xFFF97316),
+  strike('strike', '🎳', 'Strike', 0xFFEAB308),
+  clap('clap', '👏', 'Clap', 0xFF3B82F6),
+  wow('wow', '😮', 'Wow', 0xFFA855F7),
+  haha('haha', '😂', 'Haha', 0xFF22C55E);
 
-  const ReactionType(this.apiValue);
+  const ReactionType(this.apiValue, this.emoji, this.label, this.colorValue);
   final String apiValue;
+  final String emoji;
+  final String label;
+  final int colorValue;
 
   static ReactionType? fromString(String? s) {
     if (s == null) return null;

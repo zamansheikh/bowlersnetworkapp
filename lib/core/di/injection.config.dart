@@ -170,10 +170,7 @@ extension GetItInjectableX on _i174.GetIt {
       () => _i981.CheckProfileCompletionUseCase(gh<_i894.ProfileRepository>()),
     );
     gh.lazySingleton<_i469.ProfileBloc>(
-      () => _i469.ProfileBloc(
-        gh<_i981.GetMyProfileUseCase>(),
-        gh<_i981.CheckProfileCompletionUseCase>(),
-      ),
+      () => _i469.ProfileBloc(gh<_i894.ProfileRepository>()),
     );
     return this;
   }

@@ -4,7 +4,9 @@ import 'package:injectable/injectable.dart';
 
 import '../../../../core/error/exceptions.dart';
 import '../../../../core/error/failures.dart';
+import '../../domain/entities/brand.dart';
 import '../../domain/entities/profile.dart';
+import '../../domain/entities/xp_level_info.dart';
 import '../../domain/repositories/profile_repository.dart';
 import '../datasources/profile_remote_datasource.dart';
 import '../models/profile_completion_dto.dart';
@@ -30,6 +32,34 @@ class ProfileRepositoryImpl implements ProfileRepository {
         return _completionToEntity(dto);
       });
 
+  @override
+  Future<Either<Failure, XpLevelInfo>> getXpLevelInfo() => _guard(() async {
+        final dto = await _remote.getXpLevelInfo();
+        return XpLevelInfo(
+          level: dto.level,
+          totalXp: dto.totalXp,
+          progressPercentage: dto.progressPercentage,
+          rank: dto.rank,
+          tier: dto.tier,
+          rankDisplay: dto.rankDisplay,
+          badgeIconUrl: dto.badgeIconUrl,
+        );
+      });
+
+  @override
+  Future<Either<Failure, List<Brand>>> getBrands() => _guard(() async {
+        final list = await _remote.getBrands();
+        return list
+            .map((b) => Brand(
+                  id: b.brandId,
+                  name: b.name,
+                  type: b.brandType,
+                  logoUrl: b.logoUrl,
+                  isFavorite: b.isFavorite,
+                ))
+            .toList(growable: false);
+      });
+
   Profile _toEntity(ProfileDto dto) => Profile(
         user: ProfileUser(
           id: dto.user.id,
@@ -42,8 +72,29 @@ class ProfileRepositoryImpl implements ProfileRepository {
         isComplete: dto.isComplete,
         profilePictureUrl: dto.profileMedia?.profilePictureUrl,
         coverPictureUrl: dto.profileMedia?.coverPictureUrl,
+        introVideoUrl: dto.profileMedia?.introVideoUrl,
+        bio: dto.bio?.content,
+        nickname: dto.nickname?.name,
+        gender: dto.gender?.value,
+        birthdate: dto.birthdate?.dateStr ?? dto.birthdate?.dateOfBirth,
+        age: dto.birthdate?.age,
+        address: dto.address?.location?.address,
+        zipCode: dto.address?.location?.zipCode,
+        homeCenter: dto.homeCenter?.centerName,
+        handedness: dto.ballHandlingStyle?.handedness,
+        ballCarry: dto.ballHandlingStyle?.ballCarry,
+        grip: dto.ballHandlingStyle?.grip,
+        ballHandlingDescription: dto.ballHandlingStyle?.description,
+        contactEmail: dto.contactInfo?.email,
+        average: dto.officialGameStat?.average,
+        highGame: dto.officialGameStat?.highGame,
+        highSeries: dto.officialGameStat?.highSeries,
+        experience: dto.officialGameStat?.experience,
+        isCoach: dto.criticalInfo?.isCoach ?? false,
         followerCount: dto.followerCount,
         followingCount: dto.followingCount,
+        isFollowing: dto.isFollowing,
+        canFollow: dto.canFollow,
       );
 
   ProfileCompletion _completionToEntity(ProfileCompletionDto dto) =>

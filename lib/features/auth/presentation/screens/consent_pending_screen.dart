@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 import '../../../../core/extensions/context_extensions.dart';
 import '../../../../core/theme/app_spacing.dart';
@@ -34,7 +35,7 @@ class ConsentPendingScreen extends StatelessWidget {
                     color: colors.accent.withValues(alpha: 0.12),
                   ),
                   child: Icon(
-                    Icons.family_restroom_rounded,
+                    LucideIcons.users,
                     size: 48,
                     color: colors.accent,
                   ),
@@ -68,7 +69,7 @@ class ConsentPendingScreen extends StatelessWidget {
               const Spacer(flex: 2),
               AppButton(
                 label: l10n.consentPendingRefresh,
-                icon: Icons.refresh_rounded,
+                icon: LucideIcons.refreshCw,
                 expand: true,
                 onPressed: () {
                   context.read<AuthBloc>().add(const AuthStarted());

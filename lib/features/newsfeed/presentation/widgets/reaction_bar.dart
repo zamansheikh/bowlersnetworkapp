@@ -1,12 +1,16 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 import '../../../../core/extensions/context_extensions.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/theme/app_text_styles.dart';
 import '../../domain/entities/post.dart';
 
-/// Row of action buttons beneath a post: react (primary), comment, save,
-/// share. Designed to be ~44dp tall to meet touch targets.
+/// Engagement row beneath a post — mirrors the web frontend's 4-column
+/// pattern: [Reactions] [Comments] [Shares] [Save].
+///
+/// Tap the like button to toggle `Like`. Long-press opens a horizontal
+/// picker of all 6 reactions (matches web's hover-to-open picker).
 class ReactionBar extends StatelessWidget {
   const ReactionBar({
     super.key,
@@ -26,51 +30,76 @@ class ReactionBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
-    final reaction = post.reaction;
 
-    // For now tap cycles through like as the default reaction. Long-press
-    // opens the reaction picker (see [_ReactionPicker]).
-    return Row(
-      children: [
-        _ActionButton(
-          icon: reaction == null
-              ? Icons.favorite_border_rounded
-              : Icons.favorite_rounded,
-          label: _compactNumber(post.likesCount),
-          active: post.hasReacted,
-          activeColor: _colorForReaction(reaction, colors.accent),
-          onTap: () => onReact(reaction ?? ReactionType.like),
-          onLongPress: () => _pickReaction(context),
-        ),
-        _ActionButton(
-          icon: Icons.mode_comment_outlined,
-          label: _compactNumber(post.commentsCount),
-          active: false,
-          activeColor: colors.accent,
-          onTap: onComment,
-        ),
-        _ActionButton(
-          icon: post.hasSaved
-              ? Icons.bookmark_rounded
-              : Icons.bookmark_border_rounded,
-          label: _compactNumber(post.savesCount),
-          active: post.hasSaved,
-          activeColor: colors.accent,
-          onTap: onSave,
-        ),
-        const Spacer(),
-        _ActionButton(
-          icon: Icons.ios_share_rounded,
-          label: _compactNumber(post.sharesCount),
-          active: false,
-          activeColor: colors.accent,
-          onTap: onShare,
-        ),
-      ],
+    return Container(
+      margin: const EdgeInsets.only(top: AppSpacing.sm),
+      padding: const EdgeInsets.only(top: AppSpacing.sm),
+      decoration: BoxDecoration(
+        border: Border(top: BorderSide(color: colors.borderDefault)),
+      ),
+      child: Row(
+        children: [
+          // ── Reactions column ──
+          Expanded(
+            child: Row(
+              children: [
+                _LikeButton(
+                  post: post,
+                  onReact: onReact,
+                  onPickReaction: () => _pickReaction(context),
+                ),
+                if (post.likesCount > 0) ...[
+                  const SizedBox(width: 6),
+                  _StackedReactions(post: post),
+                  const SizedBox(width: 6),
+                  Text(
+                    _compactNumber(post.likesCount),
+                    style: AppTextStyles.secondary.copyWith(
+                      color: colors.textSecondary,
+                    ),
+                  ),
+                ],
+              ],
+            ),
+          ),
+          // ── Comments ──
+          _IconCountButton(
+            icon: post.commentsCount > 0
+                ? Icons.mode_comment_rounded
+                : Icons.mode_comment_outlined,
+            active: false,
+            activeColor: colors.accent,
+            count: post.commentsCount,
+            onTap: onComment,
+          ),
+          const SizedBox(width: AppSpacing.sm),
+          // ── Share ──
+          _IconCountButton(
+            icon: Icons.ios_share_rounded,
+            active: false,
+            activeColor: colors.accent,
+            count: post.sharesCount,
+            onTap: onShare,
+          ),
+          const SizedBox(width: AppSpacing.sm),
+          // ── Save ──
+          _IconCountButton(
+            icon: post.hasSaved
+                ? Icons.bookmark_rounded
+                : Icons.bookmark_border_rounded,
+            active: post.hasSaved,
+            activeColor: colors.accent,
+            count: post.savesCount,
+            onTap: onSave,
+          ),
+        ],
+      ),
     );
   }
 
   Future<void> _pickReaction(BuildContext context) async {
+    await HapticFeedback.mediumImpact();
+    if (!context.mounted) return;
     final picked = await showModalBottomSheet<ReactionType>(
       context: context,
       backgroundColor: Colors.transparent,
@@ -78,41 +107,80 @@ class ReactionBar extends StatelessWidget {
     );
     if (picked != null) onReact(picked);
   }
+}
 
-  Color _colorForReaction(ReactionType? r, Color accent) {
-    switch (r) {
-      case ReactionType.like:
-        return Colors.redAccent;
-      case ReactionType.fire:
-        return Colors.orangeAccent;
-      case ReactionType.strike:
-        return accent;
-      case ReactionType.clap:
-        return Colors.amberAccent;
-      case ReactionType.wow:
-        return Colors.purpleAccent;
-      case null:
-        return accent;
-    }
+// =============================================================================
+class _LikeButton extends StatelessWidget {
+  const _LikeButton({
+    required this.post,
+    required this.onReact,
+    required this.onPickReaction,
+  });
+
+  final Post post;
+  final ValueChanged<ReactionType> onReact;
+  final VoidCallback onPickReaction;
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = context.colors;
+    final r = post.reaction;
+    final active = r != null;
+    return SizedBox(
+      width: 36,
+      height: 36,
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          borderRadius: AppRadius.smAll,
+          onTap: () => onReact(r ?? ReactionType.like),
+          onLongPress: onPickReaction,
+          child: Center(
+            child: active
+                ? Text(r.emoji, style: const TextStyle(fontSize: 20))
+                : Icon(
+                    Icons.favorite_border_rounded,
+                    size: 20,
+                    color: colors.textSecondary,
+                  ),
+          ),
+        ),
+      ),
+    );
   }
 }
 
-class _ActionButton extends StatelessWidget {
-  const _ActionButton({
+class _StackedReactions extends StatelessWidget {
+  const _StackedReactions({required this.post});
+  final Post post;
+
+  @override
+  Widget build(BuildContext context) {
+    // Always show the user's reaction first (if any). We don't get per-post
+    // reaction breakdown from the list endpoint yet, so we fall back to
+    // showing Like as the "top" reaction when the viewer hasn't reacted.
+    final primary = post.reaction ?? ReactionType.like;
+    return Text(
+      primary.emoji,
+      style: const TextStyle(fontSize: 14, height: 1),
+    );
+  }
+}
+
+class _IconCountButton extends StatelessWidget {
+  const _IconCountButton({
     required this.icon,
-    required this.label,
     required this.active,
     required this.activeColor,
+    required this.count,
     required this.onTap,
-    this.onLongPress,
   });
 
   final IconData icon;
-  final String label;
   final bool active;
   final Color activeColor;
+  final int count;
   final VoidCallback onTap;
-  final VoidCallback? onLongPress;
 
   @override
   Widget build(BuildContext context) {
@@ -121,9 +189,8 @@ class _ActionButton extends StatelessWidget {
     return Material(
       color: Colors.transparent,
       child: InkWell(
+        borderRadius: AppRadius.smAll,
         onTap: onTap,
-        onLongPress: onLongPress,
-        borderRadius: AppRadius.mdAll,
         child: Padding(
           padding: const EdgeInsets.symmetric(
             horizontal: AppSpacing.sm,
@@ -133,11 +200,13 @@ class _ActionButton extends StatelessWidget {
             mainAxisSize: MainAxisSize.min,
             children: [
               Icon(icon, size: 18, color: color),
-              const SizedBox(width: 6),
-              Text(
-                label,
-                style: AppTextStyles.bodySmall.copyWith(color: color),
-              ),
+              if (count > 0) ...[
+                const SizedBox(width: 6),
+                Text(
+                  _compactNumber(count),
+                  style: AppTextStyles.secondary.copyWith(color: color),
+                ),
+              ],
             ],
           ),
         ),
@@ -146,42 +215,40 @@ class _ActionButton extends StatelessWidget {
   }
 }
 
+// =============================================================================
 class _ReactionPicker extends StatelessWidget {
   const _ReactionPicker();
 
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
-    const reactions = [
-      (ReactionType.like, Icons.favorite_rounded, 'Like', Colors.redAccent),
-      (ReactionType.fire, Icons.local_fire_department_rounded, 'Fire',
-          Colors.orangeAccent),
-      (ReactionType.strike, Icons.bolt_rounded, 'Strike', Color(0xFF8BC342)),
-      (ReactionType.clap, Icons.emoji_events_rounded, 'Clap',
-          Colors.amberAccent),
-      (ReactionType.wow, Icons.auto_awesome_rounded, 'Wow',
-          Colors.purpleAccent),
-    ];
     return SafeArea(
       top: false,
       child: Container(
+        margin: const EdgeInsets.all(AppSpacing.base),
+        padding: const EdgeInsets.symmetric(
+          horizontal: AppSpacing.md,
+          vertical: AppSpacing.lg,
+        ),
         decoration: BoxDecoration(
           color: colors.bgSurfaceElevated,
-          borderRadius: const BorderRadius.vertical(
-            top: Radius.circular(AppRadius.xl),
-          ),
+          borderRadius: AppRadius.xlAll,
+          border: Border.all(color: colors.borderDefault),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withValues(alpha: 0.3),
+              blurRadius: 24,
+              offset: const Offset(0, 8),
+            ),
+          ],
         ),
-        padding: const EdgeInsets.all(AppSpacing.lg),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceAround,
           children: [
-            for (final r in reactions)
+            for (final r in ReactionType.values)
               _ReactionOption(
-                type: r.$1,
-                icon: r.$2,
-                label: r.$3,
-                color: r.$4,
-                onTap: () => Navigator.of(context).pop(r.$1),
+                type: r,
+                onTap: () => Navigator.of(context).pop(r),
               ),
           ],
         ),
@@ -191,18 +258,9 @@ class _ReactionPicker extends StatelessWidget {
 }
 
 class _ReactionOption extends StatelessWidget {
-  const _ReactionOption({
-    required this.type,
-    required this.icon,
-    required this.label,
-    required this.color,
-    required this.onTap,
-  });
+  const _ReactionOption({required this.type, required this.onTap});
 
   final ReactionType type;
-  final IconData icon;
-  final String label;
-  final Color color;
   final VoidCallback onTap;
 
   @override
@@ -211,24 +269,19 @@ class _ReactionOption extends StatelessWidget {
       color: Colors.transparent,
       child: InkWell(
         borderRadius: AppRadius.lgAll,
-        onTap: onTap,
+        onTap: () {
+          HapticFeedback.lightImpact();
+          onTap();
+        },
         child: Padding(
           padding: const EdgeInsets.all(AppSpacing.sm),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Container(
-                width: 40,
-                height: 40,
-                decoration: BoxDecoration(
-                  color: color.withValues(alpha: 0.15),
-                  shape: BoxShape.circle,
-                ),
-                child: Icon(icon, color: color, size: 22),
-              ),
+              Text(type.emoji, style: const TextStyle(fontSize: 30)),
               const SizedBox(height: 4),
               Text(
-                label,
+                type.label,
                 style: AppTextStyles.micro.copyWith(
                   color: context.colors.textSecondary,
                 ),
@@ -243,6 +296,8 @@ class _ReactionOption extends StatelessWidget {
 
 String _compactNumber(int n) {
   if (n < 1000) return '$n';
-  if (n < 1000000) return '${(n / 1000).toStringAsFixed(n % 1000 >= 100 ? 1 : 0)}K';
+  if (n < 1000000) {
+    return '${(n / 1000).toStringAsFixed(n % 1000 >= 100 ? 1 : 0)}K';
+  }
   return '${(n / 1000000).toStringAsFixed(1)}M';
 }

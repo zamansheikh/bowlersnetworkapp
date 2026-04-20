@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 import '../../../../core/extensions/context_extensions.dart';
 import '../../../../core/theme/app_spacing.dart';
@@ -68,7 +69,7 @@ class AuthErrorBanner extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Icon(
-                    Icons.error_outline_rounded,
+                    LucideIcons.circleAlert,
                     size: 14,
                     color: colors.error,
                   ),

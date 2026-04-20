@@ -22,6 +22,9 @@ class ProfileUser extends Equatable {
   List<Object?> get props => [id, firstName, lastName, username, isPro];
 }
 
+/// Flat bundle of everything the mobile profile screen needs. Deep
+/// sub-models stay as optional fields so we can render null-safe when the
+/// user hasn't filled them in yet.
 class Profile extends Equatable {
   const Profile({
     required this.user,
@@ -29,8 +32,29 @@ class Profile extends Equatable {
     required this.isComplete,
     this.profilePictureUrl,
     this.coverPictureUrl,
+    this.introVideoUrl,
+    this.bio,
+    this.nickname,
+    this.gender,
+    this.birthdate,
+    this.age,
+    this.address,
+    this.zipCode,
+    this.homeCenter,
+    this.handedness,
+    this.ballCarry,
+    this.grip,
+    this.ballHandlingDescription,
+    this.contactEmail,
+    this.average,
+    this.highGame,
+    this.highSeries,
+    this.experience,
+    this.isCoach = false,
     this.followerCount = 0,
     this.followingCount = 0,
+    this.isFollowing,
+    this.canFollow,
   });
 
   final ProfileUser user;
@@ -38,8 +62,38 @@ class Profile extends Equatable {
   final bool isComplete;
   final String? profilePictureUrl;
   final String? coverPictureUrl;
+  final String? introVideoUrl;
+
+  final String? bio;
+  final String? nickname;
+  final String? gender;
+  final String? birthdate;
+  final int? age;
+  final String? address;
+  final String? zipCode;
+  final String? homeCenter;
+
+  final String? handedness;
+  final String? ballCarry;
+  final String? grip;
+  final String? ballHandlingDescription;
+
+  final String? contactEmail;
+
+  final num? average;
+  final int? highGame;
+  final int? highSeries;
+  final int? experience;
+  final bool isCoach;
+
   final int followerCount;
   final int followingCount;
+
+  final bool? isFollowing;
+  final bool? canFollow;
+
+  bool get hasBallHandling =>
+      handedness != null || ballCarry != null || grip != null;
 
   @override
   List<Object?> get props => [
@@ -48,8 +102,24 @@ class Profile extends Equatable {
         isComplete,
         profilePictureUrl,
         coverPictureUrl,
+        bio,
+        nickname,
+        gender,
+        birthdate,
+        address,
+        homeCenter,
+        handedness,
+        ballCarry,
+        grip,
+        contactEmail,
+        average,
+        highGame,
+        highSeries,
+        experience,
+        isCoach,
         followerCount,
         followingCount,
+        isFollowing,
       ];
 }
 

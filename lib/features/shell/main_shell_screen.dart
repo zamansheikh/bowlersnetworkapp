@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 import '../../core/extensions/context_extensions.dart';
 import '../../core/theme/app_spacing.dart';
@@ -35,31 +36,31 @@ class MainShellScreen extends StatelessWidget {
             child: Row(
               children: [
                 _NavItem(
-                  icon: Icons.home_rounded,
+                  icon: LucideIcons.house,
                   label: l10n.navHome,
                   active: shell.currentIndex == 0,
                   onTap: () => _goBranch(0),
                 ),
                 _NavItem(
-                  icon: Icons.newspaper_rounded,
+                  icon: LucideIcons.newspaper,
                   label: l10n.navNewsfeed,
                   active: shell.currentIndex == 1,
                   onTap: () => _goBranch(1),
                 ),
                 _NavItem(
-                  icon: Icons.track_changes_rounded,
+                  icon: LucideIcons.target,
                   label: l10n.navGames,
                   active: shell.currentIndex == 2,
                   onTap: () => _goBranch(2),
                 ),
                 _NavItem(
-                  icon: Icons.chat_bubble_outline_rounded,
+                  icon: LucideIcons.messageCircle,
                   label: l10n.navMessages,
                   active: shell.currentIndex == 3,
                   onTap: () => _goBranch(3),
                 ),
                 _NavItem(
-                  icon: Icons.person_outline_rounded,
+                  icon: LucideIcons.user,
                   label: l10n.navProfile,
                   active: shell.currentIndex == 4,
                   onTap: () => _goBranch(4),
@@ -114,7 +115,7 @@ class _NavItem extends StatelessWidget {
                   scale: active ? 1.05 : 1.0,
                   duration: AppDurations.short,
                   curve: BNCurves.spring,
-                  child: Icon(icon, color: color, size: 22),
+                  child: Icon(icon, color: color, size: 20),
                 ),
                 const SizedBox(height: 4),
                 AnimatedDefaultTextStyle(

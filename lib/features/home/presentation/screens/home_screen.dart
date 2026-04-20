@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/extensions/context_extensions.dart';
@@ -39,11 +40,11 @@ class HomeScreen extends StatelessWidget {
         actions: [
           IconButton(
             onPressed: () {},
-            icon: const Icon(Icons.search_rounded, size: 22),
+            icon: const Icon(LucideIcons.search, size: 20),
           ),
           IconButton(
             onPressed: () {},
-            icon: const Icon(Icons.notifications_outlined, size: 22),
+            icon: const Icon(LucideIcons.bell, size: 20),
           ),
           const SizedBox(width: AppSpacing.sm),
         ],
@@ -84,7 +85,7 @@ class HomeScreen extends StatelessWidget {
                     ),
                 const SizedBox(height: AppSpacing.base),
                 BentoCard(
-                  icon: Icons.newspaper_rounded,
+                  icon: LucideIcons.newspaper,
                   iconColor: AppColors.sectionNewsfeed,
                   title: l10n.navNewsfeed,
                   subtitle: 'Latest posts from your network',
@@ -112,7 +113,7 @@ class HomeScreen extends StatelessWidget {
                     ),
                 const SizedBox(height: AppSpacing.md),
                 BentoCard(
-                  icon: Icons.track_changes_rounded,
+                  icon: LucideIcons.target,
                   iconColor: AppColors.sectionEvents,
                   title: l10n.navGames,
                   subtitle: 'Track your last sessions',
@@ -140,7 +141,7 @@ class HomeScreen extends StatelessWidget {
                     ),
                 const SizedBox(height: AppSpacing.md),
                 BentoCard(
-                  icon: Icons.emoji_events_rounded,
+                  icon: LucideIcons.trophy,
                   iconColor: AppColors.sectionLeaderboard,
                   title: 'Leaderboard',
                   subtitle: 'Top bowlers this week',

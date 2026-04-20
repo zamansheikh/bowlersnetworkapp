@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 import '../../../../core/extensions/context_extensions.dart';
 import '../../../../core/router/route_names.dart';
@@ -102,7 +103,7 @@ class _LoginScreenState extends State<LoginScreen> {
                                     large: true,
                                     keyboardType: TextInputType.emailAddress,
                                     prefixIcon: Icon(
-                                      Icons.alternate_email_rounded,
+                                      LucideIcons.atSign,
                                       size: 18,
                                       color: colors.textTertiary,
                                     ),
@@ -119,7 +120,7 @@ class _LoginScreenState extends State<LoginScreen> {
                                     large: true,
                                     obscure: _obscure,
                                     prefixIcon: Icon(
-                                      Icons.lock_outline_rounded,
+                                      LucideIcons.lock,
                                       size: 18,
                                       color: colors.textTertiary,
                                     ),
@@ -128,8 +129,8 @@ class _LoginScreenState extends State<LoginScreen> {
                                           setState(() => _obscure = !_obscure),
                                       icon: Icon(
                                         _obscure
-                                            ? Icons.visibility_outlined
-                                            : Icons.visibility_off_outlined,
+                                            ? LucideIcons.eye
+                                            : LucideIcons.eyeOff,
                                         size: 18,
                                         color: colors.textTertiary,
                                       ),
@@ -175,7 +176,7 @@ class _LoginScreenState extends State<LoginScreen> {
                                     size: AppButtonSize.large,
                                     trailingIcon: state.processing
                                         ? null
-                                        : Icons.arrow_forward_rounded,
+                                        : LucideIcons.arrowRight,
                                   ),
                                   const SizedBox(height: AppSpacing.base),
                                   Row(

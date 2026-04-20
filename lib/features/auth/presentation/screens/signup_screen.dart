@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:pinput/pinput.dart';
 
 import '../../../../core/di/injection.dart';
@@ -288,7 +289,7 @@ class _SignupScreenState extends State<SignupScreen> {
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back_rounded),
+          icon: const Icon(LucideIcons.arrowLeft),
           onPressed: () {
             if (_step == _SignupStep.verify) {
               setState(() => _step = _SignupStep.register);
@@ -402,7 +403,7 @@ class _SignupScreenState extends State<SignupScreen> {
             FilteringTextInputFormatter.allow(RegExp(r'[a-zA-Z0-9_]')),
             LengthLimitingTextInputFormatter(12),
           ],
-          prefixIcon: Icon(Icons.alternate_email_rounded,
+          prefixIcon: Icon(LucideIcons.atSign,
               size: 18, color: colors.textTertiary),
           trailing: _UsernameIndicator(
             valid: _usernameFormatValid,
@@ -416,7 +417,7 @@ class _SignupScreenState extends State<SignupScreen> {
           errorText: _fieldErrors['email'],
           keyboardType: TextInputType.emailAddress,
           textInputAction: TextInputAction.next,
-          prefixIcon: Icon(Icons.mail_outline_rounded,
+          prefixIcon: Icon(LucideIcons.mail,
               size: 18, color: colors.textTertiary),
         ),
         const SizedBox(height: AppSpacing.md),
@@ -427,13 +428,13 @@ class _SignupScreenState extends State<SignupScreen> {
           errorText: _fieldErrors['password'],
           obscure: _obscurePwd,
           textInputAction: TextInputAction.next,
-          prefixIcon: Icon(Icons.lock_outline_rounded,
+          prefixIcon: Icon(LucideIcons.lock,
               size: 18, color: colors.textTertiary),
           suffixIcon: IconButton(
             icon: Icon(
               _obscurePwd
-                  ? Icons.visibility_outlined
-                  : Icons.visibility_off_outlined,
+                  ? LucideIcons.eye
+                  : LucideIcons.eyeOff,
               size: 18,
               color: colors.textTertiary,
             ),
@@ -447,13 +448,13 @@ class _SignupScreenState extends State<SignupScreen> {
           errorText: _fieldErrors['confirm_password'],
           obscure: _obscureConfirm,
           textInputAction: TextInputAction.next,
-          prefixIcon: Icon(Icons.lock_outline_rounded,
+          prefixIcon: Icon(LucideIcons.lock,
               size: 18, color: colors.textTertiary),
           suffixIcon: IconButton(
             icon: Icon(
               _obscureConfirm
-                  ? Icons.visibility_outlined
-                  : Icons.visibility_off_outlined,
+                  ? LucideIcons.eye
+                  : LucideIcons.eyeOff,
               size: 18,
               color: colors.textTertiary,
             ),
@@ -476,7 +477,7 @@ class _SignupScreenState extends State<SignupScreen> {
             hint: l10n.signupParentEmailHint,
             errorText: _fieldErrors['parent_email'],
             keyboardType: TextInputType.emailAddress,
-            prefixIcon: Icon(Icons.family_restroom_rounded,
+            prefixIcon: Icon(LucideIcons.users,
                 size: 18, color: colors.textTertiary),
           ),
         ] else if (_dob != null) ...[
@@ -498,7 +499,7 @@ class _SignupScreenState extends State<SignupScreen> {
           expand: true,
           loading: _busy,
           onPressed: _busy ? null : _continueToVerify,
-          trailingIcon: _busy ? null : Icons.arrow_forward_rounded,
+          trailingIcon: _busy ? null : LucideIcons.arrowRight,
         ),
         const SizedBox(height: AppSpacing.md),
         Row(
@@ -661,7 +662,7 @@ class _UsernameIndicator extends StatelessWidget {
                 shape: BoxShape.circle,
               ),
               alignment: Alignment.center,
-              child: Icon(Icons.check_rounded, size: 12, color: colors.success),
+              child: Icon(LucideIcons.check, size: 12, color: colors.success),
             )
           : Container(
               key: const ValueKey('invalid'),
@@ -673,7 +674,7 @@ class _UsernameIndicator extends StatelessWidget {
               ),
               alignment: Alignment.center,
               child: Icon(
-                Icons.hourglass_bottom_rounded,
+                LucideIcons.hourglass,
                 size: 12,
                 color: colors.textTertiary,
               ),
@@ -726,7 +727,7 @@ class _DobField extends StatelessWidget {
               child: Row(
                 children: [
                   Icon(
-                    Icons.calendar_today_outlined,
+                    LucideIcons.calendar,
                     size: 16,
                     color: colors.textTertiary,
                   ),
@@ -747,7 +748,7 @@ class _DobField extends StatelessWidget {
                     ),
                   ),
                   Icon(
-                    Icons.keyboard_arrow_down_rounded,
+                    LucideIcons.chevronDown,
                     size: 18,
                     color: colors.textTertiary,
                   ),
@@ -806,7 +807,7 @@ class _CoachToggle extends StatelessWidget {
           child: Row(
             children: [
               Icon(
-                Icons.sports_rounded,
+                LucideIcons.graduationCap,
                 size: 18,
                 color: value ? colors.accent : colors.textTertiary,
               ),

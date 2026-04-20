@@ -49,6 +49,14 @@ class Endpoints {
   static String profileByUsername(String username) => '/api/profile/$username';
   static String profileById(int userId) => '/api/profile/id/$userId';
 
+  // XP
+  static const String xpLevelInfo = '/api/xp/level-info';
+  static const String xpDashboard = '/api/xp/dashboard';
+
+  // Brands
+  static const String brands = '/api/brands';
+  static const String brandsSponsors = '/api/brands/sponsors';
+
   // Follow
   static String follow(int userId) => '/api/follow/$userId';
   static const String followers = '/api/followers';

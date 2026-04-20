@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 import '../../../../core/extensions/context_extensions.dart';
 import '../../../../core/theme/app_spacing.dart';
@@ -20,7 +21,7 @@ class MessagesScreen extends StatelessWidget {
         child: Padding(
           padding: EdgeInsets.all(AppSpacing.base),
           child: EmptyState(
-            icon: Icons.chat_bubble_outline_rounded,
+            icon: LucideIcons.messageCircle,
             title: 'No conversations yet',
             hint: 'Direct and group chats will appear here.',
           ),

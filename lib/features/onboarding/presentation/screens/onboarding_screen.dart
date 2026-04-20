@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:smooth_page_indicator/smooth_page_indicator.dart';
 
 import '../../../../core/constants/app_colors.dart';
@@ -27,25 +28,25 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
 
   late final List<_PageSpec> _pages = [
     _PageSpec(
-      icon: Icons.groups_rounded,
+      icon: LucideIcons.users,
       accent: AppColors.sectionNewsfeed,
       title: (l) => l.onboardingPage1Title,
       description: (l) => l.onboardingPage1Description,
     ),
     _PageSpec(
-      icon: Icons.track_changes_rounded,
+      icon: LucideIcons.target,
       accent: AppColors.sectionEvents,
       title: (l) => l.onboardingPage2Title,
       description: (l) => l.onboardingPage2Description,
     ),
     _PageSpec(
-      icon: Icons.forum_rounded,
+      icon: LucideIcons.messagesSquare,
       accent: AppColors.sectionChatter,
       title: (l) => l.onboardingPage3Title,
       description: (l) => l.onboardingPage3Description,
     ),
     _PageSpec(
-      icon: Icons.emoji_events_rounded,
+      icon: LucideIcons.trophy,
       accent: AppColors.sectionLeaderboard,
       title: (l) => l.onboardingPage4Title,
       description: (l) => l.onboardingPage4Description,
@@ -173,7 +174,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                         expand: true,
                         size: AppButtonSize.large,
                         trailingIcon:
-                            _isLast ? null : Icons.arrow_forward_rounded,
+                            _isLast ? null : LucideIcons.arrowRight,
                       ),
                       const SizedBox(height: AppSpacing.sm),
                     ],

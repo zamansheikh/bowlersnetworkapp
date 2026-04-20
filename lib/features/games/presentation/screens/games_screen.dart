@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 import '../../../../core/extensions/context_extensions.dart';
 import '../../../../core/theme/app_spacing.dart';
@@ -20,7 +21,7 @@ class GamesScreen extends StatelessWidget {
         child: Padding(
           padding: EdgeInsets.all(AppSpacing.base),
           child: EmptyState(
-            icon: Icons.track_changes_rounded,
+            icon: LucideIcons.target,
             title: 'Game tracking coming soon',
             hint: 'Log frames, analyse pin-leaves, and review your sessions.',
           ),
