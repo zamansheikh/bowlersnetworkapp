@@ -320,8 +320,10 @@ class _MediaBlock extends StatelessWidget {
     final typeData = post.typeData ?? const <String, dynamic>{};
     final child = switch (post.type) {
       PostType.photo => PostPhotoGallery(urls: post.mediaUrls),
-      PostType.video =>
-        PostVideoPreview(thumbnailUrl: post.videoThumbnailUrl),
+      PostType.video => PostVideoPreview(
+          thumbnailUrl: post.videoThumbnailUrl,
+          videoUrl: post.videoUrl,
+        ),
       PostType.score => PostScoreCard(data: typeData),
       PostType.poll => PostPollCard(data: typeData),
       PostType.shared => SharedPostBlock(typeData: typeData),

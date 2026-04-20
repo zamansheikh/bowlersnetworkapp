@@ -30,4 +30,12 @@ abstract class ProfileRemoteDatasource {
 
   @GET(Endpoints.brands)
   Future<List<BrandDto>> getBrands();
+
+  /// Step 2 of the avatar upload flow — after bytes are pushed to R2, we
+  /// save the resulting `public_url` on the profile.
+  @POST(Endpoints.profilePicture)
+  Future<void> updateProfilePicture(@Body() Map<String, dynamic> body);
+
+  @POST(Endpoints.coverPicture)
+  Future<void> updateCoverPicture(@Body() Map<String, dynamic> body);
 }

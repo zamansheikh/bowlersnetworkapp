@@ -49,3 +49,13 @@ class FeedFilterChanged extends FeedEvent {
   @override
   List<Object?> get props => [filter];
 }
+
+/// Prepend a freshly-created post to the top of the feed — avoids a full
+/// refetch after the composer submits.
+class FeedPostCreated extends FeedEvent {
+  const FeedPostCreated(this.post);
+  final Post post;
+
+  @override
+  List<Object?> get props => [post];
+}

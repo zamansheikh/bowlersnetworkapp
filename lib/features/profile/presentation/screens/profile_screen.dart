@@ -3,7 +3,9 @@ import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 
+import '../../../../core/di/injection.dart';
 import '../../../../core/extensions/context_extensions.dart';
+import '../../../../core/services/image_picker_service.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/theme/app_text_styles.dart';
 import '../../../../core/widgets/app_button.dart';
@@ -43,6 +45,28 @@ class _ProfileScreenState extends State<ProfileScreen> {
         bloc.add(const ProfileLoadRequested());
       }
     });
+  }
+
+  Future<void> _pickAvatar() async {
+    final picked = await getIt<ImagePickerService>().pickImage();
+    if (picked == null || !mounted) return;
+    context.read<ProfileBloc>().add(
+          ProfileAvatarUploadRequested(
+            bytes: picked.bytes,
+            fileName: picked.name,
+          ),
+        );
+  }
+
+  Future<void> _pickCover() async {
+    final picked = await getIt<ImagePickerService>().pickImage();
+    if (picked == null || !mounted) return;
+    context.read<ProfileBloc>().add(
+          ProfileCoverUploadRequested(
+            bytes: picked.bytes,
+            fileName: picked.name,
+          ),
+        );
   }
 
   @override
@@ -88,7 +112,14 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     child: Stack(
                       clipBehavior: Clip.none,
                       children: [
-                        ProfileHero(profile: profile, isSelf: true),
+                        ProfileHero(
+                          profile: profile,
+                          isSelf: true,
+                          onEditAvatar: _pickAvatar,
+                          onEditCover: _pickCover,
+                          uploadingAvatar: state.uploadingAvatar,
+                          uploadingCover: state.uploadingCover,
+                        ),
                         Positioned(
                           top: MediaQuery.paddingOf(context).top + 4,
                           right: AppSpacing.base,

@@ -73,6 +73,82 @@ class NewsfeedRepositoryImpl implements NewsfeedRepository {
     });
   }
 
+  @override
+  Future<Either<Failure, Post>> createTextPost({
+    required String caption,
+    required String audience,
+  }) =>
+      _guard(() async => _toPost(await _remote.createTextPost({
+            'caption': caption,
+            'audience': audience,
+          })));
+
+  @override
+  Future<Either<Failure, Post>> createPhotoPost({
+    required String caption,
+    required String audience,
+    required List<String> mediaUrls,
+  }) =>
+      _guard(() async => _toPost(await _remote.createPhotoPost({
+            'caption': caption,
+            'audience': audience,
+            'media_urls': mediaUrls,
+          })));
+
+  @override
+  Future<Either<Failure, Post>> createVideoPost({
+    required String caption,
+    required String audience,
+    required String videoUrl,
+    String? thumbnailUrl,
+  }) =>
+      _guard(() async => _toPost(await _remote.createVideoPost({
+            'caption': caption,
+            'audience': audience,
+            'video_url': videoUrl,
+            'thumbnail_url': ?thumbnailUrl,
+          })));
+
+  @override
+  Future<Either<Failure, Post>> createScorePost({
+    required String caption,
+    required String audience,
+    required int totalScore,
+    required String gameType,
+    double? strikePercentage,
+    int? splitCount,
+    String? templateStyle,
+    String? mediaUrl,
+  }) =>
+      _guard(() async => _toPost(await _remote.createScorePost({
+            'caption': caption,
+            'audience': audience,
+            'total_score': totalScore,
+            'game_type': gameType,
+            'strike_percentage': ?strikePercentage,
+            'split_count': ?splitCount,
+            'template_style': ?templateStyle,
+            'media_url': ?mediaUrl,
+          })));
+
+  @override
+  Future<Either<Failure, Post>> createPollPost({
+    required String caption,
+    required String audience,
+    required String question,
+    required List<String> options,
+    required int expiryHours,
+    String pollType = 'single',
+  }) =>
+      _guard(() async => _toPost(await _remote.createPollPost({
+            'caption': caption,
+            'audience': audience,
+            'question': question,
+            'options': options.map((t) => {'text': t}).toList(),
+            'expiry_hours': expiryHours,
+            'poll_type': pollType,
+          })));
+
   // ---------------------------------------------------------------------------
   Post _toPost(PostDto dto) {
     return Post(

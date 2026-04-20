@@ -16,4 +16,11 @@ abstract class ProfileRepository {
   /// Every brand with an `is_favorite` flag — the profile screen filters
   /// to favorites for display.
   Future<Either<Failure, List<Brand>>> getBrands();
+
+  /// Sets the user's profile picture to a pre-uploaded `publicUrl` (from
+  /// [CloudUploadService.uploadFile] into the `profiles` bucket).
+  Future<Either<Failure, Unit>> updateProfilePicture(String publicUrl);
+
+  /// Same shape, but for the cover image.
+  Future<Either<Failure, Unit>> updateCoverPicture(String publicUrl);
 }

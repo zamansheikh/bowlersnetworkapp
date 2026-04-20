@@ -25,4 +25,42 @@ abstract class NewsfeedRepository {
 
   /// Hide post from this user's feed.
   Future<Either<Failure, Unit>> hide(String postUid);
+
+  Future<Either<Failure, Post>> createTextPost({
+    required String caption,
+    required String audience,
+  });
+
+  Future<Either<Failure, Post>> createPhotoPost({
+    required String caption,
+    required String audience,
+    required List<String> mediaUrls,
+  });
+
+  Future<Either<Failure, Post>> createVideoPost({
+    required String caption,
+    required String audience,
+    required String videoUrl,
+    String? thumbnailUrl,
+  });
+
+  Future<Either<Failure, Post>> createScorePost({
+    required String caption,
+    required String audience,
+    required int totalScore,
+    required String gameType,
+    double? strikePercentage,
+    int? splitCount,
+    String? templateStyle,
+    String? mediaUrl,
+  });
+
+  Future<Either<Failure, Post>> createPollPost({
+    required String caption,
+    required String audience,
+    required String question,
+    required List<String> options,
+    required int expiryHours,
+    String pollType = 'single',
+  });
 }

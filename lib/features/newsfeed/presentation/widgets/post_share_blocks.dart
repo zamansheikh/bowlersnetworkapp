@@ -174,6 +174,7 @@ class _NestedMedia extends StatelessWidget {
       case 'video':
         return PostVideoPreview(
           thumbnailUrl: data!['thumbnail_url'] as String?,
+          videoUrl: data!['video_url'] as String?,
         );
       case 'score':
         return Padding(

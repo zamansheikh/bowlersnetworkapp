@@ -49,6 +49,7 @@ import '../../features/profile/presentation/bloc/profile_bloc.dart' as _i469;
 import '../localization/locale_cubit.dart' as _i960;
 import '../network/api_client.dart' as _i557;
 import '../services/cloud_upload_service.dart' as _i984;
+import '../services/image_picker_service.dart' as _i644;
 import '../storage/local_storage_service.dart' as _i744;
 import '../storage/secure_storage_service.dart' as _i666;
 import '../theme/theme_cubit.dart' as _i611;
@@ -61,6 +62,9 @@ extension GetItInjectableX on _i174.GetIt {
   }) {
     final gh = _i526.GetItHelper(this, environment, environmentFilter);
     final networkModule = _$NetworkModule();
+    gh.lazySingleton<_i644.ImagePickerService>(
+      () => _i644.ImagePickerService(),
+    );
     gh.lazySingleton<_i744.LocalStorageService>(
       () => _i744.LocalStorageService(),
     );
@@ -163,14 +167,17 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i22.HidePostUseCase>(),
       ),
     );
+    gh.lazySingleton<_i469.ProfileBloc>(
+      () => _i469.ProfileBloc(
+        gh<_i894.ProfileRepository>(),
+        gh<_i984.CloudUploadService>(),
+      ),
+    );
     gh.lazySingleton<_i981.GetMyProfileUseCase>(
       () => _i981.GetMyProfileUseCase(gh<_i894.ProfileRepository>()),
     );
     gh.lazySingleton<_i981.CheckProfileCompletionUseCase>(
       () => _i981.CheckProfileCompletionUseCase(gh<_i894.ProfileRepository>()),
-    );
-    gh.lazySingleton<_i469.ProfileBloc>(
-      () => _i469.ProfileBloc(gh<_i894.ProfileRepository>()),
     );
     return this;
   }

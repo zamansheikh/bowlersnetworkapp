@@ -60,6 +60,20 @@ class ProfileRepositoryImpl implements ProfileRepository {
             .toList(growable: false);
       });
 
+  @override
+  Future<Either<Failure, Unit>> updateProfilePicture(String publicUrl) =>
+      _guard(() async {
+        await _remote.updateProfilePicture({'url': publicUrl});
+        return unit;
+      });
+
+  @override
+  Future<Either<Failure, Unit>> updateCoverPicture(String publicUrl) =>
+      _guard(() async {
+        await _remote.updateCoverPicture({'url': publicUrl});
+        return unit;
+      });
+
   Profile _toEntity(ProfileDto dto) => Profile(
         user: ProfileUser(
           id: dto.user.id,

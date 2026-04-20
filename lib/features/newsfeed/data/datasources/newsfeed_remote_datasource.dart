@@ -34,4 +34,22 @@ abstract class NewsfeedRemoteDatasource {
 
   @POST('/api/newsfeed/{id}/hide')
   Future<void> hidePost(@Path('id') String id);
+
+  // ── Create endpoints ──
+  // All return the newly-created post's full payload (same shape as feed).
+
+  @POST(Endpoints.createTextPost)
+  Future<PostDto> createTextPost(@Body() Map<String, dynamic> body);
+
+  @POST(Endpoints.createPhotoPost)
+  Future<PostDto> createPhotoPost(@Body() Map<String, dynamic> body);
+
+  @POST(Endpoints.createVideoPost)
+  Future<PostDto> createVideoPost(@Body() Map<String, dynamic> body);
+
+  @POST(Endpoints.createScorePost)
+  Future<PostDto> createScorePost(@Body() Map<String, dynamic> body);
+
+  @POST(Endpoints.createPollPost)
+  Future<PostDto> createPollPost(@Body() Map<String, dynamic> body);
 }

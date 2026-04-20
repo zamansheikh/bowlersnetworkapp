@@ -15,15 +15,21 @@ class ProfileHero extends StatelessWidget {
     required this.profile,
     required this.isSelf,
     this.onEditCover,
+    this.onEditAvatar,
     this.onToggleFollow,
     this.onEditName,
+    this.uploadingAvatar = false,
+    this.uploadingCover = false,
   });
 
   final Profile profile;
   final bool isSelf;
   final VoidCallback? onEditCover;
+  final VoidCallback? onEditAvatar;
   final VoidCallback? onToggleFollow;
   final VoidCallback? onEditName;
+  final bool uploadingAvatar;
+  final bool uploadingCover;
 
   @override
   Widget build(BuildContext context) {
@@ -78,6 +84,24 @@ class ProfileHero extends StatelessWidget {
               ),
             ),
           ),
+          // Cover-upload progress overlay
+          if (uploadingCover)
+            Positioned.fill(
+              child: IgnorePointer(
+                child: Container(
+                  color: Colors.black.withValues(alpha: 0.35),
+                  alignment: Alignment.center,
+                  child: const SizedBox(
+                    width: 28,
+                    height: 28,
+                    child: CircularProgressIndicator(
+                      strokeWidth: 2.5,
+                      color: Colors.white,
+                    ),
+                  ),
+                ),
+              ),
+            ),
           // Top-right action button
           Positioned(
             top: AppSpacing.md,
@@ -86,7 +110,7 @@ class ProfileHero extends StatelessWidget {
                 ? _GlassButton(
                     icon: LucideIcons.camera,
                     label: 'Edit Cover',
-                    onTap: onEditCover,
+                    onTap: uploadingCover ? null : onEditCover,
                   )
                 : _GlassIconButton(
                     icon: profile.isFollowing == true
@@ -106,6 +130,9 @@ class ProfileHero extends StatelessWidget {
                 _GradientAvatar(
                   url: profile.profilePictureUrl,
                   fallback: profile.user.displayName,
+                  onTap: isSelf && !uploadingAvatar ? onEditAvatar : null,
+                  uploading: uploadingAvatar,
+                  showEditBadge: isSelf,
                 ),
                 const SizedBox(width: AppSpacing.md),
                 Expanded(
@@ -173,10 +200,19 @@ class ProfileHero extends StatelessWidget {
 
 // ─────────────────────────────────────────────────────────────────────────────
 class _GradientAvatar extends StatelessWidget {
-  const _GradientAvatar({required this.url, required this.fallback});
+  const _GradientAvatar({
+    required this.url,
+    required this.fallback,
+    this.onTap,
+    this.uploading = false,
+    this.showEditBadge = false,
+  });
 
   final String? url;
   final String fallback;
+  final VoidCallback? onTap;
+  final bool uploading;
+  final bool showEditBadge;
 
   @override
   Widget build(BuildContext context) {
@@ -185,7 +221,7 @@ class _GradientAvatar extends StatelessWidget {
     final initial =
         fallback.isEmpty ? '?' : fallback.characters.first.toUpperCase();
 
-    return Container(
+    final ring = Container(
       width: size + 6,
       height: size + 6,
       padding: const EdgeInsets.all(3),
@@ -225,6 +261,71 @@ class _GradientAvatar extends StatelessWidget {
                     _initialFallback(colors, initial, size),
               )
             : _initialFallback(colors, initial, size),
+      ),
+    );
+
+    return SizedBox(
+      width: size + 6,
+      height: size + 6,
+      child: Stack(
+        clipBehavior: Clip.none,
+        alignment: Alignment.center,
+        children: [
+          Material(
+            color: Colors.transparent,
+            shape: const CircleBorder(),
+            clipBehavior: Clip.antiAlias,
+            child: InkWell(
+              customBorder: const CircleBorder(),
+              onTap: onTap,
+              child: ring,
+            ),
+          ),
+          if (uploading)
+            Container(
+              width: size,
+              height: size,
+              decoration: const BoxDecoration(
+                shape: BoxShape.circle,
+                color: Colors.black54,
+              ),
+              alignment: Alignment.center,
+              child: const SizedBox(
+                width: 22,
+                height: 22,
+                child: CircularProgressIndicator(
+                  strokeWidth: 2.5,
+                  color: Colors.white,
+                ),
+              ),
+            ),
+          if (showEditBadge && !uploading)
+            Positioned(
+              right: 2,
+              bottom: 2,
+              child: Container(
+                width: 28,
+                height: 28,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: colors.accent,
+                  border: Border.all(color: colors.bgPrimary, width: 2),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withValues(alpha: 0.25),
+                      blurRadius: 6,
+                      offset: const Offset(0, 2),
+                    ),
+                  ],
+                ),
+                child: const Icon(
+                  LucideIcons.camera,
+                  size: 13,
+                  color: Colors.white,
+                ),
+              ),
+            ),
+        ],
       ),
     );
   }

@@ -13,6 +13,7 @@ import '../../../profile/presentation/bloc/profile_bloc.dart';
 import '../../domain/entities/post.dart';
 import '../bloc/feed_bloc.dart';
 import '../widgets/create_post_composer.dart';
+import '../widgets/create_post_sheet.dart';
 import '../widgets/post_card.dart';
 
 class FeedScreen extends StatelessWidget {
@@ -189,11 +190,11 @@ class _FeedViewState extends State<_FeedView> {
         return CreatePostComposer(
           currentAvatarUrl: profile?.profilePictureUrl,
           currentInitial: profile?.user.displayName ?? '?',
-          onOpenText: () {},
-          onOpenPhoto: () {},
-          onOpenVideo: () {},
-          onOpenScore: () {},
-          onOpenPoll: () {},
+          onOpenText: () => openCreateText(context),
+          onOpenPhoto: () => openCreatePhoto(context),
+          onOpenVideo: () => openCreateVideo(context),
+          onOpenScore: () => openCreateScore(context),
+          onOpenPoll: () => openCreatePoll(context),
         );
       },
     );

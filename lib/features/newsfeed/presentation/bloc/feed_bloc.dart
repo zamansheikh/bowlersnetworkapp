@@ -28,6 +28,7 @@ class FeedBloc extends Bloc<FeedEvent, FeedState> {
     on<FeedSaveToggled>(_onSave);
     on<FeedPostHidden>(_onHide);
     on<FeedFilterChanged>(_onFilterChanged);
+    on<FeedPostCreated>(_onPostCreated);
   }
 
   final GetFeedUseCase _getFeed;
@@ -170,6 +171,10 @@ class FeedBloc extends Bloc<FeedEvent, FeedState> {
         state.posts.where((p) => p.uid != event.postUid).toList(growable: false);
     emit(state.copyWith(posts: filtered));
     await _hide(event.postUid);
+  }
+
+  void _onPostCreated(FeedPostCreated event, Emitter<FeedState> emit) {
+    emit(state.copyWith(posts: [event.post, ...state.posts]));
   }
 
   void _onFilterChanged(

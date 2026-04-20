@@ -1,6 +1,8 @@
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:chewie/chewie.dart';
 import 'package:flutter/material.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
+import 'package:video_player/video_player.dart';
 
 import '../../../../core/extensions/context_extensions.dart';
 import '../../../../core/theme/app_spacing.dart';
@@ -383,54 +385,151 @@ class _PollOption extends StatelessWidget {
   }
 }
 
-/// Video preview with play button overlay (actual playback lands later).
-class PostVideoPreview extends StatelessWidget {
-  const PostVideoPreview({super.key, this.thumbnailUrl});
+/// Video preview that lazily initialises the real player on first tap.
+///
+/// Shows the thumbnail + play button until the user taps. Then swaps in a
+/// [Chewie] player backed by `video_player`. The player is disposed with
+/// the widget so scrolling the feed doesn't leak decoders.
+class PostVideoPreview extends StatefulWidget {
+  const PostVideoPreview({super.key, this.thumbnailUrl, this.videoUrl});
 
   final String? thumbnailUrl;
+  final String? videoUrl;
+
+  @override
+  State<PostVideoPreview> createState() => _PostVideoPreviewState();
+}
+
+class _PostVideoPreviewState extends State<PostVideoPreview> {
+  VideoPlayerController? _controller;
+  ChewieController? _chewie;
+  bool _activating = false;
+
+  Future<void> _activate() async {
+    if (_activating || _chewie != null) return;
+    final url = widget.videoUrl;
+    if (url == null || url.isEmpty) return;
+
+    setState(() => _activating = true);
+    final vp = VideoPlayerController.networkUrl(Uri.parse(url));
+    try {
+      await vp.initialize();
+    } catch (_) {
+      await vp.dispose();
+      if (mounted) setState(() => _activating = false);
+      return;
+    }
+    if (!mounted) {
+      await vp.dispose();
+      return;
+    }
+    setState(() {
+      _controller = vp;
+      _chewie = ChewieController(
+        videoPlayerController: vp,
+        aspectRatio: vp.value.aspectRatio == 0 ? 16 / 9 : vp.value.aspectRatio,
+        autoPlay: true,
+        looping: false,
+        allowMuting: true,
+        showControlsOnInitialize: false,
+        materialProgressColors: ChewieProgressColors(
+          playedColor: context.colors.accent,
+          handleColor: context.colors.accent,
+          backgroundColor: Colors.white24,
+          bufferedColor: Colors.white38,
+        ),
+      );
+      _activating = false;
+    });
+  }
+
+  @override
+  void dispose() {
+    _chewie?.dispose();
+    _controller?.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
-    return ClipRRect(
-      borderRadius: AppRadius.lgAll,
-      child: AspectRatio(
-        aspectRatio: 16 / 9,
-        child: Stack(
-          fit: StackFit.expand,
-          children: [
-            if (thumbnailUrl != null)
-              CachedNetworkImage(
-                imageUrl: thumbnailUrl!,
-                fit: BoxFit.cover,
-                placeholder: (_, _) => Container(color: colors.bgSurfaceHover),
-                errorWidget: (_, _, _) =>
-                    Container(color: colors.bgSurfaceHover),
-              )
-            else
-              Container(color: colors.bgSurfaceHover),
-            Center(
-              child: Container(
-                width: 60,
-                height: 60,
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  color: Colors.black.withValues(alpha: 0.55),
-                  border: Border.all(
-                    color: Colors.white.withValues(alpha: 0.24),
-                  ),
+    final chewie = _chewie;
+    if (chewie != null) {
+      return ClipRRect(
+        borderRadius: AppRadius.lgAll,
+        child: AspectRatio(
+          aspectRatio: chewie.aspectRatio ?? 16 / 9,
+          child: Chewie(controller: chewie),
+        ),
+      );
+    }
+
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        borderRadius: AppRadius.lgAll,
+        onTap: _activate,
+        child: ClipRRect(
+          borderRadius: AppRadius.lgAll,
+          child: AspectRatio(
+            aspectRatio: 16 / 9,
+            child: Stack(
+              fit: StackFit.expand,
+              children: [
+                if (widget.thumbnailUrl != null &&
+                    widget.thumbnailUrl!.isNotEmpty)
+                  CachedNetworkImage(
+                    imageUrl: widget.thumbnailUrl!,
+                    fit: BoxFit.cover,
+                    placeholder: (_, _) =>
+                        Container(color: colors.bgSurfaceHover),
+                    errorWidget: (_, _, _) =>
+                        Container(color: colors.bgSurfaceHover),
+                  )
+                else
+                  Container(color: colors.bgSurfaceHover),
+                Center(
+                  child: _activating
+                      ? Container(
+                          width: 60,
+                          height: 60,
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            color: Colors.black.withValues(alpha: 0.55),
+                          ),
+                          alignment: Alignment.center,
+                          child: const SizedBox(
+                            width: 22,
+                            height: 22,
+                            child: CircularProgressIndicator(
+                              strokeWidth: 2.2,
+                              color: Colors.white,
+                            ),
+                          ),
+                        )
+                      : Container(
+                          width: 60,
+                          height: 60,
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            color: Colors.black.withValues(alpha: 0.55),
+                            border: Border.all(
+                              color: Colors.white.withValues(alpha: 0.24),
+                            ),
+                          ),
+                          child: const Padding(
+                            padding: EdgeInsets.only(left: 4),
+                            child: Icon(
+                              LucideIcons.play,
+                              color: Colors.white,
+                              size: 24,
+                            ),
+                          ),
+                        ),
                 ),
-                child: const Padding(
-                  padding: EdgeInsets.only(left: 4),
-                  child: Icon(
-                    LucideIcons.play,
-                    color: Colors.white,
-                    size: 24,
-                  ),
-                ),
-              ),
+              ],
             ),
-          ],
+          ),
         ),
       ),
     );

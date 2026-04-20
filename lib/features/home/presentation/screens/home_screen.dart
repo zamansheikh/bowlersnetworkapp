@@ -15,6 +15,7 @@ import '../../../../core/widgets/bn_logo.dart';
 import '../../../../core/widgets/glow_blob.dart';
 import '../../../../core/widgets/xp_badge.dart';
 import '../../../profile/presentation/bloc/profile_bloc.dart';
+import '../../../shell/widgets/app_drawer.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
@@ -26,8 +27,14 @@ class HomeScreen extends StatelessWidget {
 
     return Scaffold(
       backgroundColor: colors.bgPrimary,
+      drawer: const AppDrawer(),
       appBar: AppBar(
-        automaticallyImplyLeading: false,
+        leading: Builder(
+          builder: (ctx) => IconButton(
+            icon: const Icon(LucideIcons.menu, size: 20),
+            onPressed: () => Scaffold.of(ctx).openDrawer(),
+          ),
+        ),
         titleSpacing: AppSpacing.base,
         title: Row(
           mainAxisSize: MainAxisSize.min,

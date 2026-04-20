@@ -59,6 +59,7 @@ dependencies:
   # Media
   image_picker: ^1.2.1
   video_player: ^2.11.1
+  chewie: ^1.13.1
 
   # Location
   permission_handler: ^12.0.1

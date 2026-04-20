@@ -46,6 +46,8 @@ class Endpoints {
   // Profile
   static const String myProfile = '/api/profile';
   static const String profileCompletion = '/api/profile/completion';
+  static const String profilePicture = '/api/profile/profile-picture';
+  static const String coverPicture = '/api/profile/cover-picture';
   static String profileByUsername(String username) => '/api/profile/$username';
   static String profileById(int userId) => '/api/profile/id/$userId';
 
@@ -76,6 +78,13 @@ class Endpoints {
   static String sharePost(String postId) => '/api/newsfeed/$postId/share';
   static String postComments(String postId) =>
       '/api/newsfeed/$postId/comments';
+
+  // Newsfeed creation endpoints — one per post type
+  static const String createTextPost = '/api/newsfeed/create/text';
+  static const String createPhotoPost = '/api/newsfeed/create/photo';
+  static const String createVideoPost = '/api/newsfeed/create/video';
+  static const String createScorePost = '/api/newsfeed/create/score';
+  static const String createPollPost = '/api/newsfeed/create/poll';
 
   // Reporting
   static const String report = '/api/report';
