@@ -25,32 +25,44 @@ enum ReactionType {
   }
 }
 
+/// Post variants — mirrors the backend's `Post` model choices in
+/// `newsfeed/models.py`. All four `*Share` types are server-created posts
+/// that reference another entity (a post, a game, a media item, a card).
 enum PostType {
   text,
   photo,
   video,
   score,
   poll,
-  share,
+
+  /// Repost of another post. `type_data.original` is the full embedded post.
+  shared,
+
+  /// Share of a completed game session. `type_data.session` + `type_data.game`.
+  gameShare,
+
+  /// Share of a video or playlist from the media section.
+  mediaShare,
+
+  /// Share of a trading card. `type_data` is the full card payload
+  /// (`card`, `info`, `brands`) from `cards.Card.data()`.
+  cardShare,
+
   unknown;
 
   static PostType fromString(String s) {
-    switch (s) {
-      case 'text':
-        return PostType.text;
-      case 'photo':
-        return PostType.photo;
-      case 'video':
-        return PostType.video;
-      case 'score':
-        return PostType.score;
-      case 'poll':
-        return PostType.poll;
-      case 'share':
-        return PostType.share;
-      default:
-        return PostType.unknown;
-    }
+    return switch (s) {
+      'text' => PostType.text,
+      'photo' => PostType.photo,
+      'video' => PostType.video,
+      'score' => PostType.score,
+      'poll' => PostType.poll,
+      'shared' => PostType.shared,
+      'game_share' => PostType.gameShare,
+      'media_share' => PostType.mediaShare,
+      'card_share' => PostType.cardShare,
+      _ => PostType.unknown,
+    };
   }
 }
 

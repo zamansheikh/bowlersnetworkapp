@@ -10,6 +10,7 @@ import '../../../../core/widgets/app_card.dart';
 import '../../domain/entities/post.dart';
 import 'link_preview.dart';
 import 'post_media.dart';
+import 'post_share_blocks.dart';
 import 'reaction_bar.dart';
 
 /// Production-grade feed card that mirrors the web's `_PostCard.tsx`.
@@ -316,14 +317,18 @@ class _MediaBlock extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final typeData = post.typeData ?? const <String, dynamic>{};
     final child = switch (post.type) {
       PostType.photo => PostPhotoGallery(urls: post.mediaUrls),
       PostType.video =>
         PostVideoPreview(thumbnailUrl: post.videoThumbnailUrl),
-      PostType.score => PostScoreCard(data: post.typeData ?? const {}),
-      PostType.poll => PostPollCard(data: post.typeData ?? const {}),
+      PostType.score => PostScoreCard(data: typeData),
+      PostType.poll => PostPollCard(data: typeData),
+      PostType.shared => SharedPostBlock(typeData: typeData),
+      PostType.gameShare => GameShareBlock(typeData: typeData),
+      PostType.mediaShare => MediaShareBlock(typeData: typeData),
+      PostType.cardShare => CardShareBlock(typeData: typeData),
       PostType.text => const SizedBox.shrink(),
-      PostType.share => const SizedBox.shrink(),
       PostType.unknown => const SizedBox.shrink(),
     };
 
