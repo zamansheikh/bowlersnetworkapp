@@ -1,5 +1,6 @@
 // Hide `State` because dartz exports a `State` monad that shadows the
 // Flutter State<T> class used by every [StatefulWidget].
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:dartz/dartz.dart' hide State;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -14,8 +15,8 @@ import '../../../../core/services/image_picker_service.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/theme/app_text_styles.dart';
 import '../../../../core/widgets/app_button.dart';
-import '../../../../core/widgets/app_input.dart';
 import '../../../../core/widgets/app_toast.dart';
+import '../../../profile/presentation/bloc/profile_bloc.dart';
 import '../../domain/entities/create_post_draft.dart';
 import '../../domain/entities/post.dart';
 import '../../domain/repositories/newsfeed_repository.dart';
@@ -23,11 +24,21 @@ import '../bloc/feed_bloc.dart';
 
 enum CreatePostKind { text, photo, video, score, poll }
 
-/// Full-screen composer supporting all 5 post types (matches the web's
-/// `CreatePostModal` tab set).
+/// Web-parity create-post modal, ported to Flutter as a bottom sheet so it
+/// feels native on mobile. Layout mirrors `_Content.tsx CreatePostModal`:
 ///
-/// Open via [showCreatePostSheet]. On success prepends the new post to
-/// [FeedBloc] so the feed updates without a refetch.
+/// ```
+/// [×]   Create Post
+/// ──────────────────────────────────────
+/// [avatar] Name · @username
+/// [Text] [Photo] [Video] [Score] [Poll]    ← compact chips, wrap
+/// ┌────────────────────────────────────┐
+/// │ What's on your mind?               │   ← textarea, always visible
+/// └────────────────────────────────────┘
+/// (type-specific fields appear here)
+/// ──────────────────────────────────────
+/// [🌐][👥][🏠][🔒]                  [Post]  ← audience icons left, Post right
+/// ```
 Future<void> showCreatePostSheet(
   BuildContext context, {
   CreatePostKind initial = CreatePostKind.text,
@@ -44,8 +55,6 @@ Future<void> showCreatePostSheet(
   );
 }
 
-/// Public helpers so [CreatePostComposer]'s action-chip handlers can pick
-/// the right initial tab without exposing the private enum.
 Future<void> openCreateText(BuildContext c) =>
     showCreatePostSheet(c, initial: CreatePostKind.text);
 Future<void> openCreatePhoto(BuildContext c) =>
@@ -70,10 +79,9 @@ class _CreatePostSheetState extends State<_CreatePostSheet> {
   late CreatePostKind _kind = widget.initial;
   PostAudience _audience = PostAudience.public;
 
-  // Shared
   final _captionCtl = TextEditingController();
 
-  // Photo
+  // Photo — web supports single photo; keep multi-capable list.
   final List<({Uint8List bytes, String name})> _photos = [];
 
   // Video
@@ -109,15 +117,14 @@ class _CreatePostSheetState extends State<_CreatePostSheet> {
     super.dispose();
   }
 
-  // ── Helpers ────────────────────────────────────────────────────────────────
-  Future<void> _pickPhotos() async {
-    final picked =
-        await getIt<ImagePickerService>().pickImages(limit: 4);
-    if (picked.isEmpty) return;
+  // ── Pickers ────────────────────────────────────────────────────────────────
+  Future<void> _pickPhoto() async {
+    final picked = await getIt<ImagePickerService>().pickImage();
+    if (picked == null) return;
     setState(() {
       _photos
         ..clear()
-        ..addAll(picked.map((p) => (bytes: p.bytes, name: p.name)));
+        ..add((bytes: picked.bytes, name: picked.name));
     });
   }
 
@@ -137,7 +144,7 @@ class _CreatePostSheetState extends State<_CreatePostSheet> {
         }
       case CreatePostKind.photo:
         if (_photos.isEmpty) {
-          _errors = ['Pick at least one photo.'];
+          _errors = ['Pick a photo.'];
           return false;
         }
       case CreatePostKind.video:
@@ -197,17 +204,13 @@ class _CreatePostSheetState extends State<_CreatePostSheet> {
             );
             final url = r.fold((_) => null, (u) => u);
             if (url == null) {
-              result = r.map((_) => throw StateError('unreachable'));
-              break;
+              setState(() {
+                _busy = false;
+                _errors = r.fold((f) => f.messages, (_) => ['Upload failed.']);
+              });
+              return;
             }
             urls.add(url);
-          }
-          if (urls.length != _photos.length) {
-            setState(() {
-              _busy = false;
-              _errors = ['One or more photos failed to upload.'];
-            });
-            return;
           }
           result = await repo.createPhotoPost(
             caption: caption,
@@ -293,64 +296,59 @@ class _CreatePostSheetState extends State<_CreatePostSheet> {
 
     return Padding(
       padding: EdgeInsets.only(bottom: viewInsets.bottom),
-      child: DraggableScrollableSheet(
-        initialChildSize: 0.9,
-        minChildSize: 0.5,
-        maxChildSize: 0.95,
-        expand: false,
-        builder: (_, scrollCtl) => Container(
-          decoration: BoxDecoration(
-            color: colors.bgSurfaceElevated,
-            borderRadius: const BorderRadius.vertical(
-              top: Radius.circular(AppRadius.xl),
-            ),
+      child: Container(
+        constraints: BoxConstraints(
+          maxHeight: MediaQuery.sizeOf(context).height * 0.92,
+        ),
+        decoration: BoxDecoration(
+          color: colors.bgSurfaceElevated,
+          borderRadius: const BorderRadius.vertical(
+            top: Radius.circular(AppRadius.xl),
           ),
-          child: Column(
-            children: [
-              const SizedBox(height: AppSpacing.sm),
-              Container(
-                width: 36,
-                height: 4,
-                decoration: BoxDecoration(
-                  color: colors.borderStrong,
-                  borderRadius: AppRadius.fullAll,
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const SizedBox(height: AppSpacing.sm),
+            Container(
+              width: 36,
+              height: 4,
+              decoration: BoxDecoration(
+                color: colors.borderStrong,
+                borderRadius: AppRadius.fullAll,
+              ),
+            ),
+            _Header(onClose: () => Navigator.of(context).pop()),
+            Divider(height: 1, color: colors.borderDefault),
+            Flexible(
+              child: SingleChildScrollView(
+                padding: const EdgeInsets.fromLTRB(
+                  AppSpacing.xl,
+                  AppSpacing.base,
+                  AppSpacing.xl,
+                  AppSpacing.base,
                 ),
-              ),
-              const SizedBox(height: AppSpacing.md),
-              _Header(
-                onClose: () => Navigator.of(context).pop(),
-                onSubmit: _busy ? null : _submit,
-                busy: _busy,
-              ),
-              _KindTabs(
-                active: _kind,
-                onChanged: (k) => setState(() => _kind = k),
-              ),
-              const SizedBox(height: AppSpacing.md),
-              Expanded(
-                child: SingleChildScrollView(
-                  controller: scrollCtl,
-                  padding: const EdgeInsets.fromLTRB(
-                    AppSpacing.base,
-                    0,
-                    AppSpacing.base,
-                    AppSpacing.xl,
-                  ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: [
-                      _CaptionField(controller: _captionCtl, kind: _kind),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    _AuthorRow(),
+                    const SizedBox(height: AppSpacing.base),
+                    _KindTabs(
+                      active: _kind,
+                      onChanged: (k) => setState(() => _kind = k),
+                    ),
+                    const SizedBox(height: AppSpacing.md),
+                    _CaptionArea(controller: _captionCtl, kind: _kind),
+                    if (_kind != CreatePostKind.text) ...[
                       const SizedBox(height: AppSpacing.md),
-                      _KindBody(
+                      _TypeBody(
                         kind: _kind,
                         photos: _photos,
-                        onPickPhotos: _pickPhotos,
-                        onRemovePhoto: (i) =>
-                            setState(() => _photos.removeAt(i)),
+                        onPickPhoto: _pickPhoto,
+                        onRemovePhoto: () => setState(() => _photos.clear()),
                         video: _video,
                         onPickVideo: _pickVideo,
-                        onRemoveVideo: () =>
-                            setState(() => _video = null),
+                        onRemoveVideo: () => setState(() => _video = null),
                         scoreCtl: _scoreCtl,
                         strikePctCtl: _strikePctCtl,
                         splitCountCtl: _splitCountCtl,
@@ -361,8 +359,8 @@ class _CreatePostSheetState extends State<_CreatePostSheet> {
                         pollOptionCtls: _pollOptionCtls,
                         onAddOption: _pollOptionCtls.length >= 5
                             ? null
-                            : () => setState(
-                                () => _pollOptionCtls.add(TextEditingController())),
+                            : () => setState(() => _pollOptionCtls
+                                .add(TextEditingController())),
                         onRemoveOption: _pollOptionCtls.length <= 2
                             ? null
                             : (i) => setState(() {
@@ -372,17 +370,263 @@ class _CreatePostSheetState extends State<_CreatePostSheet> {
                         onExpiryChanged: (h) =>
                             setState(() => _expiryHours = h),
                       ),
-                      if (_errors.isNotEmpty) ...[
-                        const SizedBox(height: AppSpacing.md),
-                        _ErrorBanner(messages: _errors),
-                      ],
                     ],
-                  ),
+                    if (_errors.isNotEmpty) ...[
+                      const SizedBox(height: AppSpacing.md),
+                      _ErrorBanner(messages: _errors),
+                    ],
+                  ],
                 ),
               ),
-              _AudienceBar(
-                audience: _audience,
-                onChanged: (a) => setState(() => _audience = a),
+            ),
+            _Footer(
+              audience: _audience,
+              onAudienceChanged: (a) => setState(() => _audience = a),
+              onPost: _busy ? null : _submit,
+              busy: _busy,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+// =============================================================================
+// Header: close button + "Create Post" title
+// =============================================================================
+class _Header extends StatelessWidget {
+  const _Header({required this.onClose});
+
+  final VoidCallback onClose;
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = context.colors;
+    return SizedBox(
+      height: 48,
+      child: Row(
+        children: [
+          const SizedBox(width: AppSpacing.sm),
+          IconButton(
+            icon: Icon(LucideIcons.x, size: 20, color: colors.textSecondary),
+            onPressed: onClose,
+            visualDensity: VisualDensity.compact,
+            tooltip: 'Close',
+          ),
+          Expanded(
+            child: Center(
+              child: Text(
+                'Create Post',
+                style: AppTextStyles.sectionTitle.copyWith(
+                  color: colors.textPrimary,
+                  fontSize: 16,
+                ),
+              ),
+            ),
+          ),
+          const SizedBox(width: 44 + AppSpacing.sm),
+        ],
+      ),
+    );
+  }
+}
+
+// =============================================================================
+// Author row
+// =============================================================================
+class _AuthorRow extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    final colors = context.colors;
+    return BlocBuilder<ProfileBloc, ProfileState>(
+      buildWhen: (p, n) =>
+          p.profile?.user.id != n.profile?.user.id ||
+          p.profile?.profilePictureUrl != n.profile?.profilePictureUrl,
+      builder: (context, state) {
+        final user = state.profile?.user;
+        final name = user == null
+            ? 'You'
+            : '${user.firstName} ${user.lastName}'.trim().isEmpty
+                ? user.username
+                : '${user.firstName} ${user.lastName}'.trim();
+        final username = user?.username ?? '';
+        final avatar = state.profile?.profilePictureUrl;
+
+        return Row(
+          children: [
+            _AuthorAvatar(url: avatar, fallback: name),
+            const SizedBox(width: AppSpacing.sm + 2),
+            Expanded(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    name,
+                    overflow: TextOverflow.ellipsis,
+                    style: AppTextStyles.bodySmall.copyWith(
+                      color: colors.textPrimary,
+                      fontWeight: FontWeight.w600,
+                      fontSize: 13,
+                    ),
+                  ),
+                  if (username.isNotEmpty)
+                    Text(
+                      '@$username',
+                      overflow: TextOverflow.ellipsis,
+                      style: AppTextStyles.nano.copyWith(
+                        color: colors.textTertiary,
+                        fontSize: 10,
+                      ),
+                    ),
+                ],
+              ),
+            ),
+          ],
+        );
+      },
+    );
+  }
+}
+
+class _AuthorAvatar extends StatelessWidget {
+  const _AuthorAvatar({required this.url, required this.fallback});
+
+  final String? url;
+  final String fallback;
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = context.colors;
+    const size = 36.0;
+    final initial =
+        fallback.isEmpty ? '?' : fallback.characters.first.toUpperCase();
+
+    final placeholder = Container(
+      width: size,
+      height: size,
+      decoration: BoxDecoration(
+        shape: BoxShape.circle,
+        color: colors.accentSubtle,
+        border: Border.all(color: colors.borderStrong),
+      ),
+      alignment: Alignment.center,
+      child: Text(
+        initial,
+        style: AppTextStyles.micro.copyWith(
+          color: colors.accent,
+          fontWeight: FontWeight.w700,
+          fontSize: 11,
+        ),
+      ),
+    );
+
+    if (url == null || url!.isEmpty) return placeholder;
+    return Container(
+      width: size,
+      height: size,
+      decoration: BoxDecoration(
+        shape: BoxShape.circle,
+        border: Border.all(color: colors.borderStrong),
+      ),
+      clipBehavior: Clip.antiAlias,
+      child: CachedNetworkImage(
+        imageUrl: url!,
+        fit: BoxFit.cover,
+        placeholder: (_, _) => placeholder,
+        errorWidget: (_, _, _) => placeholder,
+      ),
+    );
+  }
+}
+
+// =============================================================================
+// Type tabs — compact chips, wrap (matches web `flex gap-1 flex-wrap`)
+// =============================================================================
+class _KindTabs extends StatelessWidget {
+  const _KindTabs({required this.active, required this.onChanged});
+
+  final CreatePostKind active;
+  final ValueChanged<CreatePostKind> onChanged;
+
+  static const _items = [
+    (CreatePostKind.text, LucideIcons.pencil, 'Text'),
+    (CreatePostKind.photo, LucideIcons.image, 'Photo'),
+    (CreatePostKind.video, LucideIcons.video, 'Video'),
+    (CreatePostKind.score, LucideIcons.target, 'Score'),
+    (CreatePostKind.poll, LucideIcons.chartColumn, 'Poll'),
+  ];
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = context.colors;
+    return Wrap(
+      spacing: 6,
+      runSpacing: 6,
+      children: [
+        for (final (k, icon, label) in _items)
+          _TabChip(
+            icon: icon,
+            label: label,
+            active: active == k,
+            onTap: () => onChanged(k),
+            accent: colors.accent,
+            accentBg: colors.accentSubtle,
+            dim: colors.textTertiary,
+          ),
+      ],
+    );
+  }
+}
+
+class _TabChip extends StatelessWidget {
+  const _TabChip({
+    required this.icon,
+    required this.label,
+    required this.active,
+    required this.onTap,
+    required this.accent,
+    required this.accentBg,
+    required this.dim,
+  });
+
+  final IconData icon;
+  final String label;
+  final bool active;
+  final VoidCallback onTap;
+  final Color accent;
+  final Color accentBg;
+  final Color dim;
+
+  @override
+  Widget build(BuildContext context) {
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        borderRadius: AppRadius.smAll,
+        onTap: onTap,
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+          decoration: BoxDecoration(
+            color: active ? accentBg : Colors.transparent,
+            borderRadius: AppRadius.smAll,
+            border: Border.all(
+              color: active ? accent.withValues(alpha: 0.3) : Colors.transparent,
+            ),
+          ),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(icon, size: 13, color: active ? accent : dim),
+              const SizedBox(width: 4),
+              Text(
+                label,
+                style: AppTextStyles.micro.copyWith(
+                  color: active ? accent : dim,
+                  fontWeight: FontWeight.w600,
+                  fontSize: 11,
+                ),
               ),
             ],
           ),
@@ -392,156 +636,59 @@ class _CreatePostSheetState extends State<_CreatePostSheet> {
   }
 }
 
-// ─────────────────────────────────────────────────────────────────────────────
-class _Header extends StatelessWidget {
-  const _Header({
-    required this.onClose,
-    required this.onSubmit,
-    required this.busy,
-  });
-
-  final VoidCallback onClose;
-  final VoidCallback? onSubmit;
-  final bool busy;
-
-  @override
-  Widget build(BuildContext context) {
-    final colors = context.colors;
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: AppSpacing.base),
-      child: Row(
-        children: [
-          IconButton(
-            icon: Icon(LucideIcons.x, size: 20, color: colors.textSecondary),
-            onPressed: onClose,
-            visualDensity: VisualDensity.compact,
-          ),
-          const Spacer(),
-          Text(
-            'New post',
-            style: AppTextStyles.sectionTitle.copyWith(
-              color: colors.textPrimary,
-            ),
-          ),
-          const Spacer(),
-          SizedBox(
-            width: 88,
-            child: AppButton(
-              label: busy ? 'Posting' : 'Post',
-              size: AppButtonSize.small,
-              loading: busy,
-              onPressed: onSubmit,
-              expand: true,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _KindTabs extends StatelessWidget {
-  const _KindTabs({required this.active, required this.onChanged});
-
-  final CreatePostKind active;
-  final ValueChanged<CreatePostKind> onChanged;
-
-  @override
-  Widget build(BuildContext context) {
-    final colors = context.colors;
-    final items = const [
-      (CreatePostKind.text, LucideIcons.pencil, 'Text'),
-      (CreatePostKind.photo, LucideIcons.image, 'Photo'),
-      (CreatePostKind.video, LucideIcons.video, 'Video'),
-      (CreatePostKind.score, LucideIcons.target, 'Score'),
-      (CreatePostKind.poll, LucideIcons.chartColumn, 'Poll'),
-    ];
-    return SizedBox(
-      height: 42,
-      child: ListView.separated(
-        scrollDirection: Axis.horizontal,
-        padding: const EdgeInsets.symmetric(horizontal: AppSpacing.base),
-        itemCount: items.length,
-        separatorBuilder: (_, _) => const SizedBox(width: AppSpacing.xs),
-        itemBuilder: (_, i) {
-          final (k, icon, label) = items[i];
-          final on = active == k;
-          return Material(
-            color: Colors.transparent,
-            child: InkWell(
-              borderRadius: AppRadius.fullAll,
-              onTap: () => onChanged(k),
-              child: Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: AppSpacing.md,
-                  vertical: AppSpacing.xs,
-                ),
-                decoration: BoxDecoration(
-                  color: on
-                      ? colors.accent.withValues(alpha: 0.12)
-                      : Colors.transparent,
-                  borderRadius: AppRadius.fullAll,
-                  border: Border.all(
-                    color: on ? colors.accent : colors.borderDefault,
-                  ),
-                ),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Icon(
-                      icon,
-                      size: 14,
-                      color: on ? colors.accent : colors.textSecondary,
-                    ),
-                    const SizedBox(width: 6),
-                    Text(
-                      label,
-                      style: AppTextStyles.bodySmall.copyWith(
-                        color: on ? colors.accent : colors.textSecondary,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-          );
-        },
-      ),
-    );
-  }
-}
-
-class _CaptionField extends StatelessWidget {
-  const _CaptionField({required this.controller, required this.kind});
+// =============================================================================
+// Caption textarea — always visible, 3 rows
+// =============================================================================
+class _CaptionArea extends StatelessWidget {
+  const _CaptionArea({required this.controller, required this.kind});
 
   final TextEditingController controller;
   final CreatePostKind kind;
 
-  String get _hint => switch (kind) {
-        CreatePostKind.text => "What's on your mind?",
-        CreatePostKind.photo => 'Say something about these photos…',
-        CreatePostKind.video => 'Say something about this video…',
-        CreatePostKind.score => 'Add a comment about this game…',
-        CreatePostKind.poll => 'Add context for the poll…',
-      };
-
   @override
   Widget build(BuildContext context) {
-    return AppInput(
-      controller: controller,
-      hint: _hint,
-      maxLines: 5,
-      minLines: 3,
+    final colors = context.colors;
+    return Container(
+      decoration: BoxDecoration(
+        color: colors.bgSurface,
+        borderRadius: AppRadius.lgAll,
+        border: Border.all(color: colors.borderDefault),
+      ),
+      child: TextField(
+        controller: controller,
+        maxLines: 4,
+        minLines: 3,
+        autofocus: kind == CreatePostKind.text,
+        style: AppTextStyles.bodySmall.copyWith(
+          color: colors.textPrimary,
+          fontSize: 13,
+        ),
+        cursorColor: colors.accent,
+        decoration: InputDecoration(
+          hintText: "What's on your mind?",
+          hintStyle: AppTextStyles.bodySmall.copyWith(
+            color: colors.textTertiary,
+            fontSize: 13,
+          ),
+          contentPadding: const EdgeInsets.symmetric(
+            horizontal: AppSpacing.base,
+            vertical: AppSpacing.md,
+          ),
+          border: InputBorder.none,
+        ),
+      ),
     );
   }
 }
 
-class _KindBody extends StatelessWidget {
-  const _KindBody({
+// =============================================================================
+// Type-body
+// =============================================================================
+class _TypeBody extends StatelessWidget {
+  const _TypeBody({
     required this.kind,
     required this.photos,
-    required this.onPickPhotos,
+    required this.onPickPhoto,
     required this.onRemovePhoto,
     required this.video,
     required this.onPickVideo,
@@ -561,24 +708,20 @@ class _KindBody extends StatelessWidget {
 
   final CreatePostKind kind;
 
-  // Photo
   final List<({Uint8List bytes, String name})> photos;
-  final VoidCallback onPickPhotos;
-  final ValueChanged<int> onRemovePhoto;
+  final VoidCallback onPickPhoto;
+  final VoidCallback onRemovePhoto;
 
-  // Video
   final ({Uint8List bytes, String name})? video;
   final VoidCallback onPickVideo;
   final VoidCallback onRemoveVideo;
 
-  // Score
   final TextEditingController scoreCtl;
   final TextEditingController strikePctCtl;
   final TextEditingController splitCountCtl;
   final GameType gameType;
   final ValueChanged<GameType> onGameTypeChanged;
 
-  // Poll
   final TextEditingController questionCtl;
   final List<TextEditingController> pollOptionCtls;
   final VoidCallback? onAddOption;
@@ -592,10 +735,10 @@ class _KindBody extends StatelessWidget {
       case CreatePostKind.text:
         return const SizedBox.shrink();
       case CreatePostKind.photo:
-        return _PhotoGridPicker(
+        return _PhotoPicker(
           photos: photos,
-          onPickPhotos: onPickPhotos,
-          onRemovePhoto: onRemovePhoto,
+          onPick: onPickPhoto,
+          onRemove: onRemovePhoto,
         );
       case CreatePostKind.video:
         return _VideoPicker(
@@ -625,101 +768,49 @@ class _KindBody extends StatelessWidget {
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-class _PhotoGridPicker extends StatelessWidget {
-  const _PhotoGridPicker({
+class _PhotoPicker extends StatelessWidget {
+  const _PhotoPicker({
     required this.photos,
-    required this.onPickPhotos,
-    required this.onRemovePhoto,
-  });
-
-  final List<({Uint8List bytes, String name})> photos;
-  final VoidCallback onPickPhotos;
-  final ValueChanged<int> onRemovePhoto;
-
-  @override
-  Widget build(BuildContext context) {
-    final colors = context.colors;
-    if (photos.isEmpty) {
-      return _MediaDropZone(
-        icon: LucideIcons.image,
-        label: 'Pick photos',
-        hint: 'Up to 4 images',
-        onTap: onPickPhotos,
-      );
-    }
-    return Wrap(
-      spacing: AppSpacing.sm,
-      runSpacing: AppSpacing.sm,
-      children: [
-        for (var i = 0; i < photos.length; i++)
-          _PickedThumb(
-            key: ValueKey('photo-$i'),
-            bytes: photos[i].bytes,
-            onRemove: () => onRemovePhoto(i),
-          ),
-        if (photos.length < 4)
-          Material(
-            color: Colors.transparent,
-            child: InkWell(
-              borderRadius: AppRadius.mdAll,
-              onTap: onPickPhotos,
-              child: Container(
-                width: 88,
-                height: 88,
-                decoration: BoxDecoration(
-                  border: Border.all(
-                    color: colors.borderStrong,
-                    style: BorderStyle.solid,
-                  ),
-                  borderRadius: AppRadius.mdAll,
-                ),
-                alignment: Alignment.center,
-                child: Icon(
-                  LucideIcons.plus,
-                  size: 22,
-                  color: colors.textSecondary,
-                ),
-              ),
-            ),
-          ),
-      ],
-    );
-  }
-}
-
-class _PickedThumb extends StatelessWidget {
-  const _PickedThumb({
-    super.key,
-    required this.bytes,
+    required this.onPick,
     required this.onRemove,
   });
 
-  final Uint8List bytes;
+  final List<({Uint8List bytes, String name})> photos;
+  final VoidCallback onPick;
   final VoidCallback onRemove;
 
   @override
   Widget build(BuildContext context) {
+    if (photos.isEmpty) {
+      return _DashedDropZone(
+        icon: LucideIcons.image,
+        label: 'Click to upload photo',
+        onTap: onPick,
+      );
+    }
     return Stack(
       children: [
         ClipRRect(
-          borderRadius: AppRadius.mdAll,
-          child: Image.memory(
-            bytes,
-            width: 88,
-            height: 88,
-            fit: BoxFit.cover,
+          borderRadius: AppRadius.lgAll,
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(maxHeight: 192),
+            child: Image.memory(
+              photos.first.bytes,
+              fit: BoxFit.cover,
+              width: double.infinity,
+            ),
           ),
         ),
         Positioned(
-          top: 4,
-          right: 4,
+          top: AppSpacing.sm,
+          right: AppSpacing.sm,
           child: GestureDetector(
             onTap: onRemove,
             child: Container(
-              width: 22,
-              height: 22,
-              decoration: const BoxDecoration(
-                color: Colors.black87,
+              width: 24,
+              height: 24,
+              decoration: BoxDecoration(
+                color: Colors.black.withValues(alpha: 0.55),
                 shape: BoxShape.circle,
               ),
               alignment: Alignment.center,
@@ -747,58 +838,36 @@ class _VideoPicker extends StatelessWidget {
   Widget build(BuildContext context) {
     final colors = context.colors;
     if (video == null) {
-      return _MediaDropZone(
+      return _DashedDropZone(
         icon: LucideIcons.video,
-        label: 'Pick a video',
-        hint: 'Up to 90 seconds',
+        label: 'Click to upload video',
         onTap: onPick,
       );
     }
     final v = video!;
-    final sizeKb = (v.bytes.lengthInBytes / 1024).toStringAsFixed(0);
     return Container(
       padding: const EdgeInsets.all(AppSpacing.md),
       decoration: BoxDecoration(
-        color: colors.bgSurface,
-        borderRadius: AppRadius.mdAll,
+        color: colors.bgSurfaceHover,
+        borderRadius: AppRadius.lgAll,
         border: Border.all(color: colors.borderDefault),
       ),
       child: Row(
         children: [
-          Container(
-            width: 44,
-            height: 44,
-            decoration: BoxDecoration(
-              color: colors.accentSubtle,
-              borderRadius: AppRadius.smAll,
-            ),
-            alignment: Alignment.center,
-            child: Icon(LucideIcons.video, size: 20, color: colors.accent),
-          ),
-          const SizedBox(width: AppSpacing.md),
+          Icon(LucideIcons.video, size: 16, color: colors.accent),
+          const SizedBox(width: AppSpacing.sm),
           Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Text(
-                  v.name,
-                  overflow: TextOverflow.ellipsis,
-                  style: AppTextStyles.bodySmall.copyWith(
-                    color: colors.textPrimary,
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-                Text(
-                  '$sizeKb KB',
-                  style: AppTextStyles.micro
-                      .copyWith(color: colors.textTertiary),
-                ),
-              ],
+            child: Text(
+              v.name,
+              overflow: TextOverflow.ellipsis,
+              style: AppTextStyles.bodySmall.copyWith(
+                color: colors.textPrimary,
+                fontSize: 12,
+              ),
             ),
           ),
           IconButton(
-            icon: Icon(LucideIcons.x, size: 18, color: colors.textSecondary),
+            icon: Icon(LucideIcons.x, size: 14, color: colors.textTertiary),
             onPressed: onRemove,
             visualDensity: VisualDensity.compact,
           ),
@@ -808,17 +877,15 @@ class _VideoPicker extends StatelessWidget {
   }
 }
 
-class _MediaDropZone extends StatelessWidget {
-  const _MediaDropZone({
+class _DashedDropZone extends StatelessWidget {
+  const _DashedDropZone({
     required this.icon,
     required this.label,
-    required this.hint,
     required this.onTap,
   });
 
   final IconData icon;
   final String label;
-  final String hint;
   final VoidCallback onTap;
 
   @override
@@ -829,41 +896,31 @@ class _MediaDropZone extends StatelessWidget {
       child: InkWell(
         borderRadius: AppRadius.lgAll,
         onTap: onTap,
-        child: Container(
-          height: 150,
-          decoration: BoxDecoration(
-            color: colors.bgSurface,
-            borderRadius: AppRadius.lgAll,
-            border: Border.all(color: colors.borderDefault),
+        child: CustomPaint(
+          painter: _DashedBorderPainter(
+            color: colors.borderStrong,
+            radius: AppRadius.lg,
           ),
-          alignment: Alignment.center,
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Container(
-                width: 48,
-                height: 48,
-                decoration: BoxDecoration(
-                  color: colors.accentSubtle,
-                  shape: BoxShape.circle,
+          child: Container(
+            padding: const EdgeInsets.symmetric(
+              horizontal: AppSpacing.xl,
+              vertical: AppSpacing.xl,
+            ),
+            alignment: Alignment.center,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(icon, size: 20, color: colors.textTertiary),
+                const SizedBox(height: 6),
+                Text(
+                  label,
+                  style: AppTextStyles.bodySmall.copyWith(
+                    color: colors.textSecondary,
+                    fontSize: 12,
+                  ),
                 ),
-                alignment: Alignment.center,
-                child: Icon(icon, size: 22, color: colors.accent),
-              ),
-              const SizedBox(height: AppSpacing.sm),
-              Text(
-                label,
-                style: AppTextStyles.bodyMedium.copyWith(
-                  color: colors.textPrimary,
-                ),
-              ),
-              const SizedBox(height: 2),
-              Text(
-                hint,
-                style: AppTextStyles.secondary
-                    .copyWith(color: colors.textTertiary),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       ),
@@ -871,7 +928,49 @@ class _MediaDropZone extends StatelessWidget {
   }
 }
 
-// ─────────────────────────────────────────────────────────────────────────────
+/// Dashed outline — Flutter's default Container border doesn't dash, so we
+/// paint it ourselves. Matches web's `border-2 border-dashed`.
+class _DashedBorderPainter extends CustomPainter {
+  _DashedBorderPainter({required this.color, required this.radius});
+  final Color color;
+  final double radius;
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final paint = Paint()
+      ..color = color
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 1.5;
+
+    final rrect = RRect.fromRectAndRadius(
+      Offset.zero & size,
+      Radius.circular(radius),
+    );
+    final path = Path()..addRRect(rrect);
+
+    const dashLen = 6.0;
+    const gapLen = 4.0;
+    for (final metric in path.computeMetrics()) {
+      var distance = 0.0;
+      while (distance < metric.length) {
+        final end = (distance + dashLen).clamp(0.0, metric.length);
+        canvas.drawPath(
+          metric.extractPath(distance, end),
+          paint,
+        );
+        distance = end + gapLen;
+      }
+    }
+  }
+
+  @override
+  bool shouldRepaint(covariant _DashedBorderPainter old) =>
+      old.color != color || old.radius != radius;
+}
+
+// =============================================================================
+// Score form — grid-cols-2 x 2 rows (Total/GameType, Strike%/Splits)
+// =============================================================================
 class _ScoreForm extends StatelessWidget {
   const _ScoreForm({
     required this.scoreCtl,
@@ -889,58 +988,48 @@ class _ScoreForm extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colors = context.colors;
     return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        AppInput(
-          controller: scoreCtl,
-          label: 'Total Score',
-          hint: '0 – 300',
-          keyboardType: TextInputType.number,
-          inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-        ),
-        const SizedBox(height: AppSpacing.md),
-        Text(
-          'GAME TYPE',
-          style: AppTextStyles.label.copyWith(color: colors.textSecondary),
-        ),
-        const SizedBox(height: 6),
         Row(
-          children: [
-            for (var i = 0; i < GameType.values.length; i++) ...[
-              Expanded(
-                child: _SegmentButton(
-                  label: GameType.values[i].label,
-                  active: gameType == GameType.values[i],
-                  onTap: () => onGameTypeChanged(GameType.values[i]),
-                ),
-              ),
-              if (i < GameType.values.length - 1)
-                const SizedBox(width: AppSpacing.sm),
-            ],
-          ],
-        ),
-        const SizedBox(height: AppSpacing.md),
-        Row(
+          crossAxisAlignment: CrossAxisAlignment.end,
           children: [
             Expanded(
-              child: AppInput(
-                controller: strikePctCtl,
-                label: 'Strike %',
-                hint: '0 – 100',
-                keyboardType:
-                    const TextInputType.numberWithOptions(decimal: true),
+              child: _LabeledField(
+                label: 'Total Score',
+                child: _NumberField(controller: scoreCtl, hint: '279'),
               ),
             ),
             const SizedBox(width: AppSpacing.md),
             Expanded(
-              child: AppInput(
-                controller: splitCountCtl,
-                label: 'Splits',
-                hint: '0',
-                keyboardType: TextInputType.number,
-                inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+              child: _LabeledField(
+                label: 'Game Type',
+                child: _GameTypeDropdown(
+                  value: gameType,
+                  onChanged: onGameTypeChanged,
+                ),
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: AppSpacing.md),
+        Row(
+          crossAxisAlignment: CrossAxisAlignment.end,
+          children: [
+            Expanded(
+              child: _LabeledField(
+                label: 'Strike %',
+                child: _NumberField(
+                  controller: strikePctCtl,
+                  hint: '45.5',
+                  allowDecimal: true,
+                ),
+              ),
+            ),
+            const SizedBox(width: AppSpacing.md),
+            Expanded(
+              child: _LabeledField(
+                label: 'Split Count',
+                child: _NumberField(controller: splitCountCtl, hint: '3'),
               ),
             ),
           ],
@@ -950,43 +1039,70 @@ class _ScoreForm extends StatelessWidget {
   }
 }
 
-class _SegmentButton extends StatelessWidget {
-  const _SegmentButton({
-    required this.label,
-    required this.active,
-    required this.onTap,
-  });
-
+class _LabeledField extends StatelessWidget {
+  const _LabeledField({required this.label, required this.child});
   final String label;
-  final bool active;
-  final VoidCallback onTap;
+  final Widget child;
 
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
-    return Material(
-      color: Colors.transparent,
-      child: InkWell(
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Text(
+          label.toUpperCase(),
+          style: AppTextStyles.label.copyWith(color: colors.textSecondary),
+        ),
+        const SizedBox(height: 6),
+        child,
+      ],
+    );
+  }
+}
+
+class _NumberField extends StatelessWidget {
+  const _NumberField({
+    required this.controller,
+    required this.hint,
+    this.allowDecimal = false,
+  });
+  final TextEditingController controller;
+  final String hint;
+  final bool allowDecimal;
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = context.colors;
+    return Container(
+      height: 44,
+      decoration: BoxDecoration(
+        color: colors.bgSurface,
         borderRadius: AppRadius.mdAll,
-        onTap: onTap,
-        child: Container(
-          height: 38,
-          decoration: BoxDecoration(
-            color: active
-                ? colors.accent.withValues(alpha: 0.12)
-                : Colors.transparent,
-            borderRadius: AppRadius.mdAll,
-            border: Border.all(
-              color: active ? colors.accent : colors.borderDefault,
-            ),
-          ),
-          alignment: Alignment.center,
-          child: Text(
-            label,
-            style: AppTextStyles.bodySmall.copyWith(
-              color: active ? colors.accent : colors.textSecondary,
-              fontWeight: FontWeight.w600,
-            ),
+        border: Border.all(color: colors.borderStrong),
+      ),
+      padding: const EdgeInsets.symmetric(horizontal: 12),
+      child: TextField(
+        controller: controller,
+        keyboardType: TextInputType.numberWithOptions(decimal: allowDecimal),
+        inputFormatters: allowDecimal
+            ? [FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d*'))]
+            : [FilteringTextInputFormatter.digitsOnly],
+        style: AppTextStyles.body.copyWith(
+          color: colors.textPrimary,
+          fontWeight: FontWeight.w500,
+          fontSize: 13,
+        ),
+        cursorColor: colors.accent,
+        decoration: InputDecoration(
+          isDense: true,
+          contentPadding: EdgeInsets.zero,
+          border: InputBorder.none,
+          hintText: hint,
+          hintStyle: AppTextStyles.body.copyWith(
+            color: colors.textTertiary,
+            fontSize: 13,
           ),
         ),
       ),
@@ -994,7 +1110,51 @@ class _SegmentButton extends StatelessWidget {
   }
 }
 
-// ─────────────────────────────────────────────────────────────────────────────
+class _GameTypeDropdown extends StatelessWidget {
+  const _GameTypeDropdown({required this.value, required this.onChanged});
+
+  final GameType value;
+  final ValueChanged<GameType> onChanged;
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = context.colors;
+    return Container(
+      height: 44,
+      padding: const EdgeInsets.symmetric(horizontal: 12),
+      decoration: BoxDecoration(
+        color: colors.bgSurface,
+        borderRadius: AppRadius.mdAll,
+        border: Border.all(color: colors.borderStrong),
+      ),
+      child: DropdownButtonHideUnderline(
+        child: DropdownButton<GameType>(
+          value: value,
+          isExpanded: true,
+          icon: Icon(LucideIcons.chevronDown,
+              size: 14, color: colors.textTertiary),
+          dropdownColor: colors.bgSurfaceElevated,
+          style: AppTextStyles.body.copyWith(
+            color: colors.textPrimary,
+            fontSize: 13,
+            fontWeight: FontWeight.w500,
+          ),
+          items: [
+            for (final g in GameType.values)
+              DropdownMenuItem(value: g, child: Text(g.label)),
+          ],
+          onChanged: (g) {
+            if (g != null) onChanged(g);
+          },
+        ),
+      ),
+    );
+  }
+}
+
+// =============================================================================
+// Poll form
+// =============================================================================
 class _PollForm extends StatelessWidget {
   const _PollForm({
     required this.questionCtl,
@@ -1015,71 +1175,76 @@ class _PollForm extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
-    final expiries = const [12, 24, 48, 72, 168];
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        AppInput(
-          controller: questionCtl,
+        _LabeledField(
           label: 'Question',
-          hint: 'Ask your question',
+          child: _SmallTextField(
+            controller: questionCtl,
+            hint: 'Ask something...',
+          ),
         ),
         const SizedBox(height: AppSpacing.md),
-        Text(
-          'OPTIONS',
-          style: AppTextStyles.label.copyWith(color: colors.textSecondary),
-        ),
-        const SizedBox(height: 6),
         for (var i = 0; i < optionCtls.length; i++)
           Padding(
-            padding: const EdgeInsets.only(bottom: AppSpacing.sm),
+            padding: const EdgeInsets.only(bottom: 8),
             child: Row(
               children: [
                 Expanded(
-                  child: AppInput(
+                  child: _SmallTextField(
                     controller: optionCtls[i],
                     hint: 'Option ${i + 1}',
+                    compact: true,
                   ),
                 ),
-                if (onRemoveOption != null) ...[
-                  const SizedBox(width: AppSpacing.sm),
+                if (onRemoveOption != null)
                   IconButton(
                     icon: Icon(
-                      LucideIcons.x,
-                      size: 18,
+                      LucideIcons.minus,
+                      size: 14,
                       color: colors.textTertiary,
                     ),
                     onPressed: () => onRemoveOption!(i),
+                    visualDensity: VisualDensity.compact,
                   ),
-                ],
               ],
             ),
           ),
-        if (onAddOption != null)
-          Align(
-            alignment: Alignment.centerLeft,
-            child: TextButton.icon(
-              onPressed: onAddOption,
-              icon: const Icon(LucideIcons.plus, size: 14),
-              label: const Text('Add option'),
-            ),
-          ),
-        const SizedBox(height: AppSpacing.md),
-        Text(
-          'CLOSES IN',
-          style: AppTextStyles.label.copyWith(color: colors.textSecondary),
-        ),
-        const SizedBox(height: 6),
-        Wrap(
-          spacing: AppSpacing.sm,
-          runSpacing: AppSpacing.sm,
+        Row(
           children: [
-            for (final h in expiries)
-              _SegmentButtonFit(
-                label: h < 24 ? '${h}h' : '${h ~/ 24}d',
-                active: expiryHours == h,
-                onTap: () => onExpiryChanged(h),
+            if (onAddOption != null)
+              GestureDetector(
+                onTap: onAddOption,
+                behavior: HitTestBehavior.opaque,
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(LucideIcons.plus, size: 12, color: colors.accent),
+                    const SizedBox(width: 4),
+                    Text(
+                      'Add option',
+                      style: AppTextStyles.micro.copyWith(
+                        color: colors.accent,
+                        fontSize: 11,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ],
+                ),
               ),
+            const Spacer(),
+            Text(
+              'Duration: ',
+              style: AppTextStyles.micro.copyWith(
+                color: colors.textTertiary,
+                fontSize: 11,
+              ),
+            ),
+            _DurationDropdown(
+              value: expiryHours,
+              onChanged: onExpiryChanged,
+            ),
           ],
         ),
       ],
@@ -1087,45 +1252,44 @@ class _PollForm extends StatelessWidget {
   }
 }
 
-class _SegmentButtonFit extends StatelessWidget {
-  const _SegmentButtonFit({
-    required this.label,
-    required this.active,
-    required this.onTap,
+class _SmallTextField extends StatelessWidget {
+  const _SmallTextField({
+    required this.controller,
+    required this.hint,
+    this.compact = false,
   });
 
-  final String label;
-  final bool active;
-  final VoidCallback onTap;
+  final TextEditingController controller;
+  final String hint;
+  final bool compact;
 
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
-    return Material(
-      color: Colors.transparent,
-      child: InkWell(
-        borderRadius: AppRadius.fullAll,
-        onTap: onTap,
-        child: Container(
-          padding: const EdgeInsets.symmetric(
-            horizontal: AppSpacing.md,
-            vertical: AppSpacing.sm,
-          ),
-          decoration: BoxDecoration(
-            color: active
-                ? colors.accent.withValues(alpha: 0.12)
-                : Colors.transparent,
-            borderRadius: AppRadius.fullAll,
-            border: Border.all(
-              color: active ? colors.accent : colors.borderDefault,
-            ),
-          ),
-          child: Text(
-            label,
-            style: AppTextStyles.bodySmall.copyWith(
-              color: active ? colors.accent : colors.textSecondary,
-              fontWeight: FontWeight.w600,
-            ),
+    return Container(
+      height: compact ? 36 : 44,
+      padding: const EdgeInsets.symmetric(horizontal: 12),
+      decoration: BoxDecoration(
+        color: colors.bgSurface,
+        borderRadius: compact ? AppRadius.smAll : AppRadius.mdAll,
+        border: Border.all(color: colors.borderStrong),
+      ),
+      child: TextField(
+        controller: controller,
+        style: AppTextStyles.body.copyWith(
+          color: colors.textPrimary,
+          fontSize: compact ? 12 : 13,
+          fontWeight: FontWeight.w500,
+        ),
+        cursorColor: colors.accent,
+        decoration: InputDecoration(
+          isDense: true,
+          contentPadding: EdgeInsets.zero,
+          border: InputBorder.none,
+          hintText: hint,
+          hintStyle: AppTextStyles.body.copyWith(
+            color: colors.textTertiary,
+            fontSize: compact ? 12 : 13,
           ),
         ),
       ),
@@ -1133,12 +1297,76 @@ class _SegmentButtonFit extends StatelessWidget {
   }
 }
 
-// ─────────────────────────────────────────────────────────────────────────────
-class _AudienceBar extends StatelessWidget {
-  const _AudienceBar({required this.audience, required this.onChanged});
+class _DurationDropdown extends StatelessWidget {
+  const _DurationDropdown({required this.value, required this.onChanged});
+  final int value;
+  final ValueChanged<int> onChanged;
+
+  static const _items = [
+    (12, '12h'),
+    (24, '24h'),
+    (48, '2d'),
+    (72, '3d'),
+    (168, '1w'),
+  ];
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = context.colors;
+    return Container(
+      height: 32,
+      padding: const EdgeInsets.symmetric(horizontal: 8),
+      decoration: BoxDecoration(
+        color: colors.bgSurface,
+        borderRadius: AppRadius.smAll,
+        border: Border.all(color: colors.borderStrong),
+      ),
+      child: DropdownButtonHideUnderline(
+        child: DropdownButton<int>(
+          value: value,
+          icon: Icon(LucideIcons.chevronDown,
+              size: 12, color: colors.textTertiary),
+          dropdownColor: colors.bgSurfaceElevated,
+          style: AppTextStyles.micro.copyWith(
+            color: colors.textPrimary,
+            fontSize: 11,
+            fontWeight: FontWeight.w600,
+          ),
+          items: [
+            for (final (h, label) in _items)
+              DropdownMenuItem(value: h, child: Text(label)),
+          ],
+          onChanged: (v) {
+            if (v != null) onChanged(v);
+          },
+        ),
+      ),
+    );
+  }
+}
+
+// =============================================================================
+// Footer: audience icons left, Post button right
+// =============================================================================
+class _Footer extends StatelessWidget {
+  const _Footer({
+    required this.audience,
+    required this.onAudienceChanged,
+    required this.onPost,
+    required this.busy,
+  });
 
   final PostAudience audience;
-  final ValueChanged<PostAudience> onChanged;
+  final ValueChanged<PostAudience> onAudienceChanged;
+  final VoidCallback? onPost;
+  final bool busy;
+
+  static const _icons = <PostAudience, IconData>{
+    PostAudience.public: LucideIcons.globe,
+    PostAudience.followers: LucideIcons.users,
+    PostAudience.center: LucideIcons.house,
+    PostAudience.private: LucideIcons.lock,
+  };
 
   @override
   Widget build(BuildContext context) {
@@ -1146,40 +1374,38 @@ class _AudienceBar extends StatelessWidget {
     return SafeArea(
       top: false,
       child: Container(
-        padding: const EdgeInsets.symmetric(
-          horizontal: AppSpacing.base,
-          vertical: AppSpacing.sm,
+        padding: const EdgeInsets.fromLTRB(
+          AppSpacing.xl,
+          AppSpacing.md,
+          AppSpacing.xl,
+          AppSpacing.md,
         ),
         decoration: BoxDecoration(
-          color: colors.bgSurface,
           border: Border(top: BorderSide(color: colors.borderDefault)),
         ),
         child: Row(
           children: [
-            Icon(
-              _iconFor(audience),
-              size: 14,
-              color: colors.textSecondary,
+            Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                for (final a in PostAudience.values)
+                  _AudienceIconButton(
+                    icon: _icons[a]!,
+                    active: audience == a,
+                    tooltip: a.label,
+                    onTap: () => onAudienceChanged(a),
+                  ),
+              ],
             ),
-            const SizedBox(width: 6),
-            Text(
-              'Audience:',
-              style: AppTextStyles.bodySmall
-                  .copyWith(color: colors.textSecondary),
-            ),
-            const SizedBox(width: 6),
-            Expanded(
-              child: Wrap(
-                spacing: 6,
-                runSpacing: 6,
-                children: [
-                  for (final a in PostAudience.values)
-                    _AudienceChip(
-                      label: a.label,
-                      active: audience == a,
-                      onTap: () => onChanged(a),
-                    ),
-                ],
+            const Spacer(),
+            SizedBox(
+              width: 88,
+              child: AppButton(
+                label: busy ? 'Posting' : 'Post',
+                size: AppButtonSize.regular,
+                loading: busy,
+                onPressed: onPost,
+                expand: true,
               ),
             ),
           ],
@@ -1187,50 +1413,43 @@ class _AudienceBar extends StatelessWidget {
       ),
     );
   }
-
-  IconData _iconFor(PostAudience a) => switch (a) {
-        PostAudience.public => LucideIcons.globe,
-        PostAudience.followers => LucideIcons.users,
-        PostAudience.center => LucideIcons.mapPin,
-        PostAudience.private => LucideIcons.lock,
-      };
 }
 
-class _AudienceChip extends StatelessWidget {
-  const _AudienceChip({
-    required this.label,
+class _AudienceIconButton extends StatelessWidget {
+  const _AudienceIconButton({
+    required this.icon,
     required this.active,
+    required this.tooltip,
     required this.onTap,
   });
 
-  final String label;
+  final IconData icon;
   final bool active;
+  final String tooltip;
   final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
-    return Material(
-      color: Colors.transparent,
-      child: InkWell(
-        borderRadius: AppRadius.fullAll,
-        onTap: onTap,
-        child: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-          decoration: BoxDecoration(
-            color: active
-                ? colors.accent.withValues(alpha: 0.12)
-                : Colors.transparent,
-            borderRadius: AppRadius.fullAll,
-            border: Border.all(
-              color: active ? colors.accent : colors.borderDefault,
+    return Tooltip(
+      message: tooltip,
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          borderRadius: AppRadius.smAll,
+          onTap: onTap,
+          child: Container(
+            width: 28,
+            height: 28,
+            decoration: BoxDecoration(
+              color: active ? colors.accentSubtle : Colors.transparent,
+              borderRadius: AppRadius.smAll,
             ),
-          ),
-          child: Text(
-            label,
-            style: AppTextStyles.micro.copyWith(
-              color: active ? colors.accent : colors.textSecondary,
-              fontWeight: FontWeight.w600,
+            alignment: Alignment.center,
+            child: Icon(
+              icon,
+              size: 14,
+              color: active ? colors.accent : colors.textTertiary,
             ),
           ),
         ),
@@ -1239,6 +1458,9 @@ class _AudienceChip extends StatelessWidget {
   }
 }
 
+// =============================================================================
+// Error banner
+// =============================================================================
 class _ErrorBanner extends StatelessWidget {
   const _ErrorBanner({required this.messages});
   final List<String> messages;
@@ -1262,17 +1484,15 @@ class _ErrorBanner extends StatelessWidget {
               child: Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Icon(
-                    LucideIcons.circleAlert,
-                    size: 14,
-                    color: colors.error,
-                  ),
-                  const SizedBox(width: AppSpacing.sm),
+                  Icon(LucideIcons.circleAlert, size: 13, color: colors.error),
+                  const SizedBox(width: 8),
                   Expanded(
                     child: Text(
                       m,
-                      style: AppTextStyles.bodySmall
-                          .copyWith(color: colors.error),
+                      style: AppTextStyles.bodySmall.copyWith(
+                        color: colors.error,
+                        fontSize: 12,
+                      ),
                     ),
                   ),
                 ],
