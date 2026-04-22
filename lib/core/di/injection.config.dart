@@ -192,13 +192,8 @@ extension GetItInjectableX on _i174.GetIt {
     gh.lazySingleton<_i22.HidePostUseCase>(
       () => _i22.HidePostUseCase(gh<_i819.NewsfeedRepository>()),
     );
-    gh.factory<_i920.FeedBloc>(
-      () => _i920.FeedBloc(
-        gh<_i22.GetFeedUseCase>(),
-        gh<_i22.ReactToPostUseCase>(),
-        gh<_i22.ToggleSavePostUseCase>(),
-        gh<_i22.HidePostUseCase>(),
-      ),
+    gh.lazySingleton<_i22.SharePostUseCase>(
+      () => _i22.SharePostUseCase(gh<_i819.NewsfeedRepository>()),
     );
     gh.lazySingleton<_i469.ProfileBloc>(
       () => _i469.ProfileBloc(
@@ -211,6 +206,15 @@ extension GetItInjectableX on _i174.GetIt {
     );
     gh.lazySingleton<_i981.CheckProfileCompletionUseCase>(
       () => _i981.CheckProfileCompletionUseCase(gh<_i894.ProfileRepository>()),
+    );
+    gh.factory<_i920.FeedBloc>(
+      () => _i920.FeedBloc(
+        gh<_i22.GetFeedUseCase>(),
+        gh<_i22.ReactToPostUseCase>(),
+        gh<_i22.ToggleSavePostUseCase>(),
+        gh<_i22.HidePostUseCase>(),
+        gh<_i22.SharePostUseCase>(),
+      ),
     );
     return this;
   }

@@ -4,9 +4,11 @@ import 'package:injectable/injectable.dart';
 
 import '../../../../core/error/exceptions.dart';
 import '../../../../core/error/failures.dart';
+import '../../domain/entities/comment.dart';
 import '../../domain/entities/post.dart';
 import '../../domain/repositories/newsfeed_repository.dart';
 import '../datasources/newsfeed_remote_datasource.dart';
+import '../models/comment_dto.dart';
 import '../models/post_dto.dart';
 
 @LazySingleton(as: NewsfeedRepository)
@@ -148,6 +150,145 @@ class NewsfeedRepositoryImpl implements NewsfeedRepository {
             'expiry_hours': expiryHours,
             'poll_type': pollType,
           })));
+
+  // ── Comments ────────────────────────────────────────────────────────────────
+
+  @override
+  Future<Either<Failure, List<Comment>>> listComments(
+    String postUid, {
+    int page = 1,
+    int pageSize = 20,
+  }) =>
+      _guard(() async {
+        final res = await _remote.listComments(
+          postUid,
+          page: page,
+          pageSize: pageSize,
+        );
+        return res.comments.map(_commentToEntity).toList(growable: false);
+      });
+
+  @override
+  Future<Either<Failure, Comment>> createComment({
+    required String postUid,
+    required String text,
+    int? parentId,
+    String? mediaUrl,
+  }) =>
+      _guard(() async {
+        final dto = await _remote.createComment(postUid, {
+          'text': text,
+          'parent_id': ?parentId,
+          'media_url': ?mediaUrl,
+        });
+        return _commentToEntity(dto);
+      });
+
+  @override
+  Future<Either<Failure, Comment>> editComment({
+    required int commentId,
+    required String text,
+  }) =>
+      _guard(() async {
+        final dto = await _remote.editComment(commentId, {'text': text});
+        return _commentToEntity(dto);
+      });
+
+  @override
+  Future<Either<Failure, Unit>> deleteComment(int commentId) =>
+      _guard(() async {
+        await _remote.deleteComment(commentId);
+        return unit;
+      });
+
+  @override
+  Future<Either<Failure, bool>> toggleCommentLike(int commentId) =>
+      _guard(() async {
+        final res = await _remote.likeComment(commentId);
+        return res.liked ?? false;
+      });
+
+  @override
+  Future<Either<Failure, bool>> toggleCommentPin(int commentId) =>
+      _guard(() async {
+        final res = await _remote.pinComment(commentId);
+        return res.isPinned ?? false;
+      });
+
+  @override
+  Future<Either<Failure, bool>> toggleCommentHide(int commentId) =>
+      _guard(() async {
+        final res = await _remote.hideComment(commentId);
+        return res.isHidden ?? false;
+      });
+
+  @override
+  Future<Either<Failure, List<Comment>>> listReplies(
+    int parentId, {
+    int page = 1,
+    int pageSize = 20,
+  }) =>
+      _guard(() async {
+        final res = await _remote.listReplies(
+          parentId,
+          page: page,
+          pageSize: pageSize,
+        );
+        return res.replies.map(_commentToEntity).toList(growable: false);
+      });
+
+  // ── Share / Report ─────────────────────────────────────────────────────────
+
+  @override
+  Future<Either<Failure, Post>> sharePost({
+    required String postUid,
+    String caption = '',
+  }) =>
+      _guard(() async => _toPost(
+          await _remote.sharePost(postUid, {'caption': caption})));
+
+  @override
+  Future<Either<Failure, Unit>> submitReport({
+    required String contentType,
+    required int contentId,
+    required String reason,
+    String? detail,
+  }) =>
+      _guard(() async {
+        await _remote.submitReport({
+          'content_type': contentType,
+          'content_id': contentId,
+          'reason': reason,
+          if (detail != null && detail.isNotEmpty) 'detail': detail,
+        });
+        return unit;
+      });
+
+  // ---------------------------------------------------------------------------
+  Comment _commentToEntity(CommentDto dto) => Comment(
+        id: dto.id,
+        text: dto.text,
+        mediaUrl: dto.mediaUrl,
+        isHidden: dto.isHidden,
+        isPinned: dto.isPinned,
+        isEdited: dto.isEdited,
+        likesCount: dto.likesCount,
+        replyCount: dto.replyCount,
+        isMine: dto.isMine,
+        hasLiked: dto.hasLiked,
+        isPostAuthor: dto.isPostAuthor,
+        createdAt:
+            DateTime.tryParse(dto.createdAt ?? '') ?? DateTime.now(),
+        author: CommentAuthor(
+          id: dto.author.id,
+          username: dto.author.username,
+          firstName: dto.author.firstName,
+          lastName: dto.author.lastName,
+          profilePictureUrl: dto.author.profilePictureUrl,
+          level: dto.author.level,
+          rankDisplay: dto.author.rankDisplay,
+        ),
+      );
 
   // ---------------------------------------------------------------------------
   Post _toPost(PostDto dto) {

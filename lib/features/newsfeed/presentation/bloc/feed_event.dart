@@ -59,3 +59,14 @@ class FeedPostCreated extends FeedEvent {
   @override
   List<Object?> get props => [post];
 }
+
+/// Repost (share) a post — matches web's direct repost button: no caption
+/// modal. The newly-created shared post is prepended; the original's
+/// `sharesCount` is bumped optimistically.
+class FeedShareRequested extends FeedEvent {
+  const FeedShareRequested({required this.postUid});
+  final String postUid;
+
+  @override
+  List<Object?> get props => [postUid];
+}

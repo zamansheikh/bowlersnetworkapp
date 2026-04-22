@@ -20,6 +20,7 @@ class FeedBloc extends Bloc<FeedEvent, FeedState> {
     this._react,
     this._toggleSave,
     this._hide,
+    this._share,
   ) : super(const FeedState()) {
     on<FeedLoadRequested>(_onLoad);
     on<FeedRefreshRequested>(_onRefresh);
@@ -29,12 +30,14 @@ class FeedBloc extends Bloc<FeedEvent, FeedState> {
     on<FeedPostHidden>(_onHide);
     on<FeedFilterChanged>(_onFilterChanged);
     on<FeedPostCreated>(_onPostCreated);
+    on<FeedShareRequested>(_onShare);
   }
 
   final GetFeedUseCase _getFeed;
   final ReactToPostUseCase _react;
   final ToggleSavePostUseCase _toggleSave;
   final HidePostUseCase _hide;
+  final SharePostUseCase _share;
 
   Future<void> _onLoad(
     FeedLoadRequested event,
@@ -175,6 +178,33 @@ class FeedBloc extends Bloc<FeedEvent, FeedState> {
 
   void _onPostCreated(FeedPostCreated event, Emitter<FeedState> emit) {
     emit(state.copyWith(posts: [event.post, ...state.posts]));
+  }
+
+  Future<void> _onShare(
+    FeedShareRequested event,
+    Emitter<FeedState> emit,
+  ) async {
+    final idx = state.posts.indexWhere((p) => p.uid == event.postUid);
+    final original = idx >= 0 ? state.posts[idx] : null;
+
+    final res = await _share(event.postUid);
+    res.fold(
+      (f) => emit(state.copyWith(errors: f.messages)),
+      (shared) {
+        var posts = [shared, ...state.posts];
+        if (original != null) {
+          final bumpedIdx =
+              posts.indexWhere((p) => p.uid == original.uid && p != shared);
+          if (bumpedIdx >= 0) {
+            posts = List<Post>.from(posts);
+            posts[bumpedIdx] = original.copyWith(
+              sharesCount: original.sharesCount + 1,
+            );
+          }
+        }
+        emit(state.copyWith(posts: posts));
+      },
+    );
   }
 
   void _onFilterChanged(

@@ -165,6 +165,7 @@ class Post extends Equatable {
   Post copyWith({
     int? likesCount,
     int? commentsCount,
+    int? sharesCount,
     int? savesCount,
     bool? hasReacted,
     bool? hasSaved,
@@ -184,7 +185,7 @@ class Post extends Equatable {
       isCommentsEnabled: isCommentsEnabled,
       likesCount: likesCount ?? this.likesCount,
       commentsCount: commentsCount ?? this.commentsCount,
-      sharesCount: sharesCount,
+      sharesCount: sharesCount ?? this.sharesCount,
       savesCount: savesCount ?? this.savesCount,
       isMine: isMine,
       hasReacted: hasReacted ?? this.hasReacted,

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 
@@ -7,14 +8,17 @@ import '../../../../core/extensions/context_extensions.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/theme/app_text_styles.dart';
 import '../../../../core/widgets/app_button.dart';
+import '../../../../core/widgets/app_toast.dart';
 import '../../../../core/widgets/empty_state.dart';
 import '../../../../core/widgets/skeleton_box.dart';
 import '../../../profile/presentation/bloc/profile_bloc.dart';
 import '../../domain/entities/post.dart';
 import '../bloc/feed_bloc.dart';
+import '../widgets/comments_sheet.dart';
 import '../widgets/create_post_composer.dart';
 import '../widgets/create_post_sheet.dart';
 import '../widgets/post_card.dart';
+import '../widgets/report_sheet.dart';
 
 class FeedScreen extends StatelessWidget {
   const FeedScreen({super.key});
@@ -161,11 +165,15 @@ class _FeedViewState extends State<_FeedView> {
                                     reaction: r,
                                   ),
                                 ),
-                            onComment: () {},
+                            onComment: () => showCommentsSheet(
+                              context,
+                              postUid: post.uid,
+                              isPostAuthor: post.isMine,
+                            ),
                             onSave: () => context
                                 .read<FeedBloc>()
                                 .add(FeedSaveToggled(postUid: post.uid)),
-                            onShare: () {},
+                            onShare: () => _showShareMenu(context, post),
                             onMore: () => _showMoreMenu(context, post),
                           );
                         },
@@ -238,19 +246,125 @@ class _FeedViewState extends State<_FeedView> {
                   },
                 ),
                 ListTile(
-                  leading: Icon(LucideIcons.flag, size: 18, color: colors.error),
-                  title: Text(
-                    'Report post',
-                    style:
-                        AppTextStyles.body.copyWith(color: colors.error),
+                  leading: Icon(
+                    LucideIcons.link,
+                    size: 18,
+                    color: colors.textSecondary,
                   ),
-                  onTap: () => Navigator.of(sheetCtx).pop(),
+                  title: Text(
+                    'Copy link',
+                    style: AppTextStyles.body
+                        .copyWith(color: colors.textPrimary),
+                  ),
+                  onTap: () {
+                    Navigator.of(sheetCtx).pop();
+                    _copyPostLink(context, post);
+                  },
+                ),
+                if (!post.isMine)
+                  ListTile(
+                    leading:
+                        Icon(LucideIcons.flag, size: 18, color: colors.error),
+                    title: Text(
+                      'Report post',
+                      style: AppTextStyles.body.copyWith(color: colors.error),
+                    ),
+                    onTap: () {
+                      Navigator.of(sheetCtx).pop();
+                      showReportSheet(
+                        context,
+                        contentType: 'post',
+                        contentId: post.id,
+                      );
+                    },
+                  ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  void _showShareMenu(BuildContext context, Post post) {
+    final feedBloc = context.read<FeedBloc>();
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.transparent,
+      builder: (sheetCtx) {
+        final colors = sheetCtx.colors;
+        return SafeArea(
+          top: false,
+          child: Container(
+            decoration: BoxDecoration(
+              color: colors.bgSurfaceElevated,
+              borderRadius: const BorderRadius.vertical(
+                top: Radius.circular(AppRadius.xl),
+              ),
+            ),
+            padding: const EdgeInsets.all(AppSpacing.md),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                ListTile(
+                  leading: Icon(
+                    LucideIcons.repeat2,
+                    size: 20,
+                    color: colors.accent,
+                  ),
+                  title: Text(
+                    'Repost',
+                    style: AppTextStyles.body
+                        .copyWith(color: colors.textPrimary),
+                  ),
+                  subtitle: Text(
+                    'Share to your followers',
+                    style: AppTextStyles.secondary
+                        .copyWith(color: colors.textTertiary),
+                  ),
+                  onTap: () {
+                    Navigator.of(sheetCtx).pop();
+                    feedBloc.add(FeedShareRequested(postUid: post.uid));
+                    showAppToast(
+                      context,
+                      message: 'Reposted to your feed',
+                      variant: ToastVariant.success,
+                    );
+                  },
+                ),
+                ListTile(
+                  leading: Icon(
+                    LucideIcons.link,
+                    size: 20,
+                    color: colors.textSecondary,
+                  ),
+                  title: Text(
+                    'Copy link',
+                    style: AppTextStyles.body
+                        .copyWith(color: colors.textPrimary),
+                  ),
+                  onTap: () {
+                    Navigator.of(sheetCtx).pop();
+                    _copyPostLink(context, post);
+                  },
                 ),
               ],
             ),
           ),
         );
       },
+    );
+  }
+
+  Future<void> _copyPostLink(BuildContext context, Post post) async {
+    await Clipboard.setData(
+      ClipboardData(text: 'https://bowlersnetwork.com/newsfeed/${post.uid}'),
+    );
+    if (!context.mounted) return;
+    showAppToast(
+      context,
+      message: 'Link copied',
+      variant: ToastVariant.success,
     );
   }
 }

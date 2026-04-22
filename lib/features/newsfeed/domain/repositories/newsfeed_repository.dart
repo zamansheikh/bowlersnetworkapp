@@ -1,6 +1,7 @@
 import 'package:dartz/dartz.dart';
 
 import '../../../../core/error/failures.dart';
+import '../entities/comment.dart';
 import '../entities/post.dart';
 
 abstract class NewsfeedRepository {
@@ -62,5 +63,57 @@ abstract class NewsfeedRepository {
     required List<String> options,
     required int expiryHours,
     String pollType = 'single',
+  });
+
+  // ── Comments ────────────────────────────────────────────────────────────────
+  Future<Either<Failure, List<Comment>>> listComments(
+    String postUid, {
+    int page = 1,
+    int pageSize = 20,
+  });
+
+  Future<Either<Failure, Comment>> createComment({
+    required String postUid,
+    required String text,
+    int? parentId,
+    String? mediaUrl,
+  });
+
+  Future<Either<Failure, Comment>> editComment({
+    required int commentId,
+    required String text,
+  });
+
+  Future<Either<Failure, Unit>> deleteComment(int commentId);
+
+  /// Returns the new `has_liked` state.
+  Future<Either<Failure, bool>> toggleCommentLike(int commentId);
+
+  /// Post-owner only. Returns the new pinned state.
+  Future<Either<Failure, bool>> toggleCommentPin(int commentId);
+
+  /// Post-owner only. Returns the new hidden state.
+  Future<Either<Failure, bool>> toggleCommentHide(int commentId);
+
+  Future<Either<Failure, List<Comment>>> listReplies(
+    int parentId, {
+    int page = 1,
+    int pageSize = 20,
+  });
+
+  // ── Share ───────────────────────────────────────────────────────────────────
+  /// Repost another post. Empty caption is valid. Returns the newly-created
+  /// shared post (matches web: direct repost, no caption modal).
+  Future<Either<Failure, Post>> sharePost({
+    required String postUid,
+    String caption = '',
+  });
+
+  // ── Report ─────────────────────────────────────────────────────────────────
+  Future<Either<Failure, Unit>> submitReport({
+    required String contentType,
+    required int contentId,
+    required String reason,
+    String? detail,
   });
 }

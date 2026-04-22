@@ -69,3 +69,13 @@ class HidePostUseCase implements UseCase<Unit, String> {
   Future<Either<Failure, Unit>> call(String postUid) =>
       _repository.hide(postUid);
 }
+
+@lazySingleton
+class SharePostUseCase implements UseCase<Post, String> {
+  const SharePostUseCase(this._repository);
+  final NewsfeedRepository _repository;
+
+  @override
+  Future<Either<Failure, Post>> call(String postUid) =>
+      _repository.sharePost(postUid: postUid);
+}

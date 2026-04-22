@@ -3,6 +3,7 @@ import 'package:injectable/injectable.dart';
 import 'package:retrofit/retrofit.dart';
 
 import '../../../../core/constants/api_constants.dart';
+import '../models/comment_dto.dart';
 import '../models/post_dto.dart';
 
 part 'newsfeed_remote_datasource.g.dart';
@@ -52,4 +53,53 @@ abstract class NewsfeedRemoteDatasource {
 
   @POST(Endpoints.createPollPost)
   Future<PostDto> createPollPost(@Body() Map<String, dynamic> body);
+
+  // ── Comments ────────────────────────────────────────────────────────────────
+  @GET('/api/newsfeed/{uid}/comments')
+  Future<CommentsPageDto> listComments(
+    @Path('uid') String postUid, {
+    @Query('page') int? page,
+    @Query('page_size') int? pageSize,
+  });
+
+  @POST('/api/newsfeed/{uid}/comments')
+  Future<CommentDto> createComment(
+    @Path('uid') String postUid,
+    @Body() Map<String, dynamic> body,
+  );
+
+  @PATCH('/api/newsfeed/comments/{id}')
+  Future<CommentDto> editComment(
+    @Path('id') int commentId,
+    @Body() Map<String, dynamic> body,
+  );
+
+  @DELETE('/api/newsfeed/comments/{id}')
+  Future<void> deleteComment(@Path('id') int commentId);
+
+  @POST('/api/newsfeed/comments/{id}/like')
+  Future<FlagToggleResponseDto> likeComment(@Path('id') int commentId);
+
+  @POST('/api/newsfeed/comments/{id}/pin')
+  Future<FlagToggleResponseDto> pinComment(@Path('id') int commentId);
+
+  @POST('/api/newsfeed/comments/{id}/hide')
+  Future<FlagToggleResponseDto> hideComment(@Path('id') int commentId);
+
+  @GET('/api/newsfeed/comments/{id}/replies')
+  Future<RepliesPageDto> listReplies(
+    @Path('id') int commentId, {
+    @Query('page') int? page,
+    @Query('page_size') int? pageSize,
+  });
+
+  // ── Share / Report ─────────────────────────────────────────────────────────
+  @POST('/api/newsfeed/{uid}/share')
+  Future<PostDto> sharePost(
+    @Path('uid') String postUid,
+    @Body() Map<String, dynamic> body,
+  );
+
+  @POST(Endpoints.report)
+  Future<void> submitReport(@Body() Map<String, dynamic> body);
 }

@@ -79,6 +79,18 @@ class Endpoints {
   static String postComments(String postId) =>
       '/api/newsfeed/$postId/comments';
 
+  // Comments
+  static String commentDetail(int commentId) =>
+      '/api/newsfeed/comments/$commentId';
+  static String commentLike(int commentId) =>
+      '/api/newsfeed/comments/$commentId/like';
+  static String commentPin(int commentId) =>
+      '/api/newsfeed/comments/$commentId/pin';
+  static String commentHide(int commentId) =>
+      '/api/newsfeed/comments/$commentId/hide';
+  static String commentReplies(int commentId) =>
+      '/api/newsfeed/comments/$commentId/replies';
+
   // Newsfeed creation endpoints — one per post type
   static const String createTextPost = '/api/newsfeed/create/text';
   static const String createPhotoPost = '/api/newsfeed/create/photo';
