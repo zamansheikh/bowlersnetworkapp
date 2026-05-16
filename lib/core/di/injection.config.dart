@@ -51,6 +51,8 @@ import '../../features/newsfeed/domain/repositories/newsfeed_repository.dart'
     as _i819;
 import '../../features/newsfeed/domain/usecases/feed_usecases.dart' as _i22;
 import '../../features/newsfeed/presentation/bloc/feed_bloc.dart' as _i920;
+import '../../features/notifications/data/datasources/notifications_remote_datasource.dart'
+    as _i937;
 import '../../features/onboarding/data/onboarding_storage.dart' as _i861;
 import '../../features/profile/data/datasources/profile_remote_datasource.dart'
     as _i327;
@@ -65,6 +67,7 @@ import '../localization/locale_cubit.dart' as _i960;
 import '../network/api_client.dart' as _i557;
 import '../network/chat_socket.dart' as _i943;
 import '../services/cloud_upload_service.dart' as _i984;
+import '../services/device_token_service.dart' as _i914;
 import '../services/image_picker_service.dart' as _i644;
 import '../storage/local_storage_service.dart' as _i744;
 import '../storage/secure_storage_service.dart' as _i666;
@@ -111,6 +114,9 @@ extension GetItInjectableX on _i174.GetIt {
     gh.factory<_i452.NewsfeedRemoteDatasource>(
       () => _i452.NewsfeedRemoteDatasource(gh<_i361.Dio>()),
     );
+    gh.factory<_i937.NotificationsRemoteDatasource>(
+      () => _i937.NotificationsRemoteDatasource(gh<_i361.Dio>()),
+    );
     gh.factory<_i327.ProfileRemoteDatasource>(
       () => _i327.ProfileRemoteDatasource(gh<_i361.Dio>()),
     );
@@ -143,6 +149,9 @@ extension GetItInjectableX on _i174.GetIt {
     gh.lazySingleton<_i819.NewsfeedRepository>(
       () => _i306.NewsfeedRepositoryImpl(gh<_i452.NewsfeedRemoteDatasource>()),
     );
+    gh.lazySingleton<_i914.DeviceTokenService>(
+      () => _i914.DeviceTokenService(gh<_i937.NotificationsRemoteDatasource>()),
+    );
     gh.lazySingleton<_i943.ChatSocket>(
       () => _i943.ChatSocket(gh<_i666.SecureStorageService>()),
       dispose: (i) => i.dispose(),
@@ -174,18 +183,19 @@ extension GetItInjectableX on _i174.GetIt {
     gh.lazySingleton<_i416.ValidateRegistrationUseCase>(
       () => _i416.ValidateRegistrationUseCase(gh<_i787.AuthRepository>()),
     );
+    gh.factory<_i454.ConversationsBloc>(
+      () => _i454.ConversationsBloc(
+        gh<_i794.MessagesRepository>(),
+        gh<_i943.ChatSocket>(),
+      ),
+    );
     gh.singleton<_i797.AuthBloc>(
       () => _i797.AuthBloc(
         gh<_i787.AuthRepository>(),
         gh<_i188.LoginUseCase>(),
         gh<_i57.CompleteSignupUseCase>(),
         gh<_i48.LogoutUseCase>(),
-      ),
-    );
-    gh.factory<_i454.ConversationsBloc>(
-      () => _i454.ConversationsBloc(
-        gh<_i794.MessagesRepository>(),
-        gh<_i943.ChatSocket>(),
+        gh<_i914.DeviceTokenService>(),
       ),
     );
     gh.lazySingleton<_i22.GetFeedUseCase>(

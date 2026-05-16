@@ -1,7 +1,10 @@
+import 'dart:async';
+
 import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:injectable/injectable.dart';
 
+import '../../../../core/services/device_token_service.dart';
 import '../../../../core/usecase/usecase.dart';
 import '../../data/models/auth_dtos.dart';
 import '../../domain/entities/auth_session.dart';
@@ -22,6 +25,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     this._login,
     this._completeSignup,
     this._logout,
+    this._deviceTokens,
   ) : super(const AuthState()) {
     on<AuthStarted>(_onStarted);
     on<AuthLoginRequested>(_onLogin);
@@ -36,6 +40,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
   final LoginUseCase _login;
   final CompleteSignupUseCase _completeSignup;
   final LogoutUseCase _logout;
+  final DeviceTokenService _deviceTokens;
 
   Future<void> _onStarted(AuthStarted event, Emitter<AuthState> emit) async {
     final session = await _repository.restoreSession();
@@ -53,6 +58,9 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
           : AuthStatus.authenticated,
       session: session,
     ));
+    // Restored sessions still need a fresh FCM token registration — the old
+    // one may have been rotated by the OS while we were logged out.
+    unawaited(_deviceTokens.registerCurrentDevice());
   }
 
   Future<void> _onLogin(
@@ -67,13 +75,16 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
       (failure) => emit(
         state.copyWith(processing: false, errors: failure.messages),
       ),
-      (session) => emit(state.copyWith(
-        processing: false,
-        session: session,
-        status: session.requiresConsent
-            ? AuthStatus.requiresConsent
-            : AuthStatus.authenticated,
-      )),
+      (session) {
+        emit(state.copyWith(
+          processing: false,
+          session: session,
+          status: session.requiresConsent
+              ? AuthStatus.requiresConsent
+              : AuthStatus.authenticated,
+        ));
+        unawaited(_deviceTokens.registerCurrentDevice());
+      },
     );
   }
 
@@ -92,13 +103,16 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
       (failure) => emit(
         state.copyWith(processing: false, errors: failure.messages),
       ),
-      (session) => emit(state.copyWith(
-        processing: false,
-        session: session,
-        status: session.requiresConsent
-            ? AuthStatus.requiresConsent
-            : AuthStatus.authenticated,
-      )),
+      (session) {
+        emit(state.copyWith(
+          processing: false,
+          session: session,
+          status: session.requiresConsent
+              ? AuthStatus.requiresConsent
+              : AuthStatus.authenticated,
+        ));
+        unawaited(_deviceTokens.registerCurrentDevice());
+      },
     );
   }
 
@@ -122,6 +136,9 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     AuthLogoutRequested event,
     Emitter<AuthState> emit,
   ) async {
+    // MUST unregister before _logout clears the token — the request would
+    // otherwise hit the backend with no auth and 401.
+    await _deviceTokens.unregisterCurrentDevice();
     await _logout(const NoParams());
     emit(const AuthState(status: AuthStatus.unauthenticated));
   }
@@ -130,6 +147,9 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     AuthSessionExpired event,
     Emitter<AuthState> emit,
   ) async {
+    // Token is already invalid here — don't bother unregistering, just drop
+    // the cached FCM token locally so the next login re-registers.
+    await _deviceTokens.unregisterCurrentDevice();
     await _logout(const NoParams());
     emit(const AuthState(
       status: AuthStatus.unauthenticated,
