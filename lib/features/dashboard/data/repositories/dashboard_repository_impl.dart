@@ -8,11 +8,16 @@ import '../../domain/entities/alpha_score.dart';
 import '../../domain/entities/dashboard_range.dart';
 import '../../domain/entities/engagement_insights.dart';
 import '../../domain/entities/games_insights.dart';
+import '../../domain/entities/pro_audience.dart';
+import '../../domain/entities/pro_content.dart';
+import '../../domain/entities/pro_contribution.dart';
+import '../../domain/entities/pro_referrals.dart';
 import '../../domain/entities/xp_insights.dart';
 import '../../domain/repositories/dashboard_repository.dart';
 import '../datasources/dashboard_remote_datasource.dart';
 import '../models/engagement_dtos.dart';
 import '../models/games_dtos.dart';
+import '../models/pro_dtos.dart';
 import '../models/xp_dtos.dart';
 
 @LazySingleton(as: DashboardRepository)
@@ -252,6 +257,205 @@ class DashboardRepositoryImpl implements DashboardRepository {
       followersGained: dto.followersGained,
       mediaViews: dto.mediaViews,
       discussions: dto.discussions,
+    );
+  }
+
+  // ── Pro tabs ─────────────────────────────────────────────────────────────
+
+  @override
+  Future<Either<Failure, ProContent>> getProContent({
+    required DashboardRange window,
+  }) =>
+      _guard(() async {
+        final dto = await _remote.getProContent(window: window.wire);
+        return _toProContent(dto);
+      });
+
+  @override
+  Future<Either<Failure, ProAudience>> getProAudience({
+    required DashboardRange window,
+  }) =>
+      _guard(() async {
+        final dto = await _remote.getProAudience(window: window.wire);
+        return _toProAudience(dto);
+      });
+
+  @override
+  Future<Either<Failure, ProReferrals>> getProReferrals({
+    required DashboardRange window,
+  }) =>
+      _guard(() async {
+        final dto = await _remote.getProReferrals(window: window.wire);
+        return _toProReferrals(dto);
+      });
+
+  @override
+  Future<Either<Failure, ProContribution>> getProContribution({
+    required DashboardRange window,
+  }) =>
+      _guard(() async {
+        final dto = await _remote.getProContribution(window: window.wire);
+        return _toProContribution(dto);
+      });
+
+  ProContent _toProContent(ProContentDto dto) {
+    ProContentRow rowOf(ProContentRowDto r) => ProContentRow(
+          uid: r.uid,
+          label: r.label,
+          createdAt:
+              r.createdAt == null ? null : DateTime.tryParse(r.createdAt!),
+          impressions: r.impressions,
+          reach: r.reach,
+          engagement: r.engagement,
+          engagementRate: r.engagementRate.toDouble(),
+          previewUrl: r.previewUrl,
+          previewKind: r.previewKind,
+        );
+    return ProContent(
+      windowDays: dto.windowDays,
+      summary: dto.summary == null
+          ? const ProContentSummary()
+          : ProContentSummary(
+              posts: dto.summary!.posts,
+              videos: dto.summary!.videos,
+              splits: dto.summary!.splits,
+              discussions: dto.summary!.discussions,
+              total: dto.summary!.total,
+            ),
+      topPosts: dto.topPosts.map(rowOf).toList(growable: false),
+      topVideos: dto.topVideos.map(rowOf).toList(growable: false),
+      topSplits: dto.topSplits.map(rowOf).toList(growable: false),
+      topDiscussions:
+          dto.topDiscussions.map(rowOf).toList(growable: false),
+      heatmap: dto.heatmap
+          .map((row) => List<int>.from(row))
+          .toList(growable: false),
+    );
+  }
+
+  ProAudience _toProAudience(ProAudienceDto dto) {
+    return ProAudience(
+      windowDays: dto.windowDays,
+      totalFollowers: dto.totalFollowers,
+      newFollowersWindow: dto.newFollowersWindow,
+      dailyAcquisition: dto.dailyAcquisition
+          .map((d) => DailyCount(date: d.date, count: d.count))
+          .toList(growable: false),
+      ageDistribution: dto.ageDistribution
+          .map((k) => KeyLabelCount(
+                key: k.key,
+                label: k.label,
+                count: k.count,
+              ))
+          .toList(growable: false),
+      genderDistribution: dto.genderDistribution
+          .map((k) => KeyLabelCount(
+                key: k.key,
+                label: k.label,
+                count: k.count,
+              ))
+          .toList(growable: false),
+      skillDistribution: dto.skillDistribution
+          .map((k) => KeyLabelCount(
+                key: k.key,
+                label: k.label,
+                count: k.count,
+              ))
+          .toList(growable: false),
+      topCenters: dto.topCenters
+          .map((c) => ProCenterCount(
+                // Coerce int|str ids to string so the UI doesn't branch.
+                centerId: c.centerId == null ? '' : c.centerId.toString(),
+                name: c.name,
+                count: c.count,
+              ))
+          .toList(growable: false),
+    );
+  }
+
+  ProReferrals _toProReferrals(ProReferralsDto dto) {
+    return ProReferrals(
+      windowDays: dto.windowDays,
+      clicks: dto.clicks == null
+          ? const ReferralClicks()
+          : ReferralClicks(
+              totalClicks: dto.clicks!.totalClicks,
+              windowClicks: dto.clicks!.windowClicks,
+              convertedWindow: dto.clicks!.convertedWindow,
+              conversionRate: dto.clicks!.conversionRate.toDouble(),
+              dailyClicks: dto.clicks!.dailyClicks
+                  .map((d) => DailyCount(date: d.date, count: d.count))
+                  .toList(growable: false),
+              topCountries: dto.clicks!.topCountries
+                  .map((k) => KeyLabelCount(
+                        key: k.key,
+                        label: k.label,
+                        count: k.count,
+                      ))
+                  .toList(growable: false),
+              deviceMix: dto.clicks!.deviceMix
+                  .map((k) => KeyLabelCount(
+                        key: k.key,
+                        label: k.label,
+                        count: k.count,
+                      ))
+                  .toList(growable: false),
+            ),
+      referrals: dto.referrals == null
+          ? const ReferralTotals()
+          : ReferralTotals(
+              total: dto.referrals!.total,
+              inWindow: dto.referrals!.inWindow,
+            ),
+      proAttribution: dto.proAttribution == null
+          ? null
+          : ProAttribution(
+              trueCount: dto.proAttribution!.trueCount,
+              secondaryCount: dto.proAttribution!.secondaryCount,
+              shadowCount: dto.proAttribution!.shadowCount,
+              totalCount: dto.proAttribution!.totalCount,
+              windowCount: dto.proAttribution!.windowCount,
+              weightedScore: dto.proAttribution!.weightedScore.toDouble(),
+              weightMap: _toWeights(dto.proAttribution!.weightMap),
+            ),
+    );
+  }
+
+  ProAttributionWeights _toWeights(Map<String, dynamic>? map) {
+    if (map == null) return const ProAttributionWeights();
+    double pick(String key) {
+      final v = map[key];
+      if (v is num) return v.toDouble();
+      return 0;
+    }
+    return ProAttributionWeights(
+      trueWeight: pick('true'),
+      secondaryWeight: pick('secondary'),
+      shadowWeight: pick('shadow'),
+    );
+  }
+
+  ProContribution _toProContribution(ProContributionDto dto) {
+    return ProContribution(
+      hasData: dto.hasData,
+      window: dto.window,
+      date: dto.date == null ? null : DateTime.tryParse(dto.date!),
+      poolSize: dto.poolSize,
+      rank: dto.rank,
+      poolPercentage: dto.poolPercentage.toDouble(),
+      personalScore: dto.personalScore.toDouble(),
+      contentScore: dto.contentScore.toDouble(),
+      socialScore: dto.socialScore.toDouble(),
+      growthScore: dto.growthScore.toDouble(),
+      deltas: dto.deltas == null
+          ? const ContributionDeltas()
+          : ContributionDeltas(
+              poolPercentageChange:
+                  dto.deltas!.poolPercentageChange?.toDouble(),
+              rankChange: dto.deltas!.rankChange,
+              personalScoreChange:
+                  dto.deltas!.personalScoreChange?.toDouble(),
+            ),
     );
   }
 

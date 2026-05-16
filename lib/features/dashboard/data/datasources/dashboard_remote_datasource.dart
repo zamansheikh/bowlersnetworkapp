@@ -6,6 +6,7 @@ import '../../../../core/constants/api_constants.dart';
 import '../models/alpha_dtos.dart';
 import '../models/engagement_dtos.dart';
 import '../models/games_dtos.dart';
+import '../models/pro_dtos.dart';
 import '../models/xp_dtos.dart';
 
 part 'dashboard_remote_datasource.g.dart';
@@ -55,5 +56,29 @@ abstract class DashboardRemoteDatasource {
   @GET(Endpoints.dashboardGamesTrends)
   Future<GamesTrendsDto> getGamesTrends({
     @Query('range') String? range,
+  });
+
+  // ── Pro tabs (require Profile.isPro — backend returns 403 otherwise) ─────
+  // All accept `window` of 7d or 30d. Don't call these from the bloc unless
+  // you've confirmed the viewer is pro.
+
+  @GET(Endpoints.dashboardProContent)
+  Future<ProContentDto> getProContent({
+    @Query('window') String? window,
+  });
+
+  @GET(Endpoints.dashboardProAudience)
+  Future<ProAudienceDto> getProAudience({
+    @Query('window') String? window,
+  });
+
+  @GET(Endpoints.dashboardProReferrals)
+  Future<ProReferralsDto> getProReferrals({
+    @Query('window') String? window,
+  });
+
+  @GET(Endpoints.dashboardProContribution)
+  Future<ProContributionDto> getProContribution({
+    @Query('window') String? window,
   });
 }

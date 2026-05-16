@@ -13,6 +13,10 @@ import '../bloc/dashboard_bloc.dart';
 import '../widgets/dashboard_range_selector.dart';
 import 'tabs/engagement_tab.dart';
 import 'tabs/games_tab.dart';
+import 'tabs/pro_audience_tab.dart';
+import 'tabs/pro_content_tab.dart';
+import 'tabs/pro_referrals_tab.dart';
+import 'tabs/weighted_index_tab.dart';
 import 'tabs/xp_tab.dart';
 
 /// /dashboard — all 7 tabs in a single mobile-friendly scaffold. Tabs
@@ -92,8 +96,10 @@ class _DashboardView extends StatelessWidget {
         DashboardTab.engagement => s.engagement.errors,
         DashboardTab.xp => s.xp.errors,
         DashboardTab.games => s.games.errors,
-        // Batch 3 plugs its slots in here.
-        _ => const [],
+        DashboardTab.content => s.content.errors,
+        DashboardTab.audience => s.audience.errors,
+        DashboardTab.referrals => s.referrals.errors,
+        DashboardTab.weightedIndex => s.weightedIndex.errors,
       };
 }
 
@@ -212,45 +218,14 @@ class _TabBody extends StatelessWidget {
       case DashboardTab.games:
         return GamesTab(slot: state.games);
       case DashboardTab.content:
+        return ProContentTab(slot: state.content);
       case DashboardTab.audience:
+        return ProAudienceTab(slot: state.audience);
       case DashboardTab.referrals:
+        return ProReferralsTab(slot: state.referrals);
       case DashboardTab.weightedIndex:
-        return const _ComingSoonTab();
+        return WeightedIndexTab(slot: state.weightedIndex);
     }
   }
 }
 
-/// Placeholder for tabs that ship in batches 2 + 3.
-class _ComingSoonTab extends StatelessWidget {
-  const _ComingSoonTab();
-  @override
-  Widget build(BuildContext context) {
-    final colors = context.colors;
-    return Center(
-      child: Padding(
-        padding: const EdgeInsets.all(AppSpacing.xl),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(LucideIcons.sparkles, size: 32, color: colors.textTertiary),
-            const SizedBox(height: AppSpacing.md),
-            Text(
-              'Coming soon',
-              style: AppTextStyles.sectionTitle.copyWith(
-                color: colors.textPrimary,
-                fontSize: 16,
-              ),
-            ),
-            const SizedBox(height: 4),
-            Text(
-              'This tab is being polished and will land in the next update.',
-              textAlign: TextAlign.center,
-              style:
-                  AppTextStyles.bodySmall.copyWith(color: colors.textTertiary),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}

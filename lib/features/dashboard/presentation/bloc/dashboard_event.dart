@@ -59,3 +59,31 @@ class DashboardGamesLoadRequested extends DashboardEvent {
   @override
   List<Object?> get props => [force];
 }
+
+class DashboardProContentLoadRequested extends DashboardEvent {
+  const DashboardProContentLoadRequested({this.force = false});
+  final bool force;
+  @override
+  List<Object?> get props => [force];
+}
+
+class DashboardProAudienceLoadRequested extends DashboardEvent {
+  const DashboardProAudienceLoadRequested({this.force = false});
+  final bool force;
+  @override
+  List<Object?> get props => [force];
+}
+
+class DashboardProReferralsLoadRequested extends DashboardEvent {
+  const DashboardProReferralsLoadRequested({this.force = false});
+  final bool force;
+  @override
+  List<Object?> get props => [force];
+}
+
+class DashboardProContributionLoadRequested extends DashboardEvent {
+  const DashboardProContributionLoadRequested({this.force = false});
+  final bool force;
+  @override
+  List<Object?> get props => [force];
+}
