@@ -18,36 +18,36 @@ class MediaRepositoryImpl implements MediaRepository {
   @override
   Future<Either<Failure, ({List<MediaItem> items, bool hasMore})>>
       getUserVideos({
-    required int userId,
+    required String username,
     int page = 1,
     int pageSize = 20,
   }) =>
           _guard(() async {
             final res = await _remote.getUserVideos(
-              userId,
+              username,
               page: page,
               pageSize: pageSize,
             );
             final items =
-                res.map(_videoToItem).toList(growable: false);
+                res.videos.map(_videoToItem).toList(growable: false);
             return (items: items, hasMore: items.length >= pageSize);
           });
 
   @override
   Future<Either<Failure, ({List<MediaItem> items, bool hasMore})>>
       getUserSplits({
-    required int userId,
+    required String username,
     int page = 1,
     int pageSize = 20,
   }) =>
           _guard(() async {
             final res = await _remote.getUserSplits(
-              userId,
+              username,
               page: page,
               pageSize: pageSize,
             );
             final items =
-                res.map(_splitToItem).toList(growable: false);
+                res.splits.map(_splitToItem).toList(growable: false);
             return (items: items, hasMore: items.length >= pageSize);
           });
 

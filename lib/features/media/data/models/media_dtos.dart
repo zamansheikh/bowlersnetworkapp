@@ -31,8 +31,9 @@ class MediaAuthorDto {
       _$MediaAuthorDtoFromJson(json);
 }
 
-/// One video item — `/api/media/channel/{user_id}/videos`. Endpoint returns
-/// a bare array so callers parse `List<VideoDto>` directly.
+/// One video item under `/api/media/channels/{username}/videos`. The
+/// endpoint wraps the array in `{videos: [...], page, page_size}` —
+/// see [VideosPageDto].
 @JsonSerializable(createToJson: false)
 class VideoDto {
   const VideoDto({
@@ -167,4 +168,42 @@ class SplitDto {
 
   factory SplitDto.fromJson(Map<String, dynamic> json) =>
       _$SplitDtoFromJson(json);
+}
+
+/// Page envelope returned by `/api/media/channels/{username}/videos`.
+@JsonSerializable(createToJson: false)
+class VideosPageDto {
+  const VideosPageDto({
+    this.videos = const [],
+    this.page = 1,
+    this.pageSize = 20,
+  });
+
+  final List<VideoDto> videos;
+  @JsonKey(defaultValue: 1)
+  final int page;
+  @JsonKey(name: 'page_size', defaultValue: 20)
+  final int pageSize;
+
+  factory VideosPageDto.fromJson(Map<String, dynamic> json) =>
+      _$VideosPageDtoFromJson(json);
+}
+
+/// Page envelope returned by `/api/media/channels/{username}/splits`.
+@JsonSerializable(createToJson: false)
+class SplitsPageDto {
+  const SplitsPageDto({
+    this.splits = const [],
+    this.page = 1,
+    this.pageSize = 20,
+  });
+
+  final List<SplitDto> splits;
+  @JsonKey(defaultValue: 1)
+  final int page;
+  @JsonKey(name: 'page_size', defaultValue: 20)
+  final int pageSize;
+
+  factory SplitsPageDto.fromJson(Map<String, dynamic> json) =>
+      _$SplitsPageDtoFromJson(json);
 }

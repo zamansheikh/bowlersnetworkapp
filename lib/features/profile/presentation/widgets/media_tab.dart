@@ -20,17 +20,20 @@ import '../bloc/user_media_bloc.dart';
 /// for now we toast "Opening videos is coming soon" since there's no
 /// dedicated player screen yet (defer to media-detail follow-up).
 class MediaTab extends StatelessWidget {
-  const MediaTab({super.key, required this.userId});
+  const MediaTab({super.key, required this.username});
 
-  final int userId;
+  /// Channel username (the backend route is keyed on username, NOT
+  /// numeric user id — the user-id variant is misconfigured server-side
+  /// and 500s).
+  final String username;
 
   @override
   Widget build(BuildContext context) {
     return BlocProvider<UserMediaBloc>(
-      key: ValueKey('media-tab-$userId'),
+      key: ValueKey('media-tab-$username'),
       create: (_) => UserMediaBloc(
         repository: getIt<MediaRepository>(),
-        userId: userId,
+        username: username,
       )..add(const UserMediaLoadRequested()),
       child: const _MediaView(),
     );

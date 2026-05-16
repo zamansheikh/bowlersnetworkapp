@@ -20,8 +20,8 @@ class _MediaRemoteDatasource implements MediaRemoteDatasource {
   final ParseErrorLogger? errorLogger;
 
   @override
-  Future<List<VideoDto>> getUserVideos(
-    int userId, {
+  Future<VideosPageDto> getUserVideos(
+    String username, {
     int? page,
     int? pageSize,
   }) async {
@@ -33,22 +33,20 @@ class _MediaRemoteDatasource implements MediaRemoteDatasource {
     queryParameters.removeWhere((k, v) => v == null);
     final _headers = <String, dynamic>{};
     const Map<String, dynamic>? _data = null;
-    final _options = _setStreamType<List<VideoDto>>(
+    final _options = _setStreamType<VideosPageDto>(
       Options(method: 'GET', headers: _headers, extra: _extra)
           .compose(
             _dio.options,
-            '/api/media/channel/${userId}/videos',
+            '/api/media/channels/${username}/videos',
             queryParameters: queryParameters,
             data: _data,
           )
           .copyWith(baseUrl: _combineBaseUrls(_dio.options.baseUrl, baseUrl)),
     );
-    final _result = await _dio.fetch<List<dynamic>>(_options);
-    late List<VideoDto> _value;
+    final _result = await _dio.fetch<Map<String, dynamic>>(_options);
+    late VideosPageDto _value;
     try {
-      _value = _result.data!
-          .map((dynamic i) => VideoDto.fromJson(i as Map<String, dynamic>))
-          .toList();
+      _value = VideosPageDto.fromJson(_result.data!);
     } on Object catch (e, s) {
       errorLogger?.logError(e, s, _options, response: _result);
       rethrow;
@@ -57,8 +55,8 @@ class _MediaRemoteDatasource implements MediaRemoteDatasource {
   }
 
   @override
-  Future<List<SplitDto>> getUserSplits(
-    int userId, {
+  Future<SplitsPageDto> getUserSplits(
+    String username, {
     int? page,
     int? pageSize,
   }) async {
@@ -70,22 +68,20 @@ class _MediaRemoteDatasource implements MediaRemoteDatasource {
     queryParameters.removeWhere((k, v) => v == null);
     final _headers = <String, dynamic>{};
     const Map<String, dynamic>? _data = null;
-    final _options = _setStreamType<List<SplitDto>>(
+    final _options = _setStreamType<SplitsPageDto>(
       Options(method: 'GET', headers: _headers, extra: _extra)
           .compose(
             _dio.options,
-            '/api/media/channel/${userId}/splits',
+            '/api/media/channels/${username}/splits',
             queryParameters: queryParameters,
             data: _data,
           )
           .copyWith(baseUrl: _combineBaseUrls(_dio.options.baseUrl, baseUrl)),
     );
-    final _result = await _dio.fetch<List<dynamic>>(_options);
-    late List<SplitDto> _value;
+    final _result = await _dio.fetch<Map<String, dynamic>>(_options);
+    late SplitsPageDto _value;
     try {
-      _value = _result.data!
-          .map((dynamic i) => SplitDto.fromJson(i as Map<String, dynamic>))
-          .toList();
+      _value = SplitsPageDto.fromJson(_result.data!);
     } on Object catch (e, s) {
       errorLogger?.logError(e, s, _options, response: _result);
       rethrow;

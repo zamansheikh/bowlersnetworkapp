@@ -65,3 +65,25 @@ SplitDto _$SplitDtoFromJson(Map<String, dynamic> json) => SplitDto(
   hasLiked: json['has_liked'] as bool?,
   hasSaved: json['has_saved'] as bool?,
 );
+
+VideosPageDto _$VideosPageDtoFromJson(Map<String, dynamic> json) =>
+    VideosPageDto(
+      videos:
+          (json['videos'] as List<dynamic>?)
+              ?.map((e) => VideoDto.fromJson(e as Map<String, dynamic>))
+              .toList() ??
+          const [],
+      page: (json['page'] as num?)?.toInt() ?? 1,
+      pageSize: (json['page_size'] as num?)?.toInt() ?? 20,
+    );
+
+SplitsPageDto _$SplitsPageDtoFromJson(Map<String, dynamic> json) =>
+    SplitsPageDto(
+      splits:
+          (json['splits'] as List<dynamic>?)
+              ?.map((e) => SplitDto.fromJson(e as Map<String, dynamic>))
+              .toList() ??
+          const [],
+      page: (json['page'] as num?)?.toInt() ?? 1,
+      pageSize: (json['page_size'] as num?)?.toInt() ?? 20,
+    );

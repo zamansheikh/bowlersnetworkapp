@@ -84,12 +84,15 @@ class Endpoints {
   // edit-profile screen.
   static const String searchCenters = '/api/search/centers';
 
-  // Media — per-user video / split lists. Both return BARE arrays
-  // (NOT wrapped) sorted with pinned items first.
-  static String mediaChannelVideos(int userId) =>
-      '/api/media/channel/$userId/videos';
-  static String mediaChannelSplits(int userId) =>
-      '/api/media/channel/$userId/splits';
+  // Media — per-user video / split lists. The view signature actually
+  // expects `username`, NOT `user_id` (the `/channel/<int:user_id>/`
+  // route is misconfigured server-side and 500s). The `channels` plural
+  // + username path is what the web hits. Responses are wrapped:
+  // `{videos: [...], page, page_size}` / `{splits: [...], page, page_size}`.
+  static String mediaChannelVideos(String username) =>
+      '/api/media/channels/$username/videos';
+  static String mediaChannelSplits(String username) =>
+      '/api/media/channels/$username/splits';
 
   // Cards — viewer's own cards / collections + per-user cards. Like &
   // collect toggles return authoritative `{is_..., ..._count}` payloads.

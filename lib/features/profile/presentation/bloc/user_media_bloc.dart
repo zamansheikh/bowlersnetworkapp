@@ -8,12 +8,12 @@ part 'user_media_event.dart';
 part 'user_media_state.dart';
 
 /// Drives the Media tab on a profile screen. One bloc instance per
-/// profile keyed by [userId]; tracks Videos and Splits independently so
-/// switching between sub-tabs doesn't lose pagination state.
+/// profile keyed by [username]; tracks Videos and Splits independently
+/// so switching between sub-tabs doesn't lose pagination state.
 class UserMediaBloc extends Bloc<UserMediaEvent, UserMediaState> {
   UserMediaBloc({
     required MediaRepository repository,
-    required this.userId,
+    required this.username,
   })  : _repository = repository,
         super(const UserMediaState()) {
     on<UserMediaSubTabChanged>(_onSubTabChanged);
@@ -23,7 +23,7 @@ class UserMediaBloc extends Bloc<UserMediaEvent, UserMediaState> {
   }
 
   final MediaRepository _repository;
-  final int userId;
+  final String username;
 
   Future<void> _onLoad(
     UserMediaLoadRequested event,
@@ -132,8 +132,8 @@ class UserMediaBloc extends Bloc<UserMediaEvent, UserMediaState> {
 
   Future<dynamic> _fetch({required MediaKind kind, required int page}) {
     if (kind == MediaKind.video) {
-      return _repository.getUserVideos(userId: userId, page: page);
+      return _repository.getUserVideos(username: username, page: page);
     }
-    return _repository.getUserSplits(userId: userId, page: page);
+    return _repository.getUserSplits(username: username, page: page);
   }
 }

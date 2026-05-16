@@ -284,7 +284,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
       case ProfileTab.media:
         return SizedBox(
           height: tabBoxHeight,
-          child: MediaTab(userId: profile.user.id),
+          child: MediaTab(username: profile.user.username),
         );
       case ProfileTab.cards:
         return SizedBox(
