@@ -1,7 +1,7 @@
 name: bowlersnetworkapp
 description: "BowlersNetwork - The ultimate bowling community app"
 publish_to: 'none'
-version: 1.0.6+8
+version: 1.0.7+9
 
 environment:
   sdk: ^3.9.0
@@ -58,8 +58,12 @@ dependencies:
 
   # Media
   image_picker: ^1.2.1
+  image_cropper: ^9.0.0
   video_player: ^2.11.1
   chewie: ^1.13.1
+
+  # Play Store in-app updates (Android only — iOS no-ops gracefully)
+  in_app_update: ^4.2.5
 
   # Location
   permission_handler: ^12.0.1

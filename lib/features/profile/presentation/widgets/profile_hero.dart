@@ -303,25 +303,33 @@ class _GradientAvatar extends StatelessWidget {
             Positioned(
               right: 2,
               bottom: 2,
-              child: Container(
-                width: 28,
-                height: 28,
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  color: colors.accent,
-                  border: Border.all(color: colors.bgPrimary, width: 2),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withValues(alpha: 0.25),
-                      blurRadius: 6,
-                      offset: const Offset(0, 2),
-                    ),
-                  ],
-                ),
-                child: const Icon(
-                  LucideIcons.camera,
-                  size: 13,
-                  color: Colors.white,
+              // The badge sits at the bottom-right corner — OUTSIDE the
+              // avatar's inscribed-circle hit area — so the InkWell on
+              // the ring can't catch taps here. Give the badge its own
+              // GestureDetector that fires the same `onTap`.
+              child: GestureDetector(
+                behavior: HitTestBehavior.opaque,
+                onTap: onTap,
+                child: Container(
+                  width: 28,
+                  height: 28,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    color: colors.accent,
+                    border: Border.all(color: colors.bgPrimary, width: 2),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withValues(alpha: 0.25),
+                        blurRadius: 6,
+                        offset: const Offset(0, 2),
+                      ),
+                    ],
+                  ),
+                  child: const Icon(
+                    LucideIcons.camera,
+                    size: 13,
+                    color: Colors.white,
+                  ),
                 ),
               ),
             ),

@@ -12,6 +12,7 @@ import '../../../../core/theme/app_text_styles.dart';
 import '../../../../core/widgets/app_button.dart';
 import '../../../../core/widgets/app_card.dart';
 import '../../../../core/widgets/empty_state.dart';
+import '../../../../core/widgets/image_source_sheet.dart';
 import '../../../../core/widgets/skeleton_box.dart';
 import '../../../auth/presentation/bloc/auth_bloc.dart';
 import '../../domain/entities/profile.dart';
@@ -52,16 +53,42 @@ class _ProfileScreenState extends State<ProfileScreen> {
     });
   }
 
+  /// Avatar flow: source-picker bottom sheet → cropper (1:1, circular UI)
+  /// → bloc upload. Matches the web's ImageCropModal at `aspect: 1`.
   Future<void> _pickAvatar() async {
-    final picked = await getIt<ImagePickerService>().pickImage();
+    final source = await showImageSourceSheet(
+      context,
+      title: 'Update profile picture',
+    );
+    if (source == null || !mounted) return;
+    final picked = await getIt<ImagePickerService>().pickAndCrop(
+      source: source,
+      aspectRatio: 1,
+      shape: CropShape.circle,
+      title: 'Crop profile picture',
+      accentColor: context.colors.accent,
+    );
     if (picked == null || !mounted) return;
     context.read<ProfileBloc>().add(
       ProfileAvatarUploadRequested(bytes: picked.bytes, fileName: picked.name),
     );
   }
 
+  /// Cover flow: source sheet → cropper (16:5, rectangular UI) → bloc
+  /// upload. Matches the web's ImageCropModal at `aspect: 16/5`.
   Future<void> _pickCover() async {
-    final picked = await getIt<ImagePickerService>().pickImage();
+    final source = await showImageSourceSheet(
+      context,
+      title: 'Update cover photo',
+    );
+    if (source == null || !mounted) return;
+    final picked = await getIt<ImagePickerService>().pickAndCrop(
+      source: source,
+      aspectRatio: 16 / 5,
+      shape: CropShape.rect,
+      title: 'Crop cover photo',
+      accentColor: context.colors.accent,
+    );
     if (picked == null || !mounted) return;
     context.read<ProfileBloc>().add(
       ProfileCoverUploadRequested(bytes: picked.bytes, fileName: picked.name),

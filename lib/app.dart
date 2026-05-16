@@ -8,6 +8,7 @@ import 'core/di/injection.dart';
 import 'core/localization/app_locale.dart';
 import 'core/localization/locale_cubit.dart';
 import 'core/router/app_router.dart';
+import 'core/services/app_update_service.dart';
 import 'core/theme/app_theme.dart';
 import 'core/theme/theme_cubit.dart';
 import 'features/auth/presentation/bloc/auth_bloc.dart';
@@ -25,6 +26,17 @@ class _BowlersNetworkAppState extends State<BowlersNetworkApp> {
   late final AuthBloc _authBloc = getIt<AuthBloc>();
   late final ProfileBloc _profileBloc = getIt<ProfileBloc>();
   late final _router = buildAppRouter(_authBloc);
+
+  @override
+  void initState() {
+    super.initState();
+    // Fire-and-forget Play Store update check on app launch. The service
+    // no-ops on iOS / desktop and silently swallows failures so this
+    // never blocks startup.
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      getIt<AppUpdateService>().checkAndPrompt();
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
