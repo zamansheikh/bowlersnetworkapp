@@ -17,6 +17,7 @@ import '../../domain/entities/profile.dart';
 import '../../domain/repositories/profile_repository.dart';
 import '../bloc/other_profile_bloc.dart';
 import '../widgets/info_tab.dart';
+import '../widgets/posts_tab.dart';
 import '../widgets/profile_hero.dart';
 
 /// Read-only profile screen for users OTHER than the logged-in user.
@@ -223,10 +224,9 @@ class _OtherProfileViewState extends State<_OtherProfileView> {
       case 0:
         return ProfileInfoTab(profile: profile, isSelf: false);
       case 1:
-        return EmptyState(
-          icon: LucideIcons.newspaper,
-          title: 'No posts yet',
-          hint: '${profile.user.displayName} hasn\'t shared anything yet.',
+        return SizedBox(
+          height: MediaQuery.sizeOf(context).height * 0.75,
+          child: PostsTab(userId: profile.user.id, isSelf: false),
         );
       case 2:
         return EmptyState(

@@ -24,6 +24,22 @@ abstract class NewsfeedRemoteDatasource {
   @GET('/api/newsfeed/{id}')
   Future<PostDto> getPost(@Path('id') String id);
 
+  /// Logged-in user's own posts — paginated. Page-based (NOT cursor) to
+  /// match the backend endpoint shape.
+  @GET(Endpoints.myPosts)
+  Future<FeedResponseDto> getMyPosts({
+    @Query('page') int? page,
+    @Query('page_size') int? pageSize,
+  });
+
+  /// Another user's public posts.
+  @GET('/api/newsfeed/users/{userId}/posts')
+  Future<FeedResponseDto> getUserPosts(
+    @Path('userId') int userId, {
+    @Query('page') int? page,
+    @Query('page_size') int? pageSize,
+  });
+
   @POST('/api/newsfeed/{id}/react')
   Future<ReactionResponseDto> react(
     @Path('id') String id,

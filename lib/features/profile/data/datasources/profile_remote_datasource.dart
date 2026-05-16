@@ -38,4 +38,32 @@ abstract class ProfileRemoteDatasource {
 
   @POST(Endpoints.coverPicture)
   Future<void> updateCoverPicture(@Body() Map<String, dynamic> body);
+
+  // ── Field editors ─────────────────────────────────────────────────────────
+  // Each endpoint accepts its own narrow body shape. Visibility is per-field
+  // via `is_public`. Validation errors come back as `{"errors": [...]}`.
+
+  @POST(Endpoints.profileBio)
+  Future<void> updateBio(@Body() Map<String, dynamic> body);
+
+  @POST(Endpoints.profileNickname)
+  Future<void> updateNickname(@Body() Map<String, dynamic> body);
+
+  @POST(Endpoints.profileGender)
+  Future<void> updateGender(@Body() Map<String, dynamic> body);
+
+  @POST(Endpoints.profileBirthdate)
+  Future<void> updateBirthdate(@Body() Map<String, dynamic> body);
+
+  @POST(Endpoints.profileAddress)
+  Future<void> updateAddress(@Body() Map<String, dynamic> body);
+
+  @POST(Endpoints.profileHomeCenter)
+  Future<void> updateHomeCenter(@Body() Map<String, dynamic> body);
+
+  @POST(Endpoints.profileBallHandlingStyle)
+  Future<void> updateBallHandlingStyle(@Body() Map<String, dynamic> body);
+
+  @POST(Endpoints.profileOfficialGameStat)
+  Future<void> updateOfficialGameStat(@Body() Map<String, dynamic> body);
 }

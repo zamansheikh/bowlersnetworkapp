@@ -16,6 +16,46 @@ class SearchRepositoryImpl implements SearchRepository {
   final SearchRemoteDatasource _remote;
 
   @override
+  Future<Either<Failure, List<CenterSearchResult>>> searchCenters({
+    required String query,
+    int limit = 10,
+    int offset = 0,
+  }) async {
+    try {
+      final res = await _remote.searchCenters(
+        query: query,
+        limit: limit,
+        offset: offset,
+      );
+      return Right(
+        res.results
+            .map((c) => CenterSearchResult(
+                  id: c.id,
+                  name: c.name,
+                  address: c.address,
+                  logo: c.logo,
+                ))
+            .toList(growable: false),
+      );
+    } on DioException catch (e) {
+      final parsed = e.error;
+      if (parsed is NetworkException) return const Left(NetworkFailure());
+      if (parsed is ApiException) {
+        if (parsed.statusCode == 401) {
+          return Left(UnauthorizedFailure(messages: parsed.messages));
+        }
+        return Left(ServerFailure(
+          messages: parsed.messages,
+          statusCode: parsed.statusCode,
+        ));
+      }
+      return const Left(ServerFailure());
+    } catch (_) {
+      return const Left(ServerFailure());
+    }
+  }
+
+  @override
   Future<Either<Failure, SearchResults>> search({
     required String query,
     String? types,

@@ -99,6 +99,20 @@ SearchDiscussionDto _$SearchDiscussionDtoFromJson(Map<String, dynamic> json) =>
       isResolved: json['is_resolved'] as bool? ?? false,
     );
 
+ScopedCentersResponseDto _$ScopedCentersResponseDtoFromJson(
+  Map<String, dynamic> json,
+) => ScopedCentersResponseDto(
+  query: json['query'] as String? ?? '',
+  total: (json['total'] as num?)?.toInt() ?? 0,
+  limit: (json['limit'] as num?)?.toInt() ?? 10,
+  offset: (json['offset'] as num?)?.toInt() ?? 0,
+  results:
+      (json['results'] as List<dynamic>?)
+          ?.map((e) => SearchCenterDto.fromJson(e as Map<String, dynamic>))
+          .toList() ??
+      const [],
+);
+
 SearchCenterDto _$SearchCenterDtoFromJson(Map<String, dynamic> json) =>
     SearchCenterDto(
       id: (json['id'] as num?)?.toInt() ?? 0,

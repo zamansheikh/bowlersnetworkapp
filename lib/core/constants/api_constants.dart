@@ -62,6 +62,28 @@ class Endpoints {
   static String profileByUsername(String username) => '/api/profile/$username';
   static String profileById(int userId) => '/api/profile/id/$userId';
 
+  // Per-field profile editors. Each one is a POST whose body shape is
+  // documented in the profile section of the backend api-docs.
+  static const String profileBio = '/api/profile/bio';
+  static const String profileNickname = '/api/profile/nickname';
+  static const String profileGender = '/api/profile/gender';
+  static const String profileBirthdate = '/api/profile/birthdate';
+  static const String profileAddress = '/api/profile/address';
+  static const String profileHomeCenter = '/api/profile/home-center';
+  static const String profileBallHandlingStyle =
+      '/api/profile/ball-handling-style';
+  static const String profileOfficialGameStat =
+      '/api/profile/official-game-stat';
+
+  // Newsfeed — user-scoped post lists used by the Posts tab on the
+  // profile screens.
+  static const String myPosts = '/api/newsfeed/my-posts';
+  static String userPosts(int userId) => '/api/newsfeed/users/$userId/posts';
+
+  // Centers — scoped search used by the home-center autocomplete in the
+  // edit-profile screen.
+  static const String searchCenters = '/api/search/centers';
+
   // XP
   static const String xpLevelInfo = '/api/xp/level-info';
   static const String xpDashboard = '/api/xp/dashboard';

@@ -25,6 +25,7 @@ import '../../features/messages/presentation/screens/messages_screen.dart';
 import '../../features/messages/presentation/screens/thread_screen.dart';
 import '../../features/newsfeed/presentation/screens/feed_screen.dart';
 import '../../features/onboarding/presentation/screens/onboarding_screen.dart';
+import '../../features/profile/presentation/screens/edit_profile_screen.dart';
 import '../../features/profile/presentation/screens/other_profile_screen.dart';
 import '../../features/profile/presentation/screens/profile_screen.dart';
 import '../../features/search/presentation/screens/search_screen.dart';
@@ -217,6 +218,10 @@ GoRouter buildAppRouter(AuthBloc authBloc) {
               path: RouteNames.profile,
               builder: (_, _) => const ProfileScreen(),
               routes: [
+                GoRoute(
+                  path: 'edit',
+                  builder: (_, _) => const EditProfileScreen(),
+                ),
                 GoRoute(
                   path: 'followers',
                   builder: (_, _) => const FollowListScreen(

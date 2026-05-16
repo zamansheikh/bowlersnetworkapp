@@ -140,6 +140,33 @@ class SearchDiscussionDto {
       _$SearchDiscussionDtoFromJson(json);
 }
 
+/// Scoped centers-search response — `GET /api/search/centers?q=...`.
+/// The list page wraps a `total` + `limit` + `offset` around a `results`
+/// array of [SearchCenterDto]s.
+@JsonSerializable(createToJson: false)
+class ScopedCentersResponseDto {
+  const ScopedCentersResponseDto({
+    this.query = '',
+    this.total = 0,
+    this.limit = 10,
+    this.offset = 0,
+    this.results = const [],
+  });
+
+  @JsonKey(defaultValue: '')
+  final String query;
+  @JsonKey(defaultValue: 0)
+  final int total;
+  @JsonKey(defaultValue: 10)
+  final int limit;
+  @JsonKey(defaultValue: 0)
+  final int offset;
+  final List<SearchCenterDto> results;
+
+  factory ScopedCentersResponseDto.fromJson(Map<String, dynamic> json) =>
+      _$ScopedCentersResponseDtoFromJson(json);
+}
+
 @JsonSerializable(createToJson: false)
 class SearchCenterDto {
   const SearchCenterDto({

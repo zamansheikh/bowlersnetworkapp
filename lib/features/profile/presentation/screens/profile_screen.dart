@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:go_router/go_router.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 import '../../../../core/di/injection.dart';
@@ -17,6 +18,7 @@ import '../../domain/entities/profile.dart';
 import '../bloc/profile_bloc.dart';
 import '../widgets/favorite_brands_card.dart';
 import '../widgets/info_tab.dart';
+import '../widgets/posts_tab.dart';
 import '../widgets/profile_hero.dart';
 import '../widgets/xp_rank_card.dart';
 
@@ -151,7 +153,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
                               size: AppButtonSize.regular,
                               icon: LucideIcons.pencil,
                               expand: true,
-                              onPressed: () {},
+                              onPressed: () =>
+                                  context.push('/profile/edit'),
                             ),
                           ),
                           const SizedBox(width: AppSpacing.md),
@@ -278,10 +281,13 @@ class _ProfileScreenState extends State<ProfileScreen> {
       case 0:
         return ProfileInfoTab(profile: profile, isSelf: true);
       case 1:
-        return const _TabEmpty(
-          icon: LucideIcons.newspaper,
-          title: 'No posts yet',
-          hint: 'Your posts will appear here once you share something.',
+        // PostsTab uses its own ScrollController + ListView so we give
+        // it a bounded box to live in. The outer page scroll still
+        // covers the hero / stats; once the user scrolls the page down
+        // to here, the tab takes over its own scroll.
+        return SizedBox(
+          height: MediaQuery.sizeOf(context).height * 0.75,
+          child: PostsTab(userId: profile.user.id, isSelf: true),
         );
       case 2:
         return const _TabEmpty(

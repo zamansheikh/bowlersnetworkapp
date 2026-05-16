@@ -79,6 +79,123 @@ class ProfileRepositoryImpl implements ProfileRepository {
         return unit;
       });
 
+  // ── Per-field editors ─────────────────────────────────────────────────────
+
+  @override
+  Future<Either<Failure, Unit>> updateBio({
+    required String content,
+    bool isPublic = true,
+  }) =>
+      _guard(() async {
+        await _remote.updateBio({'content': content, 'is_public': isPublic});
+        return unit;
+      });
+
+  @override
+  Future<Either<Failure, Unit>> updateNickname({
+    required String name,
+    bool isPublic = true,
+  }) =>
+      _guard(() async {
+        await _remote.updateNickname({'name': name, 'is_public': isPublic});
+        return unit;
+      });
+
+  @override
+  Future<Either<Failure, Unit>> updateGender({
+    required String value,
+    bool isPublic = true,
+  }) =>
+      _guard(() async {
+        await _remote.updateGender({'value': value, 'is_public': isPublic});
+        return unit;
+      });
+
+  @override
+  Future<Either<Failure, Unit>> updateBirthdate({
+    required String dateOfBirth,
+    bool isPublic = true,
+    String? parentEmail,
+  }) =>
+      _guard(() async {
+        await _remote.updateBirthdate({
+          'date_of_birth': dateOfBirth,
+          'is_public': isPublic,
+          'parent_email': ?parentEmail,
+        });
+        return unit;
+      });
+
+  @override
+  Future<Either<Failure, Unit>> updateAddress({
+    required String address,
+    required String zipCode,
+    required double latitude,
+    required double longitude,
+    bool isPublic = true,
+  }) =>
+      _guard(() async {
+        await _remote.updateAddress({
+          'address': address,
+          'zip_code': zipCode,
+          'latitude': latitude,
+          'longitude': longitude,
+          'is_public': isPublic,
+        });
+        return unit;
+      });
+
+  @override
+  Future<Either<Failure, Unit>> updateHomeCenter({
+    required int centerId,
+    required String centerName,
+    bool isPublic = true,
+  }) =>
+      _guard(() async {
+        await _remote.updateHomeCenter({
+          'center_id': centerId,
+          'center_name': centerName,
+          'is_public': isPublic,
+        });
+        return unit;
+      });
+
+  @override
+  Future<Either<Failure, Unit>> updateBallHandlingStyle({
+    required String handedness,
+    required String ballCarry,
+    required String grip,
+    bool isPublic = true,
+  }) =>
+      _guard(() async {
+        await _remote.updateBallHandlingStyle({
+          'handedness': handedness,
+          'ball_carry': ballCarry,
+          'grip': grip,
+          'is_public': isPublic,
+        });
+        return unit;
+      });
+
+  @override
+  Future<Either<Failure, Unit>> updateOfficialGameStat({
+    num? average,
+    int? highGame,
+    int? highSeries,
+    int? experience,
+    bool isPublic = true,
+  }) =>
+      _guard(() async {
+        await _remote.updateOfficialGameStat({
+          'average': ?average,
+          'high_game': ?highGame,
+          'high_series': ?highSeries,
+          'experience': ?experience,
+          'is_public': isPublic,
+        });
+        return unit;
+      });
+
   Profile _toEntity(ProfileDto dto) => Profile(
         user: ProfileUser(
           id: dto.user.id,

@@ -23,4 +23,65 @@ abstract class ProfileRepository {
 
   /// Same shape, but for the cover image.
   Future<Either<Failure, Unit>> updateCoverPicture(String publicUrl);
+
+  // ── Per-field editors (used by the edit-profile screen) ──────────────────
+
+  Future<Either<Failure, Unit>> updateBio({
+    required String content,
+    bool isPublic = true,
+  });
+
+  Future<Either<Failure, Unit>> updateNickname({
+    required String name,
+    bool isPublic = true,
+  });
+
+  /// [value] must be `'Male'` or `'Female'` — backend rejects other strings.
+  Future<Either<Failure, Unit>> updateGender({
+    required String value,
+    bool isPublic = true,
+  });
+
+  /// [dateOfBirth] in `YYYY-MM-DD`. [parentEmail] is required by the backend
+  /// when the date implies the user is under 13.
+  Future<Either<Failure, Unit>> updateBirthdate({
+    required String dateOfBirth,
+    bool isPublic = true,
+    String? parentEmail,
+  });
+
+  Future<Either<Failure, Unit>> updateAddress({
+    required String address,
+    required String zipCode,
+    required double latitude,
+    required double longitude,
+    bool isPublic = true,
+  });
+
+  Future<Either<Failure, Unit>> updateHomeCenter({
+    required int centerId,
+    required String centerName,
+    bool isPublic = true,
+  });
+
+  /// All three fields are required by the backend. Enums:
+  ///   * [handedness] — `'Righty'` | `'Lefty'`
+  ///   * [ballCarry] — `'One handed'` | `'Two handed'`
+  ///   * [grip] — `'With Thumb'` | `'With No Thumb'`
+  Future<Either<Failure, Unit>> updateBallHandlingStyle({
+    required String handedness,
+    required String ballCarry,
+    required String grip,
+    bool isPublic = true,
+  });
+
+  /// Self-reported stats. All fields are optional and only sent when
+  /// non-null so partial updates work.
+  Future<Either<Failure, Unit>> updateOfficialGameStat({
+    num? average,
+    int? highGame,
+    int? highSeries,
+    int? experience,
+    bool isPublic = true,
+  });
 }

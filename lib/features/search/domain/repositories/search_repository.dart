@@ -14,4 +14,12 @@ abstract class SearchRepository {
     required String query,
     String? types,
   });
+
+  /// Centers-only paginated search — used by the home-center
+  /// autocomplete in the edit-profile screen.
+  Future<Either<Failure, List<CenterSearchResult>>> searchCenters({
+    required String query,
+    int limit = 10,
+    int offset = 0,
+  });
 }

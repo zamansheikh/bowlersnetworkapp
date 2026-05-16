@@ -13,6 +13,20 @@ abstract class NewsfeedRepository {
 
   Future<Either<Failure, Post>> getPost(String uid);
 
+  /// Logged-in user's own posts. Page-based pagination; [hasMore] is true
+  /// when the returned page is full (server doesn't expose a `next`).
+  Future<Either<Failure, ({List<Post> posts, bool hasMore})>> getMyPosts({
+    int page = 1,
+    int pageSize = 20,
+  });
+
+  /// Another user's public posts.
+  Future<Either<Failure, ({List<Post> posts, bool hasMore})>> getUserPosts({
+    required int userId,
+    int page = 1,
+    int pageSize = 20,
+  });
+
   /// Toggle reaction: sending the same reaction twice un-reacts; sending a
   /// different reaction swaps. Returns the updated reaction state
   /// (`null` when cleared).

@@ -21,4 +21,14 @@ abstract class SearchRemoteDatasource {
     @Query('q') required String query,
     @Query('types') String? types,
   });
+
+  /// Paginated, centers-only search used by the home-center autocomplete
+  /// in the edit-profile screen. Returns `{query, total, limit, offset,
+  /// results: [...]}` — we only need the `results` list.
+  @GET(Endpoints.searchCenters)
+  Future<ScopedCentersResponseDto> searchCenters({
+    @Query('q') required String query,
+    @Query('limit') int? limit,
+    @Query('offset') int? offset,
+  });
 }

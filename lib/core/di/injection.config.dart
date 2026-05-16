@@ -114,6 +114,7 @@ import '../network/chat_socket.dart' as _i943;
 import '../network/live_socket.dart' as _i124;
 import '../services/cloud_upload_service.dart' as _i984;
 import '../services/device_token_service.dart' as _i914;
+import '../services/geocoder_service.dart' as _i779;
 import '../services/image_picker_service.dart' as _i644;
 import '../storage/local_storage_service.dart' as _i744;
 import '../storage/secure_storage_service.dart' as _i666;
@@ -127,6 +128,7 @@ extension GetItInjectableX on _i174.GetIt {
   }) {
     final gh = _i526.GetItHelper(this, environment, environmentFilter);
     final networkModule = _$NetworkModule();
+    gh.lazySingleton<_i779.GeocoderService>(() => _i779.GeocoderService());
     gh.lazySingleton<_i644.ImagePickerService>(
       () => _i644.ImagePickerService(),
     );

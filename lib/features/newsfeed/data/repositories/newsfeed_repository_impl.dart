@@ -46,6 +46,30 @@ class NewsfeedRepositoryImpl implements NewsfeedRepository {
       _guard(() async => _toPost(await _remote.getPost(uid)));
 
   @override
+  Future<Either<Failure, ({List<Post> posts, bool hasMore})>> getMyPosts({
+    int page = 1,
+    int pageSize = 20,
+  }) =>
+      _guard(() async {
+        final res = await _remote.getMyPosts(page: page, pageSize: pageSize);
+        final posts = res.posts.map(_toPost).toList(growable: false);
+        return (posts: posts, hasMore: posts.length >= pageSize);
+      });
+
+  @override
+  Future<Either<Failure, ({List<Post> posts, bool hasMore})>> getUserPosts({
+    required int userId,
+    int page = 1,
+    int pageSize = 20,
+  }) =>
+      _guard(() async {
+        final res =
+            await _remote.getUserPosts(userId, page: page, pageSize: pageSize);
+        final posts = res.posts.map(_toPost).toList(growable: false);
+        return (posts: posts, hasMore: posts.length >= pageSize);
+      });
+
+  @override
   Future<Either<Failure, ReactionType?>> react(
     String postUid,
     ReactionType reaction,
