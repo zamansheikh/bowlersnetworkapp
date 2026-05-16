@@ -131,13 +131,13 @@ GoRouter buildAppRouter(AuthBloc authBloc) {
           ),
         ],
       ),
-      // Other-user profile lives OUTSIDE the shell so the back arrow
-      // returns to wherever the user came from (search / a post / a
-      // leaderboard row), not back into the Profile tab. Literal
-      // sub-paths under `/profile` inside the shell (`/profile/followers`,
-      // `/profile/followings`) win over this parameterised route.
+      // Other-user profile lives at `/u/:username` (NOT `/profile/...`)
+      // so it never collides with the shell's `/profile/edit`,
+      // `/profile/followers`, `/profile/followings` literals. The web
+      // uses `/profile/{username}` but on mobile the `/profile` namespace
+      // belongs to the logged-in user's tab.
       GoRoute(
-        path: '/profile/:username',
+        path: '/u/:username',
         builder: (_, state) => OtherProfileScreen(
           username: state.pathParameters['username']!,
         ),

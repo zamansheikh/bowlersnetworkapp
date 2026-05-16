@@ -235,7 +235,7 @@ class _DetailViewState extends State<_DetailView> {
                                 onAuthorTap: o.author == null
                                     ? null
                                     : () => context.push(
-                                        '/profile/${o.author!.username}'),
+                                        '/u/${o.author!.username}'),
                               );
                             },
                           ),
@@ -339,7 +339,7 @@ class _Header extends StatelessWidget {
             const SizedBox(height: AppSpacing.sm),
             if (author != null)
               InkWell(
-                onTap: () => context.push('/profile/${author.username}'),
+                onTap: () => context.push('/u/${author.username}'),
                 borderRadius: AppRadius.smAll,
                 child: Padding(
                   padding: const EdgeInsets.symmetric(vertical: 2),

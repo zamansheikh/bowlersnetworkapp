@@ -333,7 +333,7 @@ class _ResultsList extends StatelessWidget {
               for (final u in r.users)
                 _UserRow(
                   user: u,
-                  onTap: () => context.push('/profile/${u.username}'),
+                  onTap: () => context.push('/u/${u.username}'),
                 ),
             ],
           ),

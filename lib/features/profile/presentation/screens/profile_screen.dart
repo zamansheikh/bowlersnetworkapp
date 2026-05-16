@@ -16,8 +16,10 @@ import '../../../../core/widgets/skeleton_box.dart';
 import '../../../auth/presentation/bloc/auth_bloc.dart';
 import '../../domain/entities/profile.dart';
 import '../bloc/profile_bloc.dart';
+import '../widgets/cards_tab.dart';
 import '../widgets/favorite_brands_card.dart';
 import '../widgets/info_tab.dart';
+import '../widgets/media_tab.dart';
 import '../widgets/posts_tab.dart';
 import '../widgets/profile_hero.dart';
 import '../widgets/xp_rank_card.dart';
@@ -290,16 +292,14 @@ class _ProfileScreenState extends State<ProfileScreen> {
           child: PostsTab(userId: profile.user.id, isSelf: true),
         );
       case 2:
-        return const _TabEmpty(
-          icon: LucideIcons.image,
-          title: 'No media yet',
-          hint: 'Photos and videos you post will show up here.',
+        return SizedBox(
+          height: MediaQuery.sizeOf(context).height * 0.75,
+          child: MediaTab(userId: profile.user.id),
         );
       case 3:
-        return const _TabEmpty(
-          icon: LucideIcons.idCard,
-          title: 'No cards yet',
-          hint: 'Your trading cards + collections will live here.',
+        return SizedBox(
+          height: MediaQuery.sizeOf(context).height * 0.75,
+          child: CardsTab(userId: profile.user.id, isSelf: true),
         );
       default:
         return const SizedBox.shrink();
@@ -307,18 +307,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
   }
 }
 
-// ─────────────────────────────────────────────────────────────────────────────
-class _TabEmpty extends StatelessWidget {
-  const _TabEmpty({required this.icon, required this.title, required this.hint});
-  final IconData icon;
-  final String title;
-  final String hint;
-
-  @override
-  Widget build(BuildContext context) {
-    return EmptyState(icon: icon, title: title, hint: hint);
-  }
-}
 
 class _SecondaryIconButton extends StatelessWidget {
   const _SecondaryIconButton({required this.icon, required this.onTap});

@@ -16,7 +16,9 @@ import '../../../follow/domain/repositories/follow_repository.dart';
 import '../../domain/entities/profile.dart';
 import '../../domain/repositories/profile_repository.dart';
 import '../bloc/other_profile_bloc.dart';
+import '../widgets/cards_tab.dart';
 import '../widgets/info_tab.dart';
+import '../widgets/media_tab.dart';
 import '../widgets/posts_tab.dart';
 import '../widgets/profile_hero.dart';
 
@@ -229,16 +231,14 @@ class _OtherProfileViewState extends State<_OtherProfileView> {
           child: PostsTab(userId: profile.user.id, isSelf: false),
         );
       case 2:
-        return EmptyState(
-          icon: LucideIcons.image,
-          title: 'No media yet',
-          hint: 'Photos and videos will show up here.',
+        return SizedBox(
+          height: MediaQuery.sizeOf(context).height * 0.75,
+          child: MediaTab(userId: profile.user.id),
         );
       case 3:
-        return const EmptyState(
-          icon: LucideIcons.idCard,
-          title: 'No cards yet',
-          hint: 'Trading cards will live here once available.',
+        return SizedBox(
+          height: MediaQuery.sizeOf(context).height * 0.75,
+          child: CardsTab(userId: profile.user.id, isSelf: false),
         );
       default:
         return const SizedBox.shrink();

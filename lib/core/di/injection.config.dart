@@ -28,6 +28,12 @@ import '../../features/auth/domain/usecases/signup_usecase.dart' as _i57;
 import '../../features/auth/domain/usecases/validate_registration_usecase.dart'
     as _i416;
 import '../../features/auth/presentation/bloc/auth_bloc.dart' as _i797;
+import '../../features/cards/data/datasources/cards_remote_datasource.dart'
+    as _i578;
+import '../../features/cards/data/repositories/cards_repository_impl.dart'
+    as _i216;
+import '../../features/cards/domain/repositories/cards_repository.dart'
+    as _i314;
 import '../../features/chatter/data/datasources/chatter_remote_datasource.dart'
     as _i684;
 import '../../features/chatter/data/repositories/chatter_repository_impl.dart'
@@ -73,6 +79,12 @@ import '../../features/live/data/datasources/live_remote_datasource.dart'
 import '../../features/live/data/repositories/live_repository_impl.dart'
     as _i160;
 import '../../features/live/domain/repositories/live_repository.dart' as _i898;
+import '../../features/media/data/datasources/media_remote_datasource.dart'
+    as _i696;
+import '../../features/media/data/repositories/media_repository_impl.dart'
+    as _i110;
+import '../../features/media/domain/repositories/media_repository.dart'
+    as _i459;
 import '../../features/messages/data/datasources/messages_remote_datasource.dart'
     as _i182;
 import '../../features/messages/data/repositories/messages_repository_impl.dart'
@@ -156,6 +168,9 @@ extension GetItInjectableX on _i174.GetIt {
     gh.factory<_i161.AuthRemoteDatasource>(
       () => _i161.AuthRemoteDatasource(gh<_i361.Dio>()),
     );
+    gh.factory<_i578.CardsRemoteDatasource>(
+      () => _i578.CardsRemoteDatasource(gh<_i361.Dio>()),
+    );
     gh.factory<_i684.ChatterRemoteDatasource>(
       () => _i684.ChatterRemoteDatasource(gh<_i361.Dio>()),
     );
@@ -173,6 +188,9 @@ extension GetItInjectableX on _i174.GetIt {
     );
     gh.factory<_i916.LiveRemoteDatasource>(
       () => _i916.LiveRemoteDatasource(gh<_i361.Dio>()),
+    );
+    gh.factory<_i696.MediaRemoteDatasource>(
+      () => _i696.MediaRemoteDatasource(gh<_i361.Dio>()),
     );
     gh.factory<_i182.MessagesRemoteDatasource>(
       () => _i182.MessagesRemoteDatasource(gh<_i361.Dio>()),
@@ -214,6 +232,9 @@ extension GetItInjectableX on _i174.GetIt {
     gh.lazySingleton<_i604.GamesRepository>(
       () => _i438.GamesRepositoryImpl(gh<_i771.GamesRemoteDatasource>()),
     );
+    gh.lazySingleton<_i459.MediaRepository>(
+      () => _i110.MediaRepositoryImpl(gh<_i696.MediaRemoteDatasource>()),
+    );
     gh.lazySingleton<_i797.ChatterRepository>(
       () => _i674.ChatterRepositoryImpl(gh<_i684.ChatterRemoteDatasource>()),
     );
@@ -254,6 +275,9 @@ extension GetItInjectableX on _i174.GetIt {
       () => _i1008.LeaderboardRepositoryImpl(
         gh<_i757.LeaderboardRemoteDatasource>(),
       ),
+    );
+    gh.lazySingleton<_i314.CardsRepository>(
+      () => _i216.CardsRepositoryImpl(gh<_i578.CardsRemoteDatasource>()),
     );
     gh.factory<_i250.ChatterListBloc>(
       () => _i250.ChatterListBloc(gh<_i797.ChatterRepository>()),

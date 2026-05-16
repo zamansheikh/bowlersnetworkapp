@@ -84,6 +84,21 @@ class Endpoints {
   // edit-profile screen.
   static const String searchCenters = '/api/search/centers';
 
+  // Media — per-user video / split lists. Both return BARE arrays
+  // (NOT wrapped) sorted with pinned items first.
+  static String mediaChannelVideos(int userId) =>
+      '/api/media/channel/$userId/videos';
+  static String mediaChannelSplits(int userId) =>
+      '/api/media/channel/$userId/splits';
+
+  // Cards — viewer's own cards / collections + per-user cards. Like &
+  // collect toggles return authoritative `{is_..., ..._count}` payloads.
+  static const String myCards = '/api/cards/my';
+  static const String myCardCollections = '/api/cards/collections';
+  static String userCards(int userId) => '/api/cards/user/$userId';
+  static String cardLike(int cardId) => '/api/cards/$cardId/like';
+  static String cardCollect(int cardId) => '/api/cards/$cardId/collect';
+
   // XP
   static const String xpLevelInfo = '/api/xp/level-info';
   static const String xpDashboard = '/api/xp/dashboard';

@@ -170,7 +170,7 @@ class _PostsTabViewState extends State<_PostsTabView> {
                 onAuthorTap: post.author.username.isEmpty
                     ? null
                     : () => context.push(
-                          '/profile/${post.author.username}',
+                          '/u/${post.author.username}',
                         ),
               );
             },
