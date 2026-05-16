@@ -28,6 +28,14 @@ import '../../features/auth/domain/usecases/signup_usecase.dart' as _i57;
 import '../../features/auth/domain/usecases/validate_registration_usecase.dart'
     as _i416;
 import '../../features/auth/presentation/bloc/auth_bloc.dart' as _i797;
+import '../../features/chatter/data/datasources/chatter_remote_datasource.dart'
+    as _i684;
+import '../../features/chatter/data/repositories/chatter_repository_impl.dart'
+    as _i674;
+import '../../features/chatter/domain/repositories/chatter_repository.dart'
+    as _i797;
+import '../../features/chatter/presentation/bloc/chatter_list_bloc.dart'
+    as _i250;
 import '../../features/follow/data/datasources/follow_remote_datasource.dart'
     as _i973;
 import '../../features/follow/data/repositories/follow_repository_impl.dart'
@@ -146,6 +154,9 @@ extension GetItInjectableX on _i174.GetIt {
     gh.factory<_i161.AuthRemoteDatasource>(
       () => _i161.AuthRemoteDatasource(gh<_i361.Dio>()),
     );
+    gh.factory<_i684.ChatterRemoteDatasource>(
+      () => _i684.ChatterRemoteDatasource(gh<_i361.Dio>()),
+    );
     gh.factory<_i973.FollowRemoteDatasource>(
       () => _i973.FollowRemoteDatasource(gh<_i361.Dio>()),
     );
@@ -201,6 +212,9 @@ extension GetItInjectableX on _i174.GetIt {
     gh.lazySingleton<_i604.GamesRepository>(
       () => _i438.GamesRepositoryImpl(gh<_i771.GamesRemoteDatasource>()),
     );
+    gh.lazySingleton<_i797.ChatterRepository>(
+      () => _i674.ChatterRepositoryImpl(gh<_i684.ChatterRemoteDatasource>()),
+    );
     gh.lazySingleton<_i787.AuthRepository>(
       () => _i153.AuthRepositoryImpl(
         gh<_i161.AuthRemoteDatasource>(),
@@ -238,6 +252,9 @@ extension GetItInjectableX on _i174.GetIt {
       () => _i1008.LeaderboardRepositoryImpl(
         gh<_i757.LeaderboardRemoteDatasource>(),
       ),
+    );
+    gh.factory<_i250.ChatterListBloc>(
+      () => _i250.ChatterListBloc(gh<_i797.ChatterRepository>()),
     );
     gh.lazySingleton<_i760.FollowRepository>(
       () => _i299.FollowRepositoryImpl(gh<_i973.FollowRemoteDatasource>()),

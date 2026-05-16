@@ -197,8 +197,20 @@ class Endpoints {
   // GET /api/search?q={query}&types={comma,separated,types}
   static const String search = '/api/search';
 
-  // Home-page previews — these endpoints power the home-screen sections.
+  // Chatter (discussions + opinions + topics).
+  // NOTE: detail endpoint is path-templated on the UID (string), while all
+  // mutating endpoints below use the numeric DB id returned in the detail
+  // payload.
+  static const String chatterTopics = '/api/chatter/topics';
   static const String chatterDiscussions = '/api/chatter/discussions';
+  static String chatterDiscussion(String uid) =>
+      '/api/chatter/discussions/$uid';
+  static String chatterDiscussionUpvote(int id) =>
+      '/api/chatter/discussions/$id/upvote';
+  static String chatterDiscussionOpinions(int id) =>
+      '/api/chatter/discussions/$id/opinions';
+  static String chatterOpinionUpvote(int id) =>
+      '/api/chatter/opinions/$id/upvote';
   static const String mediaVideos = '/api/media/videos';
   static const String mediaSplits = '/api/media/splits';
   static const String eventsFeed = '/api/events/feed';

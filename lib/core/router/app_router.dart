@@ -5,6 +5,8 @@ import 'package:go_router/go_router.dart';
 
 import '../../features/auth/presentation/bloc/auth_bloc.dart';
 import '../../features/auth/presentation/screens/consent_pending_screen.dart';
+import '../../features/chatter/presentation/screens/chatter_screen.dart';
+import '../../features/chatter/presentation/screens/discussion_detail_screen.dart';
 import '../../features/auth/presentation/screens/login_screen.dart';
 import '../../features/auth/presentation/screens/password_recovery_screen.dart';
 import '../../features/auth/presentation/screens/signup_screen.dart';
@@ -115,6 +117,18 @@ GoRouter buildAppRouter(AuthBloc authBloc) {
       GoRoute(
         path: RouteNames.search,
         builder: (_, _) => const SearchScreen(),
+      ),
+      GoRoute(
+        path: RouteNames.chatter,
+        builder: (_, _) => const ChatterScreen(),
+        routes: [
+          GoRoute(
+            path: ':uid',
+            builder: (_, state) => DiscussionDetailScreen(
+              uid: state.pathParameters['uid']!,
+            ),
+          ),
+        ],
       ),
       // Other-user profile lives OUTSIDE the shell so the back arrow
       // returns to wherever the user came from (search / a post / a

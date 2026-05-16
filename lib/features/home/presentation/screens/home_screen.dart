@@ -202,7 +202,8 @@ class _HomeView extends StatelessWidget {
                         HomeDiscussionsPreview(
                           discussions: state.discussionsPreview,
                           onViewAll: () => context.push(RouteNames.chatter),
-                          onTap: (_) => context.push(RouteNames.chatter),
+                          onTap: (d) =>
+                              context.push('${RouteNames.chatter}/${d.uid}'),
                         ),
                       const SizedBox(height: AppSpacing.md),
 

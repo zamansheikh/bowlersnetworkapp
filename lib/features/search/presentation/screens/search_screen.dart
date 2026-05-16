@@ -357,7 +357,7 @@ class _ResultsList extends StatelessWidget {
               for (final d in r.discussions)
                 _DiscussionRow(
                   discussion: d,
-                  onTap: () => _notImplemented(context, 'Discussion'),
+                  onTap: () => context.push('/chatter/${d.uid}'),
                 ),
             ],
           ),
