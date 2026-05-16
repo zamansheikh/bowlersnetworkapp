@@ -38,6 +38,8 @@ import '../../features/games/data/datasources/games_remote_datasource.dart'
     as _i771;
 import '../../features/games/data/repositories/games_repository_impl.dart'
     as _i438;
+import '../../features/games/data/services/play_local_state_service.dart'
+    as _i975;
 import '../../features/games/domain/repositories/games_repository.dart'
     as _i604;
 import '../../features/games/presentation/bloc/equipment_bloc.dart' as _i789;
@@ -94,6 +96,7 @@ import '../../features/profile/presentation/bloc/profile_bloc.dart' as _i469;
 import '../localization/locale_cubit.dart' as _i960;
 import '../network/api_client.dart' as _i557;
 import '../network/chat_socket.dart' as _i943;
+import '../network/live_socket.dart' as _i124;
 import '../services/cloud_upload_service.dart' as _i984;
 import '../services/device_token_service.dart' as _i914;
 import '../services/image_picker_service.dart' as _i644;
@@ -126,6 +129,9 @@ extension GetItInjectableX on _i174.GetIt {
     );
     gh.lazySingleton<_i611.ThemeCubit>(
       () => _i611.ThemeCubit(gh<_i744.LocalStorageService>()),
+    );
+    gh.lazySingleton<_i975.PlayLocalStateService>(
+      () => _i975.PlayLocalStateService(gh<_i744.LocalStorageService>()),
     );
     gh.lazySingleton<_i861.OnboardingStorage>(
       () => _i861.OnboardingStorage(gh<_i744.LocalStorageService>()),
@@ -206,6 +212,10 @@ extension GetItInjectableX on _i174.GetIt {
     );
     gh.lazySingleton<_i943.ChatSocket>(
       () => _i943.ChatSocket(gh<_i666.SecureStorageService>()),
+      dispose: (i) => i.dispose(),
+    );
+    gh.lazySingleton<_i124.LiveSocket>(
+      () => _i124.LiveSocket(gh<_i666.SecureStorageService>()),
       dispose: (i) => i.dispose(),
     );
     gh.lazySingleton<_i655.LeaderboardRepository>(

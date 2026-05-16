@@ -40,6 +40,28 @@ abstract class GamesRepository {
     required String handedness,
   });
 
+  /// Mid-broadcast / mid-session: spin up a new empty Game row so the
+  /// next round of frames has somewhere to land. Returns the new
+  /// game's id + game_number.
+  Future<Either<Failure, GameDetail>> startNextGame({
+    required String sessionUid,
+    String entryMode = 'full',
+  });
+
+  /// PATCH the session metadata. Any null field is omitted from the
+  /// request body so partial updates work.
+  Future<Either<Failure, Session>> updateSession({
+    required String uid,
+    String? name,
+    int? centerId,
+    String? laneNumbers,
+    String? gameContext,
+    String? oilPatternName,
+    int? oilPatternLength,
+    String? notes,
+    String? sessionDate,
+  });
+
   Future<Either<Failure, Unit>> deleteSession(String uid);
 
   Future<Either<Failure, Unit>> deleteGame(int id);

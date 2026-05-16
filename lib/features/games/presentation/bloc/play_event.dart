@@ -131,3 +131,19 @@ class PlayEndLiveRequested extends PlayEvent {
 class PlayLiveRehydrateRequested extends PlayEvent {
   const PlayLiveRehydrateRequested();
 }
+
+/// Fire-on-mount: read any saved local play state for this session out of
+/// SharedPreferences and adopt it. Lets the user resume a force-closed
+/// in-progress game.
+class PlayLocalStateRehydrateRequested extends PlayEvent {
+  const PlayLocalStateRehydrateRequested();
+}
+
+/// Internal — funnels [LiveSocket] inbound events through the bloc's
+/// event pipeline so all state writes stay single-threaded.
+class _PlayLiveSocketEvent extends PlayEvent {
+  const _PlayLiveSocketEvent(this.event);
+  final LiveSocketEvent event;
+  @override
+  List<Object?> get props => [event];
+}

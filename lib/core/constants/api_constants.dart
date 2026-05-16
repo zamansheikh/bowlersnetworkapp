@@ -203,4 +203,8 @@ class Endpoints {
   // WebSocket paths (appended to ApiConstants.wsBaseUrl, token in query).
   static const String wsChat = '/ws/chat/';
   static const String wsNotifications = '/ws/notifications/';
+
+  /// Live-broadcast WS for the broadcaster. Pass the numeric LiveScore id.
+  /// Inbound events: `init`, `viewer_count`, `broadcast_ended`.
+  static String wsLive(int livescoreId) => '/ws/live/$livescoreId/';
 }

@@ -102,6 +102,47 @@ class GamesRepositoryImpl implements GamesRepository {
       });
 
   @override
+  Future<Either<Failure, GameDetail>> startNextGame({
+    required String sessionUid,
+    String entryMode = 'full',
+  }) =>
+      _guard(() async {
+        final dto = await _remote.startNextGame(sessionUid, {
+          'entry_mode': entryMode,
+        });
+        return _gameToEntity(dto);
+      });
+
+  @override
+  Future<Either<Failure, Session>> updateSession({
+    required String uid,
+    String? name,
+    int? centerId,
+    String? laneNumbers,
+    String? gameContext,
+    String? oilPatternName,
+    int? oilPatternLength,
+    String? notes,
+    String? sessionDate,
+  }) =>
+      _guard(() async {
+        // Null-aware map entries → omit untouched fields so the PATCH
+        // doesn't clobber server-side values the user didn't edit.
+        final body = <String, dynamic>{
+          'name': ?name,
+          'center_id': ?centerId,
+          'lane_numbers': ?laneNumbers,
+          'game_context': ?gameContext,
+          'oil_pattern_name': ?oilPatternName,
+          'oil_pattern_length': ?oilPatternLength,
+          'notes': ?notes,
+          'session_date': ?sessionDate,
+        };
+        final dto = await _remote.updateSession(uid, body);
+        return _sessionToEntity(dto);
+      });
+
+  @override
   Future<Either<Failure, Unit>> deleteSession(String uid) => _guard(() async {
         await _remote.deleteSession(uid);
         return unit;

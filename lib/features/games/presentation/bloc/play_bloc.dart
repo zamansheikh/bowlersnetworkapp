@@ -1,8 +1,12 @@
+import 'dart:async';
+
 import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
+import '../../../../core/network/live_socket.dart';
 import '../../../live/domain/entities/live_broadcast.dart';
 import '../../../live/domain/repositories/live_repository.dart';
+import '../../data/services/play_local_state_service.dart';
 import '../../domain/entities/game_detail.dart';
 import '../../domain/repositories/games_repository.dart';
 import '../../domain/scorer/bowling_scorer.dart';
@@ -19,9 +23,13 @@ class PlayBloc extends Bloc<PlayEvent, PlayState> {
   PlayBloc({
     required GamesRepository repository,
     required LiveRepository liveRepository,
+    required PlayLocalStateService localState,
+    required LiveSocket liveSocket,
     required String sessionUid,
   })  : _repository = repository,
         _live = liveRepository,
+        _localState = localState,
+        _socket = liveSocket,
         _sessionUid = sessionUid,
         super(PlayState.initial()) {
     on<PlayPinToggled>(_onPinToggled);
@@ -41,11 +49,70 @@ class PlayBloc extends Bloc<PlayEvent, PlayState> {
     on<PlayGoLiveRequested>(_onGoLive);
     on<PlayEndLiveRequested>(_onEndLive);
     on<PlayLiveRehydrateRequested>(_onLiveRehydrate);
+    on<PlayLocalStateRehydrateRequested>(_onLocalStateRehydrate);
+    on<_PlayLiveSocketEvent>(_onLiveSocketEvent);
   }
 
   final GamesRepository _repository;
   final LiveRepository _live;
+  final PlayLocalStateService _localState;
+  final LiveSocket _socket;
   final String _sessionUid;
+
+  StreamSubscription<LiveSocketEvent>? _socketSub;
+
+  /// Snapshot the current state to disk. Fire-and-forget — saving failures
+  /// shouldn't block UI updates.
+  void _persist(PlayState s) {
+    // Skip persistence when the user is on the celebration card — the
+    // game already shipped to the server.
+    if (s.submittedGame != null) return;
+    _localState.save(_sessionUid, s);
+  }
+
+  /// Open the live-broadcast socket and route incoming events back into
+  /// this bloc. Idempotent — re-calling with the same id is cheap.
+  void _attachSocket(int livescoreId) {
+    _socket.connect(livescoreId);
+    _socketSub ??= _socket.events.listen(
+      (event) => add(_PlayLiveSocketEvent(event)),
+    );
+  }
+
+  Future<void> _detachSocket() async {
+    await _socketSub?.cancel();
+    _socketSub = null;
+    await _socket.disconnect();
+  }
+
+  @override
+  Future<void> close() async {
+    await _detachSocket();
+    return super.close();
+  }
+
+  // ── socket inbound ─────────────────────────────────────────────────────────
+  void _onLiveSocketEvent(
+    _PlayLiveSocketEvent event,
+    Emitter<PlayState> emit,
+  ) {
+    final live = state.live;
+    if (live == null) return;
+    final ev = event.event;
+    // Ignore events from a stale broadcast (e.g. we just hot-swapped
+    // and a queued message arrived for the previous id).
+    if (ev.livescoreId != live.id) return;
+    switch (ev) {
+      case LiveInitEvent(:final viewerCount):
+        emit(state.copyWith(live: live.copyWith(viewerCount: viewerCount)));
+      case LiveViewerCountEvent(:final viewerCount):
+        emit(state.copyWith(live: live.copyWith(viewerCount: viewerCount)));
+      case LiveBroadcastEndedEvent():
+        // Server terminated the broadcast — drop local state to match.
+        emit(state.copyWith(clearLive: true));
+        _detachSocket();
+    }
+  }
 
   // ── pin toggle ─────────────────────────────────────────────────────────────
   void _onPinToggled(PlayPinToggled event, Emitter<PlayState> emit) {
@@ -56,23 +123,26 @@ class PlayBloc extends Bloc<PlayEvent, PlayState> {
         ? [...activeDelivery.where((p) => p != event.pin)]
         : [...activeDelivery, event.pin]
       ..sort();
-    emit(_withActiveStanding(state, next));
+    final newState = _withActiveStanding(state, next);
+    emit(newState);
+    _persist(newState);
   }
 
   // ── quick actions: Strike / Spare / Miss / Clear / Next ───────────────────
   void _onQuickAction(PlayQuickAction event, Emitter<PlayState> emit) {
     if (state.cursor.isGameOver) return;
+    final PlayState newState;
     switch (event.action) {
       case PlayQuickActionType.strike:
         // Mark all pins down (empty standing) and commit.
-        emit(_commitDelivery(state, const <int>[]));
+        newState = _commitDelivery(state, const <int>[]);
       case PlayQuickActionType.spare:
         // Clear whatever's still up.
-        emit(_commitDelivery(state, const <int>[]));
+        newState = _commitDelivery(state, const <int>[]);
       case PlayQuickActionType.miss:
         // Keep whatever's standing — same set as before this delivery.
         final priorStanding = _priorStanding(state);
-        emit(_commitDelivery(state, priorStanding));
+        newState = _commitDelivery(state, priorStanding);
       case PlayQuickActionType.clear:
         // Reset the in-progress active delivery. With pin-default
         // 'standing' the rack returns to all-up; with 'knocked' it goes
@@ -81,23 +151,27 @@ class PlayBloc extends Bloc<PlayEvent, PlayState> {
         final reset = state.pinDefault == PinDefaultState.knocked
             ? const <int>[]
             : priorStanding;
-        emit(_withActiveStanding(state, reset));
+        newState = _withActiveStanding(state, reset);
       case PlayQuickActionType.next:
         // Commit whatever the user has currently painted on the deck.
-        emit(_commitDelivery(state, state.activeStanding));
+        newState = _commitDelivery(state, state.activeStanding);
     }
+    emit(newState);
+    _persist(newState);
   }
 
   // ── jump to a specific frame (scorecard tap) ───────────────────────────────
   void _onFrameJumped(PlayFrameJumped event, Emitter<PlayState> emit) {
     if (event.frameIndex < 0 || event.frameIndex > 9) return;
     final f = state.frames[event.frameIndex];
-    emit(state.copyWith(
+    final newState = state.copyWith(
       cursor: PlayCursor(
         frameIndex: event.frameIndex,
         deliveryIndex: f.deliveries.length,
       ),
-    ));
+    );
+    emit(newState);
+    _persist(newState);
   }
 
   // ── undo last delivery ─────────────────────────────────────────────────────
@@ -121,20 +195,25 @@ class PlayBloc extends Bloc<PlayEvent, PlayState> {
     final nextFrames = List<FrameInput>.from(state.frames);
     nextFrames[frameIdx] = frame.copyWith(deliveries: shortened);
 
-    emit(state.copyWith(
+    final newState = state.copyWith(
       frames: nextFrames,
       cursor: PlayCursor(
         frameIndex: frameIdx,
         deliveryIndex: shortened.length,
       ),
-    ));
+      score: computeGame(nextFrames),
+    );
+    emit(newState);
+    _persist(newState);
   }
 
   void _onHandednessChanged(
     PlayHandednessChanged event,
     Emitter<PlayState> emit,
   ) {
-    emit(state.copyWith(handedness: event.handedness));
+    final newState = state.copyWith(handedness: event.handedness);
+    emit(newState);
+    _persist(newState);
   }
 
   /// Drag-aware setter: the deck pushes the full standing-pin set after
@@ -146,7 +225,9 @@ class PlayBloc extends Bloc<PlayEvent, PlayState> {
     Emitter<PlayState> emit,
   ) {
     if (state.cursor.isGameOver) return;
-    emit(_withActiveStanding(state, event.standing));
+    final newState = _withActiveStanding(state, event.standing);
+    emit(newState);
+    _persist(newState);
   }
 
   /// Flip the user's pin-default preference. If they're mid-delivery on
@@ -158,17 +239,21 @@ class PlayBloc extends Bloc<PlayEvent, PlayState> {
     final next = state.pinDefault == PinDefaultState.standing
         ? PinDefaultState.knocked
         : PinDefaultState.standing;
-    emit(state.copyWith(pinDefault: next));
+    final newState = state.copyWith(pinDefault: next);
+    emit(newState);
+    _persist(newState);
   }
 
   void _onSelectedBallChanged(
     PlaySelectedBallChanged event,
     Emitter<PlayState> emit,
   ) {
-    emit(state.copyWith(
+    final newState = state.copyWith(
       selectedBallId: event.userBallId,
       clearSelectedBall: event.userBallId == null,
-    ));
+    );
+    emit(newState);
+    _persist(newState);
   }
 
   // ── submit completed game ──────────────────────────────────────────────────
@@ -191,12 +276,18 @@ class PlayBloc extends Bloc<PlayEvent, PlayState> {
     );
     res.fold(
       (f) => emit(state.copyWith(submitting: false, errors: f.messages)),
-      (game) => emit(state.copyWith(submitting: false, submittedGame: game)),
+      (game) {
+        emit(state.copyWith(submitting: false, submittedGame: game));
+        // Game is on the server now — drop the resume blob so the next
+        // mount doesn't re-load a stale in-progress state.
+        _localState.clear(_sessionUid);
+      },
     );
   }
 
   void _onReset(PlayGameReset event, Emitter<PlayState> emit) {
     emit(PlayState.initial());
+    _localState.clear(_sessionUid);
   }
 
   // ── entry mode + quick score ──────────────────────────────────────────────
@@ -204,14 +295,18 @@ class PlayBloc extends Bloc<PlayEvent, PlayState> {
     PlayEntryModeChanged event,
     Emitter<PlayState> emit,
   ) {
-    emit(state.copyWith(entryMode: event.mode));
+    final newState = state.copyWith(entryMode: event.mode);
+    emit(newState);
+    _persist(newState);
   }
 
   void _onQuickScoreDraftChanged(
     PlayQuickScoreDraftChanged event,
     Emitter<PlayState> emit,
   ) {
-    emit(state.copyWith(quickScoreDraft: event.value));
+    final newState = state.copyWith(quickScoreDraft: event.value);
+    emit(newState);
+    _persist(newState);
   }
 
   Future<void> _onQuickScoreSubmitted(
@@ -231,12 +326,15 @@ class PlayBloc extends Bloc<PlayEvent, PlayState> {
     );
     res.fold(
       (f) => emit(state.copyWith(submitting: false, errors: f.messages)),
-      (game) => emit(state.copyWith(
-        submitting: false,
-        submittedGame: game,
-        // Clear the draft so re-entering quick mode starts blank.
-        quickScoreDraft: '',
-      )),
+      (game) {
+        emit(state.copyWith(
+          submitting: false,
+          submittedGame: game,
+          // Clear the draft so re-entering quick mode starts blank.
+          quickScoreDraft: '',
+        ));
+        _localState.clear(_sessionUid);
+      },
     );
   }
 
@@ -244,11 +342,40 @@ class PlayBloc extends Bloc<PlayEvent, PlayState> {
   /// (handedness / pin-default / selected ball / entry mode), bumps the
   /// game number, and wipes the just-submitted result so the user is
   /// returned to a fresh play surface.
-  void _onAnotherGameRequested(
+  ///
+  /// When live, ALSO POSTs `/api/games/sessions/{uid}/start-game` to spin
+  /// up a fresh server-side Game row and retargets the broadcast at it —
+  /// otherwise per-frame PUTs would keep streaming into the just-finished
+  /// game and viewers would never see the new one start.
+  Future<void> _onAnotherGameRequested(
     PlayAnotherGameRequested event,
     Emitter<PlayState> emit,
-  ) {
-    emit(state.resetForNextGame());
+  ) async {
+    final reset = state.resetForNextGame();
+    if (reset.live == null) {
+      emit(reset);
+      _persist(reset);
+      return;
+    }
+    final entryModeStr =
+        reset.entryMode == PlayEntryMode.quick ? 'quick' : 'full';
+    final res = await _repository.startNextGame(
+      sessionUid: _sessionUid,
+      entryMode: entryModeStr,
+    );
+    res.fold(
+      (f) => emit(reset.copyWith(errors: f.messages)),
+      (game) {
+        final next = reset.copyWith(
+          live: reset.live!.copyWith(
+            currentGameId: game.id,
+            currentGameNumber: game.gameNumber,
+          ),
+        );
+        emit(next);
+        _persist(next);
+      },
+    );
   }
 
   // ── live broadcast ────────────────────────────────────────────────────────
@@ -261,7 +388,10 @@ class PlayBloc extends Bloc<PlayEvent, PlayState> {
     final res = await _live.startBroadcast(sessionUid: _sessionUid);
     res.fold(
       (f) => emit(state.copyWith(liveBusy: false, errors: f.messages)),
-      (broadcast) => emit(state.copyWith(liveBusy: false, live: broadcast)),
+      (broadcast) {
+        emit(state.copyWith(liveBusy: false, live: broadcast));
+        _attachSocket(broadcast.id);
+      },
     );
   }
 
@@ -276,7 +406,10 @@ class PlayBloc extends Bloc<PlayEvent, PlayState> {
     res.fold(
       (f) => emit(state.copyWith(liveBusy: false, errors: f.messages)),
       // Clear the broadcast regardless — server already terminated it.
-      (_) => emit(state.copyWith(liveBusy: false, clearLive: true)),
+      (_) {
+        emit(state.copyWith(liveBusy: false, clearLive: true));
+        _detachSocket();
+      },
     );
   }
 
@@ -297,8 +430,31 @@ class PlayBloc extends Bloc<PlayEvent, PlayState> {
           return;
         }
         emit(state.copyWith(live: broadcast));
+        _attachSocket(broadcast.id);
       },
     );
+  }
+
+  /// On screen mount: read any saved play state for this session and
+  /// adopt it. No-op if there's nothing saved (fresh game) or if the
+  /// player has already started interacting in this run.
+  Future<void> _onLocalStateRehydrate(
+    PlayLocalStateRehydrateRequested event,
+    Emitter<PlayState> emit,
+  ) async {
+    final saved = await _localState.load(_sessionUid);
+    if (saved == null) return;
+    // Don't clobber an active in-progress state (e.g. if rehydrate runs
+    // after the user already started bowling in this mount).
+    final pristine = state.frames.every((f) => f.deliveries.isEmpty) &&
+        state.cursor.frameIndex == 0 &&
+        state.cursor.deliveryIndex == 0;
+    if (!pristine) return;
+    // Preserve any broadcast already rehydrated on this mount.
+    emit(saved.copyWith(
+      live: state.live,
+      liveBusy: state.liveBusy,
+    ));
   }
 
   /// Fire-and-forget per-frame PUT used while broadcasting. Called

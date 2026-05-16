@@ -89,6 +89,23 @@ abstract class GamesRemoteDatasource {
     @Body() Map<String, dynamic> body,
   );
 
+  /// POST /api/games/sessions/{uid}/start-game — creates a fresh, empty
+  /// Game row in the session and returns its detail. Used mid-broadcast
+  /// to keep streaming the next game to viewers.
+  @POST('/api/games/sessions/{uid}/start-game')
+  Future<GameDetailDto> startNextGame(
+    @Path('uid') String uid,
+    @Body() Map<String, dynamic> body,
+  );
+
+  /// PATCH /api/games/sessions/{uid}/update — edit session metadata
+  /// (name, center, lanes, oil pattern, notes, session_date).
+  @PATCH('/api/games/sessions/{uid}/update')
+  Future<SessionDto> updateSession(
+    @Path('uid') String uid,
+    @Body() Map<String, dynamic> body,
+  );
+
   @DELETE('/api/games/sessions/{uid}/delete')
   Future<void> deleteSession(@Path('uid') String uid);
 

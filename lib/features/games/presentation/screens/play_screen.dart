@@ -6,6 +6,7 @@ import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 import '../../../../core/di/injection.dart';
 import '../../../../core/extensions/context_extensions.dart';
+import '../../../../core/network/live_socket.dart';
 import '../../../../core/router/route_names.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/theme/app_text_styles.dart';
@@ -13,6 +14,7 @@ import '../../../../core/widgets/app_button.dart';
 import '../../../../core/widgets/app_card.dart';
 import '../../../../core/widgets/app_toast.dart';
 import '../../../live/domain/repositories/live_repository.dart';
+import '../../data/services/play_local_state_service.dart';
 import '../../domain/entities/equipment.dart';
 import '../../domain/repositories/games_repository.dart';
 import '../bloc/play_bloc.dart';
@@ -33,8 +35,12 @@ class PlayScreen extends StatelessWidget {
       create: (_) => PlayBloc(
         repository: getIt<GamesRepository>(),
         liveRepository: getIt<LiveRepository>(),
+        localState: getIt<PlayLocalStateService>(),
+        liveSocket: getIt<LiveSocket>(),
         sessionUid: sessionUid,
-      )..add(const PlayLiveRehydrateRequested()),
+      )
+        ..add(const PlayLiveRehydrateRequested())
+        ..add(const PlayLocalStateRehydrateRequested()),
       child: const _PlayView(),
     );
   }

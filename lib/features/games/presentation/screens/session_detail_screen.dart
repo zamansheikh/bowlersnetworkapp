@@ -9,11 +9,25 @@ import '../../../../core/theme/app_text_styles.dart';
 import '../../../../core/widgets/app_card.dart';
 import '../../../../core/widgets/app_fab.dart';
 import '../../domain/entities/session.dart';
+import '../widgets/edit_session_sheet.dart';
 
-class SessionDetailScreen extends StatelessWidget {
+class SessionDetailScreen extends StatefulWidget {
   const SessionDetailScreen({super.key, required this.session});
 
   final Session session;
+
+  @override
+  State<SessionDetailScreen> createState() => _SessionDetailScreenState();
+}
+
+class _SessionDetailScreenState extends State<SessionDetailScreen> {
+  late Session session = widget.session;
+
+  Future<void> _openEditSheet() async {
+    final updated = await showEditSessionSheet(context, session: session);
+    if (!mounted || updated == null) return;
+    setState(() => session = updated);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -21,7 +35,16 @@ class SessionDetailScreen extends StatelessWidget {
 
     return Scaffold(
       backgroundColor: colors.bgPrimary,
-      appBar: AppBar(title: Text(session.name)),
+      appBar: AppBar(
+        title: Text(session.name),
+        actions: [
+          IconButton(
+            tooltip: 'Edit session',
+            icon: const Icon(LucideIcons.pencil, size: 18),
+            onPressed: _openEditSheet,
+          ),
+        ],
+      ),
       floatingActionButton: AppFab.extended(
         icon: LucideIcons.plus,
         label: 'Bowl another game',
