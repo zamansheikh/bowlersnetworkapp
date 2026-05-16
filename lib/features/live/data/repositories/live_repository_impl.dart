@@ -56,7 +56,7 @@ class LiveRepositoryImpl implements LiveRepository {
               cursorId: cursorId,
             );
             return (
-              items: dto.results
+              items: dto.entries
                   .map(_toListItem)
                   .toList(growable: false),
               nextCursorId: dto.nextCursorId,
@@ -79,7 +79,7 @@ class LiveRepositoryImpl implements LiveRepository {
       _guard(() async {
         final dto = await _remote.getComments(liveId, cursorId: cursorId);
         return LiveCommentsPage(
-          comments: dto.results.map(_toComment).toList(growable: false),
+          comments: dto.entries.map(_toComment).toList(growable: false),
           nextCursorId: dto.nextCursorId,
         );
       });

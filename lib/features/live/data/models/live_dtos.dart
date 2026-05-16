@@ -215,16 +215,18 @@ class LiveBroadcastListItemDto {
       _$LiveBroadcastListItemDtoFromJson(json);
 }
 
-/// Cursor-paginated list response.
+/// Cursor-paginated list response. Backend wraps the rows in `entries`
+/// (NOT `results`) and the cursor key is `next_cursor` (NOT
+/// `next_cursor_id`).
 @JsonSerializable(createToJson: false)
 class LiveBroadcastListDto {
   const LiveBroadcastListDto({
-    this.results = const [],
+    this.entries = const [],
     this.nextCursorId,
   });
-  @JsonKey(defaultValue: <LiveBroadcastListItemDto>[])
-  final List<LiveBroadcastListItemDto> results;
-  @JsonKey(name: 'next_cursor_id')
+  @JsonKey(name: 'entries', defaultValue: <LiveBroadcastListItemDto>[])
+  final List<LiveBroadcastListItemDto> entries;
+  @JsonKey(name: 'next_cursor')
   final int? nextCursorId;
 
   factory LiveBroadcastListDto.fromJson(Map<String, dynamic> json) =>
@@ -321,15 +323,16 @@ class LiveCommentDto {
       _$LiveCommentDtoFromJson(json);
 }
 
+/// Backend shape: `{entries: [...], has_next: bool, next_cursor: int|null}`.
 @JsonSerializable(createToJson: false)
 class LiveCommentsPageDto {
   const LiveCommentsPageDto({
-    this.results = const [],
+    this.entries = const [],
     this.nextCursorId,
   });
-  @JsonKey(defaultValue: <LiveCommentDto>[])
-  final List<LiveCommentDto> results;
-  @JsonKey(name: 'next_cursor_id')
+  @JsonKey(name: 'entries', defaultValue: <LiveCommentDto>[])
+  final List<LiveCommentDto> entries;
+  @JsonKey(name: 'next_cursor')
   final int? nextCursorId;
 
   factory LiveCommentsPageDto.fromJson(Map<String, dynamic> json) =>

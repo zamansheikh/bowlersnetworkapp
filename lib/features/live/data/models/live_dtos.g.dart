@@ -108,14 +108,14 @@ LiveBroadcastListItemDto _$LiveBroadcastListItemDtoFromJson(
 LiveBroadcastListDto _$LiveBroadcastListDtoFromJson(
   Map<String, dynamic> json,
 ) => LiveBroadcastListDto(
-  results:
-      (json['results'] as List<dynamic>?)
+  entries:
+      (json['entries'] as List<dynamic>?)
           ?.map(
             (e) => LiveBroadcastListItemDto.fromJson(e as Map<String, dynamic>),
           )
           .toList() ??
       [],
-  nextCursorId: (json['next_cursor_id'] as num?)?.toInt(),
+  nextCursorId: (json['next_cursor'] as num?)?.toInt(),
 );
 
 LiveBroadcastDetailDto _$LiveBroadcastDetailDtoFromJson(
@@ -163,12 +163,12 @@ LiveCommentDto _$LiveCommentDtoFromJson(Map<String, dynamic> json) =>
 
 LiveCommentsPageDto _$LiveCommentsPageDtoFromJson(Map<String, dynamic> json) =>
     LiveCommentsPageDto(
-      results:
-          (json['results'] as List<dynamic>?)
+      entries:
+          (json['entries'] as List<dynamic>?)
               ?.map((e) => LiveCommentDto.fromJson(e as Map<String, dynamic>))
               .toList() ??
           [],
-      nextCursorId: (json['next_cursor_id'] as num?)?.toInt(),
+      nextCursorId: (json['next_cursor'] as num?)?.toInt(),
     );
 
 LiveReactionAckDto _$LiveReactionAckDtoFromJson(Map<String, dynamic> json) =>

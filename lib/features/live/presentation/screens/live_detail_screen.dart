@@ -402,17 +402,35 @@ class _ScoreboardCard extends StatefulWidget {
 }
 
 class _ScoreboardCardState extends State<_ScoreboardCard> {
-  int _activeIndex = 0;
+  /// Game number the user explicitly tapped. Null = follow live (the
+  /// first in-progress game, or the last game if all are complete).
+  int? _pickedGameNumber;
+
+  /// The "live" index = first in-progress game, falling back to the last
+  /// game if everything's complete. Mirrors the web's
+  /// `games.find(g => !g.is_complete) ?? games.at(-1)` selector.
+  int _liveIndex() {
+    final games = widget.games;
+    if (games.isEmpty) return 0;
+    final inProgress = games.indexWhere((g) => !g.isComplete);
+    return inProgress >= 0 ? inProgress : games.length - 1;
+  }
+
+  int _displayIndex() {
+    final picked = _pickedGameNumber;
+    if (picked == null) return _liveIndex();
+    final idx =
+        widget.games.indexWhere((g) => g.gameNumber == picked);
+    return idx >= 0 ? idx : _liveIndex();
+  }
 
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
-    // Clamp the active index in case the games list shrinks under us
-    // (e.g. backend changed; rare but defensive).
-    if (_activeIndex >= widget.games.length) {
-      _activeIndex = widget.games.length - 1;
-    }
-    final game = widget.games[_activeIndex];
+    final activeIdx = _displayIndex();
+    final game = widget.games[activeIdx];
+    final liveIdx = _liveIndex();
+    final viewingLive = activeIdx == liveIdx;
     return Material(
       color: colors.bgSurface,
       borderRadius: BorderRadius.circular(16),
@@ -433,23 +451,43 @@ class _ScoreboardCardState extends State<_ScoreboardCard> {
                   ),
                 ),
                 const Spacer(),
-                Text(
-                  game.isComplete ? 'Final' : 'Live',
-                  style: AppTextStyles.nano.copyWith(
-                    color: game.isComplete
-                        ? colors.textTertiary
-                        : colors.accent,
-                    fontWeight: FontWeight.w800,
+                if (!viewingLive)
+                  TextButton(
+                    onPressed: () =>
+                        setState(() => _pickedGameNumber = null),
+                    style: TextButton.styleFrom(
+                      visualDensity: VisualDensity.compact,
+                      padding: const EdgeInsets.symmetric(horizontal: 8),
+                    ),
+                    child: Text(
+                      'Jump to live',
+                      style: AppTextStyles.nano.copyWith(
+                        color: colors.accent,
+                        fontWeight: FontWeight.w800,
+                      ),
+                    ),
+                  )
+                else
+                  Text(
+                    game.isComplete ? 'Final' : 'Live',
+                    style: AppTextStyles.nano.copyWith(
+                      color: game.isComplete
+                          ? colors.textTertiary
+                          : colors.accent,
+                      fontWeight: FontWeight.w800,
+                    ),
                   ),
-                ),
               ],
             ),
             if (widget.games.length > 1) ...[
               const SizedBox(height: AppSpacing.sm),
               _GameTabs(
                 games: widget.games,
-                active: _activeIndex,
-                onPick: (i) => setState(() => _activeIndex = i),
+                active: activeIdx,
+                liveIndex: liveIdx,
+                onPick: (i) => setState(() {
+                  _pickedGameNumber = widget.games[i].gameNumber;
+                }),
               ),
             ],
             const SizedBox(height: AppSpacing.sm),
@@ -489,10 +527,15 @@ class _GameTabs extends StatelessWidget {
   const _GameTabs({
     required this.games,
     required this.active,
+    required this.liveIndex,
     required this.onPick,
   });
   final List<LiveGame> games;
   final int active;
+
+  /// Index of the game the broadcaster is currently bowling. Marked
+  /// with a red pulse dot so viewers know which tab is the live one.
+  final int liveIndex;
   final ValueChanged<int> onPick;
 
   @override
@@ -506,6 +549,7 @@ class _GameTabs extends StatelessWidget {
         separatorBuilder: (_, _) => const SizedBox(width: 6),
         itemBuilder: (_, i) {
           final selected = i == active;
+          final isLive = i == liveIndex;
           return Material(
             color: selected
                 ? colors.accent.withValues(alpha: 0.14)
@@ -517,13 +561,30 @@ class _GameTabs extends StatelessWidget {
               child: Padding(
                 padding:
                     const EdgeInsets.symmetric(horizontal: 12, vertical: 5),
-                child: Text(
-                  'Game ${games[i].gameNumber}',
-                  style: AppTextStyles.nano.copyWith(
-                    color: selected ? colors.accent : colors.textSecondary,
-                    fontWeight:
-                        selected ? FontWeight.w800 : FontWeight.w600,
-                  ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    if (isLive) ...[
+                      Container(
+                        width: 6,
+                        height: 6,
+                        decoration: const BoxDecoration(
+                          color: Color(0xFFE11D48),
+                          shape: BoxShape.circle,
+                        ),
+                      ),
+                      const SizedBox(width: 5),
+                    ],
+                    Text(
+                      'Game ${games[i].gameNumber}',
+                      style: AppTextStyles.nano.copyWith(
+                        color:
+                            selected ? colors.accent : colors.textSecondary,
+                        fontWeight:
+                            selected ? FontWeight.w800 : FontWeight.w600,
+                      ),
+                    ),
+                  ],
                 ),
               ),
             ),
