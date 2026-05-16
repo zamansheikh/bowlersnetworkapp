@@ -76,6 +76,25 @@ class NewsfeedRepositoryImpl implements NewsfeedRepository {
   }
 
   @override
+  Future<Either<Failure, bool>> togglePin(String postUid) =>
+      _guard(() async {
+        final res = await _remote.pinPost(postUid);
+        return res.isPinned;
+      });
+
+  @override
+  Future<Either<Failure, bool>> togglePostComments(
+    String postUid, {
+    required bool enabled,
+  }) =>
+      _guard(() async {
+        final res = await _remote.togglePostComments(postUid, {
+          'is_comments_enabled': enabled,
+        });
+        return res.isCommentsEnabled;
+      });
+
+  @override
   Future<Either<Failure, Post>> createTextPost({
     required String caption,
     required String audience,

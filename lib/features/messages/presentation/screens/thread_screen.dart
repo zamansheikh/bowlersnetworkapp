@@ -1,15 +1,22 @@
+import 'dart:async';
+
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 import '../../../../core/di/injection.dart';
 import '../../../../core/extensions/context_extensions.dart';
+import '../../../../core/network/chat_socket.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/theme/app_text_styles.dart';
 import '../../../../core/widgets/skeleton_box.dart';
+import '../../../profile/presentation/bloc/profile_bloc.dart';
 import '../../domain/entities/conversation.dart';
 import '../../domain/repositories/messages_repository.dart';
+import '../bloc/conversations_bloc.dart';
 import '../bloc/thread_bloc.dart';
+import '../widgets/conversation_settings_sheet.dart';
 import '../widgets/message_bubble.dart';
 
 class ThreadScreen extends StatelessWidget {
@@ -19,10 +26,18 @@ class ThreadScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // Current user id — needed so the bloc can correctly flag `isOwn` when
+    // the backend doesn't include it on socket payloads. Fallbacks to 0 if
+    // profile hasn't loaded yet; the comparison just won't match then.
+    final currentUserId =
+        context.select<ProfileBloc, int>((b) => b.state.profile?.user.id ?? 0);
+
     return BlocProvider<ThreadBloc>(
       create: (_) => ThreadBloc(
         repository: getIt<MessagesRepository>(),
+        socket: getIt<ChatSocket>(),
         conversationUid: conversation.uid,
+        currentUserId: currentUserId,
       )..add(const ThreadLoadRequested()),
       child: _ThreadView(conversation: conversation),
     );
@@ -40,9 +55,12 @@ class _ThreadView extends StatefulWidget {
 class _ThreadViewState extends State<_ThreadView> {
   final _textCtl = TextEditingController();
   final _scroll = ScrollController();
+  Timer? _typingThrottle;
+  late ConversationListItem _conversation = _conversation;
 
   @override
   void dispose() {
+    _typingThrottle?.cancel();
     _textCtl.dispose();
     _scroll.dispose();
     super.dispose();
@@ -67,10 +85,69 @@ class _ThreadViewState extends State<_ThreadView> {
     _scrollToBottom();
   }
 
+  /// Throttle outbound typing to at most one event every 2 seconds to match
+  /// the web's server-side debounce window.
+  void _onComposeChanged(String _) {
+    if (_typingThrottle?.isActive ?? false) return;
+    context.read<ThreadBloc>().add(const ThreadTypingSent());
+    _typingThrottle = Timer(const Duration(seconds: 2), () {});
+  }
+
+  Future<void> _openSettings() async {
+    final conversationsBloc =
+        context.findAncestorStateOfType<NavigatorState>() == null
+            ? null
+            : _maybeConversationsBloc();
+    final result = await showConversationSettings(
+      context,
+      conversation: _conversation,
+    );
+    if (result == null || !mounted) return;
+    if (result.muteToggled) {
+      setState(() {
+        _conversation = _conversation.copyWith(isMuted: result.newMuted);
+      });
+      // Let the conversations list reflect the change too, if reachable.
+      conversationsBloc?.add(ConversationMuteChanged(
+        conversationUid: _conversation.uid,
+        isMuted: result.newMuted,
+      ));
+    }
+    if (result.exited) {
+      conversationsBloc?.add(
+        ConversationRemovedLocally(conversationUid: _conversation.uid),
+      );
+      if (mounted) Navigator.of(context).maybePop();
+    }
+  }
+
+  ConversationsBloc? _maybeConversationsBloc() {
+    try {
+      return context.read<ConversationsBloc>();
+    } catch (_) {
+      return null;
+    }
+  }
+
+  Future<void> _onLongPressMessage(ChatMessage m) async {
+    if (!m.isOwn || m.isDeleted) return;
+    final bloc = context.read<ThreadBloc>();
+    final confirmed = await showModalBottomSheet<bool>(
+      context: context,
+      backgroundColor: Colors.transparent,
+      builder: (sheetCtx) => _DeleteSheet(onDelete: () {
+        Navigator.of(sheetCtx).pop(true);
+      }),
+    );
+    if (confirmed == true) {
+      bloc.add(ThreadMessageDeleteRequested(m.uid));
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
-    final c = widget.conversation;
+    final c = _conversation;
 
     return Scaffold(
       backgroundColor: colors.bgPrimary,
@@ -92,13 +169,29 @@ class _ThreadViewState extends State<_ThreadView> {
                       color: colors.textPrimary,
                     ),
                   ),
-                  if (c.isGroup)
-                    Text(
-                      '${c.memberCount} members',
-                      style: AppTextStyles.micro.copyWith(
-                        color: colors.textTertiary,
-                      ),
-                    ),
+                  BlocBuilder<ThreadBloc, ThreadState>(
+                    buildWhen: (p, n) => p.typingUsers != n.typingUsers,
+                    builder: (context, state) {
+                      if (state.typingUsers.isNotEmpty) {
+                        return Text(
+                          _typingSubtitle(state.typingUsers),
+                          style: AppTextStyles.micro.copyWith(
+                            color: colors.accent,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        );
+                      }
+                      if (c.isGroup) {
+                        return Text(
+                          '${c.memberCount} members',
+                          style: AppTextStyles.micro.copyWith(
+                            color: colors.textTertiary,
+                          ),
+                        );
+                      }
+                      return const SizedBox.shrink();
+                    },
+                  ),
                 ],
               ),
             ),
@@ -106,12 +199,8 @@ class _ThreadViewState extends State<_ThreadView> {
         ),
         actions: [
           IconButton(
-            icon: const Icon(LucideIcons.phone, size: 18),
-            onPressed: () {},
-          ),
-          IconButton(
             icon: const Icon(LucideIcons.ellipsisVertical, size: 18),
-            onPressed: () {},
+            onPressed: _openSettings,
           ),
         ],
       ),
@@ -153,10 +242,14 @@ class _ThreadViewState extends State<_ThreadView> {
                       final showAvatar = prev == null ||
                           prev.sender.id != m.sender.id ||
                           prev.isOwn != m.isOwn;
-                      return MessageBubble(
-                        message: m,
-                        showAvatar: showAvatar,
-                        isGroup: c.isGroup,
+                      return GestureDetector(
+                        behavior: HitTestBehavior.opaque,
+                        onLongPress: () => _onLongPressMessage(m),
+                        child: MessageBubble(
+                          message: m,
+                          showAvatar: showAvatar,
+                          isGroup: c.isGroup,
+                        ),
                       );
                     },
                   );
@@ -166,6 +259,7 @@ class _ThreadViewState extends State<_ThreadView> {
             _Composer(
               controller: _textCtl,
               onSend: _send,
+              onChanged: _onComposeChanged,
               sending: context.select<ThreadBloc, bool>(
                 (b) => b.state.sending,
               ),
@@ -174,6 +268,14 @@ class _ThreadViewState extends State<_ThreadView> {
         ),
       ),
     );
+  }
+
+  static String _typingSubtitle(List<TypingUser> users) {
+    if (users.length == 1) return '${users.first.username} is typing…';
+    if (users.length == 2) {
+      return '${users[0].username} and ${users[1].username} are typing…';
+    }
+    return '${users.length} people are typing…';
   }
 }
 
@@ -194,7 +296,7 @@ class _HeaderAvatar extends StatelessWidget {
     final colors = context.colors;
     final initial =
         fallback.isEmpty ? '?' : fallback.characters.first.toUpperCase();
-    return Container(
+    final placeholder = Container(
       width: 36,
       height: 36,
       decoration: BoxDecoration(
@@ -212,6 +314,20 @@ class _HeaderAvatar extends StatelessWidget {
               ),
             ),
     );
+
+    if (url.isEmpty) return placeholder;
+    return ClipOval(
+      child: SizedBox(
+        width: 36,
+        height: 36,
+        child: CachedNetworkImage(
+          imageUrl: url,
+          fit: BoxFit.cover,
+          placeholder: (_, _) => placeholder,
+          errorWidget: (_, _, _) => placeholder,
+        ),
+      ),
+    );
   }
 }
 
@@ -219,11 +335,13 @@ class _Composer extends StatelessWidget {
   const _Composer({
     required this.controller,
     required this.onSend,
+    required this.onChanged,
     required this.sending,
   });
 
   final TextEditingController controller;
   final VoidCallback onSend;
+  final ValueChanged<String> onChanged;
   final bool sending;
 
   @override
@@ -266,6 +384,7 @@ class _Composer extends StatelessWidget {
                   maxLines: null,
                   textInputAction: TextInputAction.send,
                   textCapitalization: TextCapitalization.sentences,
+                  onChanged: onChanged,
                   onSubmitted: (_) => onSend(),
                   style: AppTextStyles.body.copyWith(color: colors.textPrimary),
                   cursorColor: colors.accent,
@@ -311,6 +430,42 @@ class _Composer extends StatelessWidget {
                         ),
                 ),
               ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _DeleteSheet extends StatelessWidget {
+  const _DeleteSheet({required this.onDelete});
+  final VoidCallback onDelete;
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = context.colors;
+    return SafeArea(
+      top: false,
+      child: Container(
+        decoration: BoxDecoration(
+          color: colors.bgSurfaceElevated,
+          borderRadius: const BorderRadius.vertical(
+            top: Radius.circular(AppRadius.xl),
+          ),
+        ),
+        padding: const EdgeInsets.all(AppSpacing.md),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            ListTile(
+              leading:
+                  Icon(LucideIcons.trash2, size: 18, color: colors.error),
+              title: Text(
+                'Delete message',
+                style: AppTextStyles.body.copyWith(color: colors.error),
+              ),
+              onTap: onDelete,
             ),
           ],
         ),

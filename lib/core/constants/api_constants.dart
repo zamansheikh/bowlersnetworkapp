@@ -21,15 +21,26 @@ class Endpoints {
       '/api/cloud/upload/multipart/requests/complete';
 
   // Auth
-  static const String verifyEmail = '/api/auth/verify-email';
-  static const String signup = '/api/auth/signup';
   static const String login = '/api/auth/login';
+  static const String authFeatureStatus = '/api/auth/feature-status';
 
-  /// Step-1 validation — mirrors web's first signup step. Returns 200 if the
-  /// registration data is valid AND username/email are unused. Lets us show
-  /// "username taken" / "email exists" errors before asking for OTP.
+  // ── Signup (4-step flow, mirrors web exactly) ─────────────────────────────
+  // 1. validate/registration — pre-check uniqueness + format BEFORE asking
+  //    the user for OTP. Lets us show "username taken" etc. inline.
+  // 2. validate/profile — optional pre-check for the (also optional)
+  //    bowler-profile step (handedness, ball carry, etc.).
+  // 3. submit — emails the OTP. Caches registration server-side.
+  // 4. complete — verify OTP + finalise account. Returns auth token.
   static const String signupValidateRegistration =
       '/api/auth/signup/validate/registration';
+  static const String signupValidateProfile =
+      '/api/auth/signup/validate/profile';
+  static const String signupSubmit = '/api/auth/signup/submit';
+  static const String signupComplete = '/api/auth/signup/complete';
+
+  // Parental consent (for under-18 signups).
+  static const String authConsentVerify = '/api/auth/consent/verify';
+  static const String authConsentResend = '/api/auth/consent/resend';
 
   // Password recovery
   static const String recoveryInitiateOtp =
@@ -76,6 +87,9 @@ class Endpoints {
   static String savePost(String postId) => '/api/newsfeed/$postId/save';
   static String hidePost(String postId) => '/api/newsfeed/$postId/hide';
   static String sharePost(String postId) => '/api/newsfeed/$postId/share';
+  static String pinPost(String postId) => '/api/newsfeed/$postId/pin';
+  static String postCommentsToggle(String postId) =>
+      '/api/newsfeed/$postId/comments-toggle';
   static String postComments(String postId) =>
       '/api/newsfeed/$postId/comments';
 
@@ -128,4 +142,23 @@ class Endpoints {
   static const String createPrivateConversation = '/api/messages/private';
   static const String createGroupConversation = '/api/messages/group';
   static String deleteMessage(String uid) => '/api/messages/$uid/delete';
+  static String conversationMute(String uid) =>
+      '/api/messages/conversations/$uid/mute';
+  static String conversationLeave(String uid) =>
+      '/api/messages/conversations/$uid/leave';
+  static String conversationDeleteSelf(String uid) =>
+      '/api/messages/conversations/$uid/delete';
+  static String conversationUpdate(String uid) =>
+      '/api/messages/conversations/$uid/update';
+  static String conversationMembers(String uid) =>
+      '/api/messages/conversations/$uid/members';
+  static String conversationMemberRemove(String uid, int userId) =>
+      '/api/messages/conversations/$uid/members/$userId';
+
+  // User search (used by DM / group create + team invites)
+  static const String usersSearch = '/api/users/search';
+
+  // WebSocket paths (appended to ApiConstants.wsBaseUrl, token in query).
+  static const String wsChat = '/ws/chat/';
+  static const String wsNotifications = '/ws/notifications/';
 }

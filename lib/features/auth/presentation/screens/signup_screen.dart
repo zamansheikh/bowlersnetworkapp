@@ -18,7 +18,8 @@ import '../../../../core/widgets/app_toast.dart';
 import '../../../../core/widgets/bn_logo.dart';
 import '../../../../core/widgets/glow_blob.dart';
 import '../../data/models/auth_dtos.dart';
-import '../../domain/usecases/send_email_verification_usecase.dart';
+import '../../domain/usecases/send_email_verification_usecase.dart'
+    show SubmitSignupUseCase;
 import '../../domain/usecases/validate_registration_usecase.dart';
 import '../bloc/auth_bloc.dart';
 import '../widgets/auth_header.dart';
@@ -232,8 +233,8 @@ class _SignupScreenState extends State<SignupScreen> {
       return;
     }
 
-    // Step B: send the OTP to the user's email
-    final otp = await getIt<SendEmailVerificationUseCase>()(data.email);
+    // Step B: submit signup — backend caches registration + emails OTP.
+    final otp = await getIt<SubmitSignupUseCase>()(data);
     if (!mounted) return;
     otp.fold(
       (f) => setState(() {
@@ -584,9 +585,10 @@ class _SignupScreenState extends State<SignupScreen> {
               child: TextButton(
                 onPressed: () async {
                   if (_pendingData == null) return;
-                  final res = await getIt<SendEmailVerificationUseCase>()(
-                    _pendingData!.email,
-                  );
+                  // Resend = re-submit; backend reissues the OTP for the
+                  // cached registration.
+                  final res =
+                      await getIt<SubmitSignupUseCase>()(_pendingData!);
                   if (!mounted) return;
                   res.fold(
                     (f) => showAppToast(context,

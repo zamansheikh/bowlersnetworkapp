@@ -27,15 +27,18 @@ class AuthSignupRequested extends AuthEvent {
   const AuthSignupRequested({
     required this.data,
     required this.verificationCode,
+    this.favoriteBrandIds = const [],
     this.referrerUsername,
   });
 
   final SignupData data;
   final String verificationCode;
+  final List<int> favoriteBrandIds;
   final String? referrerUsername;
 
   @override
-  List<Object?> get props => [data, verificationCode, referrerUsername];
+  List<Object?> get props =>
+      [data, verificationCode, favoriteBrandIds, referrerUsername];
 }
 
 /// Fired after ProfileBloc confirms `is_complete: true`. Lifts the router

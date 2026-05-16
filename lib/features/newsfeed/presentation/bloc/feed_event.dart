@@ -70,3 +70,20 @@ class FeedShareRequested extends FeedEvent {
   @override
   List<Object?> get props => [postUid];
 }
+
+/// Toggle a post's pinned flag (owner only). Optimistic flip with rollback.
+class FeedPinToggled extends FeedEvent {
+  const FeedPinToggled({required this.postUid});
+  final String postUid;
+  @override
+  List<Object?> get props => [postUid];
+}
+
+/// Enable/disable comments on one of your posts.
+class FeedCommentsToggled extends FeedEvent {
+  const FeedCommentsToggled({required this.postUid, required this.enabled});
+  final String postUid;
+  final bool enabled;
+  @override
+  List<Object?> get props => [postUid, enabled];
+}

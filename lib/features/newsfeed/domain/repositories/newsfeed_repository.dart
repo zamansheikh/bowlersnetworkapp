@@ -24,8 +24,18 @@ abstract class NewsfeedRepository {
   /// Save/unsave toggle. Returns the new saved state.
   Future<Either<Failure, bool>> toggleSave(String postUid);
 
-  /// Hide post from this user's feed.
+  /// Hide post from this user's feed. For an owner, the backend treats this
+  /// as a delete (matches web's "Delete" button behaviour).
   Future<Either<Failure, Unit>> hide(String postUid);
+
+  /// Toggle pin. Returns the new pinned state.
+  Future<Either<Failure, bool>> togglePin(String postUid);
+
+  /// Enable/disable comments (post owner only). Returns the new state.
+  Future<Either<Failure, bool>> togglePostComments(
+    String postUid, {
+    required bool enabled,
+  });
 
   Future<Either<Failure, Post>> createTextPost({
     required String caption,

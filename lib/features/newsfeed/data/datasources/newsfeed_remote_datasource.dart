@@ -36,6 +36,15 @@ abstract class NewsfeedRemoteDatasource {
   @POST('/api/newsfeed/{id}/hide')
   Future<void> hidePost(@Path('id') String id);
 
+  @POST('/api/newsfeed/{id}/pin')
+  Future<PinResponseDto> pinPost(@Path('id') String id);
+
+  @PATCH('/api/newsfeed/{id}/comments-toggle')
+  Future<CommentsToggleResponseDto> togglePostComments(
+    @Path('id') String id,
+    @Body() Map<String, dynamic> body,
+  );
+
   // ── Create endpoints ──
   // All return the newly-created post's full payload (same shape as feed).
 

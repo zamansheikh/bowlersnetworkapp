@@ -88,7 +88,12 @@ ConversationDetailDto _$ConversationDetailDtoFromJson(
           .toList() ??
       const [],
   createdAt: json['created_at'] as String?,
+  isCreator: json['is_creator'] as bool? ?? false,
+  isMuted: json['is_muted'] as bool? ?? false,
 );
+
+MuteResponseDto _$MuteResponseDtoFromJson(Map<String, dynamic> json) =>
+    MuteResponseDto(isMuted: json['is_muted'] as bool? ?? false);
 
 ConversationMemberDto _$ConversationMemberDtoFromJson(
   Map<String, dynamic> json,
@@ -99,3 +104,23 @@ ConversationMemberDto _$ConversationMemberDtoFromJson(
   lastName: json['last_name'] as String? ?? '',
   profilePictureUrl: json['profile_picture_url'] as String?,
 );
+
+SearchUsersResponseDto _$SearchUsersResponseDtoFromJson(
+  Map<String, dynamic> json,
+) => SearchUsersResponseDto(
+  users:
+      (json['users'] as List<dynamic>?)
+          ?.map((e) => SearchUserDto.fromJson(e as Map<String, dynamic>))
+          .toList() ??
+      [],
+);
+
+SearchUserDto _$SearchUserDtoFromJson(Map<String, dynamic> json) =>
+    SearchUserDto(
+      id: (json['id'] as num).toInt(),
+      username: json['username'] as String,
+      firstName: json['first_name'] as String? ?? '',
+      lastName: json['last_name'] as String? ?? '',
+      profilePictureUrl: json['profile_picture_url'] as String?,
+      rankDisplay: json['rank_display'] as String?,
+    );

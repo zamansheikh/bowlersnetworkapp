@@ -5,6 +5,7 @@ import 'package:injectable/injectable.dart';
 
 import '../../../../core/error/failures.dart';
 import '../../domain/entities/post.dart';
+import '../../domain/repositories/newsfeed_repository.dart';
 import '../../domain/usecases/feed_usecases.dart';
 
 part 'feed_event.dart';
@@ -21,6 +22,7 @@ class FeedBloc extends Bloc<FeedEvent, FeedState> {
     this._toggleSave,
     this._hide,
     this._share,
+    this._repository,
   ) : super(const FeedState()) {
     on<FeedLoadRequested>(_onLoad);
     on<FeedRefreshRequested>(_onRefresh);
@@ -31,6 +33,8 @@ class FeedBloc extends Bloc<FeedEvent, FeedState> {
     on<FeedFilterChanged>(_onFilterChanged);
     on<FeedPostCreated>(_onPostCreated);
     on<FeedShareRequested>(_onShare);
+    on<FeedPinToggled>(_onPinToggled);
+    on<FeedCommentsToggled>(_onCommentsToggled);
   }
 
   final GetFeedUseCase _getFeed;
@@ -38,6 +42,7 @@ class FeedBloc extends Bloc<FeedEvent, FeedState> {
   final ToggleSavePostUseCase _toggleSave;
   final HidePostUseCase _hide;
   final SharePostUseCase _share;
+  final NewsfeedRepository _repository;
 
   Future<void> _onLoad(
     FeedLoadRequested event,
@@ -218,6 +223,60 @@ class FeedBloc extends Bloc<FeedEvent, FeedState> {
       clearFilter: event.filter == null,
     ));
     add(const FeedLoadRequested());
+  }
+
+  Future<void> _onPinToggled(
+    FeedPinToggled event,
+    Emitter<FeedState> emit,
+  ) async {
+    final idx = state.posts.indexWhere((p) => p.uid == event.postUid);
+    if (idx < 0) return;
+    final original = state.posts[idx];
+    // Optimistic flip.
+    emit(state.copyWith(
+      posts: _replace(idx, original.copyWith(isPinned: !original.isPinned)),
+    ));
+    final res = await _repository.togglePin(event.postUid);
+    res.fold(
+      (f) => emit(state.copyWith(
+        posts: _replace(idx, original),
+        errors: f.messages,
+      )),
+      (pinned) => emit(state.copyWith(
+        posts: _replace(idx, original.copyWith(isPinned: pinned)),
+      )),
+    );
+  }
+
+  Future<void> _onCommentsToggled(
+    FeedCommentsToggled event,
+    Emitter<FeedState> emit,
+  ) async {
+    final idx = state.posts.indexWhere((p) => p.uid == event.postUid);
+    if (idx < 0) return;
+    final original = state.posts[idx];
+    emit(state.copyWith(
+      posts: _replace(
+        idx,
+        original.copyWith(isCommentsEnabled: event.enabled),
+      ),
+    ));
+    final res = await _repository.togglePostComments(
+      event.postUid,
+      enabled: event.enabled,
+    );
+    res.fold(
+      (f) => emit(state.copyWith(
+        posts: _replace(idx, original),
+        errors: f.messages,
+      )),
+      (enabled) => emit(state.copyWith(
+            posts: _replace(
+              idx,
+              original.copyWith(isCommentsEnabled: enabled),
+            ),
+          )),
+    );
   }
 
   List<Post> _replace(int index, Post post) {

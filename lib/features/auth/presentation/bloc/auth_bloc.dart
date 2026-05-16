@@ -20,7 +20,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
   AuthBloc(
     this._repository,
     this._login,
-    this._signup,
+    this._completeSignup,
     this._logout,
   ) : super(const AuthState()) {
     on<AuthStarted>(_onStarted);
@@ -34,7 +34,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
 
   final AuthRepository _repository;
   final LoginUseCase _login;
-  final SignupUseCase _signup;
+  final CompleteSignupUseCase _completeSignup;
   final LogoutUseCase _logout;
 
   Future<void> _onStarted(AuthStarted event, Emitter<AuthState> emit) async {
@@ -82,9 +82,10 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     Emitter<AuthState> emit,
   ) async {
     emit(state.copyWith(processing: true, errors: const []));
-    final result = await _signup(SignupParams(
+    final result = await _completeSignup(SignupParams(
       data: event.data,
       verificationCode: event.verificationCode,
+      favoriteBrandIds: event.favoriteBrandIds,
       referrerUsername: event.referrerUsername,
     ));
     result.fold(

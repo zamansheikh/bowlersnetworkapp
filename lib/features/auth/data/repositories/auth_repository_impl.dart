@@ -21,14 +21,6 @@ class AuthRepositoryImpl implements AuthRepository {
   final LocalStorageService _local;
 
   @override
-  Future<Either<Failure, Unit>> sendEmailVerification(String email) async {
-    return _guard(() async {
-      await _remote.verifyEmail(VerifyEmailRequest(email: email));
-      return unit;
-    });
-  }
-
-  @override
   Future<Either<Failure, Unit>> validateRegistration(SignupData data) async {
     return _guard(() async {
       await _remote.validateRegistration(
@@ -47,16 +39,26 @@ class AuthRepositoryImpl implements AuthRepository {
   }
 
   @override
-  Future<Either<Failure, AuthSession>> signup({
+  Future<Either<Failure, Unit>> submitSignup(SignupData data) async {
+    return _guard(() async {
+      await _remote.submitSignup(SignupSubmitRequest(registration: data));
+      return unit;
+    });
+  }
+
+  @override
+  Future<Either<Failure, AuthSession>> completeSignup({
     required SignupData data,
     required String verificationCode,
+    List<int> favoriteBrandIds = const [],
     String? referrerUsername,
   }) async {
     return _guard(() async {
-      final res = await _remote.signup(
-        SignupRequest(
-          signupData: data,
+      final res = await _remote.completeSignup(
+        SignupCompleteRequest(
+          registration: data,
           verificationCode: verificationCode,
+          favoriteBrandIds: favoriteBrandIds,
           referrerUsername: referrerUsername,
         ),
       );

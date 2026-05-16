@@ -2,16 +2,6 @@ import 'package:json_annotation/json_annotation.dart';
 
 part 'auth_dtos.g.dart';
 
-/// POST /api/auth/verify-email
-@JsonSerializable(createFactory: false)
-class VerifyEmailRequest {
-  const VerifyEmailRequest({required this.email});
-
-  final String email;
-
-  Map<String, dynamic> toJson() => _$VerifyEmailRequestToJson(this);
-}
-
 @JsonSerializable(createToJson: false)
 class MessageResponse {
   const MessageResponse({required this.message});
@@ -22,7 +12,8 @@ class MessageResponse {
       _$MessageResponseFromJson(json);
 }
 
-/// POST /api/auth/signup — payload is wrapped as `{signup_data, verification_code, referrer_username}`
+/// Core registration payload — shared between `validate/registration`,
+/// `submit`, and `complete` (where it's wrapped in `{registration: {...}}`).
 @JsonSerializable(createFactory: false)
 class SignupData {
   const SignupData({
@@ -51,24 +42,6 @@ class SignupData {
   final String? parentEmail;
 
   Map<String, dynamic> toJson() => _$SignupDataToJson(this);
-}
-
-@JsonSerializable(createFactory: false)
-class SignupRequest {
-  const SignupRequest({
-    required this.signupData,
-    required this.verificationCode,
-    this.referrerUsername,
-  });
-
-  @JsonKey(name: 'signup_data')
-  final SignupData signupData;
-  @JsonKey(name: 'verification_code')
-  final String verificationCode;
-  @JsonKey(name: 'referrer_username', includeIfNull: false)
-  final String? referrerUsername;
-
-  Map<String, dynamic> toJson() => _$SignupRequestToJson(this);
 }
 
 /// POST /api/auth/signup/validate/registration — same shape as [SignupData]
@@ -101,6 +74,42 @@ class ValidateRegistrationRequest {
   Map<String, dynamic> toJson() => _$ValidateRegistrationRequestToJson(this);
 }
 
+/// POST /api/auth/signup/submit — body is `{registration: {…}}`. Triggers
+/// the OTP email and caches the registration server-side under a short TTL.
+@JsonSerializable(createFactory: false)
+class SignupSubmitRequest {
+  const SignupSubmitRequest({required this.registration});
+
+  final SignupData registration;
+
+  Map<String, dynamic> toJson() => _$SignupSubmitRequestToJson(this);
+}
+
+/// POST /api/auth/signup/complete — verifies the OTP + finalises the
+/// account. Body:
+///   `{registration, verification_code, favorite_brand_ids,
+///     profile?, referrer_username?}`.
+/// Returns an `AuthTokenResponse`.
+@JsonSerializable(createFactory: false)
+class SignupCompleteRequest {
+  const SignupCompleteRequest({
+    required this.registration,
+    required this.verificationCode,
+    this.favoriteBrandIds = const [],
+    this.referrerUsername,
+  });
+
+  final SignupData registration;
+  @JsonKey(name: 'verification_code')
+  final String verificationCode;
+  @JsonKey(name: 'favorite_brand_ids', defaultValue: <int>[])
+  final List<int> favoriteBrandIds;
+  @JsonKey(name: 'referrer_username', includeIfNull: false)
+  final String? referrerUsername;
+
+  Map<String, dynamic> toJson() => _$SignupCompleteRequestToJson(this);
+}
+
 /// POST /api/auth/login
 @JsonSerializable(createFactory: false)
 class LoginRequest {
@@ -112,7 +121,8 @@ class LoginRequest {
   Map<String, dynamic> toJson() => _$LoginRequestToJson(this);
 }
 
-/// Shared response shape for login + signup: `{token, requires_consent?}`.
+/// Shared response shape for login + signup-complete:
+/// `{token, requires_consent?}`.
 @JsonSerializable(createToJson: false)
 class AuthTokenResponse {
   const AuthTokenResponse({required this.token, this.requiresConsent = false});

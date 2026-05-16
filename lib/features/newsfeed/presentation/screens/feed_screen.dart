@@ -209,6 +209,7 @@ class _FeedViewState extends State<_FeedView> {
   }
 
   void _showMoreMenu(BuildContext context, Post post) {
+    final feedBloc = context.read<FeedBloc>();
     showModalBottomSheet(
       context: context,
       backgroundColor: Colors.transparent,
@@ -227,46 +228,88 @@ class _FeedViewState extends State<_FeedView> {
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                ListTile(
-                  leading: Icon(
-                    LucideIcons.eyeOff,
-                    size: 18,
-                    color: colors.textSecondary,
-                  ),
-                  title: Text(
-                    'Hide from my feed',
-                    style: AppTextStyles.body
-                        .copyWith(color: colors.textPrimary),
-                  ),
-                  onTap: () {
-                    Navigator.of(sheetCtx).pop();
-                    context
-                        .read<FeedBloc>()
-                        .add(FeedPostHidden(postUid: post.uid));
-                  },
-                ),
-                ListTile(
-                  leading: Icon(
-                    LucideIcons.link,
-                    size: 18,
-                    color: colors.textSecondary,
-                  ),
-                  title: Text(
-                    'Copy link',
-                    style: AppTextStyles.body
-                        .copyWith(color: colors.textPrimary),
-                  ),
-                  onTap: () {
-                    Navigator.of(sheetCtx).pop();
-                    _copyPostLink(context, post);
-                  },
-                ),
-                if (!post.isMine)
+                if (post.isMine) ...[
                   ListTile(
-                    leading:
-                        Icon(LucideIcons.flag, size: 18, color: colors.error),
+                    leading: Icon(
+                      post.isCommentsEnabled
+                          ? LucideIcons.messageSquareOff
+                          : LucideIcons.messageCircle,
+                      size: 18,
+                      color: colors.textSecondary,
+                    ),
                     title: Text(
-                      'Report post',
+                      post.isCommentsEnabled
+                          ? 'Disable comments'
+                          : 'Enable comments',
+                      style: AppTextStyles.body
+                          .copyWith(color: colors.textPrimary),
+                    ),
+                    onTap: () {
+                      Navigator.of(sheetCtx).pop();
+                      feedBloc.add(FeedCommentsToggled(
+                        postUid: post.uid,
+                        enabled: !post.isCommentsEnabled,
+                      ));
+                    },
+                  ),
+                  ListTile(
+                    leading: Icon(
+                      post.isPinned ? LucideIcons.pinOff : LucideIcons.pin,
+                      size: 18,
+                      color: colors.textSecondary,
+                    ),
+                    title: Text(
+                      post.isPinned ? 'Unpin' : 'Pin',
+                      style: AppTextStyles.body
+                          .copyWith(color: colors.textPrimary),
+                    ),
+                    onTap: () {
+                      Navigator.of(sheetCtx).pop();
+                      feedBloc.add(FeedPinToggled(postUid: post.uid));
+                    },
+                  ),
+                  ListTile(
+                    leading: Icon(
+                      LucideIcons.trash2,
+                      size: 18,
+                      color: colors.error,
+                    ),
+                    title: Text(
+                      'Delete',
+                      style: AppTextStyles.body.copyWith(color: colors.error),
+                    ),
+                    onTap: () {
+                      Navigator.of(sheetCtx).pop();
+                      // Web uses the same `/hide` endpoint for owner delete —
+                      // see _PostCard.tsx line 338.
+                      feedBloc.add(FeedPostHidden(postUid: post.uid));
+                    },
+                  ),
+                ] else ...[
+                  ListTile(
+                    leading: Icon(
+                      LucideIcons.eyeOff,
+                      size: 18,
+                      color: colors.textSecondary,
+                    ),
+                    title: Text(
+                      'Hide',
+                      style: AppTextStyles.body
+                          .copyWith(color: colors.textPrimary),
+                    ),
+                    onTap: () {
+                      Navigator.of(sheetCtx).pop();
+                      feedBloc.add(FeedPostHidden(postUid: post.uid));
+                    },
+                  ),
+                  ListTile(
+                    leading: Icon(
+                      LucideIcons.flag,
+                      size: 18,
+                      color: colors.error,
+                    ),
+                    title: Text(
+                      'Report',
                       style: AppTextStyles.body.copyWith(color: colors.error),
                     ),
                     onTap: () {
@@ -278,6 +321,7 @@ class _FeedViewState extends State<_FeedView> {
                       );
                     },
                   ),
+                ],
               ],
             ),
           ),

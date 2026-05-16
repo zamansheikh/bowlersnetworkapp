@@ -58,3 +58,12 @@ Map<String, dynamic> _$ReactionRequestDtoToJson(ReactionRequestDto instance) =>
 
 SaveResponseDto _$SaveResponseDtoFromJson(Map<String, dynamic> json) =>
     SaveResponseDto(saved: json['saved'] as bool);
+
+PinResponseDto _$PinResponseDtoFromJson(Map<String, dynamic> json) =>
+    PinResponseDto(isPinned: json['is_pinned'] as bool? ?? false);
+
+CommentsToggleResponseDto _$CommentsToggleResponseDtoFromJson(
+  Map<String, dynamic> json,
+) => CommentsToggleResponseDto(
+  isCommentsEnabled: json['is_comments_enabled'] as bool? ?? true,
+);

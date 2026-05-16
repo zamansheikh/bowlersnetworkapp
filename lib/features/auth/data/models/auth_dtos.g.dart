@@ -6,9 +6,6 @@ part of 'auth_dtos.dart';
 // JsonSerializableGenerator
 // **************************************************************************
 
-Map<String, dynamic> _$VerifyEmailRequestToJson(VerifyEmailRequest instance) =>
-    <String, dynamic>{'email': instance.email};
-
 MessageResponse _$MessageResponseFromJson(Map<String, dynamic> json) =>
     MessageResponse(message: json['message'] as String);
 
@@ -24,13 +21,6 @@ Map<String, dynamic> _$SignupDataToJson(SignupData instance) =>
       'parent_email': ?instance.parentEmail,
     };
 
-Map<String, dynamic> _$SignupRequestToJson(SignupRequest instance) =>
-    <String, dynamic>{
-      'signup_data': instance.signupData,
-      'verification_code': instance.verificationCode,
-      'referrer_username': ?instance.referrerUsername,
-    };
-
 Map<String, dynamic> _$ValidateRegistrationRequestToJson(
   ValidateRegistrationRequest instance,
 ) => <String, dynamic>{
@@ -41,6 +31,19 @@ Map<String, dynamic> _$ValidateRegistrationRequestToJson(
   'password': instance.password,
   'date_of_birth': instance.dateOfBirth,
   'parent_email': ?instance.parentEmail,
+};
+
+Map<String, dynamic> _$SignupSubmitRequestToJson(
+  SignupSubmitRequest instance,
+) => <String, dynamic>{'registration': instance.registration};
+
+Map<String, dynamic> _$SignupCompleteRequestToJson(
+  SignupCompleteRequest instance,
+) => <String, dynamic>{
+  'registration': instance.registration,
+  'verification_code': instance.verificationCode,
+  'favorite_brand_ids': instance.favoriteBrandIds,
+  'referrer_username': ?instance.referrerUsername,
 };
 
 Map<String, dynamic> _$LoginRequestToJson(LoginRequest instance) =>

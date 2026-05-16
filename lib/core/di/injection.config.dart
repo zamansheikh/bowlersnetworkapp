@@ -63,6 +63,7 @@ import '../../features/profile/domain/usecases/get_my_profile_usecase.dart'
 import '../../features/profile/presentation/bloc/profile_bloc.dart' as _i469;
 import '../localization/locale_cubit.dart' as _i960;
 import '../network/api_client.dart' as _i557;
+import '../network/chat_socket.dart' as _i943;
 import '../services/cloud_upload_service.dart' as _i984;
 import '../services/image_picker_service.dart' as _i644;
 import '../storage/local_storage_service.dart' as _i744;
@@ -142,8 +143,9 @@ extension GetItInjectableX on _i174.GetIt {
     gh.lazySingleton<_i819.NewsfeedRepository>(
       () => _i306.NewsfeedRepositoryImpl(gh<_i452.NewsfeedRemoteDatasource>()),
     );
-    gh.factory<_i454.ConversationsBloc>(
-      () => _i454.ConversationsBloc(gh<_i794.MessagesRepository>()),
+    gh.lazySingleton<_i943.ChatSocket>(
+      () => _i943.ChatSocket(gh<_i666.SecureStorageService>()),
+      dispose: (i) => i.dispose(),
     );
     gh.lazySingleton<_i894.ProfileRepository>(
       () => _i334.ProfileRepositoryImpl(gh<_i327.ProfileRemoteDatasource>()),
@@ -163,11 +165,11 @@ extension GetItInjectableX on _i174.GetIt {
     gh.lazySingleton<_i38.ResetPasswordUseCase>(
       () => _i38.ResetPasswordUseCase(gh<_i787.AuthRepository>()),
     );
-    gh.lazySingleton<_i707.SendEmailVerificationUseCase>(
-      () => _i707.SendEmailVerificationUseCase(gh<_i787.AuthRepository>()),
+    gh.lazySingleton<_i707.SubmitSignupUseCase>(
+      () => _i707.SubmitSignupUseCase(gh<_i787.AuthRepository>()),
     );
-    gh.lazySingleton<_i57.SignupUseCase>(
-      () => _i57.SignupUseCase(gh<_i787.AuthRepository>()),
+    gh.lazySingleton<_i57.CompleteSignupUseCase>(
+      () => _i57.CompleteSignupUseCase(gh<_i787.AuthRepository>()),
     );
     gh.lazySingleton<_i416.ValidateRegistrationUseCase>(
       () => _i416.ValidateRegistrationUseCase(gh<_i787.AuthRepository>()),
@@ -176,8 +178,14 @@ extension GetItInjectableX on _i174.GetIt {
       () => _i797.AuthBloc(
         gh<_i787.AuthRepository>(),
         gh<_i188.LoginUseCase>(),
-        gh<_i57.SignupUseCase>(),
+        gh<_i57.CompleteSignupUseCase>(),
         gh<_i48.LogoutUseCase>(),
+      ),
+    );
+    gh.factory<_i454.ConversationsBloc>(
+      () => _i454.ConversationsBloc(
+        gh<_i794.MessagesRepository>(),
+        gh<_i943.ChatSocket>(),
       ),
     );
     gh.lazySingleton<_i22.GetFeedUseCase>(
@@ -195,6 +203,16 @@ extension GetItInjectableX on _i174.GetIt {
     gh.lazySingleton<_i22.SharePostUseCase>(
       () => _i22.SharePostUseCase(gh<_i819.NewsfeedRepository>()),
     );
+    gh.factory<_i920.FeedBloc>(
+      () => _i920.FeedBloc(
+        gh<_i22.GetFeedUseCase>(),
+        gh<_i22.ReactToPostUseCase>(),
+        gh<_i22.ToggleSavePostUseCase>(),
+        gh<_i22.HidePostUseCase>(),
+        gh<_i22.SharePostUseCase>(),
+        gh<_i819.NewsfeedRepository>(),
+      ),
+    );
     gh.lazySingleton<_i469.ProfileBloc>(
       () => _i469.ProfileBloc(
         gh<_i894.ProfileRepository>(),
@@ -206,15 +224,6 @@ extension GetItInjectableX on _i174.GetIt {
     );
     gh.lazySingleton<_i981.CheckProfileCompletionUseCase>(
       () => _i981.CheckProfileCompletionUseCase(gh<_i894.ProfileRepository>()),
-    );
-    gh.factory<_i920.FeedBloc>(
-      () => _i920.FeedBloc(
-        gh<_i22.GetFeedUseCase>(),
-        gh<_i22.ReactToPostUseCase>(),
-        gh<_i22.ToggleSavePostUseCase>(),
-        gh<_i22.HidePostUseCase>(),
-        gh<_i22.SharePostUseCase>(),
-      ),
     );
     return this;
   }

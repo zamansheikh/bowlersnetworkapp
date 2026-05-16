@@ -20,34 +20,6 @@ class _AuthRemoteDatasource implements AuthRemoteDatasource {
   final ParseErrorLogger? errorLogger;
 
   @override
-  Future<MessageResponse> verifyEmail(VerifyEmailRequest body) async {
-    final _extra = <String, dynamic>{};
-    final queryParameters = <String, dynamic>{};
-    final _headers = <String, dynamic>{};
-    final _data = <String, dynamic>{};
-    _data.addAll(body.toJson());
-    final _options = _setStreamType<MessageResponse>(
-      Options(method: 'POST', headers: _headers, extra: _extra)
-          .compose(
-            _dio.options,
-            '/api/auth/verify-email',
-            queryParameters: queryParameters,
-            data: _data,
-          )
-          .copyWith(baseUrl: _combineBaseUrls(_dio.options.baseUrl, baseUrl)),
-    );
-    final _result = await _dio.fetch<Map<String, dynamic>>(_options);
-    late MessageResponse _value;
-    try {
-      _value = MessageResponse.fromJson(_result.data!);
-    } on Object catch (e, s) {
-      errorLogger?.logError(e, s, _options, response: _result);
-      rethrow;
-    }
-    return _value;
-  }
-
-  @override
   Future<MessageResponse> validateRegistration(
     ValidateRegistrationRequest body,
   ) async {
@@ -78,7 +50,35 @@ class _AuthRemoteDatasource implements AuthRemoteDatasource {
   }
 
   @override
-  Future<AuthTokenResponse> signup(SignupRequest body) async {
+  Future<MessageResponse> submitSignup(SignupSubmitRequest body) async {
+    final _extra = <String, dynamic>{};
+    final queryParameters = <String, dynamic>{};
+    final _headers = <String, dynamic>{};
+    final _data = <String, dynamic>{};
+    _data.addAll(body.toJson());
+    final _options = _setStreamType<MessageResponse>(
+      Options(method: 'POST', headers: _headers, extra: _extra)
+          .compose(
+            _dio.options,
+            '/api/auth/signup/submit',
+            queryParameters: queryParameters,
+            data: _data,
+          )
+          .copyWith(baseUrl: _combineBaseUrls(_dio.options.baseUrl, baseUrl)),
+    );
+    final _result = await _dio.fetch<Map<String, dynamic>>(_options);
+    late MessageResponse _value;
+    try {
+      _value = MessageResponse.fromJson(_result.data!);
+    } on Object catch (e, s) {
+      errorLogger?.logError(e, s, _options, response: _result);
+      rethrow;
+    }
+    return _value;
+  }
+
+  @override
+  Future<AuthTokenResponse> completeSignup(SignupCompleteRequest body) async {
     final _extra = <String, dynamic>{};
     final queryParameters = <String, dynamic>{};
     final _headers = <String, dynamic>{};
@@ -88,7 +88,7 @@ class _AuthRemoteDatasource implements AuthRemoteDatasource {
       Options(method: 'POST', headers: _headers, extra: _extra)
           .compose(
             _dio.options,
-            '/api/auth/signup',
+            '/api/auth/signup/complete',
             queryParameters: queryParameters,
             data: _data,
           )

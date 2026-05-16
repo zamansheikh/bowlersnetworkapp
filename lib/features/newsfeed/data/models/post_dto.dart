@@ -158,3 +158,27 @@ class SaveResponseDto {
   factory SaveResponseDto.fromJson(Map<String, dynamic> json) =>
       _$SaveResponseDtoFromJson(json);
 }
+
+/// POST /api/newsfeed/{id}/pin → `{is_pinned: bool}`.
+@JsonSerializable(createToJson: false)
+class PinResponseDto {
+  const PinResponseDto({this.isPinned = false});
+
+  @JsonKey(name: 'is_pinned', defaultValue: false)
+  final bool isPinned;
+
+  factory PinResponseDto.fromJson(Map<String, dynamic> json) =>
+      _$PinResponseDtoFromJson(json);
+}
+
+/// PATCH /api/newsfeed/{id}/comments-toggle → `{is_comments_enabled: bool}`.
+@JsonSerializable(createToJson: false)
+class CommentsToggleResponseDto {
+  const CommentsToggleResponseDto({this.isCommentsEnabled = true});
+
+  @JsonKey(name: 'is_comments_enabled', defaultValue: true)
+  final bool isCommentsEnabled;
+
+  factory CommentsToggleResponseDto.fromJson(Map<String, dynamic> json) =>
+      _$CommentsToggleResponseDtoFromJson(json);
+}

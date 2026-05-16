@@ -12,6 +12,7 @@ import '../../../../core/widgets/empty_state.dart';
 import '../../../../core/widgets/skeleton_box.dart';
 import '../bloc/conversations_bloc.dart';
 import '../widgets/conversation_tile.dart';
+import '../widgets/new_conversation_sheet.dart';
 
 class MessagesScreen extends StatelessWidget {
   const MessagesScreen({super.key});
@@ -28,6 +29,17 @@ class MessagesScreen extends StatelessWidget {
 
 class _MessagesView extends StatelessWidget {
   const _MessagesView();
+
+  Future<void> _startNewConversation(BuildContext context) async {
+    final bloc = context.read<ConversationsBloc>();
+    final created = await showNewConversationChooser(context);
+    if (created == null || !context.mounted) return;
+    bloc.add(ConversationInserted(created));
+    await context.push(
+      '${RouteNames.messages}/${created.uid}',
+      extra: created,
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -47,11 +59,13 @@ class _MessagesView extends StatelessWidget {
           const SizedBox(width: AppSpacing.sm),
         ],
       ),
-      floatingActionButton: FloatingActionButton(
-        backgroundColor: colors.accent,
-        foregroundColor: Colors.white,
-        onPressed: () {},
-        child: const Icon(LucideIcons.squarePen, size: 20),
+      floatingActionButton: Builder(
+        builder: (buttonCtx) => FloatingActionButton(
+          backgroundColor: colors.accent,
+          foregroundColor: Colors.white,
+          onPressed: () => _startNewConversation(buttonCtx),
+          child: const Icon(LucideIcons.squarePen, size: 20),
+        ),
       ),
       body: SafeArea(
         top: false,

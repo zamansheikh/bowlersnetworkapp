@@ -13,16 +13,18 @@ abstract class AuthRemoteDatasource {
   @factoryMethod
   factory AuthRemoteDatasource(Dio dio) = _AuthRemoteDatasource;
 
-  @POST(Endpoints.verifyEmail)
-  Future<MessageResponse> verifyEmail(@Body() VerifyEmailRequest body);
-
   @POST(Endpoints.signupValidateRegistration)
   Future<MessageResponse> validateRegistration(
     @Body() ValidateRegistrationRequest body,
   );
 
-  @POST(Endpoints.signup)
-  Future<AuthTokenResponse> signup(@Body() SignupRequest body);
+  /// Sends the OTP email and stashes registration server-side.
+  @POST(Endpoints.signupSubmit)
+  Future<MessageResponse> submitSignup(@Body() SignupSubmitRequest body);
+
+  /// Verifies the OTP and finalises the account. Returns auth token.
+  @POST(Endpoints.signupComplete)
+  Future<AuthTokenResponse> completeSignup(@Body() SignupCompleteRequest body);
 
   @POST(Endpoints.login)
   Future<AuthTokenResponse> login(@Body() LoginRequest body);

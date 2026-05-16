@@ -68,6 +68,145 @@ class MessagesRepositoryImpl implements MessagesRepository {
         return unit;
       });
 
+  @override
+  ChatMessage parseSocketMessage(Map<String, dynamic> raw) =>
+      _messageToEntity(MessageDto.fromJson(raw));
+
+  @override
+  Future<Either<Failure, List<SearchUser>>> searchUsers(String q) =>
+      _guard(() async {
+        final res = await _remote.searchUsers(q);
+        return res.users
+            .map((u) => SearchUser(
+                  id: u.id,
+                  username: u.username,
+                  firstName: u.firstName,
+                  lastName: u.lastName,
+                  profilePictureUrl: u.profilePictureUrl,
+                  rankDisplay: u.rankDisplay,
+                ))
+            .toList(growable: false);
+      });
+
+  @override
+  Future<Either<Failure, ConversationListItem>> createPrivateConversation(
+    int userId,
+  ) =>
+      _guard(() async {
+        final dto = await _remote.createPrivateConversation({'user_id': userId});
+        return _conversationToEntity(dto);
+      });
+
+  @override
+  Future<Either<Failure, ConversationListItem>> createGroupConversation({
+    required List<int> userIds,
+    required String name,
+  }) =>
+      _guard(() async {
+        final dto = await _remote.createGroupConversation({
+          'user_ids': userIds,
+          'name': name,
+        });
+        return _conversationToEntity(dto);
+      });
+
+  @override
+  Future<Either<Failure, Unit>> deleteMessage(String messageUid) =>
+      _guard(() async {
+        await _remote.deleteMessage(messageUid);
+        return unit;
+      });
+
+  @override
+  Future<Either<Failure, bool>> toggleMute(String conversationUid) =>
+      _guard(() async {
+        final res = await _remote.toggleMute(conversationUid);
+        return res.isMuted;
+      });
+
+  @override
+  Future<Either<Failure, Unit>> leaveGroup(String conversationUid) =>
+      _guard(() async {
+        await _remote.leaveGroup(conversationUid);
+        return unit;
+      });
+
+  @override
+  Future<Either<Failure, Unit>> deleteConversation(String conversationUid) =>
+      _guard(() async {
+        await _remote.deleteConversation(conversationUid);
+        return unit;
+      });
+
+  @override
+  Future<Either<Failure, ConversationDetail>> getConversationDetail(
+    String conversationUid,
+  ) =>
+      _guard(() async {
+        final dto = await _remote.getConversationDetail(conversationUid);
+        return _detailToEntity(dto);
+      });
+
+  @override
+  Future<Either<Failure, ConversationDetail>> updateGroupName({
+    required String conversationUid,
+    required String name,
+  }) =>
+      _guard(() async {
+        final dto = await _remote.updateConversation(
+          conversationUid,
+          {'name': name},
+        );
+        return _detailToEntity(dto);
+      });
+
+  @override
+  Future<Either<Failure, ConversationDetail>> addMembers({
+    required String conversationUid,
+    required List<int> userIds,
+  }) =>
+      _guard(() async {
+        final dto = await _remote.addMembers(
+          conversationUid,
+          {'user_ids': userIds},
+        );
+        return _detailToEntity(dto);
+      });
+
+  @override
+  Future<Either<Failure, Unit>> removeMember({
+    required String conversationUid,
+    required int userId,
+  }) =>
+      _guard(() async {
+        await _remote.removeMember(conversationUid, userId);
+        return unit;
+      });
+
+  // ---------------------------------------------------------------------------
+  ConversationDetail _detailToEntity(ConversationDetailDto dto) =>
+      ConversationDetail(
+        uid: dto.uid,
+        name: dto.name,
+        isGroup: dto.isGroup,
+        imageUrl: dto.imageUrl,
+        memberCount: dto.memberCount,
+        isCreator: dto.isCreator,
+        isMuted: dto.isMuted,
+        members: dto.members
+            .map((m) => ConversationMember(
+                  id: m.id,
+                  username: m.username,
+                  firstName: m.firstName,
+                  lastName: m.lastName,
+                  profilePictureUrl: m.profilePictureUrl,
+                ))
+            .toList(growable: false),
+        createdAt: dto.createdAt == null
+            ? null
+            : DateTime.tryParse(dto.createdAt!),
+      );
+
   // ---------------------------------------------------------------------------
   ConversationListItem _conversationToEntity(ConversationListItemDto dto) =>
       ConversationListItem(

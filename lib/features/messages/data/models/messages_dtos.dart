@@ -151,6 +151,8 @@ class ConversationDetailDto {
     this.memberCount = 0,
     this.members = const [],
     this.createdAt,
+    this.isCreator = false,
+    this.isMuted = false,
   });
 
   final String uid;
@@ -164,9 +166,26 @@ class ConversationDetailDto {
   final List<ConversationMemberDto> members;
   @JsonKey(name: 'created_at')
   final String? createdAt;
+  @JsonKey(name: 'is_creator', defaultValue: false)
+  final bool isCreator;
+  @JsonKey(name: 'is_muted', defaultValue: false)
+  final bool isMuted;
 
   factory ConversationDetailDto.fromJson(Map<String, dynamic> json) =>
       _$ConversationDetailDtoFromJson(json);
+}
+
+/// Response from POST `/api/messages/conversations/<uid>/mute` — backend
+/// returns new `{is_muted: bool}` state.
+@JsonSerializable(createToJson: false)
+class MuteResponseDto {
+  const MuteResponseDto({this.isMuted = false});
+
+  @JsonKey(name: 'is_muted', defaultValue: false)
+  final bool isMuted;
+
+  factory MuteResponseDto.fromJson(Map<String, dynamic> json) =>
+      _$MuteResponseDtoFromJson(json);
 }
 
 @JsonSerializable(createToJson: false)
@@ -190,4 +209,44 @@ class ConversationMemberDto {
 
   factory ConversationMemberDto.fromJson(Map<String, dynamic> json) =>
       _$ConversationMemberDtoFromJson(json);
+}
+
+// ──────────────────────────────────────────────────────────────────────────────
+// GET /api/users/search?q=…  → `{users: [...]}`
+// ──────────────────────────────────────────────────────────────────────────────
+@JsonSerializable(createToJson: false)
+class SearchUsersResponseDto {
+  const SearchUsersResponseDto({this.users = const []});
+
+  @JsonKey(defaultValue: [])
+  final List<SearchUserDto> users;
+
+  factory SearchUsersResponseDto.fromJson(Map<String, dynamic> json) =>
+      _$SearchUsersResponseDtoFromJson(json);
+}
+
+@JsonSerializable(createToJson: false)
+class SearchUserDto {
+  const SearchUserDto({
+    required this.id,
+    required this.username,
+    this.firstName = '',
+    this.lastName = '',
+    this.profilePictureUrl,
+    this.rankDisplay,
+  });
+
+  final int id;
+  final String username;
+  @JsonKey(name: 'first_name', defaultValue: '')
+  final String firstName;
+  @JsonKey(name: 'last_name', defaultValue: '')
+  final String lastName;
+  @JsonKey(name: 'profile_picture_url')
+  final String? profilePictureUrl;
+  @JsonKey(name: 'rank_display')
+  final String? rankDisplay;
+
+  factory SearchUserDto.fromJson(Map<String, dynamic> json) =>
+      _$SearchUserDtoFromJson(json);
 }
