@@ -230,6 +230,17 @@ class Endpoints {
   static String liveEnd(int id) => '/api/games/lives/$id/end';
   static const String liveMyActive = '/api/games/lives/me/active';
 
+  // Live viewer side — list, detail, comments, reactions. All auth-gated
+  // (the public `/public/{uid}/...` variants are NOT wired here; mobile
+  // viewing requires a session).
+  static const String livesList = '/api/games/lives';
+  static String liveDetailById(int id) => '/api/games/lives/$id';
+  static String liveDetailByUid(String uid) => '/api/games/lives/by-uid/$uid';
+  static String liveComments(int id) => '/api/games/lives/$id/comments';
+  static String liveCommentDelete(int liveId, int commentId) =>
+      '/api/games/lives/$liveId/comments/$commentId';
+  static String liveReact(int id) => '/api/games/lives/$id/react';
+
   // Ball catalog (used by the ball picker modal).
   static const String ballsCatalog = '/api/balls';
 

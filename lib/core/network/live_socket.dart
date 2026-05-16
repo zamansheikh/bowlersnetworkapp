@@ -40,7 +40,81 @@ class LiveViewerCountEvent extends LiveSocketEvent {
 /// Server-side broadcast termination notification (`POST .../end` →
 /// channel layer push). The bloc clears local state when it sees this.
 class LiveBroadcastEndedEvent extends LiveSocketEvent {
-  const LiveBroadcastEndedEvent({required super.livescoreId});
+  const LiveBroadcastEndedEvent({
+    required super.livescoreId,
+    this.endReason = '',
+    this.endedAt,
+  });
+  final String endReason;
+  final DateTime? endedAt;
+}
+
+/// Pushed after a frame is finalized (post-bonus). [game] is the full
+/// raw game payload — the bloc/repo maps it into a `LiveGame`.
+class LiveFrameUpdateEvent extends LiveSocketEvent {
+  const LiveFrameUpdateEvent({
+    required super.livescoreId,
+    required this.gameId,
+    required this.gameNumber,
+    required this.game,
+    this.gameTotal = 0,
+    this.isComplete = false,
+  });
+  final int gameId;
+  final int gameNumber;
+  final Map<String, dynamic> game;
+  final int gameTotal;
+  final bool isComplete;
+}
+
+/// Pushed when the broadcaster moves to a new game.
+class LiveGameStartedEvent extends LiveSocketEvent {
+  const LiveGameStartedEvent({
+    required super.livescoreId,
+    required this.gameId,
+    required this.gameNumber,
+    required this.game,
+  });
+  final int gameId;
+  final int gameNumber;
+  final Map<String, dynamic> game;
+}
+
+/// Viewer added / changed / removed an emoji.
+class LiveReactionChangedEvent extends LiveSocketEvent {
+  const LiveReactionChangedEvent({
+    required super.livescoreId,
+    required this.action,
+    required this.userId,
+    this.reactionType,
+    this.previousType,
+  });
+
+  /// "added" | "updated" | "removed"
+  final String action;
+  final int userId;
+  final String? reactionType;
+  final String? previousType;
+}
+
+/// New comment posted.
+class LiveCommentAddedEvent extends LiveSocketEvent {
+  const LiveCommentAddedEvent({
+    required super.livescoreId,
+    required this.comment,
+  });
+
+  /// Raw `LiveScoreComment` payload — repo mapper converts to entity.
+  final Map<String, dynamic> comment;
+}
+
+/// Comment deleted.
+class LiveCommentDeletedEvent extends LiveSocketEvent {
+  const LiveCommentDeletedEvent({
+    required super.livescoreId,
+    required this.commentId,
+  });
+  final int commentId;
 }
 
 /// Connection to a single live broadcast. Each broadcast gets its own
@@ -174,7 +248,68 @@ class LiveSocket {
           ));
         }
       case 'broadcast_ended':
-        _events.add(LiveBroadcastEndedEvent(livescoreId: id));
+        final endedAtRaw = data['ended_at'];
+        _events.add(LiveBroadcastEndedEvent(
+          livescoreId: id,
+          endReason: data['end_reason'] as String? ?? '',
+          endedAt: endedAtRaw is String ? DateTime.tryParse(endedAtRaw) : null,
+        ));
+      case 'frame_update':
+        final game = data['game'];
+        final gameId = data['game_id'];
+        final gameNumber = data['game_number'];
+        if (game is Map<String, dynamic> && gameId is int && gameNumber is int) {
+          _events.add(LiveFrameUpdateEvent(
+            livescoreId: id,
+            gameId: gameId,
+            gameNumber: gameNumber,
+            game: game,
+            gameTotal: (data['game_total'] is int)
+                ? data['game_total'] as int
+                : 0,
+            isComplete: data['is_complete'] == true,
+          ));
+        }
+      case 'game_started':
+        final game = data['game'];
+        final gameId = data['game_id'];
+        final gameNumber = data['game_number'];
+        if (game is Map<String, dynamic> && gameId is int && gameNumber is int) {
+          _events.add(LiveGameStartedEvent(
+            livescoreId: id,
+            gameId: gameId,
+            gameNumber: gameNumber,
+            game: game,
+          ));
+        }
+      case 'reaction_changed':
+        final action = data['action'];
+        final userId = data['user_id'];
+        if (action is String && userId is int) {
+          _events.add(LiveReactionChangedEvent(
+            livescoreId: id,
+            action: action,
+            userId: userId,
+            reactionType: data['reaction_type'] as String?,
+            previousType: data['previous_type'] as String?,
+          ));
+        }
+      case 'comment_added':
+        final comment = data['comment'];
+        if (comment is Map<String, dynamic>) {
+          _events.add(LiveCommentAddedEvent(
+            livescoreId: id,
+            comment: comment,
+          ));
+        }
+      case 'comment_deleted':
+        final commentId = data['comment_id'];
+        if (commentId is int) {
+          _events.add(LiveCommentDeletedEvent(
+            livescoreId: id,
+            commentId: commentId,
+          ));
+        }
     }
   }
 

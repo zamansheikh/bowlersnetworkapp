@@ -24,6 +24,8 @@ import '../../features/auth/presentation/screens/signup_screen.dart';
 import '../../features/follow/presentation/bloc/follow_list_bloc.dart';
 import '../../features/follow/presentation/screens/follow_list_screen.dart';
 import '../../features/leaderboard/presentation/screens/leaderboard_screen.dart';
+import '../../features/live/presentation/screens/live_detail_screen.dart';
+import '../../features/live/presentation/screens/live_list_screen.dart';
 import '../../features/media/presentation/screens/media_screen.dart';
 import '../../features/games/domain/entities/session.dart';
 import '../../features/games/presentation/screens/equipment_screen.dart';
@@ -156,6 +158,18 @@ GoRouter buildAppRouter(AuthBloc authBloc) {
       GoRoute(
         path: RouteNames.dashboard,
         builder: (_, _) => const DashboardScreen(),
+      ),
+      GoRoute(
+        path: RouteNames.live,
+        builder: (_, _) => const LiveListScreen(),
+        routes: [
+          GoRoute(
+            path: ':uid',
+            builder: (_, state) => LiveDetailScreen(
+              uid: state.pathParameters['uid']!,
+            ),
+          ),
+        ],
       ),
       GoRoute(
         path: RouteNames.teams,

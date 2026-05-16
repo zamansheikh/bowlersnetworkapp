@@ -105,6 +105,8 @@ import '../../features/live/data/datasources/live_remote_datasource.dart'
 import '../../features/live/data/repositories/live_repository_impl.dart'
     as _i160;
 import '../../features/live/domain/repositories/live_repository.dart' as _i898;
+import '../../features/live/presentation/bloc/live_detail_bloc.dart' as _i660;
+import '../../features/live/presentation/bloc/live_list_bloc.dart' as _i790;
 import '../../features/media/data/datasources/media_remote_datasource.dart'
     as _i696;
 import '../../features/media/data/repositories/media_repository_impl.dart'
@@ -352,6 +354,9 @@ extension GetItInjectableX on _i174.GetIt {
     gh.factory<_i250.ChatterListBloc>(
       () => _i250.ChatterListBloc(gh<_i797.ChatterRepository>()),
     );
+    gh.factory<_i790.LiveListBloc>(
+      () => _i790.LiveListBloc(gh<_i898.LiveRepository>()),
+    );
     gh.factory<_i494.FeedbackBloc>(
       () => _i494.FeedbackBloc(gh<_i619.FeedbackRepository>()),
     );
@@ -363,6 +368,12 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i819.NewsfeedRepository>(),
         gh<_i655.LeaderboardRepository>(),
         gh<_i1033.HomePreviewRepository>(),
+      ),
+    );
+    gh.factory<_i660.LiveDetailBloc>(
+      () => _i660.LiveDetailBloc(
+        gh<_i898.LiveRepository>(),
+        gh<_i124.LiveSocket>(),
       ),
     );
     gh.lazySingleton<_i875.TeamsRepository>(

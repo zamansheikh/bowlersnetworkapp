@@ -111,6 +111,15 @@ class PlayBloc extends Bloc<PlayEvent, PlayState> {
         // Server terminated the broadcast — drop local state to match.
         emit(state.copyWith(clearLive: true));
         _detachSocket();
+      case LiveFrameUpdateEvent():
+      case LiveGameStartedEvent():
+      case LiveReactionChangedEvent():
+      case LiveCommentAddedEvent():
+      case LiveCommentDeletedEvent():
+        // Viewer-side events — the broadcaster's play screen doesn't
+        // render comments / reactions / score echoes, so we ignore them
+        // here. The dedicated LiveDetailBloc handles them on /live/:uid.
+        break;
     }
   }
 

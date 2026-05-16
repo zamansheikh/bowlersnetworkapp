@@ -21,4 +21,45 @@ abstract class LiveRemoteDatasource {
 
   @GET(Endpoints.liveMyActive)
   Future<LiveMyActiveDto> myActive();
+
+  // ── Viewer side ──────────────────────────────────────────────────────────
+
+  @GET(Endpoints.livesList)
+  Future<LiveBroadcastListDto> list({
+    @Query('scope') String? scope,
+    @Query('cursor_id') int? cursorId,
+  });
+
+  @GET('/api/games/lives/by-uid/{uid}')
+  Future<LiveBroadcastDetailDto> getDetailByUid(@Path('uid') String uid);
+
+  @GET('/api/games/lives/{id}')
+  Future<LiveBroadcastDetailDto> getDetailById(@Path('id') int id);
+
+  @GET('/api/games/lives/{id}/comments')
+  Future<LiveCommentsPageDto> getComments(
+    @Path('id') int id, {
+    @Query('cursor_id') int? cursorId,
+  });
+
+  @POST('/api/games/lives/{id}/comments')
+  Future<LiveCommentDto> postComment(
+    @Path('id') int id,
+    @Body() Map<String, dynamic> body,
+  );
+
+  @DELETE('/api/games/lives/{liveId}/comments/{commentId}')
+  Future<void> deleteComment(
+    @Path('liveId') int liveId,
+    @Path('commentId') int commentId,
+  );
+
+  @POST('/api/games/lives/{id}/react')
+  Future<LiveReactionAckDto> react(
+    @Path('id') int id,
+    @Body() Map<String, dynamic> body,
+  );
+
+  @DELETE('/api/games/lives/{id}/react')
+  Future<void> removeReaction(@Path('id') int id);
 }
