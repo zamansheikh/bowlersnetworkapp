@@ -7,6 +7,7 @@ import '../../../../core/di/injection.dart';
 import '../../../../core/extensions/context_extensions.dart';
 import '../../../../core/router/route_names.dart';
 import '../../../../core/theme/app_spacing.dart';
+import '../../../../core/widgets/app_toast.dart';
 import '../../../../core/widgets/bn_logo.dart';
 import '../../../../core/widgets/glow_blob.dart';
 import '../../../../core/widgets/skeleton_box.dart';
@@ -117,8 +118,20 @@ class _HomeView extends StatelessWidget {
                       if (state.livePreview.isNotEmpty) ...[
                         HomeLiveNowStrip(
                           broadcasts: state.livePreview,
-                          onViewAll: () => context.push(RouteNames.events),
-                          onTap: (_) => context.push(RouteNames.events),
+                          // The dedicated /live screen + per-broadcast
+                          // viewer aren't built yet (only the broadcaster
+                          // side of the live API is wired). Surface a
+                          // toast so taps stop landing on /events.
+                          onViewAll: () => showAppToast(
+                            context,
+                            message: 'Live viewer is coming soon.',
+                            variant: ToastVariant.info,
+                          ),
+                          onTap: (_) => showAppToast(
+                            context,
+                            message: 'Live viewer is coming soon.',
+                            variant: ToastVariant.info,
+                          ),
                         ),
                         const SizedBox(height: AppSpacing.md),
                       ],
