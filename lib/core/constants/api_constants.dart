@@ -193,6 +193,10 @@ class Endpoints {
   // User search (used by DM / group create + team invites)
   static const String usersSearch = '/api/users/search';
 
+  // Universal search — central predictive search across all content types.
+  // GET /api/search?q={query}&types={comma,separated,types}
+  static const String search = '/api/search';
+
   // Home-page previews — these endpoints power the home-screen sections.
   static const String chatterDiscussions = '/api/chatter/discussions';
   static const String mediaVideos = '/api/media/videos';

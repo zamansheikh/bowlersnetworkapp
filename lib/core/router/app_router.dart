@@ -24,6 +24,7 @@ import '../../features/messages/presentation/screens/thread_screen.dart';
 import '../../features/newsfeed/presentation/screens/feed_screen.dart';
 import '../../features/onboarding/presentation/screens/onboarding_screen.dart';
 import '../../features/profile/presentation/screens/profile_screen.dart';
+import '../../features/search/presentation/screens/search_screen.dart';
 import '../../features/shell/main_shell_screen.dart';
 import '../../features/splash/presentation/screens/splash_screen.dart';
 import 'route_names.dart';
@@ -109,6 +110,10 @@ GoRouter buildAppRouter(AuthBloc authBloc) {
       GoRoute(
         path: RouteNames.leaderboard,
         builder: (_, _) => const LeaderboardScreen(),
+      ),
+      GoRoute(
+        path: RouteNames.search,
+        builder: (_, _) => const SearchScreen(),
       ),
 
       // Main-app shell: 5 tabs, each with its own navigation stack.

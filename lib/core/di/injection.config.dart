@@ -93,6 +93,13 @@ import '../../features/profile/domain/repositories/profile_repository.dart'
 import '../../features/profile/domain/usecases/get_my_profile_usecase.dart'
     as _i981;
 import '../../features/profile/presentation/bloc/profile_bloc.dart' as _i469;
+import '../../features/search/data/datasources/search_remote_datasource.dart'
+    as _i879;
+import '../../features/search/data/repositories/search_repository_impl.dart'
+    as _i1017;
+import '../../features/search/domain/repositories/search_repository.dart'
+    as _i357;
+import '../../features/search/presentation/bloc/search_bloc.dart' as _i552;
 import '../localization/locale_cubit.dart' as _i960;
 import '../network/api_client.dart' as _i557;
 import '../network/chat_socket.dart' as _i943;
@@ -166,9 +173,15 @@ extension GetItInjectableX on _i174.GetIt {
     gh.factory<_i327.ProfileRemoteDatasource>(
       () => _i327.ProfileRemoteDatasource(gh<_i361.Dio>()),
     );
+    gh.factory<_i879.SearchRemoteDatasource>(
+      () => _i879.SearchRemoteDatasource(gh<_i361.Dio>()),
+    );
     gh.lazySingleton<_i361.Dio>(
       () => networkModule.uploadDio(),
       instanceName: 'uploadDio',
+    );
+    gh.lazySingleton<_i357.SearchRepository>(
+      () => _i1017.SearchRepositoryImpl(gh<_i879.SearchRemoteDatasource>()),
     );
     gh.lazySingleton<_i794.MessagesRepository>(
       () => _i20.MessagesRepositoryImpl(gh<_i182.MessagesRemoteDatasource>()),
@@ -178,6 +191,9 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i361.Dio>(),
         gh<_i361.Dio>(instanceName: 'uploadDio'),
       ),
+    );
+    gh.factory<_i552.SearchBloc>(
+      () => _i552.SearchBloc(gh<_i357.SearchRepository>()),
     );
     gh.lazySingleton<_i898.LiveRepository>(
       () => _i160.LiveRepositoryImpl(gh<_i916.LiveRemoteDatasource>()),
