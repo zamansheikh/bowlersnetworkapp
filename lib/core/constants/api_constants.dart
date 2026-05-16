@@ -293,6 +293,32 @@ class Endpoints {
       '/api/events/invitations/$invitationId/respond';
   static const String gamesLives = '/api/games/lives';
 
+  // Teams — every endpoint is auth-gated. /api/teams/my returns ALL teams
+  // the viewer is a member of (creator or accepted invitee). Create / edit /
+  // delete are creator-only. Invitation list returns BOTH received (to me)
+  // and sent (by my created teams).
+  static const String teamsMy = '/api/teams/my';
+  static const String teamsCreate = '/api/teams';
+  static const String teamsValidateName = '/api/teams/validate-name';
+  static const String teamInvite = '/api/teams/invite';
+  static const String teamInvitations = '/api/teams/invitations';
+  static String teamDetail(int teamId) => '/api/teams/$teamId';
+  static String teamLogo(int teamId) => '/api/teams/$teamId/logo';
+  static String teamMembers(int teamId) => '/api/teams/$teamId/members';
+  static String teamLeave(int teamId) => '/api/teams/$teamId/leave';
+  static String teamMemberRemove(int teamId, int userId) =>
+      '/api/teams/$teamId/members/$userId';
+  static String teamMemberRole(int teamId, int userId) =>
+      '/api/teams/$teamId/members/$userId/role';
+  static String teamMemberJersey(int teamId, int userId) =>
+      '/api/teams/$teamId/members/$userId/jersey';
+  static String teamInvitationAccept(int invitationId) =>
+      '/api/teams/invitations/$invitationId/accept';
+  static String teamInvitationDecline(int invitationId) =>
+      '/api/teams/invitations/$invitationId/decline';
+  static String teamInvitationCancel(int invitationId) =>
+      '/api/teams/invitations/$invitationId';
+
   // WebSocket paths (appended to ApiConstants.wsBaseUrl, token in query).
   static const String wsChat = '/ws/chat/';
   static const String wsNotifications = '/ws/notifications/';

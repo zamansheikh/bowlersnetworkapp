@@ -143,6 +143,13 @@ import '../../features/search/domain/repositories/search_repository.dart'
     as _i357;
 import '../../features/search/presentation/bloc/search_bloc.dart' as _i552;
 import '../../features/settings/presentation/bloc/settings_bloc.dart' as _i585;
+import '../../features/teams/data/datasources/teams_remote_datasource.dart'
+    as _i475;
+import '../../features/teams/data/repositories/teams_repository_impl.dart'
+    as _i845;
+import '../../features/teams/domain/repositories/teams_repository.dart'
+    as _i875;
+import '../../features/teams/presentation/bloc/teams_bloc.dart' as _i78;
 import '../localization/locale_cubit.dart' as _i960;
 import '../network/api_client.dart' as _i557;
 import '../network/chat_socket.dart' as _i943;
@@ -235,6 +242,9 @@ extension GetItInjectableX on _i174.GetIt {
     );
     gh.factory<_i879.SearchRemoteDatasource>(
       () => _i879.SearchRemoteDatasource(gh<_i361.Dio>()),
+    );
+    gh.factory<_i475.TeamsRemoteDatasource>(
+      () => _i475.TeamsRemoteDatasource(gh<_i361.Dio>()),
     );
     gh.lazySingleton<_i361.Dio>(
       () => networkModule.uploadDio(),
@@ -338,6 +348,9 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i1033.HomePreviewRepository>(),
       ),
     );
+    gh.lazySingleton<_i875.TeamsRepository>(
+      () => _i845.TeamsRepositoryImpl(gh<_i475.TeamsRemoteDatasource>()),
+    );
     gh.lazySingleton<_i967.EventsRepository>(
       () => _i560.EventsRepositoryImpl(gh<_i125.EventsRemoteDatasource>()),
     );
@@ -412,6 +425,9 @@ extension GetItInjectableX on _i174.GetIt {
     );
     gh.lazySingleton<_i22.SharePostUseCase>(
       () => _i22.SharePostUseCase(gh<_i819.NewsfeedRepository>()),
+    );
+    gh.factory<_i78.TeamsBloc>(
+      () => _i78.TeamsBloc(gh<_i875.TeamsRepository>()),
     );
     gh.factory<_i920.FeedBloc>(
       () => _i920.FeedBloc(

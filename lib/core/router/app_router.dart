@@ -41,6 +41,7 @@ import '../../features/profile/presentation/screens/profile_screen.dart';
 import '../../features/search/presentation/screens/search_screen.dart';
 import '../../features/shell/main_shell_screen.dart';
 import '../../features/splash/presentation/screens/splash_screen.dart';
+import '../../features/teams/presentation/screens/teams_screen.dart';
 import 'route_names.dart';
 
 /// Builds the app's [GoRouter] with auth-aware redirect logic + a stateful
@@ -144,6 +145,10 @@ GoRouter buildAppRouter(AuthBloc authBloc) {
       GoRoute(
         path: RouteNames.media,
         builder: (_, _) => const MediaScreen(),
+      ),
+      GoRoute(
+        path: RouteNames.teams,
+        builder: (_, _) => const TeamsScreen(),
       ),
       GoRoute(
         path: RouteNames.events,
