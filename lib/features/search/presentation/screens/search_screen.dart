@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:go_router/go_router.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 import '../../../../core/di/injection.dart';
@@ -332,7 +333,7 @@ class _ResultsList extends StatelessWidget {
               for (final u in r.users)
                 _UserRow(
                   user: u,
-                  onTap: () => _notImplemented(context, 'Profile'),
+                  onTap: () => context.push('/profile/${u.username}'),
                 ),
             ],
           ),

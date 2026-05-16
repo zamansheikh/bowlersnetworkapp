@@ -23,6 +23,7 @@ import '../../features/messages/presentation/screens/messages_screen.dart';
 import '../../features/messages/presentation/screens/thread_screen.dart';
 import '../../features/newsfeed/presentation/screens/feed_screen.dart';
 import '../../features/onboarding/presentation/screens/onboarding_screen.dart';
+import '../../features/profile/presentation/screens/other_profile_screen.dart';
 import '../../features/profile/presentation/screens/profile_screen.dart';
 import '../../features/search/presentation/screens/search_screen.dart';
 import '../../features/shell/main_shell_screen.dart';
@@ -114,6 +115,17 @@ GoRouter buildAppRouter(AuthBloc authBloc) {
       GoRoute(
         path: RouteNames.search,
         builder: (_, _) => const SearchScreen(),
+      ),
+      // Other-user profile lives OUTSIDE the shell so the back arrow
+      // returns to wherever the user came from (search / a post / a
+      // leaderboard row), not back into the Profile tab. Literal
+      // sub-paths under `/profile` inside the shell (`/profile/followers`,
+      // `/profile/followings`) win over this parameterised route.
+      GoRoute(
+        path: '/profile/:username',
+        builder: (_, state) => OtherProfileScreen(
+          username: state.pathParameters['username']!,
+        ),
       ),
 
       // Main-app shell: 5 tabs, each with its own navigation stack.
