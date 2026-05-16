@@ -7,6 +7,7 @@ import '../../features/auth/presentation/bloc/auth_bloc.dart';
 import '../../features/auth/presentation/screens/consent_pending_screen.dart';
 import '../../features/brands/presentation/screens/brands_screen.dart';
 import '../../features/cards/presentation/screens/cards_screen.dart';
+import '../../features/dashboard/presentation/screens/dashboard_screen.dart';
 import '../../features/chatter/presentation/screens/chatter_screen.dart';
 import '../../features/chatter/presentation/screens/discussion_detail_screen.dart';
 import '../../features/events/domain/entities/event.dart';
@@ -151,6 +152,10 @@ GoRouter buildAppRouter(AuthBloc authBloc) {
       GoRoute(
         path: RouteNames.brands,
         builder: (_, _) => const BrandsScreen(),
+      ),
+      GoRoute(
+        path: RouteNames.dashboard,
+        builder: (_, _) => const DashboardScreen(),
       ),
       GoRoute(
         path: RouteNames.teams,

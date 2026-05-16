@@ -44,6 +44,14 @@ import '../../features/chatter/domain/repositories/chatter_repository.dart'
     as _i797;
 import '../../features/chatter/presentation/bloc/chatter_list_bloc.dart'
     as _i250;
+import '../../features/dashboard/data/datasources/dashboard_remote_datasource.dart'
+    as _i817;
+import '../../features/dashboard/data/repositories/dashboard_repository_impl.dart'
+    as _i509;
+import '../../features/dashboard/domain/repositories/dashboard_repository.dart'
+    as _i665;
+import '../../features/dashboard/presentation/bloc/dashboard_bloc.dart'
+    as _i652;
 import '../../features/events/data/datasources/events_remote_datasource.dart'
     as _i125;
 import '../../features/events/data/repositories/events_repository_impl.dart'
@@ -206,6 +214,9 @@ extension GetItInjectableX on _i174.GetIt {
     gh.factory<_i684.ChatterRemoteDatasource>(
       () => _i684.ChatterRemoteDatasource(gh<_i361.Dio>()),
     );
+    gh.factory<_i817.DashboardRemoteDatasource>(
+      () => _i817.DashboardRemoteDatasource(gh<_i361.Dio>()),
+    );
     gh.factory<_i125.EventsRemoteDatasource>(
       () => _i125.EventsRemoteDatasource(gh<_i361.Dio>()),
     );
@@ -297,6 +308,10 @@ extension GetItInjectableX on _i174.GetIt {
     gh.factory<_i585.SettingsBloc>(
       () => _i585.SettingsBloc(gh<_i563.NotificationsRepository>()),
     );
+    gh.lazySingleton<_i665.DashboardRepository>(
+      () =>
+          _i509.DashboardRepositoryImpl(gh<_i817.DashboardRemoteDatasource>()),
+    );
     gh.factory<_i142.MediaFeedBloc>(
       () => _i142.MediaFeedBloc(gh<_i459.MediaRepository>()),
     );
@@ -385,6 +400,9 @@ extension GetItInjectableX on _i174.GetIt {
     );
     gh.factory<_i957.LeaderboardBloc>(
       () => _i957.LeaderboardBloc(gh<_i655.LeaderboardRepository>()),
+    );
+    gh.factory<_i652.DashboardBloc>(
+      () => _i652.DashboardBloc(gh<_i665.DashboardRepository>()),
     );
     gh.factory<_i275.EventsListBloc>(
       () => _i275.EventsListBloc(gh<_i967.EventsRepository>()),

@@ -134,6 +134,26 @@ class Endpoints {
   static String brandFavoriteToggle(int brandId) =>
       '/api/brands/$brandId/favorite';
 
+  // Dashboard — free (all users) + pro (gated by `Profile.isPro`).
+  // All accept a `range` query param: 7d | 30d | 90d | 365d. Pro tabs use
+  // `window`: 7d | 30d. Empty payloads come back as zero-filled
+  // structures, never 404 — the bloc treats those as "no data yet".
+  static const String dashboardInsights = '/api/dashboard/insights';
+  static const String dashboardInsightsAlpha =
+      '/api/dashboard/insights/alpha';
+  static const String dashboardInsightsAlphaHow =
+      '/api/dashboard/insights/alpha/how';
+  static const String dashboardXpInsights = '/api/xp/insights';
+  static const String dashboardGamesReport = '/api/dashboard/games/report';
+  static const String dashboardGamesTrends = '/api/dashboard/games/trends';
+
+  // Pro-only — backend returns 403 for non-pro callers, so don't request
+  // these unless `Profile.isPro` is true.
+  static const String dashboardProContent = '/api/pro/content';
+  static const String dashboardProAudience = '/api/pro/audience';
+  static const String dashboardProReferrals = '/api/pro/referrals';
+  static const String dashboardProContribution = '/api/pro/contribution';
+
   // Follow — toggle endpoint is GET, mirroring the web. POST returns 405.
   static String followToggle(int userId) => '/api/follow/$userId';
   static const String myFollowers = '/api/followers';
