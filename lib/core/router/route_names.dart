@@ -19,6 +19,10 @@ class RouteNames {
   static const String messages = '/messages';
   static const String profile = '/profile';
 
+  // Profile sub-routes (followers / followings list of the current user).
+  static const String myFollowers = '/profile/followers';
+  static const String myFollowings = '/profile/followings';
+
   // Secondary
   static const String chatter = '/chatter';
   static const String media = '/media';

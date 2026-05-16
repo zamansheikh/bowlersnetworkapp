@@ -8,6 +8,8 @@ import '../../features/auth/presentation/screens/consent_pending_screen.dart';
 import '../../features/auth/presentation/screens/login_screen.dart';
 import '../../features/auth/presentation/screens/password_recovery_screen.dart';
 import '../../features/auth/presentation/screens/signup_screen.dart';
+import '../../features/follow/presentation/bloc/follow_list_bloc.dart';
+import '../../features/follow/presentation/screens/follow_list_screen.dart';
 import '../../features/games/domain/entities/session.dart';
 import '../../features/games/presentation/screens/games_screen.dart';
 import '../../features/games/presentation/screens/session_detail_screen.dart';
@@ -158,6 +160,20 @@ GoRouter buildAppRouter(AuthBloc authBloc) {
             GoRoute(
               path: RouteNames.profile,
               builder: (_, _) => const ProfileScreen(),
+              routes: [
+                GoRoute(
+                  path: 'followers',
+                  builder: (_, _) => const FollowListScreen(
+                    source: FollowListSource.myFollowers,
+                  ),
+                ),
+                GoRoute(
+                  path: 'followings',
+                  builder: (_, _) => const FollowListScreen(
+                    source: FollowListSource.myFollowings,
+                  ),
+                ),
+              ],
             ),
           ]),
         ],

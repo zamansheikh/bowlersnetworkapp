@@ -4,6 +4,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:injectable/injectable.dart';
 
 import '../../../../core/error/failures.dart';
+import '../../../follow/domain/repositories/follow_repository.dart';
 import '../../domain/entities/post.dart';
 import '../../domain/repositories/newsfeed_repository.dart';
 import '../../domain/usecases/feed_usecases.dart';
@@ -23,6 +24,7 @@ class FeedBloc extends Bloc<FeedEvent, FeedState> {
     this._hide,
     this._share,
     this._repository,
+    this._follow,
   ) : super(const FeedState()) {
     on<FeedLoadRequested>(_onLoad);
     on<FeedRefreshRequested>(_onRefresh);
@@ -35,6 +37,7 @@ class FeedBloc extends Bloc<FeedEvent, FeedState> {
     on<FeedShareRequested>(_onShare);
     on<FeedPinToggled>(_onPinToggled);
     on<FeedCommentsToggled>(_onCommentsToggled);
+    on<FeedFollowToggled>(_onFollowToggled);
   }
 
   final GetFeedUseCase _getFeed;
@@ -43,6 +46,7 @@ class FeedBloc extends Bloc<FeedEvent, FeedState> {
   final HidePostUseCase _hide;
   final SharePostUseCase _share;
   final NewsfeedRepository _repository;
+  final FollowRepository _follow;
 
   Future<void> _onLoad(
     FeedLoadRequested event,
@@ -277,6 +281,40 @@ class FeedBloc extends Bloc<FeedEvent, FeedState> {
             ),
           )),
     );
+  }
+
+  Future<void> _onFollowToggled(
+    FeedFollowToggled event,
+    Emitter<FeedState> emit,
+  ) async {
+    final affected = state.posts
+        .where((p) => p.author.id == event.authorId)
+        .toList(growable: false);
+    if (affected.isEmpty) return;
+    final wasFollowing = affected.first.author.isFollowing;
+    // Optimistic: flip every post by this author.
+    emit(state.copyWith(posts: _flipFollow(event.authorId, !wasFollowing)));
+
+    final res = await _follow.toggleFollow(event.authorId);
+    res.fold(
+      (f) => emit(state.copyWith(
+        posts: _flipFollow(event.authorId, wasFollowing),
+        errors: f.messages,
+      )),
+      (result) => emit(state.copyWith(
+        posts: _flipFollow(event.authorId, result.isFollowing),
+      )),
+    );
+  }
+
+  List<Post> _flipFollow(int authorId, bool isFollowing) {
+    return [
+      for (final p in state.posts)
+        if (p.author.id == authorId)
+          p.copyWith(author: p.author.copyWith(isFollowing: isFollowing))
+        else
+          p,
+    ];
   }
 
   List<Post> _replace(int index, Post post) {

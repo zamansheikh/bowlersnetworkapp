@@ -175,6 +175,11 @@ class _FeedViewState extends State<_FeedView> {
                                 .add(FeedSaveToggled(postUid: post.uid)),
                             onShare: () => _showShareMenu(context, post),
                             onMore: () => _showMoreMenu(context, post),
+                            onFollow: () => context.read<FeedBloc>().add(
+                                  FeedFollowToggled(
+                                    authorId: post.author.id,
+                                  ),
+                                ),
                           );
                         },
                       ),

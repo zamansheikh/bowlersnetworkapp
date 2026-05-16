@@ -23,6 +23,7 @@ class PostCard extends StatefulWidget {
     required this.onSave,
     required this.onShare,
     required this.onMore,
+    required this.onFollow,
     this.onOpenDetail,
     this.onAuthorTap,
   });
@@ -33,6 +34,7 @@ class PostCard extends StatefulWidget {
   final VoidCallback onSave;
   final VoidCallback onShare;
   final VoidCallback onMore;
+  final VoidCallback onFollow;
   final VoidCallback? onOpenDetail;
   final VoidCallback? onAuthorTap;
 
@@ -67,6 +69,7 @@ class _PostCardState extends State<PostCard> {
               post: p,
               onTap: widget.onAuthorTap,
               onMore: widget.onMore,
+              onFollow: widget.onFollow,
             ),
           ),
           if (p.caption.isNotEmpty) ...[
@@ -146,11 +149,13 @@ class _AuthorRow extends StatelessWidget {
     required this.post,
     required this.onTap,
     required this.onMore,
+    required this.onFollow,
   });
 
   final Post post;
   final VoidCallback? onTap;
   final VoidCallback onMore;
+  final VoidCallback onFollow;
 
   @override
   Widget build(BuildContext context) {
@@ -239,6 +244,11 @@ class _AuthorRow extends StatelessWidget {
             ),
           ),
         ),
+        if (!post.isMine)
+          _FollowIconButton(
+            following: post.author.isFollowing,
+            onPressed: onFollow,
+          ),
         IconButton(
           icon: Icon(
             LucideIcons.ellipsis,
@@ -250,6 +260,39 @@ class _AuthorRow extends StatelessWidget {
           splashRadius: 20,
         ),
       ],
+    );
+  }
+}
+
+/// Compact 32×32 square icon — matches the web's `_PostCard.tsx` follow
+/// button (h-8 w-8 rounded-lg, UserPlus → UserCheck on toggle, accent when
+/// following). Sits between the author block and the more-menu.
+class _FollowIconButton extends StatelessWidget {
+  const _FollowIconButton({required this.following, required this.onPressed});
+
+  final bool following;
+  final VoidCallback onPressed;
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = context.colors;
+    final color = following ? colors.accent : colors.textTertiary;
+    return SizedBox(
+      width: 32,
+      height: 32,
+      child: Material(
+        color: Colors.transparent,
+        borderRadius: BorderRadius.circular(8),
+        clipBehavior: Clip.antiAlias,
+        child: InkWell(
+          onTap: onPressed,
+          child: Icon(
+            following ? LucideIcons.userCheck : LucideIcons.userPlus,
+            size: 17,
+            color: color,
+          ),
+        ),
+      ),
     );
   }
 }

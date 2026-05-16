@@ -45,6 +45,7 @@ PostAuthorDto _$PostAuthorDtoFromJson(Map<String, dynamic> json) =>
       isPro: json['is_pro'] as bool? ?? false,
       level: (json['level'] as num?)?.toInt(),
       rank: json['rank'] as String?,
+      isFollowing: json['is_following'] as bool? ?? false,
     );
 
 ReactionResponseDto _$ReactionResponseDtoFromJson(Map<String, dynamic> json) =>

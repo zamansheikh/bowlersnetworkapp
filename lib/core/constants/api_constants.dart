@@ -70,10 +70,12 @@ class Endpoints {
   static const String brands = '/api/brands';
   static const String brandsSponsors = '/api/brands/sponsors';
 
-  // Follow
-  static String follow(int userId) => '/api/follow/$userId';
-  static const String followers = '/api/followers';
-  static const String followings = '/api/followings';
+  // Follow — toggle endpoint is GET, mirroring the web. POST returns 405.
+  static String followToggle(int userId) => '/api/follow/$userId';
+  static const String myFollowers = '/api/followers';
+  static const String myFollowings = '/api/followings';
+  static String userFollowers(int userId) => '/api/users/$userId/followers';
+  static String userFollowings(int userId) => '/api/users/$userId/followings';
 
   // Notifications (used for FCM registration after login)
   static const String registerDevice = '/api/notifications/devices/register';

@@ -87,3 +87,12 @@ class FeedCommentsToggled extends FeedEvent {
   @override
   List<Object?> get props => [postUid, enabled];
 }
+
+/// Toggle follow on the post's author. Updates every post in the feed that
+/// shares this author so the state stays in sync.
+class FeedFollowToggled extends FeedEvent {
+  const FeedFollowToggled({required this.authorId});
+  final int authorId;
+  @override
+  List<Object?> get props => [authorId];
+}

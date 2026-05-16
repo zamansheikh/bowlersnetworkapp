@@ -324,6 +324,7 @@ class NewsfeedRepositoryImpl implements NewsfeedRepository {
         isPro: dto.author.isPro,
         level: dto.author.level,
         rank: dto.author.rank,
+        isFollowing: dto.author.isFollowing,
       ),
       createdAt: DateTime.tryParse(dto.createdAt) ?? DateTime.now(),
       caption: dto.caption,

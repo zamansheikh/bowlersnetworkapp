@@ -104,6 +104,7 @@ class PostAuthorDto {
     this.isPro = false,
     this.level,
     this.rank,
+    this.isFollowing = false,
   });
 
   final int id;
@@ -118,6 +119,8 @@ class PostAuthorDto {
   final bool isPro;
   final int? level;
   final String? rank;
+  @JsonKey(name: 'is_following', defaultValue: false)
+  final bool isFollowing;
 
   factory PostAuthorDto.fromJson(Map<String, dynamic> json) =>
       _$PostAuthorDtoFromJson(json);

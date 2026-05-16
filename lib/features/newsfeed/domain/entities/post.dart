@@ -76,6 +76,7 @@ class PostAuthor extends Equatable {
     this.isPro = false,
     this.level,
     this.rank,
+    this.isFollowing = false,
   });
 
   final int id;
@@ -86,10 +87,23 @@ class PostAuthor extends Equatable {
   final bool isPro;
   final int? level;
   final String? rank;
+  final bool isFollowing;
 
   String get displayName => '$firstName $lastName'.trim().isEmpty
       ? username
       : '$firstName $lastName'.trim();
+
+  PostAuthor copyWith({bool? isFollowing}) => PostAuthor(
+        id: id,
+        username: username,
+        firstName: firstName,
+        lastName: lastName,
+        profilePictureUrl: profilePictureUrl,
+        isPro: isPro,
+        level: level,
+        rank: rank,
+        isFollowing: isFollowing ?? this.isFollowing,
+      );
 
   @override
   List<Object?> get props => [
@@ -101,6 +115,7 @@ class PostAuthor extends Equatable {
         isPro,
         level,
         rank,
+        isFollowing,
       ];
 }
 
@@ -163,6 +178,7 @@ class Post extends Equatable {
   String? get videoThumbnailUrl => typeData?['thumbnail_url'] as String?;
 
   Post copyWith({
+    PostAuthor? author,
     int? likesCount,
     int? commentsCount,
     int? sharesCount,
@@ -178,7 +194,7 @@ class Post extends Equatable {
       id: id,
       uid: uid,
       type: type,
-      author: author,
+      author: author ?? this.author,
       createdAt: createdAt,
       caption: caption,
       audience: audience,

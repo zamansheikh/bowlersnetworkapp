@@ -28,6 +28,12 @@ import '../../features/auth/domain/usecases/signup_usecase.dart' as _i57;
 import '../../features/auth/domain/usecases/validate_registration_usecase.dart'
     as _i416;
 import '../../features/auth/presentation/bloc/auth_bloc.dart' as _i797;
+import '../../features/follow/data/datasources/follow_remote_datasource.dart'
+    as _i973;
+import '../../features/follow/data/repositories/follow_repository_impl.dart'
+    as _i299;
+import '../../features/follow/domain/repositories/follow_repository.dart'
+    as _i760;
 import '../../features/games/data/datasources/games_remote_datasource.dart'
     as _i771;
 import '../../features/games/data/repositories/games_repository_impl.dart'
@@ -105,6 +111,9 @@ extension GetItInjectableX on _i174.GetIt {
     gh.factory<_i161.AuthRemoteDatasource>(
       () => _i161.AuthRemoteDatasource(gh<_i361.Dio>()),
     );
+    gh.factory<_i973.FollowRemoteDatasource>(
+      () => _i973.FollowRemoteDatasource(gh<_i361.Dio>()),
+    );
     gh.factory<_i771.GamesRemoteDatasource>(
       () => _i771.GamesRemoteDatasource(gh<_i361.Dio>()),
     );
@@ -155,6 +164,9 @@ extension GetItInjectableX on _i174.GetIt {
     gh.lazySingleton<_i943.ChatSocket>(
       () => _i943.ChatSocket(gh<_i666.SecureStorageService>()),
       dispose: (i) => i.dispose(),
+    );
+    gh.lazySingleton<_i760.FollowRepository>(
+      () => _i299.FollowRepositoryImpl(gh<_i973.FollowRemoteDatasource>()),
     );
     gh.lazySingleton<_i894.ProfileRepository>(
       () => _i334.ProfileRepositoryImpl(gh<_i327.ProfileRemoteDatasource>()),
@@ -221,6 +233,7 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i22.HidePostUseCase>(),
         gh<_i22.SharePostUseCase>(),
         gh<_i819.NewsfeedRepository>(),
+        gh<_i760.FollowRepository>(),
       ),
     );
     gh.lazySingleton<_i469.ProfileBloc>(
