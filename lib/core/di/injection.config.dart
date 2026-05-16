@@ -58,6 +58,11 @@ import '../../features/leaderboard/domain/repositories/leaderboard_repository.da
     as _i655;
 import '../../features/leaderboard/presentation/bloc/leaderboard_bloc.dart'
     as _i957;
+import '../../features/live/data/datasources/live_remote_datasource.dart'
+    as _i916;
+import '../../features/live/data/repositories/live_repository_impl.dart'
+    as _i160;
+import '../../features/live/domain/repositories/live_repository.dart' as _i898;
 import '../../features/messages/data/datasources/messages_remote_datasource.dart'
     as _i182;
 import '../../features/messages/data/repositories/messages_repository_impl.dart'
@@ -140,6 +145,9 @@ extension GetItInjectableX on _i174.GetIt {
     gh.factory<_i757.LeaderboardRemoteDatasource>(
       () => _i757.LeaderboardRemoteDatasource(gh<_i361.Dio>()),
     );
+    gh.factory<_i916.LiveRemoteDatasource>(
+      () => _i916.LiveRemoteDatasource(gh<_i361.Dio>()),
+    );
     gh.factory<_i182.MessagesRemoteDatasource>(
       () => _i182.MessagesRemoteDatasource(gh<_i361.Dio>()),
     );
@@ -164,6 +172,9 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i361.Dio>(),
         gh<_i361.Dio>(instanceName: 'uploadDio'),
       ),
+    );
+    gh.lazySingleton<_i898.LiveRepository>(
+      () => _i160.LiveRepositoryImpl(gh<_i916.LiveRemoteDatasource>()),
     );
     gh.lazySingleton<_i604.GamesRepository>(
       () => _i438.GamesRepositoryImpl(gh<_i771.GamesRemoteDatasource>()),

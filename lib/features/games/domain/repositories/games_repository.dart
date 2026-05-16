@@ -32,9 +32,24 @@ abstract class GamesRepository {
     int? totalScore,
   });
 
+  /// Quick-score path — just total + handedness, no per-frame detail.
+  /// Used when the player skips frame-by-frame entry.
+  Future<Either<Failure, GameDetail>> submitQuickScore({
+    required String sessionUid,
+    required int totalScore,
+    required String handedness,
+  });
+
   Future<Either<Failure, Unit>> deleteSession(String uid);
 
   Future<Either<Failure, Unit>> deleteGame(int id);
+
+  /// PUT a single frame on a game — used during live broadcast to stream
+  /// progress to viewers without waiting for full-game submit.
+  Future<Either<Failure, Unit>> updateFrame({
+    required int gameId,
+    required SubmitFramePayload frame,
+  });
 
   // ── Equipment ─────────────────────────────────────────────────────────────
   Future<Either<Failure, List<UserBall>>> getEquipment();

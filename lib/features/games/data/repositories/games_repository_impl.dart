@@ -88,6 +88,20 @@ class GamesRepositoryImpl implements GamesRepository {
       });
 
   @override
+  Future<Either<Failure, GameDetail>> submitQuickScore({
+    required String sessionUid,
+    required int totalScore,
+    required String handedness,
+  }) =>
+      _guard(() async {
+        final dto = await _remote.submitQuickScore(sessionUid, {
+          'total_score': totalScore,
+          'handedness': handedness,
+        });
+        return _gameToEntity(dto);
+      });
+
+  @override
   Future<Either<Failure, Unit>> deleteSession(String uid) => _guard(() async {
         await _remote.deleteSession(uid);
         return unit;
@@ -96,6 +110,16 @@ class GamesRepositoryImpl implements GamesRepository {
   @override
   Future<Either<Failure, Unit>> deleteGame(int id) => _guard(() async {
         await _remote.deleteGame(id);
+        return unit;
+      });
+
+  @override
+  Future<Either<Failure, Unit>> updateFrame({
+    required int gameId,
+    required SubmitFramePayload frame,
+  }) =>
+      _guard(() async {
+        await _remote.updateFrame(gameId, frame.frameNumber, frame.toJson());
         return unit;
       });
 

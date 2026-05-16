@@ -81,9 +81,27 @@ abstract class GamesRemoteDatasource {
     @Body() Map<String, dynamic> body,
   );
 
+  /// Quick-score: single total + handedness, no per-frame detail. Backend
+  /// creates a synthetic completed game record.
+  @POST('/api/games/sessions/{uid}/submit-quick')
+  Future<GameDetailDto> submitQuickScore(
+    @Path('uid') String uid,
+    @Body() Map<String, dynamic> body,
+  );
+
   @DELETE('/api/games/sessions/{uid}/delete')
   Future<void> deleteSession(@Path('uid') String uid);
 
   @DELETE('/api/games/{id}/delete')
   Future<void> deleteGame(@Path('id') int id);
+
+  /// PUT /api/games/{game_id}/frames/{frame_number} — per-frame sync used
+  /// while broadcasting. Body shape matches one entry from
+  /// [SubmitFramePayload.toJson].
+  @PUT('/api/games/{gameId}/frames/{frameNumber}')
+  Future<void> updateFrame(
+    @Path('gameId') int gameId,
+    @Path('frameNumber') int frameNumber,
+    @Body() Map<String, dynamic> body,
+  );
 }

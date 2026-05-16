@@ -138,8 +138,19 @@ class Endpoints {
       '/api/games/sessions/$uid/delete';
   static String gamesSessionSubmitGame(String uid) =>
       '/api/games/sessions/$uid/submit-game';
+  static String gamesSessionSubmitQuick(String uid) =>
+      '/api/games/sessions/$uid/submit-quick';
+  static String gamesSessionStartGame(String uid) =>
+      '/api/games/sessions/$uid/start-game';
   static String gameDetail(int gameId) => '/api/games/$gameId';
   static String gameShared(int gameId) => '/api/games/shared/$gameId';
+  static String gameFrameUpdate(int gameId, int frameNumber) =>
+      '/api/games/$gameId/frames/$frameNumber';
+
+  // Live broadcast (game-side livescore lifecycle).
+  static const String liveStart = '/api/games/lives/start';
+  static String liveEnd(int id) => '/api/games/lives/$id/end';
+  static const String liveMyActive = '/api/games/lives/me/active';
 
   // Ball catalog (used by the ball picker modal).
   static const String ballsCatalog = '/api/balls';

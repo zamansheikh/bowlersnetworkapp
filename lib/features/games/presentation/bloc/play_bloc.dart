@@ -1,6 +1,8 @@
 import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
+import '../../../live/domain/entities/live_broadcast.dart';
+import '../../../live/domain/repositories/live_repository.dart';
 import '../../domain/entities/game_detail.dart';
 import '../../domain/repositories/games_repository.dart';
 import '../../domain/scorer/bowling_scorer.dart';
@@ -14,20 +16,35 @@ part 'play_state.dart';
 /// NOT a singleton — spun up by the play screen's BlocProvider so each
 /// game has its own state.
 class PlayBloc extends Bloc<PlayEvent, PlayState> {
-  PlayBloc({required GamesRepository repository, required String sessionUid})
-      : _repository = repository,
+  PlayBloc({
+    required GamesRepository repository,
+    required LiveRepository liveRepository,
+    required String sessionUid,
+  })  : _repository = repository,
+        _live = liveRepository,
         _sessionUid = sessionUid,
         super(PlayState.initial()) {
     on<PlayPinToggled>(_onPinToggled);
+    on<PlayStandingChanged>(_onStandingChanged);
     on<PlayQuickAction>(_onQuickAction);
     on<PlayFrameJumped>(_onFrameJumped);
     on<PlayDeliveryUndone>(_onDeliveryUndone);
     on<PlayHandednessChanged>(_onHandednessChanged);
+    on<PlayPinDefaultToggled>(_onPinDefaultToggled);
+    on<PlaySelectedBallChanged>(_onSelectedBallChanged);
     on<PlayGameSubmitted>(_onSubmit);
     on<PlayGameReset>(_onReset);
+    on<PlayEntryModeChanged>(_onEntryModeChanged);
+    on<PlayQuickScoreDraftChanged>(_onQuickScoreDraftChanged);
+    on<PlayQuickScoreSubmitted>(_onQuickScoreSubmitted);
+    on<PlayAnotherGameRequested>(_onAnotherGameRequested);
+    on<PlayGoLiveRequested>(_onGoLive);
+    on<PlayEndLiveRequested>(_onEndLive);
+    on<PlayLiveRehydrateRequested>(_onLiveRehydrate);
   }
 
   final GamesRepository _repository;
+  final LiveRepository _live;
   final String _sessionUid;
 
   // ── pin toggle ─────────────────────────────────────────────────────────────
@@ -42,7 +59,7 @@ class PlayBloc extends Bloc<PlayEvent, PlayState> {
     emit(_withActiveStanding(state, next));
   }
 
-  // ── quick actions: Strike / Spare / Miss / Clear ───────────────────────────
+  // ── quick actions: Strike / Spare / Miss / Clear / Next ───────────────────
   void _onQuickAction(PlayQuickAction event, Emitter<PlayState> emit) {
     if (state.cursor.isGameOver) return;
     switch (event.action) {
@@ -57,10 +74,17 @@ class PlayBloc extends Bloc<PlayEvent, PlayState> {
         final priorStanding = _priorStanding(state);
         emit(_commitDelivery(state, priorStanding));
       case PlayQuickActionType.clear:
-        // Reset the in-progress active delivery to "all standing for the
-        // rack" (i.e., nothing knocked yet on this throw).
+        // Reset the in-progress active delivery. With pin-default
+        // 'standing' the rack returns to all-up; with 'knocked' it goes
+        // to all-down (so the user re-taps which ones survived).
         final priorStanding = _priorStanding(state);
-        emit(_withActiveStanding(state, priorStanding));
+        final reset = state.pinDefault == PinDefaultState.knocked
+            ? const <int>[]
+            : priorStanding;
+        emit(_withActiveStanding(state, reset));
+      case PlayQuickActionType.next:
+        // Commit whatever the user has currently painted on the deck.
+        emit(_commitDelivery(state, state.activeStanding));
     }
   }
 
@@ -113,6 +137,40 @@ class PlayBloc extends Bloc<PlayEvent, PlayState> {
     emit(state.copyWith(handedness: event.handedness));
   }
 
+  /// Drag-aware setter: the deck pushes the full standing-pin set after
+  /// every pointer move. We mirror it into the in-progress delivery and
+  /// recompute the score; cursor doesn't advance until the user commits
+  /// via Next / a quick action.
+  void _onStandingChanged(
+    PlayStandingChanged event,
+    Emitter<PlayState> emit,
+  ) {
+    if (state.cursor.isGameOver) return;
+    emit(_withActiveStanding(state, event.standing));
+  }
+
+  /// Flip the user's pin-default preference. If they're mid-delivery on
+  /// a fresh frame, reset the active delivery's standing set to match.
+  void _onPinDefaultToggled(
+    PlayPinDefaultToggled event,
+    Emitter<PlayState> emit,
+  ) {
+    final next = state.pinDefault == PinDefaultState.standing
+        ? PinDefaultState.knocked
+        : PinDefaultState.standing;
+    emit(state.copyWith(pinDefault: next));
+  }
+
+  void _onSelectedBallChanged(
+    PlaySelectedBallChanged event,
+    Emitter<PlayState> emit,
+  ) {
+    emit(state.copyWith(
+      selectedBallId: event.userBallId,
+      clearSelectedBall: event.userBallId == null,
+    ));
+  }
+
   // ── submit completed game ──────────────────────────────────────────────────
   Future<void> _onSubmit(
     PlayGameSubmitted event,
@@ -139,6 +197,138 @@ class PlayBloc extends Bloc<PlayEvent, PlayState> {
 
   void _onReset(PlayGameReset event, Emitter<PlayState> emit) {
     emit(PlayState.initial());
+  }
+
+  // ── entry mode + quick score ──────────────────────────────────────────────
+  void _onEntryModeChanged(
+    PlayEntryModeChanged event,
+    Emitter<PlayState> emit,
+  ) {
+    emit(state.copyWith(entryMode: event.mode));
+  }
+
+  void _onQuickScoreDraftChanged(
+    PlayQuickScoreDraftChanged event,
+    Emitter<PlayState> emit,
+  ) {
+    emit(state.copyWith(quickScoreDraft: event.value));
+  }
+
+  Future<void> _onQuickScoreSubmitted(
+    PlayQuickScoreSubmitted event,
+    Emitter<PlayState> emit,
+  ) async {
+    final score = event.totalScore;
+    if (score < 0 || score > 300) {
+      emit(state.copyWith(errors: const ['Score must be between 0 and 300.']));
+      return;
+    }
+    emit(state.copyWith(submitting: true, errors: const []));
+    final res = await _repository.submitQuickScore(
+      sessionUid: _sessionUid,
+      totalScore: score,
+      handedness: state.handedness,
+    );
+    res.fold(
+      (f) => emit(state.copyWith(submitting: false, errors: f.messages)),
+      (game) => emit(state.copyWith(
+        submitting: false,
+        submittedGame: game,
+        // Clear the draft so re-entering quick mode starts blank.
+        quickScoreDraft: '',
+      )),
+    );
+  }
+
+  /// "Another Game" tap on the celebration screen. Preserves prefs
+  /// (handedness / pin-default / selected ball / entry mode), bumps the
+  /// game number, and wipes the just-submitted result so the user is
+  /// returned to a fresh play surface.
+  void _onAnotherGameRequested(
+    PlayAnotherGameRequested event,
+    Emitter<PlayState> emit,
+  ) {
+    emit(state.resetForNextGame());
+  }
+
+  // ── live broadcast ────────────────────────────────────────────────────────
+  Future<void> _onGoLive(
+    PlayGoLiveRequested event,
+    Emitter<PlayState> emit,
+  ) async {
+    if (state.isLive || state.liveBusy) return;
+    emit(state.copyWith(liveBusy: true, errors: const []));
+    final res = await _live.startBroadcast(sessionUid: _sessionUid);
+    res.fold(
+      (f) => emit(state.copyWith(liveBusy: false, errors: f.messages)),
+      (broadcast) => emit(state.copyWith(liveBusy: false, live: broadcast)),
+    );
+  }
+
+  Future<void> _onEndLive(
+    PlayEndLiveRequested event,
+    Emitter<PlayState> emit,
+  ) async {
+    final live = state.live;
+    if (live == null || state.liveBusy) return;
+    emit(state.copyWith(liveBusy: true, errors: const []));
+    final res = await _live.endBroadcast(live.id);
+    res.fold(
+      (f) => emit(state.copyWith(liveBusy: false, errors: f.messages)),
+      // Clear the broadcast regardless — server already terminated it.
+      (_) => emit(state.copyWith(liveBusy: false, clearLive: true)),
+    );
+  }
+
+  /// On screen mount: adopt the user's active broadcast if there is one
+  /// AND it belongs to this session. This handles cold-start mid-broadcast.
+  Future<void> _onLiveRehydrate(
+    PlayLiveRehydrateRequested event,
+    Emitter<PlayState> emit,
+  ) async {
+    if (state.isLive) return;
+    final res = await _live.getMyActive();
+    res.fold(
+      (_) {/* silent — rehydrate is best-effort */},
+      (broadcast) {
+        if (broadcast == null) return;
+        if (broadcast.sessionUid != null &&
+            broadcast.sessionUid != _sessionUid) {
+          return;
+        }
+        emit(state.copyWith(live: broadcast));
+      },
+    );
+  }
+
+  /// Fire-and-forget per-frame PUT used while broadcasting. Called
+  /// inside [_commitDelivery] after every committed throw so viewers
+  /// stay in sync without waiting for the full-game submit.
+  void _syncFrameToBroadcast(PlayState newState, int committedFrameIdx) {
+    final live = newState.live;
+    final gameId = live?.currentGameId;
+    if (live == null || gameId == null) return;
+    final frame = newState.frames[committedFrameIdx];
+    if (frame.deliveries.isEmpty) return;
+    final payload = SubmitFramePayload(
+      frameNumber: committedFrameIdx + 1,
+      ball1Standing: frame.deliveries[0].pinsStanding,
+      ball2Standing: frame.deliveries.length > 1
+          ? frame.deliveries[1].pinsStanding
+          : null,
+      ball3Standing: frame.deliveries.length > 2
+          ? frame.deliveries[2].pinsStanding
+          : null,
+      ball1EquipmentId: frame.deliveries[0].equipmentId,
+      ball2EquipmentId: frame.deliveries.length > 1
+          ? frame.deliveries[1].equipmentId
+          : null,
+      ball3EquipmentId: frame.deliveries.length > 2
+          ? frame.deliveries[2].equipmentId
+          : null,
+    );
+    // Don't await — failure here shouldn't block the player's next throw.
+    _repository.updateFrame(gameId: gameId, frame: payload);
   }
 
   // ── helpers ────────────────────────────────────────────────────────────────
@@ -182,9 +372,15 @@ class PlayBloc extends Bloc<PlayEvent, PlayState> {
     final dels = List<Delivery>.from(frame.deliveries);
 
     if (cursor.deliveryIndex < dels.length) {
-      dels[cursor.deliveryIndex] = Delivery(pinsStanding: standing);
+      dels[cursor.deliveryIndex] = Delivery(
+        pinsStanding: standing,
+        equipmentId: state.selectedBallId,
+      );
     } else {
-      dels.add(Delivery(pinsStanding: standing));
+      dels.add(Delivery(
+        pinsStanding: standing,
+        equipmentId: state.selectedBallId,
+      ));
     }
     frames[cursor.frameIndex] = frame.copyWith(deliveries: dels);
 
@@ -194,9 +390,13 @@ class PlayBloc extends Bloc<PlayEvent, PlayState> {
 
   /// Commit the current delivery with [standing] and advance the cursor.
   PlayState _commitDelivery(PlayState state, List<int> standing) {
+    final committedFrameIdx = state.cursor.frameIndex;
     final intermediate = _withActiveStanding(state, standing);
     final nextCursor = _advanceCursor(intermediate);
-    return intermediate.copyWith(cursor: nextCursor);
+    final next = intermediate.copyWith(cursor: nextCursor);
+    // Stream the just-committed frame to viewers when broadcasting.
+    _syncFrameToBroadcast(next, committedFrameIdx);
+    return next;
   }
 
   PlayCursor _advanceCursor(PlayState state) {
