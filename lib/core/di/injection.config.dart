@@ -34,6 +34,7 @@ import '../../features/cards/data/repositories/cards_repository_impl.dart'
     as _i216;
 import '../../features/cards/domain/repositories/cards_repository.dart'
     as _i314;
+import '../../features/cards/presentation/bloc/cards_feed_bloc.dart' as _i1053;
 import '../../features/chatter/data/datasources/chatter_remote_datasource.dart'
     as _i684;
 import '../../features/chatter/data/repositories/chatter_repository_impl.dart'
@@ -101,6 +102,7 @@ import '../../features/media/data/repositories/media_repository_impl.dart'
     as _i110;
 import '../../features/media/domain/repositories/media_repository.dart'
     as _i459;
+import '../../features/media/presentation/bloc/media_feed_bloc.dart' as _i142;
 import '../../features/messages/data/datasources/messages_remote_datasource.dart'
     as _i182;
 import '../../features/messages/data/repositories/messages_repository_impl.dart'
@@ -283,6 +285,9 @@ extension GetItInjectableX on _i174.GetIt {
     gh.factory<_i585.SettingsBloc>(
       () => _i585.SettingsBloc(gh<_i563.NotificationsRepository>()),
     );
+    gh.factory<_i142.MediaFeedBloc>(
+      () => _i142.MediaFeedBloc(gh<_i459.MediaRepository>()),
+    );
     gh.factory<_i789.EquipmentBloc>(
       () => _i789.EquipmentBloc(gh<_i604.GamesRepository>()),
     );
@@ -374,6 +379,9 @@ extension GetItInjectableX on _i174.GetIt {
     );
     gh.factory<_i59.MyEventsBloc>(
       () => _i59.MyEventsBloc(gh<_i967.EventsRepository>()),
+    );
+    gh.factory<_i1053.CardsFeedBloc>(
+      () => _i1053.CardsFeedBloc(gh<_i314.CardsRepository>()),
     );
     gh.factory<_i454.ConversationsBloc>(
       () => _i454.ConversationsBloc(

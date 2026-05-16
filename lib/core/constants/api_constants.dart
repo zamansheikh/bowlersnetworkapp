@@ -113,6 +113,7 @@ class Endpoints {
   // collect toggles return authoritative `{is_..., ..._count}` payloads.
   static const String myCards = '/api/cards/my';
   static const String myCardCollections = '/api/cards/collections';
+  static const String cardsFeed = '/api/cards/feed';
   static String userCards(int userId) => '/api/cards/user/$userId';
   static String cardLike(int cardId) => '/api/cards/$cardId/like';
   static String cardCollect(int cardId) => '/api/cards/$cardId/collect';

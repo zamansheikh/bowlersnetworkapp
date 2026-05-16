@@ -52,6 +52,17 @@ class CardsRepositoryImpl implements CardsRepository {
           });
 
   @override
+  Future<Either<Failure, ({List<TradingCard> cards, bool hasMore})>>
+      getCardsFeed({int page = 1, int pageSize = 20}) =>
+          _guard(() async {
+            final res = await _remote.getCardsFeed(
+              page: page,
+              pageSize: pageSize,
+            );
+            return _toPage(res, pageSize);
+          });
+
+  @override
   Future<Either<Failure, CardLikeResult>> toggleLike(int cardId) =>
       _guard(() async {
         final res = await _remote.toggleLike(cardId);

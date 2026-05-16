@@ -35,6 +35,14 @@ abstract class CardsRemoteDatasource {
     @Query('page_size') int? pageSize,
   });
 
+  /// Global feed — everyone's cards, newest first. Same envelope shape
+  /// as /my, /collections, and /user/{id}.
+  @GET(Endpoints.cardsFeed)
+  Future<CardsPageDto> getCardsFeed({
+    @Query('page') int? page,
+    @Query('page_size') int? pageSize,
+  });
+
   @POST('/api/cards/{cardId}/like')
   Future<CardLikeToggleDto> toggleLike(@Path('cardId') int cardId);
 

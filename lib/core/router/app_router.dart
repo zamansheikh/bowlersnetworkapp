@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../features/auth/presentation/bloc/auth_bloc.dart';
 import '../../features/auth/presentation/screens/consent_pending_screen.dart';
+import '../../features/cards/presentation/screens/cards_screen.dart';
 import '../../features/chatter/presentation/screens/chatter_screen.dart';
 import '../../features/chatter/presentation/screens/discussion_detail_screen.dart';
 import '../../features/events/domain/entities/event.dart';
@@ -21,6 +22,7 @@ import '../../features/auth/presentation/screens/signup_screen.dart';
 import '../../features/follow/presentation/bloc/follow_list_bloc.dart';
 import '../../features/follow/presentation/screens/follow_list_screen.dart';
 import '../../features/leaderboard/presentation/screens/leaderboard_screen.dart';
+import '../../features/media/presentation/screens/media_screen.dart';
 import '../../features/games/domain/entities/session.dart';
 import '../../features/games/presentation/screens/equipment_screen.dart';
 import '../../features/games/presentation/screens/games_screen.dart';
@@ -134,6 +136,14 @@ GoRouter buildAppRouter(AuthBloc authBloc) {
       GoRoute(
         path: RouteNames.feedback,
         builder: (_, _) => const FeedbackScreen(),
+      ),
+      GoRoute(
+        path: RouteNames.cards,
+        builder: (_, _) => const CardsScreen(),
+      ),
+      GoRoute(
+        path: RouteNames.media,
+        builder: (_, _) => const MediaScreen(),
       ),
       GoRoute(
         path: RouteNames.events,

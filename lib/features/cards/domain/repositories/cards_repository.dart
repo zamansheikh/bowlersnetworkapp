@@ -27,6 +27,14 @@ abstract class CardsRepository {
     int pageSize = 20,
   });
 
+  /// Global cards feed — newest first across all users. Powers the
+  /// /cards drawer entry.
+  Future<Either<Failure, ({List<TradingCard> cards, bool hasMore})>>
+      getCardsFeed({
+    int page = 1,
+    int pageSize = 20,
+  });
+
   Future<Either<Failure, CardLikeResult>> toggleLike(int cardId);
 
   Future<Either<Failure, CardCollectResult>> toggleCollect(int cardId);

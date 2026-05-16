@@ -51,6 +51,32 @@ class MediaRepositoryImpl implements MediaRepository {
             return (items: items, hasMore: items.length >= pageSize);
           });
 
+  @override
+  Future<Either<Failure, ({List<MediaItem> items, bool hasMore})>>
+      getGlobalVideos({int page = 1, int pageSize = 20}) =>
+          _guard(() async {
+            final res = await _remote.getGlobalVideos(
+              page: page,
+              pageSize: pageSize,
+            );
+            final items =
+                res.videos.map(_videoToItem).toList(growable: false);
+            return (items: items, hasMore: items.length >= pageSize);
+          });
+
+  @override
+  Future<Either<Failure, ({List<MediaItem> items, bool hasMore})>>
+      getGlobalSplits({int page = 1, int pageSize = 20}) =>
+          _guard(() async {
+            final res = await _remote.getGlobalSplits(
+              page: page,
+              pageSize: pageSize,
+            );
+            final items =
+                res.splits.map(_splitToItem).toList(growable: false);
+            return (items: items, hasMore: items.length >= pageSize);
+          });
+
   MediaAuthor? _author(MediaAuthorDto? dto) => dto == null
       ? null
       : MediaAuthor(

@@ -19,4 +19,18 @@ abstract class MediaRepository {
     int page = 1,
     int pageSize = 20,
   });
+
+  /// Global videos feed — every public video across the platform,
+  /// newest first. Powers the /media drawer entry.
+  Future<Either<Failure, ({List<MediaItem> items, bool hasMore})>>
+      getGlobalVideos({
+    int page = 1,
+    int pageSize = 20,
+  });
+
+  Future<Either<Failure, ({List<MediaItem> items, bool hasMore})>>
+      getGlobalSplits({
+    int page = 1,
+    int pageSize = 20,
+  });
 }
