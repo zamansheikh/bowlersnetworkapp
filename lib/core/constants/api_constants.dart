@@ -269,6 +269,27 @@ class Endpoints {
   static const String mediaVideos = '/api/media/videos';
   static const String mediaSplits = '/api/media/splits';
   static const String eventsFeed = '/api/events/feed';
+  static const String eventsTypes = '/api/events/types';
+  static const String eventsCreate = '/api/events';
+  static const String eventsMy = '/api/events/my';
+  static const String eventInvitationsList = '/api/events/invitations';
+  static String eventDetail(String uid) => '/api/events/$uid';
+  static String eventInterest(String uid) => '/api/events/$uid/interest';
+  static String eventUpdate(String uid) => '/api/events/$uid/update';
+  static String eventDelete(String uid) => '/api/events/$uid/delete';
+  static String eventInterested(String uid) =>
+      '/api/events/$uid/interested';
+  static String eventGoing(String uid) => '/api/events/$uid/going';
+  static String eventInvite(String uid) => '/api/events/$uid/invite';
+  static String eventInviteDiscover(String uid) =>
+      '/api/events/$uid/invite/discover';
+  static String eventNotes(String uid) => '/api/events/$uid/notes';
+  static String eventNoteReply(int noteId) =>
+      '/api/events/notes/$noteId/reply';
+  static String eventNoteDelete(int noteId) =>
+      '/api/events/notes/$noteId/delete';
+  static String eventInvitationRespond(int invitationId) =>
+      '/api/events/invitations/$invitationId/respond';
   static const String gamesLives = '/api/games/lives';
 
   // WebSocket paths (appended to ApiConstants.wsBaseUrl, token in query).

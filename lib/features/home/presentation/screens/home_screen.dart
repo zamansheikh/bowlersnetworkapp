@@ -225,7 +225,8 @@ class _HomeView extends StatelessWidget {
                         HomeEventsPreview(
                           events: state.eventsPreview,
                           onViewAll: () => context.push(RouteNames.events),
-                          onTap: (_) => context.push(RouteNames.events),
+                          onTap: (e) =>
+                              context.push('${RouteNames.events}/${e.uid}'),
                         ),
                       const SizedBox(height: AppSpacing.md),
 

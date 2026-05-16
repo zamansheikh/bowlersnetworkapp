@@ -7,6 +7,12 @@ import '../../features/auth/presentation/bloc/auth_bloc.dart';
 import '../../features/auth/presentation/screens/consent_pending_screen.dart';
 import '../../features/chatter/presentation/screens/chatter_screen.dart';
 import '../../features/chatter/presentation/screens/discussion_detail_screen.dart';
+import '../../features/events/domain/entities/event.dart';
+import '../../features/events/presentation/screens/event_detail_screen.dart';
+import '../../features/events/presentation/screens/event_editor_screen.dart';
+import '../../features/events/presentation/screens/events_screen.dart';
+import '../../features/events/presentation/screens/invitations_screen.dart';
+import '../../features/events/presentation/screens/my_events_screen.dart';
 import '../../features/feedback/presentation/screens/feedback_screen.dart';
 import '../../features/settings/presentation/screens/settings_screen.dart';
 import '../../features/auth/presentation/screens/login_screen.dart';
@@ -128,6 +134,43 @@ GoRouter buildAppRouter(AuthBloc authBloc) {
       GoRoute(
         path: RouteNames.feedback,
         builder: (_, _) => const FeedbackScreen(),
+      ),
+      GoRoute(
+        path: RouteNames.events,
+        builder: (_, _) => const EventsScreen(),
+        routes: [
+          // Specific sub-paths first so go_router prefers them over
+          // the `:uid` parameterised route below.
+          GoRoute(
+            path: 'new',
+            builder: (_, _) => const EventEditorScreen(),
+          ),
+          GoRoute(
+            path: 'my',
+            builder: (_, _) => const MyEventsScreen(),
+          ),
+          GoRoute(
+            path: 'invitations',
+            builder: (_, _) => const InvitationsScreen(),
+          ),
+          GoRoute(
+            path: ':uid',
+            builder: (_, state) => EventDetailScreen(
+              uid: state.pathParameters['uid']!,
+            ),
+            routes: [
+              GoRoute(
+                path: 'edit',
+                builder: (_, state) => EventEditorScreen(
+                  // `state.extra` is the already-loaded Event so we
+                  // skip a redundant detail fetch when entering edit
+                  // mode from the detail menu.
+                  existing: state.extra as Event?,
+                ),
+              ),
+            ],
+          ),
+        ],
       ),
       GoRoute(
         path: RouteNames.chatter,

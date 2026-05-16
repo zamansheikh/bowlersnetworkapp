@@ -42,6 +42,15 @@ import '../../features/chatter/domain/repositories/chatter_repository.dart'
     as _i797;
 import '../../features/chatter/presentation/bloc/chatter_list_bloc.dart'
     as _i250;
+import '../../features/events/data/datasources/events_remote_datasource.dart'
+    as _i125;
+import '../../features/events/data/repositories/events_repository_impl.dart'
+    as _i560;
+import '../../features/events/domain/repositories/events_repository.dart'
+    as _i967;
+import '../../features/events/presentation/bloc/events_list_bloc.dart' as _i275;
+import '../../features/events/presentation/bloc/invitations_bloc.dart' as _i70;
+import '../../features/events/presentation/bloc/my_events_bloc.dart' as _i59;
 import '../../features/feedback/data/datasources/feedback_remote_datasource.dart'
     as _i147;
 import '../../features/feedback/data/repositories/feedback_repository_impl.dart'
@@ -186,6 +195,9 @@ extension GetItInjectableX on _i174.GetIt {
     gh.factory<_i684.ChatterRemoteDatasource>(
       () => _i684.ChatterRemoteDatasource(gh<_i361.Dio>()),
     );
+    gh.factory<_i125.EventsRemoteDatasource>(
+      () => _i125.EventsRemoteDatasource(gh<_i361.Dio>()),
+    );
     gh.factory<_i147.FeedbackRemoteDatasource>(
       () => _i147.FeedbackRemoteDatasource(gh<_i361.Dio>()),
     );
@@ -321,6 +333,9 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i1033.HomePreviewRepository>(),
       ),
     );
+    gh.lazySingleton<_i967.EventsRepository>(
+      () => _i560.EventsRepositoryImpl(gh<_i125.EventsRemoteDatasource>()),
+    );
     gh.lazySingleton<_i894.ProfileRepository>(
       () => _i334.ProfileRepositoryImpl(gh<_i327.ProfileRemoteDatasource>()),
     );
@@ -350,6 +365,15 @@ extension GetItInjectableX on _i174.GetIt {
     );
     gh.factory<_i957.LeaderboardBloc>(
       () => _i957.LeaderboardBloc(gh<_i655.LeaderboardRepository>()),
+    );
+    gh.factory<_i275.EventsListBloc>(
+      () => _i275.EventsListBloc(gh<_i967.EventsRepository>()),
+    );
+    gh.factory<_i70.InvitationsBloc>(
+      () => _i70.InvitationsBloc(gh<_i967.EventsRepository>()),
+    );
+    gh.factory<_i59.MyEventsBloc>(
+      () => _i59.MyEventsBloc(gh<_i967.EventsRepository>()),
     );
     gh.factory<_i454.ConversationsBloc>(
       () => _i454.ConversationsBloc(

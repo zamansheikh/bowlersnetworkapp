@@ -371,7 +371,7 @@ class _ResultsList extends StatelessWidget {
               for (final e in r.events)
                 _EventRow(
                   event: e,
-                  onTap: () => _notImplemented(context, 'Event'),
+                  onTap: () => context.push('/events/${e.uid}'),
                 ),
             ],
           ),
