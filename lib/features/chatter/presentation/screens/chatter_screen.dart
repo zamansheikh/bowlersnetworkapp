@@ -5,6 +5,7 @@ import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 import '../../../../core/di/injection.dart';
 import '../../../../core/extensions/context_extensions.dart';
+import '../../../../core/router/route_names.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/theme/app_text_styles.dart';
 import '../../../../core/widgets/app_toast.dart';
@@ -66,7 +67,22 @@ class _ChatterViewState extends State<_ChatterView> {
     final colors = context.colors;
     return Scaffold(
       backgroundColor: colors.bgPrimary,
-      appBar: AppBar(title: const Text('Chatter')),
+      appBar: AppBar(
+        title: const Text('Chatter'),
+        // Explicit leading so the back arrow always shows, even when
+        // the route was entered via `context.go` (which clears the
+        // navigator stack and would normally hide the auto-leading).
+        leading: IconButton(
+          icon: const Icon(LucideIcons.arrowLeft),
+          onPressed: () {
+            if (context.canPop()) {
+              context.pop();
+            } else {
+              context.go(RouteNames.home);
+            }
+          },
+        ),
+      ),
       body: BlocConsumer<ChatterListBloc, ChatterListState>(
         listenWhen: (p, n) => p.errors != n.errors && n.errors.isNotEmpty,
         listener: (context, state) {
