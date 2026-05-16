@@ -40,7 +40,9 @@ import '../../features/games/data/repositories/games_repository_impl.dart'
     as _i438;
 import '../../features/games/domain/repositories/games_repository.dart'
     as _i604;
+import '../../features/games/presentation/bloc/equipment_bloc.dart' as _i789;
 import '../../features/games/presentation/bloc/games_bloc.dart' as _i974;
+import '../../features/games/presentation/bloc/stats_bloc.dart' as _i377;
 import '../../features/leaderboard/data/datasources/leaderboard_remote_datasource.dart'
     as _i757;
 import '../../features/leaderboard/data/repositories/leaderboard_repository_impl.dart'
@@ -163,8 +165,14 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i744.LocalStorageService>(),
       ),
     );
+    gh.factory<_i789.EquipmentBloc>(
+      () => _i789.EquipmentBloc(gh<_i604.GamesRepository>()),
+    );
     gh.factory<_i974.GamesBloc>(
       () => _i974.GamesBloc(gh<_i604.GamesRepository>()),
+    );
+    gh.factory<_i377.StatsBloc>(
+      () => _i377.StatsBloc(gh<_i604.GamesRepository>()),
     );
     gh.lazySingleton<_i819.NewsfeedRepository>(
       () => _i306.NewsfeedRepositoryImpl(gh<_i452.NewsfeedRemoteDatasource>()),

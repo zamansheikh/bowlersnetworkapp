@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 import '../../../../core/extensions/context_extensions.dart';
+import '../../../../core/router/route_names.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/theme/app_text_styles.dart';
 import '../../../../core/widgets/app_card.dart';
@@ -19,6 +21,20 @@ class SessionDetailScreen extends StatelessWidget {
     return Scaffold(
       backgroundColor: colors.bgPrimary,
       appBar: AppBar(title: Text(session.name)),
+      floatingActionButton: FloatingActionButton.extended(
+        backgroundColor: colors.accent,
+        foregroundColor: Colors.white,
+        icon: const Icon(LucideIcons.plus, size: 18),
+        label: Text(
+          'Bowl another game',
+          style: AppTextStyles.buttonLabel.copyWith(
+            color: Colors.white,
+            fontWeight: FontWeight.w700,
+          ),
+        ),
+        onPressed: () =>
+            context.push('${RouteNames.games}/play/${session.uid}'),
+      ),
       body: SafeArea(
         child: ListView(
           padding: const EdgeInsets.all(AppSpacing.base),

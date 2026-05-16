@@ -152,47 +152,239 @@ class UserGameStatsDto {
 }
 
 // ──────────────────────────────────────────────────────────────────────────────
-// GET /api/games/equipment
+// GET /api/games/equipment  →  array of UserBall ({id, ball, weight, ...})
 // ──────────────────────────────────────────────────────────────────────────────
 @JsonSerializable(createToJson: false)
-class BallDto {
-  const BallDto({
+class UserBallDto {
+  const UserBallDto({
+    required this.id,
+    required this.ball,
+    this.weight = 15,
+    this.createdAt,
+  });
+
+  final int id;
+  final BallCatalogDto ball;
+  @JsonKey(defaultValue: 15)
+  final int weight;
+  @JsonKey(name: 'created_at')
+  final String? createdAt;
+
+  factory UserBallDto.fromJson(Map<String, dynamic> json) =>
+      _$UserBallDtoFromJson(json);
+}
+
+/// Catalog ball — the full spec returned by `/api/balls` and nested
+/// inside each UserBall.
+@JsonSerializable(createToJson: false)
+class BallCatalogDto {
+  const BallCatalogDto({
     required this.id,
     required this.name,
     this.brand,
-    this.ballName = '',
-    this.weight,
+    this.core = '',
     this.surface = '',
-    this.isActive = true,
+    this.rg = '',
+    this.diff = '',
+    this.intDiff = '',
+    this.arc = '',
+    this.ballImage = '',
   });
 
   final int id;
   final String name;
   final BrandRefDto? brand;
-
-  @JsonKey(name: 'ball_name', defaultValue: '')
-  final String ballName;
-
-  final int? weight;
-
+  @JsonKey(defaultValue: '')
+  final String core;
   @JsonKey(defaultValue: '')
   final String surface;
+  @JsonKey(defaultValue: '')
+  final String rg;
+  @JsonKey(defaultValue: '')
+  final String diff;
+  @JsonKey(name: 'int_diff', defaultValue: '')
+  final String intDiff;
+  @JsonKey(defaultValue: '')
+  final String arc;
+  @JsonKey(name: 'ball_image', defaultValue: '')
+  final String ballImage;
 
-  @JsonKey(name: 'is_active', defaultValue: true)
-  final bool isActive;
-
-  factory BallDto.fromJson(Map<String, dynamic> json) =>
-      _$BallDtoFromJson(json);
+  factory BallCatalogDto.fromJson(Map<String, dynamic> json) =>
+      _$BallCatalogDtoFromJson(json);
 }
 
 @JsonSerializable(createToJson: false)
 class BrandRefDto {
-  const BrandRefDto({required this.id, required this.name});
+  const BrandRefDto({
+    required this.id,
+    required this.name,
+    this.logoUrl,
+  });
+
   final int id;
   final String name;
+  @JsonKey(name: 'logo_url')
+  final String? logoUrl;
 
   factory BrandRefDto.fromJson(Map<String, dynamic> json) =>
       _$BrandRefDtoFromJson(json);
+}
+
+/// GET /api/balls  →  `{balls: [...], has_next: bool}`.
+@JsonSerializable(createToJson: false)
+class BallCatalogPageDto {
+  const BallCatalogPageDto({this.balls = const [], this.hasNext = false});
+
+  @JsonKey(defaultValue: [])
+  final List<BallCatalogDto> balls;
+  @JsonKey(name: 'has_next', defaultValue: false)
+  final bool hasNext;
+
+  factory BallCatalogPageDto.fromJson(Map<String, dynamic> json) =>
+      _$BallCatalogPageDtoFromJson(json);
+}
+
+/// GET /api/games/stats/pin-leaves entry.
+@JsonSerializable(createToJson: false)
+class PinLeaveStatDto {
+  const PinLeaveStatDto({
+    this.leavePattern = '',
+    this.name = '',
+    this.occurrenceCount = 0,
+    this.conversionCount = 0,
+    this.conversionRate = 0,
+  });
+
+  @JsonKey(name: 'leave_pattern', defaultValue: '')
+  final String leavePattern;
+  @JsonKey(defaultValue: '')
+  final String name;
+  @JsonKey(name: 'occurrence_count', defaultValue: 0)
+  final int occurrenceCount;
+  @JsonKey(name: 'conversion_count', defaultValue: 0)
+  final int conversionCount;
+  @JsonKey(name: 'conversion_rate', defaultValue: 0)
+  final num conversionRate;
+
+  factory PinLeaveStatDto.fromJson(Map<String, dynamic> json) =>
+      _$PinLeaveStatDtoFromJson(json);
+}
+
+/// GET /api/games/stats/spares entry.
+@JsonSerializable(createToJson: false)
+class SpareCategoryStatDto {
+  const SpareCategoryStatDto({
+    this.category = '',
+    this.total = 0,
+    this.converted = 0,
+    this.conversionRate = 0,
+  });
+
+  @JsonKey(defaultValue: '')
+  final String category;
+  @JsonKey(defaultValue: 0)
+  final int total;
+  @JsonKey(defaultValue: 0)
+  final int converted;
+  @JsonKey(name: 'conversion_rate', defaultValue: 0)
+  final num conversionRate;
+
+  factory SpareCategoryStatDto.fromJson(Map<String, dynamic> json) =>
+      _$SpareCategoryStatDtoFromJson(json);
+}
+
+/// GET /api/games/stats/trends entry.
+@JsonSerializable(createToJson: false)
+class TrendPointDto {
+  const TrendPointDto({
+    this.score = 0,
+    this.rollingAverage = 0,
+    this.date,
+    this.gameContext = '',
+  });
+
+  @JsonKey(defaultValue: 0)
+  final int score;
+  @JsonKey(name: 'rolling_average', defaultValue: 0)
+  final num rollingAverage;
+  final String? date;
+  @JsonKey(name: 'game_context', defaultValue: '')
+  final String gameContext;
+
+  factory TrendPointDto.fromJson(Map<String, dynamic> json) =>
+      _$TrendPointDtoFromJson(json);
+}
+
+/// GET /api/games/stats/by-center entry.
+@JsonSerializable(createToJson: false)
+class CenterPerformanceDto {
+  const CenterPerformanceDto({
+    this.centerId = 0,
+    this.centerName = '',
+    this.avgScore = 0,
+    this.gamesCount = 0,
+  });
+
+  @JsonKey(name: 'center_id', defaultValue: 0)
+  final int centerId;
+  @JsonKey(name: 'center_name', defaultValue: '')
+  final String centerName;
+  @JsonKey(name: 'avg_score', defaultValue: 0)
+  final num avgScore;
+  @JsonKey(name: 'games_count', defaultValue: 0)
+  final int gamesCount;
+
+  factory CenterPerformanceDto.fromJson(Map<String, dynamic> json) =>
+      _$CenterPerformanceDtoFromJson(json);
+}
+
+/// GET /api/games/stats/by-context entry.
+@JsonSerializable(createToJson: false)
+class ContextPerformanceDto {
+  const ContextPerformanceDto({
+    this.gameContext = '',
+    this.avgScore = 0,
+    this.gamesCount = 0,
+  });
+
+  @JsonKey(name: 'game_context', defaultValue: '')
+  final String gameContext;
+  @JsonKey(name: 'avg_score', defaultValue: 0)
+  final num avgScore;
+  @JsonKey(name: 'games_count', defaultValue: 0)
+  final int gamesCount;
+
+  factory ContextPerformanceDto.fromJson(Map<String, dynamic> json) =>
+      _$ContextPerformanceDtoFromJson(json);
+}
+
+/// GET /api/games/equipment/stats  →  `[{user_ball_id, ...}]`.
+@JsonSerializable(createToJson: false)
+class BallStatsDto {
+  const BallStatsDto({
+    required this.userBallId,
+    this.gamesPlayed = 0,
+    this.framesThrown = 0,
+    this.firstBallCount = 0,
+    this.firstBallAvg = 0,
+    this.strikeRate = 0,
+  });
+
+  @JsonKey(name: 'user_ball_id')
+  final int userBallId;
+  @JsonKey(name: 'games_played', defaultValue: 0)
+  final int gamesPlayed;
+  @JsonKey(name: 'frames_thrown', defaultValue: 0)
+  final int framesThrown;
+  @JsonKey(name: 'first_ball_count', defaultValue: 0)
+  final int firstBallCount;
+  @JsonKey(name: 'first_ball_avg', defaultValue: 0)
+  final num firstBallAvg;
+  @JsonKey(name: 'strike_rate', defaultValue: 0)
+  final num strikeRate;
+
+  factory BallStatsDto.fromJson(Map<String, dynamic> json) =>
+      _$BallStatsDtoFromJson(json);
 }
 
 // ──────────────────────────────────────────────────────────────────────────────

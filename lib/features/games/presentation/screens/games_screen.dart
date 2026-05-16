@@ -9,8 +9,10 @@ import '../../../../core/router/route_names.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/theme/app_text_styles.dart';
 import '../../../../core/widgets/app_button.dart';
+import '../../../../core/widgets/app_toast.dart';
 import '../../../../core/widgets/empty_state.dart';
 import '../../../../core/widgets/skeleton_box.dart';
+import '../../domain/repositories/games_repository.dart';
 import '../bloc/games_bloc.dart';
 import '../widgets/session_card.dart';
 import '../widgets/stats_card.dart';
@@ -27,8 +29,37 @@ class GamesScreen extends StatelessWidget {
   }
 }
 
-class _GamesView extends StatelessWidget {
+class _GamesView extends StatefulWidget {
   const _GamesView();
+
+  @override
+  State<_GamesView> createState() => _GamesViewState();
+}
+
+class _GamesViewState extends State<_GamesView> {
+  bool _creatingSession = false;
+
+  Future<void> _startNewSession(BuildContext ctx) async {
+    if (_creatingSession) return;
+    setState(() => _creatingSession = true);
+    final res = await getIt<GamesRepository>().createSession();
+    if (!mounted) return;
+    setState(() => _creatingSession = false);
+    res.fold(
+      (f) => showAppToast(
+        ctx,
+        message: f.messages.isNotEmpty
+            ? f.messages.first
+            : 'Couldn\'t start a new session.',
+        variant: ToastVariant.error,
+      ),
+      (session) {
+        // Refresh the list so the new session shows even before we return.
+        ctx.read<GamesBloc>().add(const GamesLoadRequested(force: true));
+        ctx.push('${RouteNames.games}/play/${session.uid}');
+      },
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -42,20 +73,35 @@ class _GamesView extends StatelessWidget {
         title: Text(l10n.navGames),
         actions: [
           IconButton(
+            icon: const Icon(LucideIcons.circle, size: 20),
+            tooltip: 'My equipment',
+            onPressed: () =>
+                context.push('${RouteNames.games}/equipment'),
+          ),
+          IconButton(
             icon: const Icon(LucideIcons.chartLine, size: 20),
-            tooltip: 'All-time stats',
-            onPressed: () {},
+            tooltip: 'Analytics',
+            onPressed: () => context.push('${RouteNames.games}/stats'),
           ),
           const SizedBox(width: AppSpacing.sm),
         ],
       ),
       floatingActionButton: FloatingActionButton.extended(
-        onPressed: () {},
+        onPressed: _creatingSession ? null : () => _startNewSession(context),
         backgroundColor: colors.accent,
         foregroundColor: Colors.white,
-        icon: const Icon(LucideIcons.plus, size: 18),
+        icon: _creatingSession
+            ? const SizedBox(
+                width: 16,
+                height: 16,
+                child: CircularProgressIndicator(
+                  strokeWidth: 2,
+                  color: Colors.white,
+                ),
+              )
+            : const Icon(LucideIcons.plus, size: 18),
         label: Text(
-          'New session',
+          _creatingSession ? 'Starting…' : 'New session',
           style: AppTextStyles.buttonLabel.copyWith(
             color: Colors.white,
             fontWeight: FontWeight.w700,

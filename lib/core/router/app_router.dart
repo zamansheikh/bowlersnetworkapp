@@ -12,8 +12,11 @@ import '../../features/follow/presentation/bloc/follow_list_bloc.dart';
 import '../../features/follow/presentation/screens/follow_list_screen.dart';
 import '../../features/leaderboard/presentation/screens/leaderboard_screen.dart';
 import '../../features/games/domain/entities/session.dart';
+import '../../features/games/presentation/screens/equipment_screen.dart';
 import '../../features/games/presentation/screens/games_screen.dart';
+import '../../features/games/presentation/screens/play_screen.dart';
 import '../../features/games/presentation/screens/session_detail_screen.dart';
+import '../../features/games/presentation/screens/stats_screen.dart';
 import '../../features/home/presentation/screens/home_screen.dart';
 import '../../features/messages/domain/entities/conversation.dart';
 import '../../features/messages/presentation/screens/messages_screen.dart';
@@ -140,6 +143,20 @@ GoRouter buildAppRouter(AuthBloc authBloc) {
                     }
                     return SessionDetailScreen(session: session);
                   },
+                ),
+                GoRoute(
+                  path: 'play/:uid',
+                  builder: (_, state) => PlayScreen(
+                    sessionUid: state.pathParameters['uid']!,
+                  ),
+                ),
+                GoRoute(
+                  path: 'equipment',
+                  builder: (_, _) => const EquipmentScreen(),
+                ),
+                GoRoute(
+                  path: 'stats',
+                  builder: (_, _) => const StatsScreen(),
                 ),
               ],
             ),

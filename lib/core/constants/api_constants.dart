@@ -128,6 +128,10 @@ class Endpoints {
   static const String gamesSessionsCreate = '/api/games/sessions';
   static const String gamesStats = '/api/games/stats';
   static const String gamesEquipment = '/api/games/equipment';
+  static const String gamesEquipmentAdd = '/api/games/equipment/add';
+  static const String gamesEquipmentStats = '/api/games/equipment/stats';
+  static String gamesEquipmentDelete(int ballId) =>
+      '/api/games/equipment/$ballId/delete';
   static String gamesSessionDetail(String uid) =>
       '/api/games/sessions/$uid';
   static String gamesSessionDelete(String uid) =>
@@ -136,6 +140,18 @@ class Endpoints {
       '/api/games/sessions/$uid/submit-game';
   static String gameDetail(int gameId) => '/api/games/$gameId';
   static String gameShared(int gameId) => '/api/games/shared/$gameId';
+
+  // Ball catalog (used by the ball picker modal).
+  static const String ballsCatalog = '/api/balls';
+
+  // Stats sub-resources (drives the analytics dashboard).
+  static const String gamesStatsPinLeaves = '/api/games/stats/pin-leaves';
+  static const String gamesStatsSpares = '/api/games/stats/spares';
+  static const String gamesStatsTrends = '/api/games/stats/trends';
+  static const String gamesStatsByCenter = '/api/games/stats/by-center';
+  static const String gamesStatsByContext = '/api/games/stats/by-context';
+  static const String gamesStatsFrames = '/api/games/stats/frames';
+  static const String gamesStatsDistribution = '/api/games/stats/distribution';
 
   // Messages
   static const String conversationsList = '/api/messages/conversations';

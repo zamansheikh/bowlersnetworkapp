@@ -57,20 +57,96 @@ UserGameStatsDto _$UserGameStatsDtoFromJson(Map<String, dynamic> json) =>
       perfectGameCount: (json['perfect_game_count'] as num?)?.toInt() ?? 0,
     );
 
-BallDto _$BallDtoFromJson(Map<String, dynamic> json) => BallDto(
+UserBallDto _$UserBallDtoFromJson(Map<String, dynamic> json) => UserBallDto(
   id: (json['id'] as num).toInt(),
-  name: json['name'] as String,
-  brand: json['brand'] == null
-      ? null
-      : BrandRefDto.fromJson(json['brand'] as Map<String, dynamic>),
-  ballName: json['ball_name'] as String? ?? '',
-  weight: (json['weight'] as num?)?.toInt(),
-  surface: json['surface'] as String? ?? '',
-  isActive: json['is_active'] as bool? ?? true,
+  ball: BallCatalogDto.fromJson(json['ball'] as Map<String, dynamic>),
+  weight: (json['weight'] as num?)?.toInt() ?? 15,
+  createdAt: json['created_at'] as String?,
 );
 
-BrandRefDto _$BrandRefDtoFromJson(Map<String, dynamic> json) =>
-    BrandRefDto(id: (json['id'] as num).toInt(), name: json['name'] as String);
+BallCatalogDto _$BallCatalogDtoFromJson(Map<String, dynamic> json) =>
+    BallCatalogDto(
+      id: (json['id'] as num).toInt(),
+      name: json['name'] as String,
+      brand: json['brand'] == null
+          ? null
+          : BrandRefDto.fromJson(json['brand'] as Map<String, dynamic>),
+      core: json['core'] as String? ?? '',
+      surface: json['surface'] as String? ?? '',
+      rg: json['rg'] as String? ?? '',
+      diff: json['diff'] as String? ?? '',
+      intDiff: json['int_diff'] as String? ?? '',
+      arc: json['arc'] as String? ?? '',
+      ballImage: json['ball_image'] as String? ?? '',
+    );
+
+BrandRefDto _$BrandRefDtoFromJson(Map<String, dynamic> json) => BrandRefDto(
+  id: (json['id'] as num).toInt(),
+  name: json['name'] as String,
+  logoUrl: json['logo_url'] as String?,
+);
+
+BallCatalogPageDto _$BallCatalogPageDtoFromJson(Map<String, dynamic> json) =>
+    BallCatalogPageDto(
+      balls:
+          (json['balls'] as List<dynamic>?)
+              ?.map((e) => BallCatalogDto.fromJson(e as Map<String, dynamic>))
+              .toList() ??
+          [],
+      hasNext: json['has_next'] as bool? ?? false,
+    );
+
+PinLeaveStatDto _$PinLeaveStatDtoFromJson(Map<String, dynamic> json) =>
+    PinLeaveStatDto(
+      leavePattern: json['leave_pattern'] as String? ?? '',
+      name: json['name'] as String? ?? '',
+      occurrenceCount: (json['occurrence_count'] as num?)?.toInt() ?? 0,
+      conversionCount: (json['conversion_count'] as num?)?.toInt() ?? 0,
+      conversionRate: json['conversion_rate'] as num? ?? 0,
+    );
+
+SpareCategoryStatDto _$SpareCategoryStatDtoFromJson(
+  Map<String, dynamic> json,
+) => SpareCategoryStatDto(
+  category: json['category'] as String? ?? '',
+  total: (json['total'] as num?)?.toInt() ?? 0,
+  converted: (json['converted'] as num?)?.toInt() ?? 0,
+  conversionRate: json['conversion_rate'] as num? ?? 0,
+);
+
+TrendPointDto _$TrendPointDtoFromJson(Map<String, dynamic> json) =>
+    TrendPointDto(
+      score: (json['score'] as num?)?.toInt() ?? 0,
+      rollingAverage: json['rolling_average'] as num? ?? 0,
+      date: json['date'] as String?,
+      gameContext: json['game_context'] as String? ?? '',
+    );
+
+CenterPerformanceDto _$CenterPerformanceDtoFromJson(
+  Map<String, dynamic> json,
+) => CenterPerformanceDto(
+  centerId: (json['center_id'] as num?)?.toInt() ?? 0,
+  centerName: json['center_name'] as String? ?? '',
+  avgScore: json['avg_score'] as num? ?? 0,
+  gamesCount: (json['games_count'] as num?)?.toInt() ?? 0,
+);
+
+ContextPerformanceDto _$ContextPerformanceDtoFromJson(
+  Map<String, dynamic> json,
+) => ContextPerformanceDto(
+  gameContext: json['game_context'] as String? ?? '',
+  avgScore: json['avg_score'] as num? ?? 0,
+  gamesCount: (json['games_count'] as num?)?.toInt() ?? 0,
+);
+
+BallStatsDto _$BallStatsDtoFromJson(Map<String, dynamic> json) => BallStatsDto(
+  userBallId: (json['user_ball_id'] as num).toInt(),
+  gamesPlayed: (json['games_played'] as num?)?.toInt() ?? 0,
+  framesThrown: (json['frames_thrown'] as num?)?.toInt() ?? 0,
+  firstBallCount: (json['first_ball_count'] as num?)?.toInt() ?? 0,
+  firstBallAvg: json['first_ball_avg'] as num? ?? 0,
+  strikeRate: json['strike_rate'] as num? ?? 0,
+);
 
 GameDetailDto _$GameDetailDtoFromJson(Map<String, dynamic> json) =>
     GameDetailDto(

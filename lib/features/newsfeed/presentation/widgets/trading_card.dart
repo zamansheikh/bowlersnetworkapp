@@ -452,13 +452,20 @@ class _CardFront extends StatelessWidget {
   }
 
   String? _heroImage(Map<String, dynamic> card) {
+    // Web's TradingCard front uses `card.display_image_url` (the curated
+    // hero shot). `shots[]` is the BACK carousel, not the front face.
+    // Prior versions walked shots first, which made the front display a
+    // different photo from the web (e.g. action-shot back instead of the
+    // posed portrait front).
+    final display = card['display_image_url'] as String?;
+    if (display != null && display.isNotEmpty) return display;
+    // Only fall back to shots if there's no dedicated display image — for
+    // older cards that predate `display_image_url`.
     final shots = ((card['shots'] as List?) ?? const [])
         .cast<Map<String, dynamic>>();
     for (final s in shots) {
       if (s['media_type'] == 'image') return s['url'] as String?;
     }
-    final fallback = card['display_image_url'] as String?;
-    if (fallback != null && fallback.isNotEmpty) return fallback;
     return null;
   }
 }

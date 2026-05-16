@@ -155,8 +155,10 @@ class PostScoreCard extends StatelessWidget {
     final colors = context.colors;
     final total = (data['total_score'] as num?)?.toInt() ?? 0;
     final gameType = (data['game_type'] as String? ?? '').toUpperCase();
+    // Backend returns strike_percentage as the actual percent value (e.g. 88),
+    // NOT a 0-1 fraction. Web renders `{value}%` directly — match that.
     final strikeRaw = data['strike_percentage'];
-    final strikePct = strikeRaw is num ? (strikeRaw * 100).toInt() : null;
+    final strikePct = strikeRaw is num ? strikeRaw.toInt() : null;
     final splitCount = (data['split_count'] as num?)?.toInt();
 
     return Container(
