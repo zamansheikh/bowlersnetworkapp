@@ -1,4 +1,3 @@
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 
@@ -6,6 +5,7 @@ import '../../../../core/extensions/context_extensions.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/theme/app_text_styles.dart';
 import '../../../../core/widgets/app_card.dart';
+import '../../../../core/widgets/network_badge.dart';
 import '../../domain/entities/xp_level_info.dart';
 
 /// Rank + level + progress card, mirroring the web's sidebar XP card.
@@ -176,13 +176,12 @@ class _BadgeIcon extends StatelessWidget {
     if (url == null || url!.isEmpty) return fallback;
     return ClipRRect(
       borderRadius: AppRadius.mdAll,
-      child: CachedNetworkImage(
-        imageUrl: url!,
+      child: NetworkBadge(
+        url: url,
         width: size,
         height: size,
         fit: BoxFit.cover,
-        placeholder: (_, _) => fallback,
-        errorWidget: (_, _, _) => fallback,
+        placeholder: fallback,
       ),
     );
   }

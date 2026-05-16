@@ -43,6 +43,11 @@ class ProfileRepositoryImpl implements ProfileRepository {
           tier: dto.tier,
           rankDisplay: dto.rankDisplay,
           badgeIconUrl: dto.badgeIconUrl,
+          weeklyXpChange: dto.weeklyXpChange,
+          xpToNextLevel: dto.xpToNextLevel,
+          nextLevel: dto.nextLevel,
+          nextRankDisplay: dto.nextRankDisplay,
+          nextBadgeIconUrl: dto.nextBadgeIconUrl,
         );
       });
 

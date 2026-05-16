@@ -22,6 +22,8 @@ class AppThemeColors extends ThemeExtension<AppThemeColors> {
     required this.accentHover,
     required this.accentSubtle,
     required this.accentGlow,
+    required this.accentFrom,
+    required this.accentTo,
     required this.error,
     required this.success,
     required this.warning,
@@ -41,6 +43,25 @@ class AppThemeColors extends ThemeExtension<AppThemeColors> {
   final Color accentHover;
   final Color accentSubtle;
   final Color accentGlow;
+
+  /// Start of the premium accent gradient (lime / chartreuse). Mirrors
+  /// web's `--accent-from` CSS var. Use [accentGradient] for the full
+  /// gradient brush.
+  final Color accentFrom;
+
+  /// End of the premium accent gradient (deep green). Mirrors web's
+  /// `--accent-to`.
+  final Color accentTo;
+
+  /// Convenience: the same gradient web's `.accent-gradient` class
+  /// produces — left → right, [accentFrom] → [accentTo]. Drop into any
+  /// `BoxDecoration(gradient: ...)`.
+  LinearGradient get accentGradient => LinearGradient(
+        begin: Alignment.centerLeft,
+        end: Alignment.centerRight,
+        colors: [accentFrom, accentTo],
+      );
+
   final Color error;
   final Color success;
   final Color warning;
@@ -60,6 +81,8 @@ class AppThemeColors extends ThemeExtension<AppThemeColors> {
     accentHover: AppColors.darkAccentHover,
     accentSubtle: AppColors.darkAccentSubtle,
     accentGlow: AppColors.darkAccentGlow,
+    accentFrom: AppColors.darkAccentFrom,
+    accentTo: AppColors.darkAccentTo,
     error: AppColors.error,
     success: AppColors.success,
     warning: AppColors.warning,
@@ -80,6 +103,8 @@ class AppThemeColors extends ThemeExtension<AppThemeColors> {
     accentHover: AppColors.lightAccentHover,
     accentSubtle: AppColors.lightAccentSubtle,
     accentGlow: AppColors.lightAccentGlow,
+    accentFrom: AppColors.lightAccentFrom,
+    accentTo: AppColors.lightAccentTo,
     error: AppColors.error,
     success: AppColors.success,
     warning: AppColors.warning,
@@ -101,6 +126,8 @@ class AppThemeColors extends ThemeExtension<AppThemeColors> {
     Color? accentHover,
     Color? accentSubtle,
     Color? accentGlow,
+    Color? accentFrom,
+    Color? accentTo,
     Color? error,
     Color? success,
     Color? warning,
@@ -120,6 +147,8 @@ class AppThemeColors extends ThemeExtension<AppThemeColors> {
       accentHover: accentHover ?? this.accentHover,
       accentSubtle: accentSubtle ?? this.accentSubtle,
       accentGlow: accentGlow ?? this.accentGlow,
+      accentFrom: accentFrom ?? this.accentFrom,
+      accentTo: accentTo ?? this.accentTo,
       error: error ?? this.error,
       success: success ?? this.success,
       warning: warning ?? this.warning,
@@ -144,6 +173,8 @@ class AppThemeColors extends ThemeExtension<AppThemeColors> {
       accentHover: Color.lerp(accentHover, other.accentHover, t)!,
       accentSubtle: Color.lerp(accentSubtle, other.accentSubtle, t)!,
       accentGlow: Color.lerp(accentGlow, other.accentGlow, t)!,
+      accentFrom: Color.lerp(accentFrom, other.accentFrom, t)!,
+      accentTo: Color.lerp(accentTo, other.accentTo, t)!,
       error: Color.lerp(error, other.error, t)!,
       success: Color.lerp(success, other.success, t)!,
       warning: Color.lerp(warning, other.warning, t)!,

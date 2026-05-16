@@ -9,6 +9,7 @@ import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/theme/app_text_styles.dart';
 import '../../../../core/widgets/app_button.dart';
 import '../../../../core/widgets/app_card.dart';
+import '../../../../core/widgets/app_fab.dart';
 import '../../../../core/widgets/empty_state.dart';
 import '../../../../core/widgets/skeleton_box.dart';
 import '../../domain/entities/equipment.dart';
@@ -83,17 +84,9 @@ class _EquipmentView extends StatelessWidget {
     return Scaffold(
       backgroundColor: colors.bgPrimary,
       appBar: AppBar(title: const Text('My Equipment')),
-      floatingActionButton: FloatingActionButton.extended(
-        backgroundColor: colors.accent,
-        foregroundColor: Colors.white,
-        icon: const Icon(LucideIcons.plus, size: 18),
-        label: Text(
-          'Add ball',
-          style: AppTextStyles.buttonLabel.copyWith(
-            color: Colors.white,
-            fontWeight: FontWeight.w700,
-          ),
-        ),
+      floatingActionButton: AppFab.extended(
+        icon: LucideIcons.plus,
+        label: 'Add ball',
         onPressed: () => _addBall(context),
       ),
       body: BlocBuilder<EquipmentBloc, EquipmentState>(

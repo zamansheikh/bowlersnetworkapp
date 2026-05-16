@@ -43,6 +43,13 @@ import '../../features/games/domain/repositories/games_repository.dart'
 import '../../features/games/presentation/bloc/equipment_bloc.dart' as _i789;
 import '../../features/games/presentation/bloc/games_bloc.dart' as _i974;
 import '../../features/games/presentation/bloc/stats_bloc.dart' as _i377;
+import '../../features/home/data/datasources/home_preview_datasource.dart'
+    as _i111;
+import '../../features/home/data/repositories/home_preview_repository_impl.dart'
+    as _i1007;
+import '../../features/home/domain/repositories/home_preview_repository.dart'
+    as _i1033;
+import '../../features/home/presentation/bloc/home_bloc.dart' as _i202;
 import '../../features/leaderboard/data/datasources/leaderboard_remote_datasource.dart'
     as _i757;
 import '../../features/leaderboard/data/repositories/leaderboard_repository_impl.dart'
@@ -127,6 +134,9 @@ extension GetItInjectableX on _i174.GetIt {
     gh.factory<_i771.GamesRemoteDatasource>(
       () => _i771.GamesRemoteDatasource(gh<_i361.Dio>()),
     );
+    gh.factory<_i111.HomePreviewDatasource>(
+      () => _i111.HomePreviewDatasource(gh<_i361.Dio>()),
+    );
     gh.factory<_i757.LeaderboardRemoteDatasource>(
       () => _i757.LeaderboardRemoteDatasource(gh<_i361.Dio>()),
     );
@@ -180,6 +190,9 @@ extension GetItInjectableX on _i174.GetIt {
     gh.lazySingleton<_i914.DeviceTokenService>(
       () => _i914.DeviceTokenService(gh<_i937.NotificationsRemoteDatasource>()),
     );
+    gh.lazySingleton<_i1033.HomePreviewRepository>(
+      () => _i1007.HomePreviewRepositoryImpl(gh<_i111.HomePreviewDatasource>()),
+    );
     gh.lazySingleton<_i943.ChatSocket>(
       () => _i943.ChatSocket(gh<_i666.SecureStorageService>()),
       dispose: (i) => i.dispose(),
@@ -191,6 +204,13 @@ extension GetItInjectableX on _i174.GetIt {
     );
     gh.lazySingleton<_i760.FollowRepository>(
       () => _i299.FollowRepositoryImpl(gh<_i973.FollowRemoteDatasource>()),
+    );
+    gh.factory<_i202.HomeBloc>(
+      () => _i202.HomeBloc(
+        gh<_i819.NewsfeedRepository>(),
+        gh<_i655.LeaderboardRepository>(),
+        gh<_i1033.HomePreviewRepository>(),
+      ),
     );
     gh.lazySingleton<_i894.ProfileRepository>(
       () => _i334.ProfileRepositoryImpl(gh<_i327.ProfileRemoteDatasource>()),

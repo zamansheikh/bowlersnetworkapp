@@ -15,4 +15,9 @@ XpLevelInfoDto _$XpLevelInfoDtoFromJson(Map<String, dynamic> json) =>
       badgeIconUrl: json['badge_icon_url'] as String?,
       progressPercentage: json['progress_percentage'] as num? ?? 0,
       totalXp: (json['total_xp'] as num?)?.toInt() ?? 0,
+      weeklyXpChange: (json['weekly_xp_change'] as num?)?.toInt(),
+      xpToNextLevel: (json['xp_to_next_level'] as num?)?.toInt(),
+      nextLevel: (json['next_level'] as num?)?.toInt(),
+      nextRankDisplay: json['next_rank_display'] as String?,
+      nextBadgeIconUrl: json['next_badge_icon_url'] as String?,
     );

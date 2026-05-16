@@ -1,7 +1,9 @@
+import 'package:dartz/dartz.dart';
 import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:injectable/injectable.dart';
 
+import '../../../../core/error/failures.dart';
 import '../../domain/entities/equipment.dart';
 import '../../domain/repositories/games_repository.dart';
 
@@ -62,20 +64,22 @@ class EquipmentBloc extends Bloc<EquipmentEvent, EquipmentState> {
   }
 
   Future<void> _fetch(Emitter<EquipmentState> emit) async {
-    final results = await Future.wait([
+    // Parallel fetch with typed casts — `as dynamic` would compile but blow
+    // up at runtime because closure types can't flow through dynamic.
+    final futures = await Future.wait<dynamic>([
       _repository.getEquipment(),
       _repository.getEquipmentStats(),
     ]);
-    final ballsRes = results[0] as dynamic;
-    final statsRes = results[1] as dynamic;
+    final ballsRes = futures[0] as Either<Failure, List<UserBall>>;
+    final statsRes = futures[1] as Either<Failure, List<BallStats>>;
 
     final balls = ballsRes.fold<List<UserBall>>(
       (_) => state.balls,
-      (list) => list as List<UserBall>,
+      (list) => list,
     );
     final statsList = statsRes.fold<List<BallStats>>(
       (_) => const <BallStats>[],
-      (list) => list as List<BallStats>,
+      (list) => list,
     );
     final statsByBall = <int, BallStats>{
       for (final s in statsList) s.userBallId: s,

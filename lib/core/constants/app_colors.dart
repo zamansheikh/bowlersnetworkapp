@@ -25,6 +25,10 @@ class AppColors {
   static const darkAccentHover = Color(0xFF7DB33A);
   static const darkAccentSubtle = Color(0x1A8BC342); // 10%
   static const darkAccentGlow = Color(0x268BC342); // 15%
+  // Premium fill gradient — mirrors web's `.accent-gradient`
+  // (`--accent-from` → `--accent-to`). Used on primary CTAs.
+  static const darkAccentFrom = Color(0xFFBEF264);
+  static const darkAccentTo = Color(0xFF15803D);
 
   // ---------------------------------------------------------------------------
   // Light palette
@@ -43,6 +47,8 @@ class AppColors {
   static const lightAccentHover = Color(0xFF5E8C28);
   static const lightAccentSubtle = Color(0x146DA030); // 8%
   static const lightAccentGlow = Color(0x206DA030); // ~12%
+  static const lightAccentFrom = Color(0xFF84CC16);
+  static const lightAccentTo = Color(0xFF15803D);
 
   // ---------------------------------------------------------------------------
   // Status (shared across themes)

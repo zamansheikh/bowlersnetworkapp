@@ -182,6 +182,13 @@ class Endpoints {
   // User search (used by DM / group create + team invites)
   static const String usersSearch = '/api/users/search';
 
+  // Home-page previews — these endpoints power the home-screen sections.
+  static const String chatterDiscussions = '/api/chatter/discussions';
+  static const String mediaVideos = '/api/media/videos';
+  static const String mediaSplits = '/api/media/splits';
+  static const String eventsFeed = '/api/events/feed';
+  static const String gamesLives = '/api/games/lives';
+
   // WebSocket paths (appended to ApiConstants.wsBaseUrl, token in query).
   static const String wsChat = '/ws/chat/';
   static const String wsNotifications = '/ws/notifications/';

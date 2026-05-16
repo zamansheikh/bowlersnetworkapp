@@ -1,10 +1,10 @@
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 
 import '../../../../core/extensions/context_extensions.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/theme/app_text_styles.dart';
 import '../../../../core/widgets/app_card.dart';
+import '../../../../core/widgets/network_badge.dart';
 import '../../domain/entities/leaderboard.dart';
 
 /// Levels & Ranks tab body — full progression ladder grouped by rank.
@@ -22,47 +22,60 @@ class RanksSection extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
-    return ListView.separated(
+    // RanksSection is rendered inside the leaderboard screen's
+    // CustomScrollView (via SliverToBoxAdapter), so it has unbounded
+    // height. A nested vertical ListView would crash with "Vertical
+    // viewport was given unbounded height" — use a Column instead and
+    // rely on the outer scroller.
+    return Padding(
       padding: const EdgeInsets.all(AppSpacing.base),
-      itemCount: ranks.length,
-      separatorBuilder: (_, _) => const SizedBox(height: AppSpacing.md),
-      itemBuilder: (_, i) {
-        final group = ranks[i];
-        return AppCard(
-          padding: const EdgeInsets.all(AppSpacing.base),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Text(
-                group.rank.name,
-                style: AppTextStyles.sectionTitle.copyWith(
-                  color: colors.textPrimary,
-                ),
-              ),
-              const SizedBox(height: 2),
-              if (group.rank.phase.isNotEmpty)
-                Text(
-                  group.rank.phase,
-                  style: AppTextStyles.secondary
-                      .copyWith(color: colors.textTertiary),
-                ),
-              const SizedBox(height: AppSpacing.md),
-              for (final tier in group.tiers) ...[
-                _TierRow(
-                  tier: tier,
-                  isMine: myLevel != null && myLevel == tier.level,
-                ),
-                if (tier != group.tiers.last)
-                  Divider(
-                    height: AppSpacing.md,
-                    color: colors.borderDefault.withValues(alpha: 0.4),
-                  ),
-              ],
-            ],
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          for (var i = 0; i < ranks.length; i++) ...[
+            if (i > 0) const SizedBox(height: AppSpacing.md),
+            _buildRankCard(context, ranks[i], colors),
+          ],
+        ],
+      ),
+    );
+  }
+
+  Widget _buildRankCard(BuildContext context, RankGroup group, dynamic colors) {
+    return AppCard(
+      padding: const EdgeInsets.all(AppSpacing.base),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Text(
+            group.rank.name,
+            style: AppTextStyles.sectionTitle.copyWith(
+              color: colors.textPrimary,
+            ),
           ),
-        );
-      },
+          const SizedBox(height: 2),
+          if (group.rank.phase.isNotEmpty)
+            Text(
+              group.rank.phase,
+              style: AppTextStyles.secondary
+                  .copyWith(color: colors.textTertiary),
+            ),
+          const SizedBox(height: AppSpacing.md),
+          for (final tier in group.tiers) ...[
+            _TierRow(
+              tier: tier,
+              isMine: myLevel != null && myLevel == tier.level,
+            ),
+            if (tier != group.tiers.last)
+              Divider(
+                height: AppSpacing.md,
+                color: colors.borderDefault.withValues(alpha: 0.4),
+              ),
+          ],
+        ],
+      ),
     );
   }
 }
@@ -176,11 +189,7 @@ class _Badge extends StatelessWidget {
         ),
       );
     }
-    return SizedBox(
-      width: 36,
-      height: 36,
-      child: CachedNetworkImage(imageUrl: url, fit: BoxFit.contain),
-    );
+    return NetworkBadge(url: url, size: 36);
   }
 }
 

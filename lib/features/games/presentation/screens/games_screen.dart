@@ -9,6 +9,7 @@ import '../../../../core/router/route_names.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/theme/app_text_styles.dart';
 import '../../../../core/widgets/app_button.dart';
+import '../../../../core/widgets/app_fab.dart';
 import '../../../../core/widgets/app_toast.dart';
 import '../../../../core/widgets/empty_state.dart';
 import '../../../../core/widgets/skeleton_box.dart';
@@ -86,27 +87,10 @@ class _GamesViewState extends State<_GamesView> {
           const SizedBox(width: AppSpacing.sm),
         ],
       ),
-      floatingActionButton: FloatingActionButton.extended(
+      floatingActionButton: AppFab.extended(
+        icon: LucideIcons.plus,
+        label: _creatingSession ? 'Starting…' : 'New session',
         onPressed: _creatingSession ? null : () => _startNewSession(context),
-        backgroundColor: colors.accent,
-        foregroundColor: Colors.white,
-        icon: _creatingSession
-            ? const SizedBox(
-                width: 16,
-                height: 16,
-                child: CircularProgressIndicator(
-                  strokeWidth: 2,
-                  color: Colors.white,
-                ),
-              )
-            : const Icon(LucideIcons.plus, size: 18),
-        label: Text(
-          _creatingSession ? 'Starting…' : 'New session',
-          style: AppTextStyles.buttonLabel.copyWith(
-            color: Colors.white,
-            fontWeight: FontWeight.w700,
-          ),
-        ),
       ),
       body: SafeArea(
         top: false,

@@ -1,7 +1,9 @@
+import 'package:dartz/dartz.dart';
 import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:injectable/injectable.dart';
 
+import '../../../../core/error/failures.dart';
 import '../../domain/entities/stats_detail.dart';
 import '../../domain/entities/user_game_stats.dart';
 import '../../domain/repositories/games_repository.dart';
@@ -52,7 +54,11 @@ class StatsBloc extends Bloc<StatsEvent, StatsState> {
   }
 
   Future<void> _fetchAll(Emitter<StatsState> emit) async {
-    final results = await Future.wait([
+    // Fan-out fetches in parallel. Each result keeps its own Either<L, R>
+    // type — earlier versions used `Future.wait([...])` then `as dynamic`,
+    // which compiled but blew up at runtime because the closure types in
+    // `.fold(...)` couldn't be enforced through `dynamic` dispatch.
+    final futures = await Future.wait<dynamic>([
       _repository.getStats(),
       _repository.getPinLeaveStats(),
       _repository.getSpareStats(),
@@ -60,29 +66,38 @@ class StatsBloc extends Bloc<StatsEvent, StatsState> {
       _repository.getStatsByCenter(),
       _repository.getStatsByContext(),
     ]);
-    final stats = (results[0] as dynamic).fold<UserGameStats?>(
+
+    final statsRes = futures[0] as Either<Failure, UserGameStats>;
+    final pinLeavesRes = futures[1] as Either<Failure, List<PinLeaveStat>>;
+    final sparesRes = futures[2] as Either<Failure, List<SpareCategoryStat>>;
+    final trendsRes = futures[3] as Either<Failure, List<TrendPoint>>;
+    final byCenterRes = futures[4] as Either<Failure, List<CenterPerformance>>;
+    final byContextRes =
+        futures[5] as Either<Failure, List<ContextPerformance>>;
+
+    final stats = statsRes.fold<UserGameStats?>(
       (_) => state.stats,
-      (s) => (s as UserGameStats).hasRecord ? s : null,
+      (s) => s.hasRecord ? s : null,
     );
-    final pinLeaves = (results[1] as dynamic).fold<List<PinLeaveStat>>(
-      (_) => const [],
-      (l) => l as List<PinLeaveStat>,
+    final pinLeaves = pinLeavesRes.fold<List<PinLeaveStat>>(
+      (_) => const <PinLeaveStat>[],
+      (l) => l,
     );
-    final spares = (results[2] as dynamic).fold<List<SpareCategoryStat>>(
-      (_) => const [],
-      (l) => l as List<SpareCategoryStat>,
+    final spares = sparesRes.fold<List<SpareCategoryStat>>(
+      (_) => const <SpareCategoryStat>[],
+      (l) => l,
     );
-    final trends = (results[3] as dynamic).fold<List<TrendPoint>>(
-      (_) => const [],
-      (l) => l as List<TrendPoint>,
+    final trends = trendsRes.fold<List<TrendPoint>>(
+      (_) => const <TrendPoint>[],
+      (l) => l,
     );
-    final byCenter = (results[4] as dynamic).fold<List<CenterPerformance>>(
-      (_) => const [],
-      (l) => l as List<CenterPerformance>,
+    final byCenter = byCenterRes.fold<List<CenterPerformance>>(
+      (_) => const <CenterPerformance>[],
+      (l) => l,
     );
-    final byContext = (results[5] as dynamic).fold<List<ContextPerformance>>(
-      (_) => const [],
-      (l) => l as List<ContextPerformance>,
+    final byContext = byContextRes.fold<List<ContextPerformance>>(
+      (_) => const <ContextPerformance>[],
+      (l) => l,
     );
 
     emit(state.copyWith(

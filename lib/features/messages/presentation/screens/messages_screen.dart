@@ -8,6 +8,7 @@ import '../../../../core/extensions/context_extensions.dart';
 import '../../../../core/router/route_names.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/widgets/app_button.dart';
+import '../../../../core/widgets/app_fab.dart';
 import '../../../../core/widgets/empty_state.dart';
 import '../../../../core/widgets/skeleton_box.dart';
 import '../bloc/conversations_bloc.dart';
@@ -60,9 +61,7 @@ class _MessagesView extends StatelessWidget {
         ],
       ),
       floatingActionButton: Builder(
-        builder: (buttonCtx) => FloatingActionButton(
-          backgroundColor: colors.accent,
-          foregroundColor: Colors.white,
+        builder: (buttonCtx) => AppFab.circle(
           onPressed: () => _startNewConversation(buttonCtx),
           child: const Icon(LucideIcons.squarePen, size: 20),
         ),

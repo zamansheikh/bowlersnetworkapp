@@ -125,7 +125,9 @@ class _AppButtonState extends State<AppButton> {
             child: AnimatedContainer(
               duration: AppDurations.micro,
               decoration: BoxDecoration(
-                color: style.bg,
+                // Gradient overrides solid `bg` when present (primary CTA).
+                color: style.gradient == null ? style.bg : null,
+                gradient: style.gradient,
                 borderRadius: AppRadius.mdAll,
                 border: style.border != null
                     ? Border.all(color: style.border!, width: 1)
@@ -158,15 +160,22 @@ class _AppButtonState extends State<AppButton> {
   _ButtonStyleTokens _resolveStyle(dynamic colors, bool disabled) {
     switch (widget.variant) {
       case AppButtonVariant.primary:
+        // Matches the web's `.accent-gradient` class — linear left-to-right
+        // accentFrom → accentTo + accentGlow shadow. Disabled state drops
+        // the gradient for a flat, dimmed accent fill.
         return _ButtonStyleTokens(
           bg: disabled ? colors.accent.withValues(alpha: 0.45) : colors.accent,
+          gradient: disabled ? null : colors.accentGradient as Gradient,
           fg: Colors.white,
           shadow: disabled
               ? null
               : [
+                  // Web uses `0 2px 10px var(--accent-glow)` baseline +
+                  // `0 4px 18px var(--accent-glow)` on hover. Flutter has no
+                  // hover on touch; pick the richer of the two.
                   BoxShadow(
-                    color: colors.accent.withValues(alpha: 0.25),
-                    blurRadius: 16,
+                    color: colors.accentGlow as Color,
+                    blurRadius: 18,
                     offset: const Offset(0, 4),
                   ),
                 ],
@@ -206,12 +215,14 @@ class _ButtonStyleTokens {
   _ButtonStyleTokens({
     required this.bg,
     required this.fg,
+    this.gradient,
     this.border,
     this.shadow,
   });
 
   final Color bg;
   final Color fg;
+  final Gradient? gradient;
   final Color? border;
   final List<BoxShadow>? shadow;
 }
