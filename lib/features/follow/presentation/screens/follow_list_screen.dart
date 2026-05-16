@@ -5,6 +5,7 @@ import 'package:lucide_icons_flutter/lucide_icons.dart';
 import '../../../../core/di/injection.dart';
 import '../../../../core/extensions/context_extensions.dart';
 import '../../../../core/theme/app_spacing.dart';
+import '../../../../core/widgets/app_back_button.dart';
 import '../../../../core/widgets/app_button.dart';
 import '../../../../core/widgets/empty_state.dart';
 import '../../../../core/widgets/skeleton_box.dart';
@@ -68,6 +69,7 @@ class _FollowListView extends StatelessWidget {
       backgroundColor: colors.bgPrimary,
       appBar: AppBar(
         title: Text(title ?? _defaultTitle()),
+        leading: const AppBackButton(),
       ),
       body: BlocBuilder<FollowListBloc, FollowListState>(
         builder: (context, state) {

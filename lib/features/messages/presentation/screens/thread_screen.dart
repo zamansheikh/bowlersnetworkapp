@@ -10,6 +10,7 @@ import '../../../../core/extensions/context_extensions.dart';
 import '../../../../core/network/chat_socket.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/theme/app_text_styles.dart';
+import '../../../../core/widgets/app_back_button.dart';
 import '../../../../core/widgets/skeleton_box.dart';
 import '../../../profile/presentation/bloc/profile_bloc.dart';
 import '../../domain/entities/conversation.dart';
@@ -153,6 +154,7 @@ class _ThreadViewState extends State<_ThreadView> {
       backgroundColor: colors.bgPrimary,
       appBar: AppBar(
         titleSpacing: 0,
+        leading: const AppBackButton(fallbackRoute: '/messages'),
         title: Row(
           children: [
             _HeaderAvatar(url: c.imageUrl, fallback: c.name, isGroup: c.isGroup),

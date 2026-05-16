@@ -8,6 +8,7 @@ import '../../../../core/di/injection.dart';
 import '../../../../core/extensions/context_extensions.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/theme/app_text_styles.dart';
+import '../../../../core/widgets/app_back_button.dart';
 import '../../../../core/widgets/app_button.dart';
 import '../../../../core/widgets/app_card.dart';
 import '../../../../core/widgets/app_toast.dart';
@@ -99,7 +100,10 @@ class _DetailViewState extends State<_DetailView> {
     final colors = context.colors;
     return Scaffold(
       backgroundColor: colors.bgPrimary,
-      appBar: AppBar(title: const Text('Discussion')),
+      appBar: AppBar(
+        title: const Text('Discussion'),
+        leading: const AppBackButton(),
+      ),
       body: BlocConsumer<DiscussionDetailBloc, DiscussionDetailState>(
         listenWhen: (p, n) => p.errors != n.errors && n.errors.isNotEmpty,
         listener: (context, state) {

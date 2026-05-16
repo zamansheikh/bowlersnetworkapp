@@ -10,6 +10,7 @@ import '../../../../core/di/injection.dart';
 import '../../../../core/extensions/context_extensions.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/theme/app_text_styles.dart';
+import '../../../../core/widgets/app_back_button.dart';
 import '../../../../core/widgets/app_card.dart';
 import '../../../../core/widgets/app_toast.dart';
 import '../../domain/entities/search_result.dart';
@@ -88,6 +89,7 @@ class _SearchViewState extends State<_SearchView> {
       backgroundColor: colors.bgPrimary,
       appBar: AppBar(
         title: const Text('Search'),
+        leading: const AppBackButton(),
         bottom: PreferredSize(
           preferredSize: const Size.fromHeight(60),
           child: Padding(

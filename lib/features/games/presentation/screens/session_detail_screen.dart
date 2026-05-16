@@ -6,6 +6,7 @@ import '../../../../core/extensions/context_extensions.dart';
 import '../../../../core/router/route_names.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/theme/app_text_styles.dart';
+import '../../../../core/widgets/app_back_button.dart';
 import '../../../../core/widgets/app_card.dart';
 import '../../../../core/widgets/app_fab.dart';
 import '../../domain/entities/session.dart';
@@ -37,6 +38,7 @@ class _SessionDetailScreenState extends State<SessionDetailScreen> {
       backgroundColor: colors.bgPrimary,
       appBar: AppBar(
         title: Text(session.name),
+        leading: const AppBackButton(),
         actions: [
           IconButton(
             tooltip: 'Edit session',

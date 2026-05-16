@@ -7,6 +7,7 @@ import '../../../../core/di/injection.dart';
 import '../../../../core/extensions/context_extensions.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/theme/app_text_styles.dart';
+import '../../../../core/widgets/app_back_button.dart';
 import '../../../../core/widgets/app_card.dart';
 import '../../../../core/widgets/empty_state.dart';
 import '../../../../core/widgets/skeleton_box.dart';
@@ -35,7 +36,10 @@ class _StatsView extends StatelessWidget {
     final colors = context.colors;
     return Scaffold(
       backgroundColor: colors.bgPrimary,
-      appBar: AppBar(title: const Text('Game analytics')),
+      appBar: AppBar(
+        title: const Text('Game analytics'),
+        leading: const AppBackButton(),
+      ),
       body: BlocBuilder<StatsBloc, StatsState>(
         builder: (context, state) {
           if (state.loading && state.stats == null) {

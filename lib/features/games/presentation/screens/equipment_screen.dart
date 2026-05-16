@@ -7,6 +7,7 @@ import '../../../../core/di/injection.dart';
 import '../../../../core/extensions/context_extensions.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/theme/app_text_styles.dart';
+import '../../../../core/widgets/app_back_button.dart';
 import '../../../../core/widgets/app_button.dart';
 import '../../../../core/widgets/app_card.dart';
 import '../../../../core/widgets/app_fab.dart';
@@ -83,7 +84,10 @@ class _EquipmentView extends StatelessWidget {
     final colors = context.colors;
     return Scaffold(
       backgroundColor: colors.bgPrimary,
-      appBar: AppBar(title: const Text('My Equipment')),
+      appBar: AppBar(
+        title: const Text('My Equipment'),
+        leading: const AppBackButton(),
+      ),
       floatingActionButton: AppFab.extended(
         icon: LucideIcons.plus,
         label: 'Add ball',

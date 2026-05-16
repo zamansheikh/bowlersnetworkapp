@@ -10,6 +10,7 @@ import '../../../../core/extensions/context_extensions.dart';
 import '../../../../core/services/geocoder_service.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/theme/app_text_styles.dart';
+import '../../../../core/widgets/app_back_button.dart';
 import '../../../../core/widgets/app_button.dart';
 import '../../../../core/widgets/app_card.dart';
 import '../../../../core/widgets/app_input.dart';
@@ -40,7 +41,10 @@ class EditProfileScreen extends StatelessWidget {
         final profile = state.profile;
         if (profile == null) {
           return Scaffold(
-            appBar: AppBar(title: const Text('Edit profile')),
+            appBar: AppBar(
+            title: const Text('Edit profile'),
+            leading: const AppBackButton(),
+          ),
             body: const Center(
               child: EmptyState(
                 icon: LucideIcons.userX,
@@ -70,7 +74,10 @@ class _EditView extends StatelessWidget {
     final colors = context.colors;
     return Scaffold(
       backgroundColor: colors.bgPrimary,
-      appBar: AppBar(title: const Text('Edit profile')),
+      appBar: AppBar(
+            title: const Text('Edit profile'),
+            leading: const AppBackButton(),
+          ),
       body: BlocConsumer<EditProfileBloc, EditProfileState>(
         listenWhen: (p, n) =>
             p.savedToken != n.savedToken ||
