@@ -12,6 +12,8 @@ import '../../../profile/presentation/bloc/profile_bloc.dart';
 import '../bloc/dashboard_bloc.dart';
 import '../widgets/dashboard_range_selector.dart';
 import 'tabs/engagement_tab.dart';
+import 'tabs/games_tab.dart';
+import 'tabs/xp_tab.dart';
 
 /// /dashboard — all 7 tabs in a single mobile-friendly scaffold. Tabs
 /// are rendered into a single scroll view (one body per active tab) so
@@ -88,7 +90,9 @@ class _DashboardView extends StatelessWidget {
 
   List<String> _activeTabErrors(DashboardState s) => switch (s.activeTab) {
         DashboardTab.engagement => s.engagement.errors,
-        // Batches 2 + 3 plug their slots in here.
+        DashboardTab.xp => s.xp.errors,
+        DashboardTab.games => s.games.errors,
+        // Batch 3 plugs its slots in here.
         _ => const [],
       };
 }
@@ -204,7 +208,9 @@ class _TabBody extends StatelessWidget {
       case DashboardTab.engagement:
         return EngagementTab(slot: state.engagement);
       case DashboardTab.xp:
+        return XpTab(slot: state.xp);
       case DashboardTab.games:
+        return GamesTab(slot: state.games);
       case DashboardTab.content:
       case DashboardTab.audience:
       case DashboardTab.referrals:

@@ -45,3 +45,17 @@ class DashboardEngagementLoadRequested extends DashboardEvent {
   @override
   List<Object?> get props => [force];
 }
+
+class DashboardXpLoadRequested extends DashboardEvent {
+  const DashboardXpLoadRequested({this.force = false});
+  final bool force;
+  @override
+  List<Object?> get props => [force];
+}
+
+class DashboardGamesLoadRequested extends DashboardEvent {
+  const DashboardGamesLoadRequested({this.force = false});
+  final bool force;
+  @override
+  List<Object?> get props => [force];
+}

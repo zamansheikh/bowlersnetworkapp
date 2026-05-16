@@ -7,9 +7,13 @@ import '../../../../core/error/failures.dart';
 import '../../domain/entities/alpha_score.dart';
 import '../../domain/entities/dashboard_range.dart';
 import '../../domain/entities/engagement_insights.dart';
+import '../../domain/entities/games_insights.dart';
+import '../../domain/entities/xp_insights.dart';
 import '../../domain/repositories/dashboard_repository.dart';
 import '../datasources/dashboard_remote_datasource.dart';
 import '../models/engagement_dtos.dart';
+import '../models/games_dtos.dart';
+import '../models/xp_dtos.dart';
 
 @LazySingleton(as: DashboardRepository)
 class DashboardRepositoryImpl implements DashboardRepository {
@@ -39,6 +43,51 @@ class DashboardRepositoryImpl implements DashboardRepository {
           impactLevel: dto.impactLevel,
           tips: dto.tips
               .map((t) => AlphaTip(text: t.text, action: t.action))
+              .toList(growable: false),
+        );
+      });
+
+  // ── XP ───────────────────────────────────────────────────────────────────
+
+  @override
+  Future<Either<Failure, XpInsights>> getXpInsights({
+    required DashboardRange range,
+  }) =>
+      _guard(() async {
+        final dto = await _remote.getXpInsights(range: range.wire);
+        return _toXp(dto);
+      });
+
+  // ── Games ────────────────────────────────────────────────────────────────
+
+  @override
+  Future<Either<Failure, GamesReport>> getGamesReport({DateTime? month}) =>
+      _guard(() async {
+        // YYYY-MM-DD matching the backend's expected format. Pass null
+        // when month is null so the backend defaults to the previous month.
+        final monthParam = month == null
+            ? null
+            : '${month.year.toString().padLeft(4, '0')}-'
+                '${month.month.toString().padLeft(2, '0')}-01';
+        final dto = await _remote.getGamesReport(month: monthParam);
+        return _toGamesReport(dto);
+      });
+
+  @override
+  Future<Either<Failure, GamesTrends>> getGamesTrends({
+    required DashboardRange range,
+  }) =>
+      _guard(() async {
+        final dto = await _remote.getGamesTrends(range: range.wire);
+        return GamesTrends(
+          labels: List<String>.from(dto.labels),
+          averages:
+              dto.averages.map((n) => n.toDouble()).toList(growable: false),
+          strikePcts: dto.strikePcts
+              .map((n) => n.toDouble())
+              .toList(growable: false),
+          spareRates: dto.spareRates
+              .map((n) => n.toDouble())
               .toList(growable: false),
         );
       });
@@ -203,6 +252,144 @@ class DashboardRepositoryImpl implements DashboardRepository {
       followersGained: dto.followersGained,
       mediaViews: dto.mediaViews,
       discussions: dto.discussions,
+    );
+  }
+
+  XpInsights _toXp(XpInsightsDto dto) => XpInsights(
+        snapshotDate: dto.snapshotDate == null
+            ? null
+            : DateTime.tryParse(dto.snapshotDate!),
+        overview: dto.overview == null
+            ? const XpOverview()
+            : XpOverview(
+                totalXp: dto.overview!.totalXp,
+                level: dto.overview!.level,
+                rank: dto.overview!.rank,
+                tier: dto.overview!.tier,
+                rankDisplay: dto.overview!.rankDisplay,
+                badgeIconUrl: dto.overview!.badgeIconUrl,
+                progressPercentage:
+                    dto.overview!.progressPercentage.toDouble(),
+                xpToNextLevel: dto.overview!.xpToNextLevel,
+                nextLevel: dto.overview!.nextLevel,
+                nextRankDisplay: dto.overview!.nextRankDisplay,
+                nextBadgeIconUrl: dto.overview!.nextBadgeIconUrl,
+                dailyXp: dto.overview!.dailyXp,
+                weeklyXp: dto.overview!.weeklyXp,
+              ),
+        velocity: dto.velocity == null
+            ? const XpVelocity()
+            : XpVelocity(
+                earned7d: dto.velocity!.earned7d,
+                earned30d: dto.velocity!.earned30d,
+                lost7d: dto.velocity!.lost7d,
+                lost30d: dto.velocity!.lost30d,
+                avgDaily7d: dto.velocity!.avgDaily7d.toDouble(),
+                avgDaily30d: dto.velocity!.avgDaily30d.toDouble(),
+                activeDays7d: dto.velocity!.activeDays7d,
+                activeDays30d: dto.velocity!.activeDays30d,
+                net7d: dto.velocity!.net7d,
+                net30d: dto.velocity!.net30d,
+              ),
+        categoryBreakdown: dto.categoryBreakdown
+            .map((c) => XpCategoryEntry(
+                  category: c.category,
+                  earned: c.earned,
+                  count: c.count,
+                  percentage: c.percentage.toDouble(),
+                ))
+            .toList(growable: false),
+        topActions: dto.topActions
+            .map((a) => XpActionEntry(
+                  action: a.action,
+                  earned: a.earned,
+                  count: a.count,
+                ))
+            .toList(growable: false),
+        patterns: dto.patterns == null
+            ? const XpPatterns()
+            : XpPatterns(
+                hourlyXp: dto.patterns!.hourlyXp
+                    .map((n) => n.toDouble())
+                    .toList(growable: false),
+                dailyXp: dto.patterns!.dailyXp
+                    .map((n) => n.toDouble())
+                    .toList(growable: false),
+                bestHour: dto.patterns!.bestHour,
+                bestHourLabel: dto.patterns!.bestHourLabel,
+                bestDay: dto.patterns!.bestDay,
+                bestDayName: dto.patterns!.bestDayName,
+              ),
+        streak: dto.streak == null
+            ? const XpStreak()
+            : XpStreak(
+                currentStreak: dto.streak!.currentStreak,
+                longestStreak: dto.streak!.longestStreak,
+                milestones: dto.streak!.milestones
+                    .map((m) => XpStreakMilestone(
+                          length: m.length,
+                          xpAwarded: m.xpAwarded,
+                          reachedAt: m.reachedAt == null
+                              ? null
+                              : DateTime.tryParse(m.reachedAt!),
+                        ))
+                    .toList(growable: false),
+                nextMilestone: dto.streak!.nextMilestone == null
+                    ? null
+                    : XpStreakTarget(
+                        target: dto.streak!.nextMilestone!.target,
+                        daysAway: dto.streak!.nextMilestone!.daysAway,
+                      ),
+                multiplier: dto.streak!.multiplier.toDouble(),
+              ),
+        rank: dto.rank == null
+            ? const XpRank()
+            : XpRank(
+                globalPosition: dto.rank!.globalPosition,
+                globalTotalRanked: dto.rank!.globalTotalRanked,
+                globalPercentile: dto.rank!.globalPercentile.toDouble(),
+              ),
+        history: dto.history == null
+            ? const XpHistory()
+            : XpHistory(
+                labels: List<String>.from(dto.history!.labels),
+                xpTotals: List<int>.from(dto.history!.xpTotals),
+                xpDaily: List<int>.from(dto.history!.xpDaily),
+                levels: List<int>.from(dto.history!.levels),
+              ),
+        projection: dto.projection == null
+            ? const XpProjection()
+            : XpProjection(
+                daysToNextLevel: dto.projection!.daysToNextLevel,
+                projectedLevel30d: dto.projection!.projectedLevel30d,
+                currentVelocity: dto.projection!.currentVelocity.toDouble(),
+              ),
+        recommendations: List<String>.from(dto.recommendations),
+      );
+
+  GamesReport _toGamesReport(GamesReportDto dto) {
+    // Milestones may come as strings or `{text: ..., ...}` objects.
+    // Coerce each to a display string so the UI doesn't have to branch.
+    final milestones = dto.milestones.map((m) {
+      if (m is String) return m;
+      if (m is Map) {
+        return (m['text'] ?? m['label'] ?? m['name'] ?? '').toString();
+      }
+      return m.toString();
+    }).where((s) => s.isNotEmpty).toList(growable: false);
+    return GamesReport(
+      month: dto.month == null ? null : DateTime.tryParse(dto.month!),
+      gamesBowled: dto.gamesBowled,
+      average: dto.average.toDouble(),
+      highGame: dto.highGame,
+      highSeries: dto.highSeries,
+      strikePercentage: dto.strikePercentage.toDouble(),
+      spareConversionRate: dto.spareConversionRate.toDouble(),
+      previousMonthAverage: dto.previousMonthAverage?.toDouble(),
+      strengths: List<String>.from(dto.strengths),
+      improvements: List<String>.from(dto.improvements),
+      practicePriorities: List<String>.from(dto.practicePriorities),
+      milestones: milestones,
     );
   }
 

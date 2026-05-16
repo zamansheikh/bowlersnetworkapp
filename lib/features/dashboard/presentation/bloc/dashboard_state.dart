@@ -23,6 +23,8 @@ class DashboardState extends Equatable {
     this.activeTab = DashboardTab.engagement,
     this.range = DashboardRange.d7,
     this.engagement = const DashboardEngagementSlot(),
+    this.xp = const DashboardXpSlot(),
+    this.games = const DashboardGamesSlot(),
   });
 
   /// True if the viewer can see + load pro tabs. Set once on init from
@@ -31,6 +33,8 @@ class DashboardState extends Equatable {
   final DashboardTab activeTab;
   final DashboardRange range;
   final DashboardEngagementSlot engagement;
+  final DashboardXpSlot xp;
+  final DashboardGamesSlot games;
 
   /// Tabs visible to the current viewer. Used by the screen's tab bar.
   List<DashboardTab> get visibleTabs => DashboardTab.values
@@ -42,22 +46,103 @@ class DashboardState extends Equatable {
     DashboardTab? activeTab,
     DashboardRange? range,
     DashboardEngagementSlot? engagement,
+    DashboardXpSlot? xp,
+    DashboardGamesSlot? games,
   }) {
     return DashboardState(
       isPro: isPro ?? this.isPro,
       activeTab: activeTab ?? this.activeTab,
       range: range ?? this.range,
       engagement: engagement ?? this.engagement,
+      xp: xp ?? this.xp,
+      games: games ?? this.games,
     );
   }
 
   @override
-  List<Object?> get props => [isPro, activeTab, range, engagement];
+  List<Object?> get props =>
+      [isPro, activeTab, range, engagement, xp, games];
 }
 
 /// Per-tab slot — owns the tab's loaded data + its own loading flags.
 /// Each tab has its own slot class so future tabs can carry tab-specific
 /// state (e.g. selected sub-range) without bloating the others.
+
+class DashboardXpSlot extends Equatable {
+  const DashboardXpSlot({
+    this.loading = false,
+    this.refreshing = false,
+    this.loaded = false,
+    this.insights,
+    this.errors = const [],
+  });
+
+  final bool loading;
+  final bool refreshing;
+  final bool loaded;
+  final XpInsights? insights;
+  final List<String> errors;
+
+  DashboardXpSlot copyWith({
+    bool? loading,
+    bool? refreshing,
+    bool? loaded,
+    XpInsights? insights,
+    List<String>? errors,
+  }) {
+    return DashboardXpSlot(
+      loading: loading ?? this.loading,
+      refreshing: refreshing ?? this.refreshing,
+      loaded: loaded ?? this.loaded,
+      insights: insights ?? this.insights,
+      errors: errors ?? this.errors,
+    );
+  }
+
+  @override
+  List<Object?> get props => [loading, refreshing, loaded, insights, errors];
+}
+
+class DashboardGamesSlot extends Equatable {
+  const DashboardGamesSlot({
+    this.loading = false,
+    this.refreshing = false,
+    this.loaded = false,
+    this.report,
+    this.trends,
+    this.errors = const [],
+  });
+
+  final bool loading;
+  final bool refreshing;
+  final bool loaded;
+  final GamesReport? report;
+  final GamesTrends? trends;
+  final List<String> errors;
+
+  DashboardGamesSlot copyWith({
+    bool? loading,
+    bool? refreshing,
+    bool? loaded,
+    GamesReport? report,
+    GamesTrends? trends,
+    List<String>? errors,
+  }) {
+    return DashboardGamesSlot(
+      loading: loading ?? this.loading,
+      refreshing: refreshing ?? this.refreshing,
+      loaded: loaded ?? this.loaded,
+      report: report ?? this.report,
+      trends: trends ?? this.trends,
+      errors: errors ?? this.errors,
+    );
+  }
+
+  @override
+  List<Object?> get props =>
+      [loading, refreshing, loaded, report, trends, errors];
+}
+
 class DashboardEngagementSlot extends Equatable {
   const DashboardEngagementSlot({
     this.loading = false,

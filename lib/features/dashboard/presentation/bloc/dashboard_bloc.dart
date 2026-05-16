@@ -5,6 +5,8 @@ import 'package:injectable/injectable.dart';
 import '../../domain/entities/alpha_score.dart';
 import '../../domain/entities/dashboard_range.dart';
 import '../../domain/entities/engagement_insights.dart';
+import '../../domain/entities/games_insights.dart';
+import '../../domain/entities/xp_insights.dart';
 import '../../domain/repositories/dashboard_repository.dart';
 
 part 'dashboard_event.dart';
@@ -25,6 +27,8 @@ class DashboardBloc extends Bloc<DashboardEvent, DashboardState> {
     on<DashboardRangeChanged>(_onRangeChanged);
     on<DashboardRefreshRequested>(_onRefresh);
     on<DashboardEngagementLoadRequested>(_onLoadEngagement);
+    on<DashboardXpLoadRequested>(_onLoadXp);
+    on<DashboardGamesLoadRequested>(_onLoadGames);
   }
 
   final DashboardRepository _repository;
@@ -64,12 +68,14 @@ class DashboardBloc extends Bloc<DashboardEvent, DashboardState> {
       case DashboardTab.engagement:
         await _fetchEngagement(emit, isRefresh: true);
       case DashboardTab.xp:
+        await _fetchXp(emit, isRefresh: true);
       case DashboardTab.games:
+        await _fetchGames(emit, isRefresh: true);
       case DashboardTab.content:
       case DashboardTab.audience:
       case DashboardTab.referrals:
       case DashboardTab.weightedIndex:
-        // Wired up in batches 2 + 3.
+        // Wired up in batch 3.
         break;
     }
   }
@@ -130,6 +136,103 @@ class DashboardBloc extends Bloc<DashboardEvent, DashboardState> {
     ));
   }
 
+  Future<void> _onLoadXp(
+    DashboardXpLoadRequested event,
+    Emitter<DashboardState> emit,
+  ) async {
+    if (state.xp.loaded && !event.force) return;
+    await _fetchXp(emit, isRefresh: false);
+  }
+
+  Future<void> _fetchXp(
+    Emitter<DashboardState> emit, {
+    required bool isRefresh,
+  }) async {
+    emit(state.copyWith(
+      xp: state.xp.copyWith(
+        loading: !isRefresh,
+        refreshing: isRefresh,
+        errors: const [],
+      ),
+    ));
+    final res = await _repository.getXpInsights(range: state.range);
+    res.fold(
+      (f) => emit(state.copyWith(
+        xp: state.xp.copyWith(
+          loading: false,
+          refreshing: false,
+          errors: f.messages.isEmpty
+              ? const ['Failed to load XP insights.']
+              : f.messages,
+        ),
+      )),
+      (data) => emit(state.copyWith(
+        xp: state.xp.copyWith(
+          loading: false,
+          refreshing: false,
+          loaded: true,
+          insights: data,
+          errors: const [],
+        ),
+      )),
+    );
+  }
+
+  Future<void> _onLoadGames(
+    DashboardGamesLoadRequested event,
+    Emitter<DashboardState> emit,
+  ) async {
+    if (state.games.loaded && !event.force) return;
+    await _fetchGames(emit, isRefresh: false);
+  }
+
+  Future<void> _fetchGames(
+    Emitter<DashboardState> emit, {
+    required bool isRefresh,
+  }) async {
+    emit(state.copyWith(
+      games: state.games.copyWith(
+        loading: !isRefresh,
+        refreshing: isRefresh,
+        errors: const [],
+      ),
+    ));
+    final results = await Future.wait([
+      _repository.getGamesReport(),
+      _repository.getGamesTrends(range: state.range),
+    ]);
+    final reportRes = results[0];
+    final trendsRes = results[1];
+
+    final errors = <String>[];
+    GamesReport? report = state.games.report;
+    GamesTrends? trends = state.games.trends;
+
+    reportRes.fold(
+      (f) => errors.addAll(f.messages.isEmpty
+          ? const ['Failed to load games report.']
+          : f.messages),
+      (data) => report = data as GamesReport,
+    );
+    trendsRes.fold(
+      (_) {
+        // Trends are auxiliary — silently skip.
+      },
+      (data) => trends = data as GamesTrends,
+    );
+
+    emit(state.copyWith(
+      games: state.games.copyWith(
+        loading: false,
+        refreshing: false,
+        loaded: true,
+        report: report,
+        trends: trends,
+        errors: errors,
+      ),
+    ));
+  }
+
   void _ensureLoaded(DashboardTab tab) {
     switch (tab) {
       case DashboardTab.engagement:
@@ -137,12 +240,18 @@ class DashboardBloc extends Bloc<DashboardEvent, DashboardState> {
           add(const DashboardEngagementLoadRequested());
         }
       case DashboardTab.xp:
+        if (!state.xp.loaded) {
+          add(const DashboardXpLoadRequested());
+        }
       case DashboardTab.games:
+        if (!state.games.loaded) {
+          add(const DashboardGamesLoadRequested());
+        }
       case DashboardTab.content:
       case DashboardTab.audience:
       case DashboardTab.referrals:
       case DashboardTab.weightedIndex:
-        // Wired up in batches 2 + 3.
+        // Wired up in batch 3.
         break;
     }
   }
@@ -150,11 +259,11 @@ class DashboardBloc extends Bloc<DashboardEvent, DashboardState> {
   DashboardState _invalidateActive(DashboardState s) {
     switch (s.activeTab) {
       case DashboardTab.engagement:
-        return s.copyWith(
-          engagement: const DashboardEngagementSlot(),
-        );
+        return s.copyWith(engagement: const DashboardEngagementSlot());
       case DashboardTab.xp:
+        return s.copyWith(xp: const DashboardXpSlot());
       case DashboardTab.games:
+        return s.copyWith(games: const DashboardGamesSlot());
       case DashboardTab.content:
       case DashboardTab.audience:
       case DashboardTab.referrals:

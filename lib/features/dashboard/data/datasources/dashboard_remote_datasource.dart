@@ -5,6 +5,8 @@ import 'package:retrofit/retrofit.dart';
 import '../../../../core/constants/api_constants.dart';
 import '../models/alpha_dtos.dart';
 import '../models/engagement_dtos.dart';
+import '../models/games_dtos.dart';
+import '../models/xp_dtos.dart';
 
 part 'dashboard_remote_datasource.g.dart';
 
@@ -31,6 +33,27 @@ abstract class DashboardRemoteDatasource {
 
   @GET(Endpoints.dashboardInsightsAlpha)
   Future<AlphaScoreDto> getAlphaScore({
+    @Query('range') String? range,
+  });
+
+  // ── XP tab (free) ─────────────────────────────────────────────────────────
+
+  @GET(Endpoints.dashboardXpInsights)
+  Future<XpInsightsDto> getXpInsights({
+    @Query('range') String? range,
+  });
+
+  // ── Games tab (free) ──────────────────────────────────────────────────────
+
+  /// `month` is a YYYY-MM-DD string (the 1st of any month). Omit to get
+  /// the previous month — backend default.
+  @GET(Endpoints.dashboardGamesReport)
+  Future<GamesReportDto> getGamesReport({
+    @Query('month') String? month,
+  });
+
+  @GET(Endpoints.dashboardGamesTrends)
+  Future<GamesTrendsDto> getGamesTrends({
     @Query('range') String? range,
   });
 }
