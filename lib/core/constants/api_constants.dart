@@ -131,6 +131,8 @@ class Endpoints {
   // Brands
   static const String brands = '/api/brands';
   static const String brandsSponsors = '/api/brands/sponsors';
+  static String brandFavoriteToggle(int brandId) =>
+      '/api/brands/$brandId/favorite';
 
   // Follow — toggle endpoint is GET, mirroring the web. POST returns 405.
   static String followToggle(int userId) => '/api/follow/$userId';

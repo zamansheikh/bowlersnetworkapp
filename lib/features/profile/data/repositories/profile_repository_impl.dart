@@ -66,6 +66,13 @@ class ProfileRepositoryImpl implements ProfileRepository {
       });
 
   @override
+  Future<Either<Failure, bool>> toggleBrandFavorite(int brandId) =>
+      _guard(() async {
+        final res = await _remote.toggleBrandFavorite(brandId);
+        return res.isFavorite;
+      });
+
+  @override
   Future<Either<Failure, Unit>> updateProfilePicture(String publicUrl) =>
       _guard(() async {
         await _remote.updateProfilePicture({'url': publicUrl});

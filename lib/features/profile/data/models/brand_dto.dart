@@ -39,3 +39,15 @@ class BrandDto {
   factory BrandDto.fromJson(Map<String, dynamic> json) =>
       _$BrandDtoFromJson(json);
 }
+
+/// Response of POST /api/brands/{id}/favorite — backend echoes the
+/// authoritative new boolean so the bloc doesn't have to assume.
+@JsonSerializable(createToJson: false)
+class BrandFavoriteToggleDto {
+  const BrandFavoriteToggleDto({this.isFavorite = false});
+  @JsonKey(name: 'is_favorite', defaultValue: false)
+  final bool isFavorite;
+
+  factory BrandFavoriteToggleDto.fromJson(Map<String, dynamic> json) =>
+      _$BrandFavoriteToggleDtoFromJson(json);
+}

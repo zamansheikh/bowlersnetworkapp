@@ -16,6 +16,14 @@ class Brand extends Equatable {
   final String logoUrl;
   final bool isFavorite;
 
+  Brand copyWith({bool? isFavorite}) => Brand(
+        id: id,
+        name: name,
+        type: type,
+        logoUrl: logoUrl,
+        isFavorite: isFavorite ?? this.isFavorite,
+      );
+
   @override
   List<Object?> get props => [id, name, type, logoUrl, isFavorite];
 }

@@ -28,6 +28,7 @@ import '../../features/auth/domain/usecases/signup_usecase.dart' as _i57;
 import '../../features/auth/domain/usecases/validate_registration_usecase.dart'
     as _i416;
 import '../../features/auth/presentation/bloc/auth_bloc.dart' as _i797;
+import '../../features/brands/presentation/bloc/brands_bloc.dart' as _i271;
 import '../../features/cards/data/datasources/cards_remote_datasource.dart'
     as _i578;
 import '../../features/cards/data/repositories/cards_repository_impl.dart'
@@ -455,6 +456,9 @@ extension GetItInjectableX on _i174.GetIt {
     );
     gh.lazySingleton<_i981.CheckProfileCompletionUseCase>(
       () => _i981.CheckProfileCompletionUseCase(gh<_i894.ProfileRepository>()),
+    );
+    gh.factory<_i271.BrandsBloc>(
+      () => _i271.BrandsBloc(gh<_i894.ProfileRepository>()),
     );
     return this;
   }

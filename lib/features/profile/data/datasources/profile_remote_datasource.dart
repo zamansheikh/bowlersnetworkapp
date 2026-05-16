@@ -31,6 +31,13 @@ abstract class ProfileRemoteDatasource {
   @GET(Endpoints.brands)
   Future<List<BrandDto>> getBrands();
 
+  /// Toggles the viewer's favorite status on a brand. Backend echoes
+  /// the new boolean back so we don't have to assume.
+  @POST('/api/brands/{brandId}/favorite')
+  Future<BrandFavoriteToggleDto> toggleBrandFavorite(
+    @Path('brandId') int brandId,
+  );
+
   /// Step 2 of the avatar upload flow — after bytes are pushed to R2, we
   /// save the resulting `public_url` on the profile.
   @POST(Endpoints.profilePicture)

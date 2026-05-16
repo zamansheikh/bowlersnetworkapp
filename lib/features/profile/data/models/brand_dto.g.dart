@@ -15,3 +15,7 @@ BrandDto _$BrandDtoFromJson(Map<String, dynamic> json) => BrandDto(
   brandTypeId: (json['brand_type_id'] as num?)?.toInt(),
   isFavorite: json['is_favorite'] as bool? ?? false,
 );
+
+BrandFavoriteToggleDto _$BrandFavoriteToggleDtoFromJson(
+  Map<String, dynamic> json,
+) => BrandFavoriteToggleDto(isFavorite: json['is_favorite'] as bool? ?? false);

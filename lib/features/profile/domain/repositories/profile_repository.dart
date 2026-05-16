@@ -17,6 +17,10 @@ abstract class ProfileRepository {
   /// to favorites for display.
   Future<Either<Failure, List<Brand>>> getBrands();
 
+  /// Toggles the viewer's favorite on a brand. Returns the authoritative
+  /// new boolean so the caller can correct an optimistic update.
+  Future<Either<Failure, bool>> toggleBrandFavorite(int brandId);
+
   /// Sets the user's profile picture to a pre-uploaded `publicUrl` (from
   /// [CloudUploadService.uploadFile] into the `profiles` bucket).
   Future<Either<Failure, Unit>> updateProfilePicture(String publicUrl);

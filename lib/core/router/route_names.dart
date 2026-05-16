@@ -29,6 +29,7 @@ class RouteNames {
   static const String events = '/events';
   static const String cards = '/cards';
   static const String teams = '/teams';
+  static const String brands = '/brands';
   static const String notifications = '/notifications';
   static const String dashboard = '/dashboard';
   static const String leaderboard = '/leaderboard';

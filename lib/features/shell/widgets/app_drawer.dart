@@ -98,6 +98,7 @@ class AppDrawer extends StatelessWidget {
                   _DrawerItem(
                     icon: LucideIcons.bookmark,
                     label: 'Brands',
+                    path: RouteNames.brands,
                   ),
                   _DrawerItem(
                     icon: LucideIcons.messageCircle,
