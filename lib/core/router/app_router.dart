@@ -41,6 +41,7 @@ import '../../features/profile/presentation/screens/profile_screen.dart';
 import '../../features/search/presentation/screens/search_screen.dart';
 import '../../features/shell/main_shell_screen.dart';
 import '../../features/splash/presentation/screens/splash_screen.dart';
+import '../../features/teams/presentation/screens/team_detail_screen.dart';
 import '../../features/teams/presentation/screens/teams_screen.dart';
 import 'route_names.dart';
 
@@ -149,6 +150,20 @@ GoRouter buildAppRouter(AuthBloc authBloc) {
       GoRoute(
         path: RouteNames.teams,
         builder: (_, _) => const TeamsScreen(),
+        routes: [
+          GoRoute(
+            path: ':id',
+            builder: (_, state) {
+              final id = int.tryParse(state.pathParameters['id'] ?? '');
+              if (id == null) {
+                return const Scaffold(
+                  body: Center(child: Text('Team not found')),
+                );
+              }
+              return TeamDetailScreen(teamId: id);
+            },
+          ),
+        ],
       ),
       GoRoute(
         path: RouteNames.events,

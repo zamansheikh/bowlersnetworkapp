@@ -149,6 +149,7 @@ import '../../features/teams/data/repositories/teams_repository_impl.dart'
     as _i845;
 import '../../features/teams/domain/repositories/teams_repository.dart'
     as _i875;
+import '../../features/teams/presentation/bloc/team_detail_bloc.dart' as _i394;
 import '../../features/teams/presentation/bloc/teams_bloc.dart' as _i78;
 import '../localization/locale_cubit.dart' as _i960;
 import '../network/api_client.dart' as _i557;
@@ -425,6 +426,9 @@ extension GetItInjectableX on _i174.GetIt {
     );
     gh.lazySingleton<_i22.SharePostUseCase>(
       () => _i22.SharePostUseCase(gh<_i819.NewsfeedRepository>()),
+    );
+    gh.factory<_i394.TeamDetailBloc>(
+      () => _i394.TeamDetailBloc(gh<_i875.TeamsRepository>()),
     );
     gh.factory<_i78.TeamsBloc>(
       () => _i78.TeamsBloc(gh<_i875.TeamsRepository>()),
