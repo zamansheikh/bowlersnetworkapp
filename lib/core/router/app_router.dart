@@ -10,6 +10,7 @@ import '../../features/auth/presentation/screens/password_recovery_screen.dart';
 import '../../features/auth/presentation/screens/signup_screen.dart';
 import '../../features/follow/presentation/bloc/follow_list_bloc.dart';
 import '../../features/follow/presentation/screens/follow_list_screen.dart';
+import '../../features/leaderboard/presentation/screens/leaderboard_screen.dart';
 import '../../features/games/domain/entities/session.dart';
 import '../../features/games/presentation/screens/games_screen.dart';
 import '../../features/games/presentation/screens/session_detail_screen.dart';
@@ -98,6 +99,13 @@ GoRouter buildAppRouter(AuthBloc authBloc) {
       GoRoute(
         path: RouteNames.consentPending,
         builder: (_, _) => const ConsentPendingScreen(),
+      ),
+
+      // Secondary routes (reached from the side drawer / deep links).
+      // Live outside the shell so they get a full back-able screen.
+      GoRoute(
+        path: RouteNames.leaderboard,
+        builder: (_, _) => const LeaderboardScreen(),
       ),
 
       // Main-app shell: 5 tabs, each with its own navigation stack.

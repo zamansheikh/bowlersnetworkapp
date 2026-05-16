@@ -41,6 +41,14 @@ import '../../features/games/data/repositories/games_repository_impl.dart'
 import '../../features/games/domain/repositories/games_repository.dart'
     as _i604;
 import '../../features/games/presentation/bloc/games_bloc.dart' as _i974;
+import '../../features/leaderboard/data/datasources/leaderboard_remote_datasource.dart'
+    as _i757;
+import '../../features/leaderboard/data/repositories/leaderboard_repository_impl.dart'
+    as _i1008;
+import '../../features/leaderboard/domain/repositories/leaderboard_repository.dart'
+    as _i655;
+import '../../features/leaderboard/presentation/bloc/leaderboard_bloc.dart'
+    as _i957;
 import '../../features/messages/data/datasources/messages_remote_datasource.dart'
     as _i182;
 import '../../features/messages/data/repositories/messages_repository_impl.dart'
@@ -117,6 +125,9 @@ extension GetItInjectableX on _i174.GetIt {
     gh.factory<_i771.GamesRemoteDatasource>(
       () => _i771.GamesRemoteDatasource(gh<_i361.Dio>()),
     );
+    gh.factory<_i757.LeaderboardRemoteDatasource>(
+      () => _i757.LeaderboardRemoteDatasource(gh<_i361.Dio>()),
+    );
     gh.factory<_i182.MessagesRemoteDatasource>(
       () => _i182.MessagesRemoteDatasource(gh<_i361.Dio>()),
     );
@@ -165,6 +176,11 @@ extension GetItInjectableX on _i174.GetIt {
       () => _i943.ChatSocket(gh<_i666.SecureStorageService>()),
       dispose: (i) => i.dispose(),
     );
+    gh.lazySingleton<_i655.LeaderboardRepository>(
+      () => _i1008.LeaderboardRepositoryImpl(
+        gh<_i757.LeaderboardRemoteDatasource>(),
+      ),
+    );
     gh.lazySingleton<_i760.FollowRepository>(
       () => _i299.FollowRepositoryImpl(gh<_i973.FollowRemoteDatasource>()),
     );
@@ -194,6 +210,9 @@ extension GetItInjectableX on _i174.GetIt {
     );
     gh.lazySingleton<_i416.ValidateRegistrationUseCase>(
       () => _i416.ValidateRegistrationUseCase(gh<_i787.AuthRepository>()),
+    );
+    gh.factory<_i957.LeaderboardBloc>(
+      () => _i957.LeaderboardBloc(gh<_i655.LeaderboardRepository>()),
     );
     gh.factory<_i454.ConversationsBloc>(
       () => _i454.ConversationsBloc(

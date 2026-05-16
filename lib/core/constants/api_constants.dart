@@ -65,6 +65,12 @@ class Endpoints {
   // XP
   static const String xpLevelInfo = '/api/xp/level-info';
   static const String xpDashboard = '/api/xp/dashboard';
+  static const String xpHistory = '/api/xp/history';
+  static const String xpBreakdown = '/api/xp/breakdown';
+  static const String xpInsights = '/api/xp/insights';
+  static const String xpRanks = '/api/xp/ranks';
+  static String xpLeaderboard(String boardType) =>
+      '/api/xp/leaderboard/$boardType';
 
   // Brands
   static const String brands = '/api/brands';
