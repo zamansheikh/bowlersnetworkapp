@@ -49,26 +49,45 @@ class UserCardsState extends Equatable {
     this.activeTab = CardsSubTab.owned,
     this.owned = const CardsSlot(),
     this.collections = const CardsSlot(),
+    this.typeFilter = CardTypeFilter.all,
   });
 
   final CardsSubTab activeTab;
   final CardsSlot owned;
   final CardsSlot collections;
 
+  /// Client-side card_type filter — applies to whichever slot is
+  /// currently active. Defaults to All.
+  final CardTypeFilter typeFilter;
+
   CardsSlot slotFor(CardsSubTab tab) =>
       tab == CardsSubTab.owned ? owned : collections;
 
   CardsSlot get activeSlot => slotFor(activeTab);
 
+  /// Items in the active slot, filtered by [typeFilter]. The bloc keeps
+  /// the unfiltered raw lists in the slots so toggling the filter is
+  /// free (no re-fetch).
+  List<TradingCard> get filteredActiveItems {
+    final all = activeSlot.items;
+    if (typeFilter == CardTypeFilter.all) return all;
+    final target = typeFilter == CardTypeFilter.modern ? 'modern' : 'legacy';
+    return all
+        .where((c) => c.cardType.toLowerCase() == target)
+        .toList(growable: false);
+  }
+
   UserCardsState copyWith({
     CardsSubTab? activeTab,
     CardsSlot? owned,
     CardsSlot? collections,
+    CardTypeFilter? typeFilter,
   }) {
     return UserCardsState(
       activeTab: activeTab ?? this.activeTab,
       owned: owned ?? this.owned,
       collections: collections ?? this.collections,
+      typeFilter: typeFilter ?? this.typeFilter,
     );
   }
 
@@ -78,5 +97,5 @@ class UserCardsState extends Equatable {
           : copyWith(collections: slot);
 
   @override
-  List<Object?> get props => [activeTab, owned, collections];
+  List<Object?> get props => [activeTab, owned, collections, typeFilter];
 }

@@ -1,25 +1,26 @@
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:go_router/go_router.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 import '../../../../core/di/injection.dart';
 import '../../../../core/extensions/context_extensions.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/theme/app_text_styles.dart';
-import '../../../../core/widgets/app_card.dart';
-import '../../../../core/widgets/app_toast.dart';
 import '../../../../core/widgets/empty_state.dart';
-import '../../../../core/widgets/network_badge.dart';
 import '../../../../core/widgets/skeleton_box.dart';
 import '../../../cards/domain/entities/trading_card.dart';
 import '../../../cards/domain/repositories/cards_repository.dart';
+import '../../../newsfeed/presentation/widgets/trading_card.dart' as nf;
 import '../bloc/user_cards_bloc.dart';
 
-/// Cards tab for both profile screens. Self profiles get a Cards /
-/// Collections sub-tab toggle; other-user profiles show only Cards
-/// (no `/api/cards/collections` equivalent for other users).
+/// Cards tab — renders the actual flippable [nf.TradingCard] widget for
+/// each card so visuals match the web grid exactly (per-design theme,
+/// accent gradient, name/quote, XP/LVL badges, flip-to-back animation).
+///
+/// Layout: horizontal scroll matching the web, with the My Cards /
+/// Collections sub-tab toggle on the left and the All / Modern / Legacy
+/// type filter on the right. Other-user profiles skip the Collections
+/// sub-tab since the backend has no equivalent endpoint.
 class CardsTab extends StatelessWidget {
   const CardsTab({
     super.key,
@@ -65,7 +66,7 @@ class _CardsViewState extends State<_CardsView> {
     if (!_scroll.hasClients) return;
     final remaining =
         _scroll.position.maxScrollExtent - _scroll.position.pixels;
-    if (remaining < 800) {
+    if (remaining < 600) {
       context.read<UserCardsBloc>().add(const UserCardsNextPageRequested());
     }
   }
@@ -77,41 +78,65 @@ class _CardsViewState extends State<_CardsView> {
     super.dispose();
   }
 
-  void _comingSoon(BuildContext context) {
-    showAppToast(
-      context,
-      message: 'Full card view is coming soon.',
-      variant: ToastVariant.info,
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
     return BlocBuilder<UserCardsBloc, UserCardsState>(
       builder: (context, state) {
         final slot = state.activeSlot;
+        final items = state.filteredActiveItems;
         return Column(
           children: [
-            if (widget.isSelf)
-              _SubTabBar(
-                active: state.activeTab,
-                onPick: (t) => context
-                    .read<UserCardsBloc>()
-                    .add(UserCardsSubTabChanged(t)),
+            // Toolbar — stacked on mobile so neither row truncates:
+            // segmented sub-tab (self only) on top, filter rail beneath
+            // right-aligned. Matches the web's two-row arrangement when
+            // the viewport gets narrow.
+            Padding(
+              padding: const EdgeInsets.fromLTRB(
+                AppSpacing.base,
+                AppSpacing.sm,
+                AppSpacing.base,
+                AppSpacing.sm,
               ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  if (widget.isSelf)
+                    _SubTabBar(
+                      active: state.activeTab,
+                      onPick: (t) => context
+                          .read<UserCardsBloc>()
+                          .add(UserCardsSubTabChanged(t)),
+                    ),
+                  if (widget.isSelf) const SizedBox(height: AppSpacing.sm),
+                  Align(
+                    alignment: Alignment.centerRight,
+                    child: _TypeFilterRail(
+                      active: state.typeFilter,
+                      onPick: (f) => context
+                          .read<UserCardsBloc>()
+                          .add(UserCardsFilterChanged(f)),
+                    ),
+                  ),
+                ],
+              ),
+            ),
             Expanded(
               child: slot.loading && slot.items.isEmpty
                   ? const _CardsSkeleton()
-                  : slot.items.isEmpty
+                  : items.isEmpty
                       ? EmptyState(
                           icon: LucideIcons.idCard,
-                          title: state.activeTab == CardsSubTab.collections
-                              ? 'No collected cards yet'
-                              : 'No cards yet',
-                          hint: state.activeTab == CardsSubTab.collections
-                              ? 'Cards you collect will appear here.'
-                              : 'New trading cards will appear here.',
+                          title: slot.items.isEmpty
+                              ? (state.activeTab == CardsSubTab.collections
+                                  ? 'No collected cards yet'
+                                  : 'No cards yet')
+                              : 'No ${state.typeFilter.label.toLowerCase()} cards',
+                          hint: slot.items.isEmpty
+                              ? (state.activeTab == CardsSubTab.collections
+                                  ? 'Cards you collect will appear here.'
+                                  : 'New trading cards will appear here.')
+                              : 'Switch the filter to see other types.',
                         )
                       : RefreshIndicator(
                           color: colors.accent,
@@ -125,6 +150,8 @@ class _CardsViewState extends State<_CardsView> {
                                 .firstWhere(
                                     (s) => !s.activeSlot.refreshing);
                           },
+                          // Vertical scroll — one card per row, centred,
+                          // maximises each card's visibility on mobile.
                           child: ListView.separated(
                             controller: _scroll,
                             physics: const AlwaysScrollableScrollPhysics(),
@@ -134,44 +161,32 @@ class _CardsViewState extends State<_CardsView> {
                               AppSpacing.base,
                               AppSpacing.xl,
                             ),
-                            itemCount: slot.items.length +
+                            itemCount: items.length +
                                 (slot.loadingMore ? 1 : 0),
                             separatorBuilder: (_, _) =>
-                                const SizedBox(height: AppSpacing.md),
+                                const SizedBox(height: AppSpacing.lg),
                             itemBuilder: (_, i) {
-                              if (i >= slot.items.length) {
-                                return Padding(
-                                  padding: const EdgeInsets.symmetric(
-                                    vertical: AppSpacing.md,
-                                  ),
-                                  child: Center(
-                                    child: SizedBox(
-                                      width: 18,
-                                      height: 18,
-                                      child: CircularProgressIndicator(
-                                        strokeWidth: 2,
-                                        color: colors.accent,
-                                      ),
+                              if (i >= items.length) {
+                                return Center(
+                                  child: SizedBox(
+                                    width: 18,
+                                    height: 18,
+                                    child: CircularProgressIndicator(
+                                      strokeWidth: 2,
+                                      color: colors.accent,
                                     ),
                                   ),
                                 );
                               }
-                              final card = slot.items[i];
-                              return _TradingCardCard(
-                                card: card,
+                              return _CardCell(
+                                card: items[i],
                                 onLike: () => context
                                     .read<UserCardsBloc>()
-                                    .add(UserCardsLikeToggled(card.id)),
+                                    .add(UserCardsLikeToggled(items[i].id)),
                                 onCollect: () => context
                                     .read<UserCardsBloc>()
-                                    .add(UserCardsCollectToggled(card.id)),
-                                onOpenDetail: () => _comingSoon(context),
-                                onAuthorTap: card.owner == null ||
-                                        card.owner!.username.isEmpty
-                                    ? null
-                                    : () => context.push(
-                                          '/u/${card.owner!.username}',
-                                        ),
+                                    .add(UserCardsCollectToggled(
+                                        items[i].id)),
                               );
                             },
                           ),
@@ -180,6 +195,111 @@ class _CardsViewState extends State<_CardsView> {
           ],
         );
       },
+    );
+  }
+}
+
+/// One card cell — flippable [nf.TradingCard] up top, like/collect row
+/// underneath. Card width is sized so ~1.7 cards peek into view at
+/// once on a typical phone.
+class _CardCell extends StatelessWidget {
+  const _CardCell({
+    required this.card,
+    required this.onLike,
+    required this.onCollect,
+  });
+
+  final TradingCard card;
+  final VoidCallback onLike;
+  final VoidCallback onCollect;
+
+  @override
+  Widget build(BuildContext context) {
+    // Vertical layout: each card centres in the row at the native 300×420
+    // size (capped slightly smaller than the viewport width so the accent
+    // shadow has room to breathe).
+    final screenWidth = MediaQuery.sizeOf(context).width;
+    final maxByViewport = (screenWidth - AppSpacing.base * 4).clamp(
+      220.0,
+      nf.TradingCard.cardWidth,
+    );
+    final scale = maxByViewport / nf.TradingCard.cardWidth;
+    final cardHeight = nf.TradingCard.cardHeight * scale;
+
+    return Center(
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          SizedBox(
+            width: maxByViewport,
+            height: cardHeight,
+            child: nf.TradingCard(
+              typeData: card.rawPayload,
+              scale: scale,
+            ),
+          ),
+          const SizedBox(height: AppSpacing.sm),
+          _CardFooter(
+            card: card,
+            onLike: onLike,
+            onCollect: onCollect,
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _CardFooter extends StatelessWidget {
+  const _CardFooter({
+    required this.card,
+    required this.onLike,
+    required this.onCollect,
+  });
+
+  final TradingCard card;
+  final VoidCallback onLike;
+  final VoidCallback onCollect;
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = context.colors;
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        _ToggleAction(
+          icon: LucideIcons.heart,
+          active: card.isLiked == true,
+          count: card.likesCount,
+          onTap: onLike,
+        ),
+        const SizedBox(width: AppSpacing.md),
+        _ToggleAction(
+          icon: LucideIcons.bookmark,
+          active: card.isCollected == true,
+          count: card.collectionsCount,
+          onTap: onCollect,
+        ),
+        if (card.isSealed) ...[
+          const SizedBox(width: AppSpacing.md),
+          Container(
+            padding:
+                const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+            decoration: BoxDecoration(
+              color: colors.bgSurfaceHover,
+              borderRadius: AppRadius.smAll,
+            ),
+            child: Text(
+              'LEGACY',
+              style: AppTextStyles.nano.copyWith(
+                color: colors.textTertiary,
+                fontWeight: FontWeight.w700,
+                letterSpacing: 0.4,
+              ),
+            ),
+          ),
+        ],
+      ],
     );
   }
 }
@@ -193,12 +313,6 @@ class _SubTabBar extends StatelessWidget {
   Widget build(BuildContext context) {
     final colors = context.colors;
     return Container(
-      margin: const EdgeInsets.fromLTRB(
-        AppSpacing.base,
-        AppSpacing.sm,
-        AppSpacing.base,
-        0,
-      ),
       padding: const EdgeInsets.all(3),
       decoration: BoxDecoration(
         color: colors.bgSurface,
@@ -207,13 +321,13 @@ class _SubTabBar extends StatelessWidget {
       ),
       child: Row(
         children: [
-          _TabPill(
+          _SegmentPill(
             icon: LucideIcons.idCard,
             label: 'My cards',
             active: active == CardsSubTab.owned,
             onTap: () => onPick(CardsSubTab.owned),
           ),
-          _TabPill(
+          _SegmentPill(
             icon: LucideIcons.bookmark,
             label: 'Collections',
             active: active == CardsSubTab.collections,
@@ -225,8 +339,8 @@ class _SubTabBar extends StatelessWidget {
   }
 }
 
-class _TabPill extends StatelessWidget {
-  const _TabPill({
+class _SegmentPill extends StatelessWidget {
+  const _SegmentPill({
     required this.icon,
     required this.label,
     required this.active,
@@ -275,335 +389,45 @@ class _TabPill extends StatelessWidget {
   }
 }
 
-/// One card row — owner header, hero photo (display_image_url with an
-/// accent gradient frame derived from the card's hue), display name +
-/// quote overlay, and like/collect toggles.
-class _TradingCardCard extends StatelessWidget {
-  const _TradingCardCard({
-    required this.card,
-    required this.onLike,
-    required this.onCollect,
-    required this.onOpenDetail,
-    this.onAuthorTap,
-  });
-
-  final TradingCard card;
-  final VoidCallback onLike;
-  final VoidCallback onCollect;
-  final VoidCallback onOpenDetail;
-  final VoidCallback? onAuthorTap;
-
-  Color _accentFromHue(int hue) =>
-      HSLColor.fromAHSL(1, (hue % 360).toDouble(), 0.65, 0.55).toColor();
+class _TypeFilterRail extends StatelessWidget {
+  const _TypeFilterRail({required this.active, required this.onPick});
+  final CardTypeFilter active;
+  final ValueChanged<CardTypeFilter> onPick;
 
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
-    final owner = card.owner;
-    final accent = card.accentHue == 0
-        ? colors.accent
-        : _accentFromHue(card.accentHue);
-
-    return AppCard(
-      padding: EdgeInsets.zero,
-      child: InkWell(
-        onTap: onOpenDetail,
-        borderRadius: AppRadius.lgAll,
-        child: Padding(
-          padding: const EdgeInsets.all(AppSpacing.base),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // Owner row
-              if (owner != null)
-                InkWell(
-                  onTap: onAuthorTap,
-                  borderRadius: AppRadius.smAll,
-                  child: Row(
-                    children: [
-                      _OwnerAvatar(owner: owner),
-                      const SizedBox(width: AppSpacing.sm),
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Row(
-                              children: [
-                                Flexible(
-                                  child: Text(
-                                    owner.displayName,
-                                    overflow: TextOverflow.ellipsis,
-                                    style: AppTextStyles.bodySmall.copyWith(
-                                      color: colors.textPrimary,
-                                      fontWeight: FontWeight.w600,
-                                    ),
-                                  ),
-                                ),
-                                if (owner.badgeIconUrl != null) ...[
-                                  const SizedBox(width: 4),
-                                  NetworkBadge(
-                                    url: owner.badgeIconUrl,
-                                    size: 12,
-                                  ),
-                                ],
-                              ],
-                            ),
-                            if (owner.rankDisplay != null &&
-                                owner.rankDisplay!.isNotEmpty)
-                              Text(
-                                owner.rankDisplay!,
-                                style: AppTextStyles.nano.copyWith(
-                                  color: colors.textTertiary,
-                                ),
-                              ),
-                          ],
-                        ),
-                      ),
-                      if (card.design != null)
-                        Container(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 8,
-                            vertical: 3,
-                          ),
-                          decoration: BoxDecoration(
-                            color: accent.withValues(alpha: 0.18),
-                            borderRadius: AppRadius.smAll,
-                          ),
-                          child: Text(
-                            card.design!.name,
-                            style: AppTextStyles.nano.copyWith(
-                              color: accent,
-                              fontWeight: FontWeight.w700,
-                              letterSpacing: 0.3,
-                            ),
-                          ),
-                        ),
-                    ],
-                  ),
-                ),
-              const SizedBox(height: AppSpacing.md),
-              // Photo hero — uses card.displayImageUrl with an accent
-              // gradient frame + name overlay at the bottom.
-              AspectRatio(
-                aspectRatio: 3 / 4,
-                child: Container(
-                  decoration: BoxDecoration(
-                    borderRadius: AppRadius.mdAll,
-                    border: Border.all(
-                      color: accent.withValues(alpha: 0.6),
-                      width: 2,
-                    ),
-                    boxShadow: [
-                      BoxShadow(
-                        color: accent.withValues(alpha: 0.25),
-                        blurRadius: 16,
-                        offset: const Offset(0, 4),
-                      ),
-                    ],
-                  ),
-                  clipBehavior: Clip.antiAlias,
-                  child: Stack(
-                    fit: StackFit.expand,
-                    children: [
-                      _CardPhoto(
-                        url: card.displayImageUrl,
-                        accent: accent,
-                      ),
-                      // Dark gradient overlay at the bottom for legible text.
-                      const Positioned.fill(
-                        child: DecoratedBox(
-                          decoration: BoxDecoration(
-                            gradient: LinearGradient(
-                              begin: Alignment.topCenter,
-                              end: Alignment.bottomCenter,
-                              colors: [
-                                Colors.transparent,
-                                Colors.transparent,
-                                Color(0xCC000000),
-                              ],
-                              stops: [0.0, 0.55, 1.0],
-                            ),
-                          ),
-                        ),
-                      ),
-                      if (card.isSealed)
-                        Positioned(
-                          top: 8,
-                          left: 8,
-                          child: _PillBadge(
-                            label: 'Legacy',
-                            color: accent,
-                          ),
-                        ),
-                      Positioned(
-                        left: AppSpacing.md,
-                        right: AppSpacing.md,
-                        bottom: AppSpacing.md,
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            if (card.displayName.isNotEmpty)
-                              Text(
-                                card.displayName,
-                                maxLines: 1,
-                                overflow: TextOverflow.ellipsis,
-                                style: AppTextStyles.pageTitle.copyWith(
-                                  color: Colors.white,
-                                  fontSize: 18,
-                                  shadows: [
-                                    Shadow(
-                                      color:
-                                          Colors.black.withValues(alpha: 0.6),
-                                      blurRadius: 6,
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            if (card.quote.isNotEmpty) ...[
-                              const SizedBox(height: 2),
-                              Text(
-                                '"${card.quote}"',
-                                maxLines: 2,
-                                overflow: TextOverflow.ellipsis,
-                                style: AppTextStyles.nano.copyWith(
-                                  color: Colors.white.withValues(alpha: 0.85),
-                                  fontStyle: FontStyle.italic,
-                                ),
-                              ),
-                            ],
-                          ],
-                        ),
-                      ),
-                    ],
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        for (final f in CardTypeFilter.values) ...[
+          Material(
+            color: active == f
+                ? colors.accent.withValues(alpha: 0.12)
+                : Colors.transparent,
+            borderRadius: AppRadius.smAll,
+            child: InkWell(
+              borderRadius: AppRadius.smAll,
+              onTap: () => onPick(f),
+              child: Padding(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                child: Text(
+                  f.label,
+                  style: AppTextStyles.nano.copyWith(
+                    color: active == f
+                        ? colors.accent
+                        : colors.textTertiary,
+                    fontWeight:
+                        active == f ? FontWeight.w700 : FontWeight.w500,
                   ),
                 ),
               ),
-              const SizedBox(height: AppSpacing.sm),
-              Row(
-                children: [
-                  _ToggleAction(
-                    icon: LucideIcons.heart,
-                    active: card.isLiked == true,
-                    count: card.likesCount,
-                    onTap: onLike,
-                  ),
-                  const SizedBox(width: AppSpacing.md),
-                  _ToggleAction(
-                    icon: LucideIcons.bookmark,
-                    active: card.isCollected == true,
-                    count: card.collectionsCount,
-                    onTap: onCollect,
-                  ),
-                ],
-              ),
-            ],
+            ),
           ),
-        ),
-      ),
-    );
-  }
-}
-
-class _CardPhoto extends StatelessWidget {
-  const _CardPhoto({required this.url, required this.accent});
-  final String url;
-  final Color accent;
-
-  @override
-  Widget build(BuildContext context) {
-    final colors = context.colors;
-    final fallback = Container(
-      decoration: BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: [
-            accent.withValues(alpha: 0.32),
-            colors.bgSurfaceHover,
-          ],
-        ),
-      ),
-      alignment: Alignment.center,
-      child: Icon(LucideIcons.idCard, size: 40, color: accent),
-    );
-    if (url.isEmpty) return fallback;
-    return CachedNetworkImage(
-      imageUrl: url,
-      fit: BoxFit.cover,
-      placeholder: (_, _) => fallback,
-      errorWidget: (_, _, _) => fallback,
-    );
-  }
-}
-
-class _PillBadge extends StatelessWidget {
-  const _PillBadge({required this.label, required this.color});
-  final String label;
-  final Color color;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-      decoration: BoxDecoration(
-        color: color,
-        borderRadius: AppRadius.smAll,
-      ),
-      child: Text(
-        label.toUpperCase(),
-        style: AppTextStyles.nano.copyWith(
-          color: Colors.white,
-          fontWeight: FontWeight.w800,
-          letterSpacing: 0.5,
-        ),
-      ),
-    );
-  }
-}
-
-class _OwnerAvatar extends StatelessWidget {
-  const _OwnerAvatar({required this.owner});
-  final TradingCardOwner owner;
-
-  @override
-  Widget build(BuildContext context) {
-    final colors = context.colors;
-    final initial = owner.firstName.isNotEmpty
-        ? owner.firstName.substring(0, 1).toUpperCase()
-        : owner.username.isNotEmpty
-            ? owner.username.substring(0, 1).toUpperCase()
-            : '?';
-    final placeholder = Container(
-      width: 32,
-      height: 32,
-      alignment: Alignment.center,
-      decoration: BoxDecoration(
-        shape: BoxShape.circle,
-        color: colors.accentSubtle,
-        border: Border.all(color: colors.borderStrong),
-      ),
-      child: Text(
-        initial,
-        style: AppTextStyles.nano.copyWith(
-          color: colors.accent,
-          fontWeight: FontWeight.w700,
-        ),
-      ),
-    );
-    final url = owner.profilePictureUrl;
-    if (url == null || url.isEmpty) return placeholder;
-    return ClipOval(
-      child: SizedBox(
-        width: 32,
-        height: 32,
-        child: CachedNetworkImage(
-          imageUrl: url,
-          fit: BoxFit.cover,
-          placeholder: (_, _) => placeholder,
-          errorWidget: (_, _, _) => placeholder,
-        ),
-      ),
+          if (f != CardTypeFilter.values.last) const SizedBox(width: 4),
+        ],
+      ],
     );
   }
 }
@@ -652,13 +476,31 @@ class _ToggleAction extends StatelessWidget {
 
 class _CardsSkeleton extends StatelessWidget {
   const _CardsSkeleton();
+
   @override
   Widget build(BuildContext context) {
+    final screenWidth = MediaQuery.sizeOf(context).width;
+    final cellWidth = (screenWidth - AppSpacing.base * 4).clamp(
+      220.0,
+      nf.TradingCard.cardWidth,
+    );
+    final cardHeight = nf.TradingCard.cardHeight *
+        (cellWidth / nf.TradingCard.cardWidth);
     return ListView.separated(
-      padding: const EdgeInsets.all(AppSpacing.base),
+      padding: const EdgeInsets.fromLTRB(
+        AppSpacing.base,
+        AppSpacing.sm,
+        AppSpacing.base,
+        AppSpacing.xl,
+      ),
       itemCount: 3,
-      separatorBuilder: (_, _) => const SizedBox(height: AppSpacing.md),
-      itemBuilder: (_, _) => const SkeletonBox(height: 360),
+      separatorBuilder: (_, _) => const SizedBox(height: AppSpacing.lg),
+      itemBuilder: (_, _) => Center(
+        child: SizedBox(
+          width: cellWidth,
+          child: SkeletonBox(height: cardHeight),
+        ),
+      ),
     );
   }
 }

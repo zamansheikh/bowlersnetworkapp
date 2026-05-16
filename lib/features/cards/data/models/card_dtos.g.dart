@@ -48,11 +48,6 @@ CardInnerDto _$CardInnerDtoFromJson(Map<String, dynamic> json) => CardInnerDto(
   createdAtIso: json['created_at_iso'] as String?,
 );
 
-CardEnvelopeDto _$CardEnvelopeDtoFromJson(Map<String, dynamic> json) =>
-    CardEnvelopeDto(
-      card: CardInnerDto.fromJson(json['card'] as Map<String, dynamic>),
-    );
-
 CardsPageDto _$CardsPageDtoFromJson(Map<String, dynamic> json) => CardsPageDto(
   cards:
       (json['cards'] as List<dynamic>?)

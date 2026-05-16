@@ -122,12 +122,24 @@ class CardInnerDto {
 /// around every card. `info` and `brands` are only present when the
 /// caller specifically asked for the full card payload — for the
 /// profile-screen list they're often missing or thin.
-@JsonSerializable(createToJson: false)
+///
+/// We also stash the [raw] JSON map so the existing flippable
+/// `TradingCard` widget can render its front / back faces straight from
+/// the wire shape without us having to mirror every nested key.
 class CardEnvelopeDto {
-  const CardEnvelopeDto({required this.card});
+  const CardEnvelopeDto({required this.card, this.raw = const {}});
+
   final CardInnerDto card;
-  factory CardEnvelopeDto.fromJson(Map<String, dynamic> json) =>
-      _$CardEnvelopeDtoFromJson(json);
+  final Map<String, dynamic> raw;
+
+  factory CardEnvelopeDto.fromJson(Map<String, dynamic> json) {
+    return CardEnvelopeDto(
+      card: CardInnerDto.fromJson(
+        json['card'] as Map<String, dynamic>? ?? const {},
+      ),
+      raw: json,
+    );
+  }
 }
 
 @JsonSerializable(createToJson: false)

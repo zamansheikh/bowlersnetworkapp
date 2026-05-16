@@ -120,6 +120,7 @@ class CardsRepositoryImpl implements CardsRepository {
       createdAt: inner.createdAtIso == null
           ? null
           : DateTime.tryParse(inner.createdAtIso!),
+      rawPayload: envelope.raw,
     );
   }
 

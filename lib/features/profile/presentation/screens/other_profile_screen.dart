@@ -21,6 +21,7 @@ import '../widgets/info_tab.dart';
 import '../widgets/media_tab.dart';
 import '../widgets/posts_tab.dart';
 import '../widgets/profile_hero.dart';
+import '../widgets/profile_tab_bar.dart';
 
 /// Read-only profile screen for users OTHER than the logged-in user.
 ///
@@ -54,7 +55,7 @@ class _OtherProfileView extends StatefulWidget {
 }
 
 class _OtherProfileViewState extends State<_OtherProfileView> {
-  int _activeTab = 0;
+  ProfileTab _activeTab = ProfileTab.info;
 
   @override
   Widget build(BuildContext context) {
@@ -185,9 +186,9 @@ class _OtherProfileViewState extends State<_OtherProfileView> {
                   ),
                   SliverPersistentHeader(
                     pinned: true,
-                    delegate: _StickyTabs(
-                      activeIndex: _activeTab,
-                      onChanged: (i) => setState(() => _activeTab = i),
+                    delegate: ProfileStickyTabsDelegate(
+                      active: _activeTab,
+                      onChanged: (t) => setState(() => _activeTab = t),
                     ),
                   ),
                   SliverPadding(
@@ -222,26 +223,25 @@ class _OtherProfileViewState extends State<_OtherProfileView> {
   }
 
   Widget _tabContent(Profile profile) {
+    final tabBoxHeight = MediaQuery.sizeOf(context).height * 0.75;
     switch (_activeTab) {
-      case 0:
+      case ProfileTab.info:
         return ProfileInfoTab(profile: profile, isSelf: false);
-      case 1:
+      case ProfileTab.posts:
         return SizedBox(
-          height: MediaQuery.sizeOf(context).height * 0.75,
+          height: tabBoxHeight,
           child: PostsTab(userId: profile.user.id, isSelf: false),
         );
-      case 2:
+      case ProfileTab.media:
         return SizedBox(
-          height: MediaQuery.sizeOf(context).height * 0.75,
+          height: tabBoxHeight,
           child: MediaTab(userId: profile.user.id),
         );
-      case 3:
+      case ProfileTab.cards:
         return SizedBox(
-          height: MediaQuery.sizeOf(context).height * 0.75,
+          height: tabBoxHeight,
           child: CardsTab(userId: profile.user.id, isSelf: false),
         );
-      default:
-        return const SizedBox.shrink();
     }
   }
 
@@ -381,128 +381,6 @@ class _StatCard extends StatelessWidget {
             style: AppTextStyles.label.copyWith(color: colors.textTertiary),
           ),
         ],
-      ),
-    );
-  }
-}
-
-class _StickyTabs extends SliverPersistentHeaderDelegate {
-  _StickyTabs({required this.activeIndex, required this.onChanged});
-
-  final int activeIndex;
-  final ValueChanged<int> onChanged;
-
-  @override
-  double get minExtent => 48;
-  @override
-  double get maxExtent => 48;
-
-  @override
-  Widget build(BuildContext context, double shrinkOffset, bool overlapsContent) {
-    final colors = context.colors;
-    return Container(
-      height: 48,
-      decoration: BoxDecoration(
-        color: colors.bgPrimary,
-        border: Border(bottom: BorderSide(color: colors.borderDefault)),
-      ),
-      child: Row(
-        children: [
-          _TabItem(
-            icon: LucideIcons.info,
-            label: 'Info',
-            active: activeIndex == 0,
-            onTap: () => onChanged(0),
-          ),
-          _TabItem(
-            icon: LucideIcons.newspaper,
-            label: 'Posts',
-            active: activeIndex == 1,
-            onTap: () => onChanged(1),
-          ),
-          _TabItem(
-            icon: LucideIcons.image,
-            label: 'Media',
-            active: activeIndex == 2,
-            onTap: () => onChanged(2),
-          ),
-          _TabItem(
-            icon: LucideIcons.sparkles,
-            label: 'Cards',
-            active: activeIndex == 3,
-            onTap: () => onChanged(3),
-          ),
-        ],
-      ),
-    );
-  }
-
-  @override
-  bool shouldRebuild(covariant _StickyTabs old) =>
-      activeIndex != old.activeIndex;
-}
-
-class _TabItem extends StatelessWidget {
-  const _TabItem({
-    required this.icon,
-    required this.label,
-    required this.active,
-    required this.onTap,
-  });
-
-  final IconData icon;
-  final String label;
-  final bool active;
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    final colors = context.colors;
-    final color = active ? colors.accent : colors.textTertiary;
-    return Expanded(
-      child: Material(
-        color: Colors.transparent,
-        child: InkWell(
-          onTap: onTap,
-          child: Stack(
-            alignment: Alignment.center,
-            children: [
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Icon(icon, size: 14, color: color),
-                  const SizedBox(width: 5),
-                  Flexible(
-                    child: Text(
-                      label,
-                      overflow: TextOverflow.ellipsis,
-                      style: AppTextStyles.bodySmall.copyWith(
-                        color: color,
-                        fontWeight: active ? FontWeight.w600 : FontWeight.w500,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-              if (active)
-                Positioned(
-                  left: 0,
-                  right: 0,
-                  bottom: 0,
-                  child: Center(
-                    child: Container(
-                      width: 44,
-                      height: 2.5,
-                      decoration: BoxDecoration(
-                        color: colors.accent,
-                        borderRadius: BorderRadius.circular(2),
-                      ),
-                    ),
-                  ),
-                ),
-            ],
-          ),
-        ),
       ),
     );
   }

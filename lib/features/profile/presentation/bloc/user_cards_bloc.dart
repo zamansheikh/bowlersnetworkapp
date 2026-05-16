@@ -25,6 +25,15 @@ class UserCardsBloc extends Bloc<UserCardsEvent, UserCardsState> {
     on<UserCardsNextPageRequested>(_onNextPage);
     on<UserCardsLikeToggled>(_onLike);
     on<UserCardsCollectToggled>(_onCollect);
+    on<UserCardsFilterChanged>(_onFilterChanged);
+  }
+
+  void _onFilterChanged(
+    UserCardsFilterChanged event,
+    Emitter<UserCardsState> emit,
+  ) {
+    if (event.filter == state.typeFilter) return;
+    emit(state.copyWith(typeFilter: event.filter));
   }
 
   final CardsRepository _repository;

@@ -79,6 +79,7 @@ class TradingCard extends Equatable {
     this.isLiked,
     this.isCollected,
     this.createdAt,
+    this.rawPayload = const {},
   });
 
   final int id;
@@ -109,6 +110,11 @@ class TradingCard extends Equatable {
   final bool? isCollected;
   final DateTime? createdAt;
 
+  /// Raw `{card, info, brands}` blob from the backend. Kept opaque so
+  /// the existing flippable `TradingCard` widget (which consumes the
+  /// full nested wire shape) can render straight from it.
+  final Map<String, dynamic> rawPayload;
+
   TradingCard withLike({required bool isLiked, required int likesCount}) =>
       TradingCard(
         id: id,
@@ -126,6 +132,7 @@ class TradingCard extends Equatable {
         isLiked: isLiked,
         isCollected: isCollected,
         createdAt: createdAt,
+        rawPayload: rawPayload,
       );
 
   TradingCard withCollect({
@@ -148,6 +155,7 @@ class TradingCard extends Equatable {
         isLiked: isLiked,
         isCollected: isCollected,
         createdAt: createdAt,
+        rawPayload: rawPayload,
       );
 
   @override
@@ -167,6 +175,8 @@ class TradingCard extends Equatable {
         isLiked,
         isCollected,
         createdAt,
+        // rawPayload deliberately excluded — equality should match on
+        // the structured fields, not on raw map identity.
       ];
 }
 

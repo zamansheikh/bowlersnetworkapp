@@ -22,6 +22,7 @@ import '../widgets/info_tab.dart';
 import '../widgets/media_tab.dart';
 import '../widgets/posts_tab.dart';
 import '../widgets/profile_hero.dart';
+import '../widgets/profile_tab_bar.dart';
 import '../widgets/xp_rank_card.dart';
 
 /// Production profile screen.
@@ -38,7 +39,7 @@ class ProfileScreen extends StatefulWidget {
 }
 
 class _ProfileScreenState extends State<ProfileScreen> {
-  int _activeTab = 0;
+  ProfileTab _activeTab = ProfileTab.info;
 
   @override
   void initState() {
@@ -55,22 +56,16 @@ class _ProfileScreenState extends State<ProfileScreen> {
     final picked = await getIt<ImagePickerService>().pickImage();
     if (picked == null || !mounted) return;
     context.read<ProfileBloc>().add(
-          ProfileAvatarUploadRequested(
-            bytes: picked.bytes,
-            fileName: picked.name,
-          ),
-        );
+      ProfileAvatarUploadRequested(bytes: picked.bytes, fileName: picked.name),
+    );
   }
 
   Future<void> _pickCover() async {
     final picked = await getIt<ImagePickerService>().pickImage();
     if (picked == null || !mounted) return;
     context.read<ProfileBloc>().add(
-          ProfileCoverUploadRequested(
-            bytes: picked.bytes,
-            fileName: picked.name,
-          ),
-        );
+      ProfileCoverUploadRequested(bytes: picked.bytes, fileName: picked.name),
+    );
   }
 
   @override
@@ -91,9 +86,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
             if (state.profile == null) {
               return _ErrorState(
                 errors: state.errors,
-                onRetry: () => context
-                    .read<ProfileBloc>()
-                    .add(const ProfileLoadRequested()),
+                onRetry: () => context.read<ProfileBloc>().add(
+                  const ProfileLoadRequested(),
+                ),
               );
             }
 
@@ -101,13 +96,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
             return RefreshIndicator(
               color: colors.accent,
               onRefresh: () async {
-                context
-                    .read<ProfileBloc>()
-                    .add(const ProfileLoadRequested());
-                await context
-                    .read<ProfileBloc>()
-                    .stream
-                    .firstWhere((s) => !s.loading);
+                context.read<ProfileBloc>().add(const ProfileLoadRequested());
+                await context.read<ProfileBloc>().stream.firstWhere(
+                  (s) => !s.loading,
+                );
               },
               child: CustomScrollView(
                 slivers: [
@@ -129,9 +121,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
                           right: AppSpacing.base,
                           child: _LogoutButton(
                             tooltip: l10n.actionLogout,
-                            onTap: () => context
-                                .read<AuthBloc>()
-                                .add(const AuthLogoutRequested()),
+                            onTap: () => context.read<AuthBloc>().add(
+                              const AuthLogoutRequested(),
+                            ),
                           ),
                         ),
                       ],
@@ -155,8 +147,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                               size: AppButtonSize.regular,
                               icon: LucideIcons.pencil,
                               expand: true,
-                              onPressed: () =>
-                                  context.push('/profile/edit'),
+                              onPressed: () => context.push('/profile/edit'),
                             ),
                           ),
                           const SizedBox(width: AppSpacing.md),
@@ -178,8 +169,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         children: [
                           if (!profile.isComplete) ...[
                             _CompletionBanner(
-                              percent: profile.completionPercentage,
-                            )
+                                  percent: profile.completionPercentage,
+                                )
                                 .animate()
                                 .fadeIn(duration: 300.ms)
                                 .moveY(begin: 8, end: 0),
@@ -218,9 +209,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
                               ),
                           const SizedBox(height: AppSpacing.md),
                           FavoriteBrandsCard(
-                            brands: state.favoriteBrands,
-                            onBrowse: () {},
-                          )
+                                brands: state.favoriteBrands,
+                                onBrowse: () {},
+                              )
                               .animate()
                               .fadeIn(
                                 delay: 120.ms,
@@ -241,9 +232,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   // ── Sticky tab bar ──
                   SliverPersistentHeader(
                     pinned: true,
-                    delegate: _StickyTabs(
-                      activeIndex: _activeTab,
-                      onChanged: (i) => setState(() => _activeTab = i),
+                    delegate: ProfileStickyTabsDelegate(
+                      active: _activeTab,
+                      onChanged: (t) => setState(() => _activeTab = t),
                     ),
                   ),
                   // ── Active tab content ──
@@ -258,10 +249,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       child: AnimatedSwitcher(
                         duration: AppDurations.short,
                         switchInCurve: BNCurves.spring,
-                        transitionBuilder: (child, anim) => FadeTransition(
-                          opacity: anim,
-                          child: child,
-                        ),
+                        transitionBuilder: (child, anim) =>
+                            FadeTransition(opacity: anim, child: child),
                         child: KeyedSubtree(
                           key: ValueKey(_activeTab),
                           child: _tabContent(profile),
@@ -279,34 +268,32 @@ class _ProfileScreenState extends State<ProfileScreen> {
   }
 
   Widget _tabContent(Profile profile) {
+    // Each non-info tab owns its own ScrollController, so we hand them a
+    // bounded box to live in. The outer CustomScrollView covers the hero /
+    // stats; once the user has scrolled to the tabs, the inner tab takes
+    // over its own scroll.
+    final tabBoxHeight = MediaQuery.sizeOf(context).height * 0.75;
     switch (_activeTab) {
-      case 0:
+      case ProfileTab.info:
         return ProfileInfoTab(profile: profile, isSelf: true);
-      case 1:
-        // PostsTab uses its own ScrollController + ListView so we give
-        // it a bounded box to live in. The outer page scroll still
-        // covers the hero / stats; once the user scrolls the page down
-        // to here, the tab takes over its own scroll.
+      case ProfileTab.posts:
         return SizedBox(
-          height: MediaQuery.sizeOf(context).height * 0.75,
+          height: tabBoxHeight,
           child: PostsTab(userId: profile.user.id, isSelf: true),
         );
-      case 2:
+      case ProfileTab.media:
         return SizedBox(
-          height: MediaQuery.sizeOf(context).height * 0.75,
+          height: tabBoxHeight,
           child: MediaTab(userId: profile.user.id),
         );
-      case 3:
+      case ProfileTab.cards:
         return SizedBox(
-          height: MediaQuery.sizeOf(context).height * 0.75,
+          height: tabBoxHeight,
           child: CardsTab(userId: profile.user.id, isSelf: true),
         );
-      default:
-        return const SizedBox.shrink();
     }
   }
 }
-
 
 class _SecondaryIconButton extends StatelessWidget {
   const _SecondaryIconButton({required this.icon, required this.onTap});
@@ -358,9 +345,7 @@ class _LogoutButton extends StatelessWidget {
             decoration: BoxDecoration(
               color: Colors.black.withValues(alpha: 0.4),
               borderRadius: AppRadius.mdAll,
-              border: Border.all(
-                color: Colors.white.withValues(alpha: 0.15),
-              ),
+              border: Border.all(color: Colors.white.withValues(alpha: 0.15)),
             ),
             alignment: Alignment.center,
             child: const Icon(
@@ -400,15 +385,15 @@ class _CompletionBanner extends StatelessWidget {
                   borderRadius: AppRadius.smAll,
                 ),
                 alignment: Alignment.center,
-                child: Icon(LucideIcons.info,
-                    size: 16, color: colors.warning),
+                child: Icon(LucideIcons.info, size: 16, color: colors.warning),
               ),
               const SizedBox(width: AppSpacing.sm),
               Expanded(
                 child: Text(
                   l10n.profileCompletionBannerTitle,
-                  style: AppTextStyles.cardTitle
-                      .copyWith(color: colors.textPrimary),
+                  style: AppTextStyles.cardTitle.copyWith(
+                    color: colors.textPrimary,
+                  ),
                 ),
               ),
               Text(
@@ -507,130 +492,6 @@ class _StatCard extends StatelessWidget {
             style: AppTextStyles.label.copyWith(color: colors.textTertiary),
           ),
         ],
-      ),
-    );
-  }
-}
-
-// ─────────────────────────────────────────────────────────────────────────────
-class _StickyTabs extends SliverPersistentHeaderDelegate {
-  _StickyTabs({required this.activeIndex, required this.onChanged});
-
-  final int activeIndex;
-  final ValueChanged<int> onChanged;
-
-  @override
-  double get minExtent => 48;
-  @override
-  double get maxExtent => 48;
-
-  @override
-  Widget build(BuildContext context, double shrinkOffset, bool overlapsContent) {
-    final colors = context.colors;
-    return Container(
-      height: 48,
-      decoration: BoxDecoration(
-        color: colors.bgPrimary,
-        border: Border(bottom: BorderSide(color: colors.borderDefault)),
-      ),
-      child: Row(
-        children: [
-          _TabItem(
-            icon: LucideIcons.info,
-            label: 'Info',
-            active: activeIndex == 0,
-            onTap: () => onChanged(0),
-          ),
-          _TabItem(
-            icon: LucideIcons.newspaper,
-            label: 'Posts',
-            active: activeIndex == 1,
-            onTap: () => onChanged(1),
-          ),
-          _TabItem(
-            icon: LucideIcons.image,
-            label: 'Media',
-            active: activeIndex == 2,
-            onTap: () => onChanged(2),
-          ),
-          _TabItem(
-            icon: LucideIcons.sparkles,
-            label: 'Cards',
-            active: activeIndex == 3,
-            onTap: () => onChanged(3),
-          ),
-        ],
-      ),
-    );
-  }
-
-  @override
-  bool shouldRebuild(covariant _StickyTabs old) =>
-      activeIndex != old.activeIndex;
-}
-
-class _TabItem extends StatelessWidget {
-  const _TabItem({
-    required this.icon,
-    required this.label,
-    required this.active,
-    required this.onTap,
-  });
-
-  final IconData icon;
-  final String label;
-  final bool active;
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    final colors = context.colors;
-    final color = active ? colors.accent : colors.textTertiary;
-
-    return Expanded(
-      child: Material(
-        color: Colors.transparent,
-        child: InkWell(
-          onTap: onTap,
-          child: Stack(
-            alignment: Alignment.center,
-            children: [
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Icon(icon, size: 14, color: color),
-                  const SizedBox(width: 5),
-                  Flexible(
-                    child: Text(
-                      label,
-                      overflow: TextOverflow.ellipsis,
-                      style: AppTextStyles.bodySmall.copyWith(
-                        color: color,
-                        fontWeight: active ? FontWeight.w600 : FontWeight.w500,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-              if (active)
-                Positioned(
-                  left: 0,
-                  right: 0,
-                  bottom: 0,
-                  child: Center(
-                    child: Container(
-                      width: 44,
-                      height: 2.5,
-                      decoration: BoxDecoration(
-                        color: colors.accent,
-                        borderRadius: BorderRadius.circular(2),
-                      ),
-                    ),
-                  ),
-                ),
-            ],
-          ),
-        ),
       ),
     );
   }
