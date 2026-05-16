@@ -42,6 +42,13 @@ import '../../features/chatter/domain/repositories/chatter_repository.dart'
     as _i797;
 import '../../features/chatter/presentation/bloc/chatter_list_bloc.dart'
     as _i250;
+import '../../features/feedback/data/datasources/feedback_remote_datasource.dart'
+    as _i147;
+import '../../features/feedback/data/repositories/feedback_repository_impl.dart'
+    as _i961;
+import '../../features/feedback/domain/repositories/feedback_repository.dart'
+    as _i619;
+import '../../features/feedback/presentation/bloc/feedback_bloc.dart' as _i494;
 import '../../features/follow/data/datasources/follow_remote_datasource.dart'
     as _i973;
 import '../../features/follow/data/repositories/follow_repository_impl.dart'
@@ -103,6 +110,10 @@ import '../../features/newsfeed/domain/usecases/feed_usecases.dart' as _i22;
 import '../../features/newsfeed/presentation/bloc/feed_bloc.dart' as _i920;
 import '../../features/notifications/data/datasources/notifications_remote_datasource.dart'
     as _i937;
+import '../../features/notifications/data/repositories/notifications_repository_impl.dart'
+    as _i201;
+import '../../features/notifications/domain/repositories/notifications_repository.dart'
+    as _i563;
 import '../../features/onboarding/data/onboarding_storage.dart' as _i861;
 import '../../features/profile/data/datasources/profile_remote_datasource.dart'
     as _i327;
@@ -120,6 +131,7 @@ import '../../features/search/data/repositories/search_repository_impl.dart'
 import '../../features/search/domain/repositories/search_repository.dart'
     as _i357;
 import '../../features/search/presentation/bloc/search_bloc.dart' as _i552;
+import '../../features/settings/presentation/bloc/settings_bloc.dart' as _i585;
 import '../localization/locale_cubit.dart' as _i960;
 import '../network/api_client.dart' as _i557;
 import '../network/chat_socket.dart' as _i943;
@@ -174,6 +186,9 @@ extension GetItInjectableX on _i174.GetIt {
     gh.factory<_i684.ChatterRemoteDatasource>(
       () => _i684.ChatterRemoteDatasource(gh<_i361.Dio>()),
     );
+    gh.factory<_i147.FeedbackRemoteDatasource>(
+      () => _i147.FeedbackRemoteDatasource(gh<_i361.Dio>()),
+    );
     gh.factory<_i973.FollowRemoteDatasource>(
       () => _i973.FollowRemoteDatasource(gh<_i361.Dio>()),
     );
@@ -214,6 +229,9 @@ extension GetItInjectableX on _i174.GetIt {
     gh.lazySingleton<_i357.SearchRepository>(
       () => _i1017.SearchRepositoryImpl(gh<_i879.SearchRemoteDatasource>()),
     );
+    gh.lazySingleton<_i619.FeedbackRepository>(
+      () => _i961.FeedbackRepositoryImpl(gh<_i147.FeedbackRemoteDatasource>()),
+    );
     gh.lazySingleton<_i794.MessagesRepository>(
       () => _i20.MessagesRepositoryImpl(gh<_i182.MessagesRemoteDatasource>()),
     );
@@ -238,12 +256,20 @@ extension GetItInjectableX on _i174.GetIt {
     gh.lazySingleton<_i797.ChatterRepository>(
       () => _i674.ChatterRepositoryImpl(gh<_i684.ChatterRemoteDatasource>()),
     );
+    gh.lazySingleton<_i563.NotificationsRepository>(
+      () => _i201.NotificationsRepositoryImpl(
+        gh<_i937.NotificationsRemoteDatasource>(),
+      ),
+    );
     gh.lazySingleton<_i787.AuthRepository>(
       () => _i153.AuthRepositoryImpl(
         gh<_i161.AuthRemoteDatasource>(),
         gh<_i666.SecureStorageService>(),
         gh<_i744.LocalStorageService>(),
       ),
+    );
+    gh.factory<_i585.SettingsBloc>(
+      () => _i585.SettingsBloc(gh<_i563.NotificationsRepository>()),
     );
     gh.factory<_i789.EquipmentBloc>(
       () => _i789.EquipmentBloc(gh<_i604.GamesRepository>()),
@@ -281,6 +307,9 @@ extension GetItInjectableX on _i174.GetIt {
     );
     gh.factory<_i250.ChatterListBloc>(
       () => _i250.ChatterListBloc(gh<_i797.ChatterRepository>()),
+    );
+    gh.factory<_i494.FeedbackBloc>(
+      () => _i494.FeedbackBloc(gh<_i619.FeedbackRepository>()),
     );
     gh.lazySingleton<_i760.FollowRepository>(
       () => _i299.FollowRepositoryImpl(gh<_i973.FollowRemoteDatasource>()),

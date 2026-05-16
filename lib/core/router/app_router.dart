@@ -7,6 +7,8 @@ import '../../features/auth/presentation/bloc/auth_bloc.dart';
 import '../../features/auth/presentation/screens/consent_pending_screen.dart';
 import '../../features/chatter/presentation/screens/chatter_screen.dart';
 import '../../features/chatter/presentation/screens/discussion_detail_screen.dart';
+import '../../features/feedback/presentation/screens/feedback_screen.dart';
+import '../../features/settings/presentation/screens/settings_screen.dart';
 import '../../features/auth/presentation/screens/login_screen.dart';
 import '../../features/auth/presentation/screens/password_recovery_screen.dart';
 import '../../features/auth/presentation/screens/signup_screen.dart';
@@ -118,6 +120,14 @@ GoRouter buildAppRouter(AuthBloc authBloc) {
       GoRoute(
         path: RouteNames.search,
         builder: (_, _) => const SearchScreen(),
+      ),
+      GoRoute(
+        path: RouteNames.settings,
+        builder: (_, _) => const SettingsScreen(),
+      ),
+      GoRoute(
+        path: RouteNames.feedback,
+        builder: (_, _) => const FeedbackScreen(),
       ),
       GoRoute(
         path: RouteNames.chatter,

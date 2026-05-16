@@ -94,6 +94,21 @@ class Endpoints {
   static String mediaChannelSplits(String username) =>
       '/api/media/channels/$username/splits';
 
+  // Feedback — bug reports / suggestions submitted by users.
+  static const String feedbackSubmit = '/api/feedback/submit';
+
+  // Notification preferences — per-category opt-in/out toggles.
+  static const String notificationPreferences =
+      '/api/notifications/preferences';
+
+  // Account actions (mutating user identity / credentials).
+  static const String accountChangeUsername =
+      '/api/account/change-username';
+  static const String accountRequestEmailChange =
+      '/api/account/request-email-change';
+  static const String accountConfirmEmailChange =
+      '/api/account/confirm-email-change';
+
   // Cards — viewer's own cards / collections + per-user cards. Like &
   // collect toggles return authoritative `{is_..., ..._count}` payloads.
   static const String myCards = '/api/cards/my';

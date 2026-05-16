@@ -109,6 +109,7 @@ class AppDrawer extends StatelessWidget {
                   _DrawerItem(
                     icon: LucideIcons.flag,
                     label: 'Feedback',
+                    path: RouteNames.feedback,
                   ),
                   _DrawerItem(
                     icon: LucideIcons.settings,
